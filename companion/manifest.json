@@ -1,0 +1,21 @@
+{
+	"id": "disguise-liveupdate",
+	"name": "disguise: LiveUpdate",
+	"shortname": "liveupdate",
+	"description": "Control and monitor Disguise Designer using the LiveUpdate API",
+	"version": "0.0.1",
+	"license": "MIT",
+	"repository": "git+https://github.com/bitfocus/companion-module-disguise-liveupdate.git",
+	"bugs": "https://github.com/bitfocus/companion-module-disguise-liveupdate/issues",
+	"maintainers": [],
+	"runtime": {
+		"type": "node18",
+		"api": "nodejs-ipc",
+		"apiVersion": "1.0.0",
+		"entrypoint": "../dist/index.js"
+	},
+	"legacyIds": [],
+	"manufacturer": "disguise",
+	"products": ["Disguise - LiveUpdate"],
+	"keywords": ["Video", "Playback", "Projection Mapping", "Extended Reality", "XR"]
+}

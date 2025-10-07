@@ -1,0 +1,47 @@
+{
+  "name": "@companion-module/disguise-liveupdate",
+  "version": "0.0.1",
+  "description": "Companion module for disguise LiveUpdate API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "companion",
+    "HELP.md"
+  ],
+  "scripts": {
+    "build": "rimraf dist && tsc --project tsconfig.json",
+    "watch": "tsc --project tsconfig.json --watch",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "package": "npm pack"
+  },
+  "keywords": [
+    "bitfocus",
+    "companion",
+    "module",
+    "disguise",
+    "designer",
+    "liveupdate"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@companion-module/base": "^1.6.3",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.10",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "eslint": "^8.56.0",
+    "rimraf": "^5.0.5",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
