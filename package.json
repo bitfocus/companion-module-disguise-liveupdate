@@ -1,5 +1,5 @@
 {
-  "name": "@companion-module/disguise-liveupdate",
+  "name": "@companion-module/liveupdate",
   "version": "0.0.1",
   "description": "Companion module for disguise LiveUpdate API",
   "main": "dist/index.js",

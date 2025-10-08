@@ -1,143 +1,306 @@
-# disguise LiveUpdate Module Help
+# Disguise LiveUpdate Module
 
-This module provides integration with the disguise LiveUpdate API, allowing real-time monitoring and control of Designer properties via WebSocket.
+This module provides real-time integration with Disguise Designer via the LiveUpdate API, allowing you to monitor properties and control your show directly from Companion.
 
 ## Configuration
 
 ### Connection Settings
 - **Director IP Address**: The IP address of the Disguise Designer Director machine (default: 127.0.0.1)
 - **Port**: The port number for the LiveUpdate API (default: 80)
-- **Reconnect Interval**: Time in milliseconds to wait before attempting to reconnect after a connection failure (default: 5000ms)
+- **Reconnect Interval**: Time in milliseconds between reconnection attempts (default: 5000ms)
+- **Pending Subscription Timeout**: Time to wait for subscription confirmation (default: 30000ms)
 
-## Actions
+## How It Works
 
-### Subscribe to Property
-Subscribe to a LiveUpdate property to monitor its value in real-time.
+This module uses **Feedbacks** to subscribe to Disguise properties. Each feedback creates a module variable that updates in real-time. You can then use these variables anywhere in Companion - in button text, expressions, triggers, or other modules.
 
-**Parameters:**
-- **Object Path**: Designer expression to find the object (e.g., `track:track_1`, `screen2:screen_1`)
-- **Property Path**: Python expression to access the property (e.g., `object.description`, `object.lengthInBeats`)
-- **Update Frequency (ms)**: Minimum time between updates in milliseconds (0 = as fast as possible)
+## Getting Started
 
-**Examples:**
-- Object: `track:track_1`, Property: `object.lengthInBeats` - Get track length
-- Object: `screen2:screen_1`, Property: `object.description` - Get screen name
-- Object: `subsystem:MonitoringManager.findLocalMonitor("fps")`, Property: `object.seriesAverage("Actual", 1)` - Get FPS
+### 1. Monitor a Disguise Property
 
-### Unsubscribe from Property
-Unsubscribe from a LiveUpdate property using its subscription ID.
+1. Add the **"Subscribe to Disguise Property"** feedback to a button
+2. Configure the feedback:
+   - **Variable Name**: `fps` (or any name you choose)
+   - **Object Path**: `subsystem:MonitoringManager.findLocalMonitor("fps")`
+   - **Property Path**: `object.seriesAverage("Actual", 1)`
+   - **Update Frequency**: `1000` (milliseconds, or 0 for real-time)
+3. The module creates a variable: `$(liveupdate:fps)`
+4. Use this variable anywhere in Companion!
 
-**Parameters:**
-- **Subscription ID**: The ID returned when the subscription was created
+### 2. Display the Value
 
-### Set Property (String)
-Set a string value for a subscribed property.
+In your button text, use:
+```
+FPS: $(liveupdate:fps)
+```
 
-**Parameters:**
-- **Subscription ID**: The ID of the subscription to update
-- **Value**: The string value to set
+Or with expressions for formatting:
+```
+FPS: ${toFixed($(liveupdate:fps), 1)}
+```
 
-### Set Property (Number)
-Set a numeric value for a subscribed property.
+### 3. Visual Feedback with Expressions
 
-**Parameters:**
-- **Subscription ID**: The ID of the subscription to update
-- **Value**: The numeric value to set
+Use Companion's expression system to change button colors based on values:
 
-### Set Property (Boolean)
-Set a boolean value for a subscribed property.
+**Button Background Color Expression:**
+```javascript
+$(liveupdate:fps) < 30 ? rgb(200,0,0) : 
+$(liveupdate:fps) < 60 ? rgb(200,150,0) : 
+rgb(0,150,0)
+```
 
-**Parameters:**
-- **Subscription ID**: The ID of the subscription to update
-- **Value**: True or False
+This changes the button:
+- Red if FPS < 30
+- Orange if FPS < 60
+- Green if FPS ≥ 60
 
-### Set Property (JSON)
-Set a complex JSON value for a subscribed property (e.g., for objects with multiple fields).
+### 4. Set a Property Value
 
-**Parameters:**
-- **Subscription ID**: The ID of the subscription to update
-- **JSON Value**: Valid JSON object or value (e.g., `{"x": 1.0, "y": 2.0, "z": 0.0}`)
+Use the **"Set to Disguise"** actions to change properties:
+
+1. Add action: **"Set to Disguise (Number)"**
+2. Configure:
+   - **Value**: `10.5` (can use variables like `$(internal:custom_my_value)`)
+   - **Object Path**: `screen2:surface_1`
+   - **Property Path**: `object.offset.x`
 
 ## Feedbacks
 
+### Subscribe to Disguise Property
+Creates a subscription to a Disguise property and exposes it as a module variable.
+
+**Options:**
+- **Variable Name**: Name for the module variable (e.g., "fps", "track_length")
+- **Object Path**: Designer expression to find the object
+- **Property Path**: Python expression to access the property
+- **Update Frequency**: Minimum time between updates in milliseconds (0 = real-time)
+
+**Examples:**
+
+| What to Monitor | Object Path | Property Path |
+|----------------|-------------|---------------|
+| Track length | `track:track_1` | `object.lengthInBeats` |
+| FPS | `subsystem:MonitoringManager.findLocalMonitor("fps")` | `object.seriesAverage("Actual", 1)` |
+| Screen name | `screen2:surface_1` | `object.mesh.description` |
+| Transport playhead | `transportManager:default` | `object.player.tRender` |
+| Screen offset (vector) | `ledscreen:myledscreen` | `object.offset` |
+
+**Note:** This feedback doesn't provide visual feedback itself - it only manages subscriptions. Use Companion's expression variables for visual feedback.
+
 ### Connection OK
-Highlights buttons when the module is connected to Disguise Designer.
+Indicates whether the module is connected to Disguise Designer.
 
-### Subscription Value Equals
-Check if a subscription value equals a specific value.
+## Actions
 
-**Parameters:**
-- **Subscription ID**: The ID of the subscription to monitor
-- **Expected Value**: The value to compare against
+### Set to Disguise (String)
+Set a Disguise property with a string value.
 
-### Subscription Value Greater Than
-Check if a subscription numeric value is greater than a threshold.
+**Use for:** Text properties (e.g., description, name)
 
-**Parameters:**
-- **Subscription ID**: The ID of the subscription to monitor
-- **Threshold**: The numeric threshold value
+**Options:**
+- **Value**: The string value to set (can use variables)
+- **Object Path**: Designer expression to find the object
+- **Property Path**: Python expression to access property
 
-### Subscription Value Less Than
-Check if a subscription numeric value is less than a threshold.
+**Example:** Set track description
+- Value: `My Track Name`
+- Object Path: `track:track_1`
+- Property Path: `object.description`
 
-**Parameters:**
-- **Subscription ID**: The ID of the subscription to monitor
-- **Threshold**: The numeric threshold value
+### Set to Disguise (Number)
+Set a Disguise property with a numeric value.
 
-### Subscription Value Boolean
-Check if a subscription boolean value matches the expected value.
+**Use for:** Numbers (e.g., offset.x, length, timing)
 
-**Parameters:**
-- **Subscription ID**: The ID of the subscription to monitor
-- **Expected Value**: True or False
+**Options:**
+- **Value**: The numeric value (can use variables). Do NOT use quotes around numbers.
+- **Object Path**: Designer expression to find the object
+- **Property Path**: Python expression to access property
+
+**Example:** Set screen X offset
+- Value: `10.5`
+- Object Path: `screen2:surface_1`
+- Property Path: `object.offset.x`
+
+### Set to Disguise (Boolean)
+Set a Disguise property with a true/false value.
+
+**Use for:** Boolean properties (e.g., enabled, visible)
+
+**Example:** Enable a track
+- Value: `True`
+- Object Path: `track:track_1`
+- Property Path: `object.enabled`
+
+### Set to Disguise (JSON)
+Set a Disguise property with a complex JSON object.
+
+**Use for:** Complex objects (e.g., vectors, arrays)
+
+**Example:** Set screen offset vector
+- Value: `{"x": 4.0, "y": 3.0, "z": 0.0}`
+- Object Path: `screen2:surface_1`
+- Property Path: `object.offset`
 
 ## Variables
 
 ### connection_status
-Shows the current connection status to Disguise Designer (Connected/Disconnected).
+Shows the current connection status (`Connected` or `Disconnected`).
 
-### Dynamic Subscription Variables
-When you subscribe to properties, dynamic variables are automatically created following the format `sub_<id>`, where `<id>` is the subscription ID.
+### Module Variables (Dynamic)
+Module variables are automatically created for each active subscription. The variable name matches what you specified in the feedback.
 
-**Example:** If subscription ID 123 is monitoring a track's length, you can use `$(disguise-designer:sub_123)` to display the current value.
+**Example:** If you created a subscription with variable name `fps`, use: `$(liveupdate:fps)`
 
 ## Common Use Cases
 
-### Monitor Track Length
-1. Create a "Subscribe to Property" action
-2. Set Object Path: `track:track_1`
-3. Set Property Path: `object.lengthInBeats`
-4. Note the subscription ID from the logs
-5. Use variable `$(disguise-designer:sub_<ID>)` to display the value
+### Monitor FPS with Color Warning
 
-### Monitor FPS
-1. Create a "Subscribe to Property" action
-2. Set Object Path: `subsystem:MonitoringManager.findLocalMonitor("fps")`
-3. Set Property Path: `object.seriesAverage("Actual", 1)`
-4. Add a feedback to highlight when FPS drops below 30
+1. Add **"Subscribe to Disguise Property"** feedback to a button:
+   - Variable Name: `fps`
+   - Object Path: `subsystem:MonitoringManager.findLocalMonitor("fps")`
+   - Property Path: `object.seriesAverage("Actual", 1)`
+   - Update Frequency: `1000`
 
-### Monitor RenderStream Workload Status
-1. Create a "Subscribe to Property" action
-2. Set Object Path: `subsystem:RenderStreamSystem`
-3. Set Property Path: `object.getWorkloadReceiveStatuses(<workload ID>)`
-4. Use the returned value to monitor workload health
+2. Set button text:
+   ```
+   FPS\n${toFixed($(liveupdate:fps), 1)}
+   ```
 
-### Change Screen Offset
-1. First subscribe to the screen offset property: Object: `screen2:screen_1`, Property: `object.offset`
-2. Note the subscription ID
-3. Use "Set Property (JSON)" action with subscription ID and value: `{"x": 4.0, "y": 3.0, "z": 0.0}`
+3. Set button background expression:
+   ```javascript
+   $(liveupdate:fps) < 30 ? rgb(200,0,0) : rgb(0,150,0)
+   ```
+
+### Display Track Length in Timecode
+
+1. Add **"Subscribe to Disguise Property"** feedback:
+   - Variable Name: `track_length`
+   - Object Path: `track:track_1`
+   - Property Path: `object.lengthInBeats`
+
+2. Set button text with formatting:
+   ```
+   Track 1\nLength\n${secondsToTimestamp($(liveupdate:track_length))}
+   ```
+
+### Monitor and Control Screen Offset
+
+1. Add **"Subscribe to Disguise Property"** feedback:
+   - Variable Name: `screen_offset`
+   - Object Path: `screen2:surface_1`
+   - Property Path: `object.offset`
+
+2. Display the value in button text:
+   ```
+   X: ${toFixed(jsonparse(parseVariables('$(liveupdate:screen_offset)')['x'], 2)}
+   Y: ${toFixed(jsonparse(parseVariables('$(liveupdate:screen_offset)')['y'], 2)}
+   ```
+
+3. Create buttons to adjust offset:
+   - Action: **"Set to Disguise (Number)"**
+   - Value: `$(liveupdate:screen_offset) + 1` (use custom variable)
+   - Object Path: `screen2:surface_1`
+   - Property Path: `object.offset.x`
+
+### Monitor Transport Playhead
+
+1. Add **"Subscribe to Disguise Property"** feedback:
+   - Variable Name: `playhead`
+   - Object Path: `transportManager:default`
+   - Property Path: `object.player.tRender`
+   - Update Frequency: `100`
+
+2. Display in button:
+   ```
+   Playhead\n${secondsToTimestamp($(liveupdate:playhead))}
+   ```
+
+## Advanced Features
+
+### Automatic Error Recovery
+The module automatically handles subscription errors:
+- **After 3 consecutive property path errors**, the subscription is automatically unsubscribed
+- Variable shows `PATH_ERROR (unsubscribed)` to indicate the issue
+- Fix the property path in the feedback options
+- Subscription automatically recreates on next evaluation
+
+### Self-Healing Subscriptions
+If subscriptions are dropped (e.g., connection loss, WebSocket errors):
+- Module automatically reconnects to Disguise
+- All feedback subscriptions are automatically recreated
+- No manual intervention required
+
+### Option Change Detection
+When you edit feedback options (object path, property path):
+- Changes are detected automatically
+- Old subscription is removed
+- New subscription is created
+- No need to remove and re-add the feedback
+
+## Object Path Examples
+
+Disguise uses "Designer expressions" to find objects:
+
+| Object Type | Example |
+|-------------|---------|
+| Track | `track:track_1` |
+| Screen (v2) | `screen2:surface_1` |
+| LED Screen | `ledscreen:myledscreen` |
+| Transport Manager | `transportManager:default` |
+| Monitoring (FPS) | `subsystem:MonitoringManager.findLocalMonitor("fps")` |
+| Monitoring (Custom) | `subsystem:MonitoringManager.findLocalMonitor("my_monitor")` |
+
+## Property Path Examples
+
+Property paths use Python-style expressions to access object properties:
+
+| Property | Example |
+|----------|---------|
+| Simple property | `object.description` |
+| Numeric property | `object.lengthInBeats` |
+| Nested property | `object.mesh.description` |
+| Vector component | `object.offset.x` |
+| Full vector | `object.offset` |
+| Method call | `object.seriesAverage("Actual", 1)` |
+| Player property | `object.player.tRender` |
+
+## Troubleshooting
+
+### Variable shows "..." or "ERROR"
+- Check that object path and property path are correct in Disguise
+- Verify the object exists in your project
+- Check the module log for specific error messages
+
+### Variable shows "PATH_ERROR (unsubscribed)"
+- The property path has a syntax error
+- Fix the property path in the feedback options
+- The subscription will automatically recreate
+
+### Connection closes with "Cannot convert JSON String to double"
+- You used the wrong action type (e.g., String action for a number property)
+- Use **"Set to Disguise (Number)"** for numeric properties
+- Use **"Set to Disguise (String)"** for text properties
+- Module will automatically reconnect
+
+### Subscription doesn't update when I change options
+- Wait a few seconds - updates happen on next feedback evaluation
+- Check that you're connected to Disguise (green status)
+- Check the module log for subscription messages
 
 ## Notes
 
-- **Subscription IDs**: When you subscribe to a property, Disguise Designer assigns a unique ID. Check the module logs to see subscription IDs.
-- **Reference Counting**: If you subscribe to the same property multiple times, you'll get the same subscription ID. Each subscription must be matched with an unsubscription.
-- **Performance**: Unsubscribe from properties that aren't actively needed (e.g., when buttons aren't visible) to conserve resources.
-- **Partial Updates**: When setting object properties (like coordinates), you can set only specific fields and other fields will be preserved.
+- **Type Safety**: Always use the correct "Set to Disguise" action type (String/Number/Boolean/JSON) to match the property type in Disguise
+- **Variable Names**: Choose descriptive names that are easy to remember
+- **Update Frequency**: Use `0` for real-time updates, or higher values (in milliseconds) to reduce network traffic
+- **Expressions**: Companion's expression system is powerful - use it for comparisons, formatting, and calculations instead of comparison feedbacks
 
 ## API Documentation
 
-For detailed information about the LiveUpdate API, visit:
-https://developer.disguise.one/api/session/liveupdate/
+For detailed information about the LiveUpdate API and available objects/properties, visit:
+- [Disguise LiveUpdate API Documentation](https://developer.disguise.one/api/session/liveupdate/)
+- [Disguise Designer Scripting Reference](https://developer.disguise.one/scripting/)
 
 ## Support
 

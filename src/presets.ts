@@ -8,9 +8,9 @@ export function getPresetDefinitions(
     trackLengthMonitor: {
       type: 'button',
       category: 'Track Monitoring',
-      name: 'Track Length Monitor (Example)',
+      name: 'Track Length Monitor',
       style: {
-        text: '`Track 1\\nLength\\n${secondsToTimestamp($(disguise-liveupdate:track_length))}`',
+        text: '`Track 1\\nLength\\n${secondsToTimestamp($(liveupdate:track_length))}`',
         size: '14',
         color: combineRgb(255, 255, 255),
         bgcolor: combineRgb(100, 50, 200),
@@ -18,22 +18,20 @@ export function getPresetDefinitions(
       },
       steps: [
         {
-          down: [
-            {
-              actionId: 'subscribe',
-              options: {
-                objectPath: 'track:track_1',
-                propertyPath: 'object.lengthInBeats',
-                customVariableName: 'track_length',
-                updateFrequency: 0,
-                autoSubscribe: true,
-              },
-            },
-          ],
+          down: [],
           up: [],
         },
       ],
       feedbacks: [
+        {
+          feedbackId: 'subscribeToProperty',
+          options: {
+            variableName: 'track_length',
+            objectPath: 'track:track_1',
+            propertyPath: 'object.lengthInBeats',
+            updateFrequency: 0,
+          },
+        },
         {
           feedbackId: 'connectionState',
           options: {},
@@ -48,31 +46,29 @@ export function getPresetDefinitions(
     screenNameMonitor: {
       type: 'button',
       category: 'Screen Monitoring',
-      name: 'Screen Name Monitor (Example)',
+      name: 'Screen Name Monitor',
       style: {
-        text: 'Surface 1\\n$(disguise-liveupdate:screen_name)',
+        text: 'Surface 1\\n$(liveupdate:screen_name)',
         size: '14',
         color: combineRgb(255, 255, 255),
         bgcolor: combineRgb(200, 100, 50),
       },
       steps: [
         {
-          down: [
-            {
-              actionId: 'subscribe',
-              options: {
-                objectPath: 'screen2:surface_1',
-                propertyPath: 'object.mesh.description',
-                customVariableName: 'screen_name',
-                updateFrequency: 0,
-                autoSubscribe: true,
-              },
-            },
-          ],
+          down: [],
           up: [],
         },
       ],
       feedbacks: [
+        {
+          feedbackId: 'subscribeToProperty',
+          options: {
+            variableName: 'screen_name',
+            objectPath: 'screen2:surface_1',
+            propertyPath: 'object.mesh.description',
+            updateFrequency: 0,
+          },
+        },
         {
           feedbackId: 'connectionState',
           options: {},
@@ -89,7 +85,7 @@ export function getPresetDefinitions(
       category: 'Performance Monitoring',
       name: 'FPS Monitor',
       style: {
-        text: '`FPS\\n${toFixed($(disguise-liveupdate:fps), 1)}`',
+        text: '`FPS\\n${toFixed($(liveupdate:fps), 1)}`',
         size: '18',
         color: combineRgb(255, 255, 255),
         bgcolor: combineRgb(0, 150, 0),
@@ -97,41 +93,25 @@ export function getPresetDefinitions(
       },
       steps: [
         {
-          down: [
-            {
-              actionId: 'subscribe',
-              options: {
-                objectPath: 'subsystem:MonitoringManager.findLocalMonitor("fps")',
-                propertyPath: 'object.seriesAverage("Actual", 1)',
-                customVariableName: 'fps',
-                updateFrequency: 1000,
-                autoSubscribe: true,
-              },
-            },
-          ],
+          down: [],
           up: [],
         },
       ],
       feedbacks: [
         {
-          feedbackId: 'variableValueLessThan',
+          feedbackId: 'subscribeToProperty',
           options: {
             variableName: 'fps',
-            threshold: '30',
-          },
-          style: {
-            bgcolor: combineRgb(200, 0, 0),
-            color: combineRgb(255, 255, 255),
+            objectPath: 'subsystem:MonitoringManager.findLocalMonitor("fps")',
+            propertyPath: 'object.seriesAverage("Actual", 1)',
+            updateFrequency: 1000,
           },
         },
         {
-          feedbackId: 'variableValueLessThan',
-          options: {
-            variableName: 'fps',
-            threshold: '60',
-          },
+          feedbackId: 'connectionState',
+          options: {},
           style: {
-            bgcolor: combineRgb(200, 150, 0),
+            bgcolor: combineRgb(0, 200, 0),
             color: combineRgb(0, 0, 0),
           },
         },
@@ -143,7 +123,7 @@ export function getPresetDefinitions(
       category: 'Transport',
       name: 'Playhead Readout',
       style: {
-        text: '`Playhead\\n${secondsToTimestamp($(disguise-liveupdate:playhead))}`',
+        text: '`Playhead\\n${secondsToTimestamp($(liveupdate:playhead))}`',
         size: '14',
         color: combineRgb(255, 255, 255),
         bgcolor: combineRgb(50, 100, 200),
@@ -151,22 +131,20 @@ export function getPresetDefinitions(
       },
       steps: [
         {
-          down: [
-            {
-              actionId: 'subscribe',
-              options: {
-                objectPath: 'transportManager:default',
-                propertyPath: 'object.player.tRender',
-                customVariableName: 'playhead',
-                updateFrequency: 100,
-                autoSubscribe: true,
-              },
-            },
-          ],
+          down: [],
           up: [],
         },
       ],
       feedbacks: [
+        {
+          feedbackId: 'subscribeToProperty',
+          options: {
+            variableName: 'playhead',
+            objectPath: 'transportManager:default',
+            propertyPath: 'object.player.tRender',
+            updateFrequency: 100,
+          },
+        },
         {
           feedbackId: 'connectionState',
           options: {},
@@ -183,7 +161,7 @@ export function getPresetDefinitions(
       category: 'Screen Monitoring',
       name: 'LED Screen Offset',
       style: {
-        text: '`LED Offset\\nX: ${toFixed(jsonparse(parseVariables(\'$(disguise-liveupdate:ledscreen)\'))[\'x\'], 2)}\\nY: ${toFixed(jsonparse(parseVariables(\'$(disguise-liveupdate:ledscreen)\'))[\'y\'], 2)}\\nZ: ${toFixed(jsonparse(parseVariables(\'$(disguise-liveupdate:ledscreen)\'))[\'z\'], 2)}`',
+        text: '`LED Offset\\nX: ${toFixed(jsonparse(parseVariables(\'$(liveupdate:ledscreen)\'))[\'x\'], 2)}\\nY: ${toFixed(jsonparse(parseVariables(\'$(liveupdate:ledscreen)\'))[\'y\'], 2)}\\nZ: ${toFixed(jsonparse(parseVariables(\'$(liveupdate:ledscreen)\'))[\'z\'], 2)}`',
         size: '14',
         color: combineRgb(255, 255, 255),
         bgcolor: combineRgb(50, 150, 200),
@@ -191,22 +169,20 @@ export function getPresetDefinitions(
       },
       steps: [
         {
-          down: [
-            {
-              actionId: 'subscribe',
-              options: {
-                objectPath: 'ledscreen:myledscreen',
-                propertyPath: 'object.offset',
-                customVariableName: 'ledscreen',
-                updateFrequency: 0,
-                autoSubscribe: true,
-              },
-            },
-          ],
+          down: [],
           up: [],
         },
       ],
       feedbacks: [
+        {
+          feedbackId: 'subscribeToProperty',
+          options: {
+            variableName: 'ledscreen',
+            objectPath: 'ledscreen:myledscreen',
+            propertyPath: 'object.offset',
+            updateFrequency: 0,
+          },
+        },
         {
           feedbackId: 'connectionState',
           options: {},

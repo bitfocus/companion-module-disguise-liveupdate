@@ -5,8 +5,8 @@
 	"description": "Control and monitor Disguise Designer using the LiveUpdate API",
 	"version": "0.0.1",
 	"license": "MIT",
-	"repository": "git+https://github.com/bitfocus/companion-module-disguise-liveupdate.git",
-	"bugs": "https://github.com/bitfocus/companion-module-disguise-liveupdate/issues",
+	"repository": "git+https://github.com/bitfocus/companion-module-liveupdate.git",
+	"bugs": "https://github.com/bitfocus/companion-module-liveupdate/issues",
 	"maintainers": [],
 	"runtime": {
 		"type": "node18",

@@ -1,4 +1,4 @@
-import { CompanionFeedbackDefinitions, combineRgb } from '@companion-module/base'
+import { CompanionFeedbackDefinitions, CompanionFeedbackContext, combineRgb } from '@companion-module/base'
 import type { DisguiseInstance } from './index'
 
 interface DisguiseFeedbackDefinitions extends CompanionFeedbackDefinitions {}
@@ -19,164 +19,12 @@ export function getFeedbackDefinitions(
       callback: () => instance.isConnectionReady(),
     },
 
-    subscriptionValueEquals: {
+    subscribeToProperty: {
       type: 'boolean',
-      name: 'Subscription Value Equals',
-      description: 'Check if a subscription value equals a specific value',
+      name: 'Subscribe to Disguise Property',
+      description: 'Subscribe to a Disguise property and expose it as a module variable. Use Companion expression variables for comparisons.',
       defaultStyle: {
-        bgcolor: combineRgb(255, 0, 0),
-        color: combineRgb(255, 255, 255),
-      },
-      options: [
-        {
-          type: 'number',
-          label: 'Subscription ID',
-          id: 'subscriptionId',
-          default: 0,
-          min: 0,
-          max: 999999,
-        },
-        {
-          type: 'textinput',
-          label: 'Expected Value',
-          id: 'expectedValue',
-          default: '',
-          useVariables: true,
-        },
-      ],
-      callback: async (feedback) => {
-        const subscriptionId = Number(feedback.options.subscriptionId)
-        const expectedValue = await instance.parseVariablesInString(String(feedback.options.expectedValue || ''))
-        const currentValue = instance.getSubscriptionValue(subscriptionId)
-        
-        if (currentValue === undefined) return false
-        
-        const currentStr = typeof currentValue === 'object' ? JSON.stringify(currentValue) : String(currentValue)
-        return currentStr === expectedValue
-      },
-    },
-
-    subscriptionValueGreaterThan: {
-      type: 'boolean',
-      name: 'Subscription Value Greater Than',
-      description: 'Check if a subscription numeric value is greater than a threshold',
-      defaultStyle: {
-        bgcolor: combineRgb(255, 128, 0),
-        color: combineRgb(0, 0, 0),
-      },
-      options: [
-        {
-          type: 'number',
-          label: 'Subscription ID',
-          id: 'subscriptionId',
-          default: 0,
-          min: 0,
-          max: 999999,
-        },
-        {
-          type: 'textinput',
-          label: 'Threshold',
-          id: 'threshold',
-          default: '0',
-          useVariables: true,
-        },
-      ],
-      callback: async (feedback) => {
-        const subscriptionId = Number(feedback.options.subscriptionId)
-        const thresholdStr = await instance.parseVariablesInString(String(feedback.options.threshold || '0'))
-        const threshold = parseFloat(thresholdStr)
-        const currentValue = instance.getSubscriptionValue(subscriptionId)
-        
-        if (currentValue === undefined || isNaN(threshold)) return false
-        
-        const numValue = parseFloat(currentValue)
-        return !isNaN(numValue) && numValue > threshold
-      },
-    },
-
-    subscriptionValueLessThan: {
-      type: 'boolean',
-      name: 'Subscription Value Less Than',
-      description: 'Check if a subscription numeric value is less than a threshold',
-      defaultStyle: {
-        bgcolor: combineRgb(0, 128, 255),
-        color: combineRgb(0, 0, 0),
-      },
-      options: [
-        {
-          type: 'number',
-          label: 'Subscription ID',
-          id: 'subscriptionId',
-          default: 0,
-          min: 0,
-          max: 999999,
-        },
-        {
-          type: 'textinput',
-          label: 'Threshold',
-          id: 'threshold',
-          default: '0',
-          useVariables: true,
-        },
-      ],
-      callback: async (feedback) => {
-        const subscriptionId = Number(feedback.options.subscriptionId)
-        const thresholdStr = await instance.parseVariablesInString(String(feedback.options.threshold || '0'))
-        const threshold = parseFloat(thresholdStr)
-        const currentValue = instance.getSubscriptionValue(subscriptionId)
-        
-        if (currentValue === undefined || isNaN(threshold)) return false
-        
-        const numValue = parseFloat(currentValue)
-        return !isNaN(numValue) && numValue < threshold
-      },
-    },
-
-    subscriptionValueBoolean: {
-      type: 'boolean',
-      name: 'Subscription Value Boolean',
-      description: 'Check if a subscription boolean value matches',
-      defaultStyle: {
-        bgcolor: combineRgb(128, 0, 255),
-        color: combineRgb(255, 255, 255),
-      },
-      options: [
-        {
-          type: 'number',
-          label: 'Subscription ID',
-          id: 'subscriptionId',
-          default: 0,
-          min: 0,
-          max: 999999,
-        },
-        {
-          type: 'dropdown',
-          label: 'Expected Value',
-          id: 'expectedValue',
-          default: 'true',
-          choices: [
-            { id: 'true', label: 'True' },
-            { id: 'false', label: 'False' },
-          ],
-        },
-      ],
-      callback: (feedback) => {
-        const subscriptionId = Number(feedback.options.subscriptionId)
-        const expectedValue = feedback.options.expectedValue === 'true'
-        const currentValue = instance.getSubscriptionValue(subscriptionId)
-        
-        if (currentValue === undefined) return false
-        
-        return Boolean(currentValue) === expectedValue
-      },
-    },
-
-    variableValueLessThan: {
-      type: 'boolean',
-      name: 'Variable Value Less Than',
-      description: 'Check if a variable numeric value is less than a threshold',
-      defaultStyle: {
-        bgcolor: combineRgb(200, 0, 0),
+        bgcolor: combineRgb(0, 0, 0),
         color: combineRgb(255, 255, 255),
       },
       options: [
@@ -184,29 +32,101 @@ export function getFeedbackDefinitions(
           type: 'textinput',
           label: 'Variable Name',
           id: 'variableName',
-          default: 'fps',
+          default: 'my_property',
           useVariables: false,
-          tooltip: 'Variable name (e.g., "fps", "track_length")',
+          tooltip: 'Name for the variable (e.g., "fps", "track_length")',
         },
         {
           type: 'textinput',
-          label: 'Threshold',
-          id: 'threshold',
-          default: '60',
+          label: 'Object Path',
+          id: 'objectPath',
+          default: 'track:track_1',
           useVariables: true,
+          tooltip: 'Designer expression to find the object (e.g., "track:track_1", "screen2:screen_1")',
+        },
+        {
+          type: 'textinput',
+          label: 'Property Path',
+          id: 'propertyPath',
+          default: 'object.description',
+          useVariables: true,
+          tooltip: 'Python expression to access property (e.g., "object.description", "object.lengthInBeats")',
+        },
+        {
+          type: 'number',
+          label: 'Update Frequency (ms)',
+          id: 'updateFrequency',
+          default: 0,
+          min: 0,
+          max: 60000,
+          tooltip: 'Minimum time between updates in milliseconds (0 = as fast as possible)',
         },
       ],
       callback: async (feedback) => {
+        // Always return false - this feedback is just for subscribing, not for visual feedback
+        // Users should use expression variables to create visual feedback based on the module variable value
+        
+        // Check if options have changed since last evaluation and ensure subscription is active
         const variableName = String(feedback.options.variableName || '')
-        const thresholdStr = await instance.parseVariablesInString(String(feedback.options.threshold || '0'))
-        const threshold = parseFloat(thresholdStr)
+        const objectPathRaw = String(feedback.options.objectPath || '')
+        const propertyPathRaw = String(feedback.options.propertyPath || '')
+        const updateFrequency = Number(feedback.options.updateFrequency)
         
-        const currentValue = instance.getCustomVariableValue(variableName)
+        const objectPath = await instance.parseVariablesInString(objectPathRaw)
+        const propertyPath = await instance.parseVariablesInString(propertyPathRaw)
         
-        if (currentValue === undefined || isNaN(threshold)) return false
+        // Check if these differ from what we have subscribed, or if subscription was dropped
+        // This provides self-healing behavior
+        instance.checkAndUpdateSubscription(
+          feedback.id, 
+          variableName, 
+          objectPath, 
+          propertyPath,
+          updateFrequency > 0 ? updateFrequency : undefined
+        )
         
-        const numValue = parseFloat(currentValue)
-        return !isNaN(numValue) && numValue < threshold
+        return false
+      },
+      subscribe: async (feedback) => {
+        const variableName = String(feedback.options.variableName || '')
+        const objectPathRaw = String(feedback.options.objectPath || '')
+        const propertyPathRaw = String(feedback.options.propertyPath || '')
+        
+        const objectPath = await instance.parseVariablesInString(objectPathRaw)
+        const propertyPath = await instance.parseVariablesInString(propertyPathRaw)
+        const updateFrequency = Number(feedback.options.updateFrequency)
+        
+        if (!variableName || !objectPath || !propertyPath) {
+          instance.log('warn', 'Variable name, object path, and property path are required')
+          return
+        }
+        
+        // Check if we already have a subscription for this feedback with different paths
+        // This handles the case where user changes options but Companion doesn't call unsubscribe first
+        const existingSubscription = instance.getSubscriptionByFeedbackId(feedback.id)
+        if (existingSubscription) {
+          const pathsChanged = existingSubscription.objectPath !== objectPath || existingSubscription.propertyPath !== propertyPath
+          if (pathsChanged) {
+            instance.log('info', `Feedback options changed, updating subscription for ${feedback.id}`)
+            // Unsubscribe old one first
+            instance.unsubscribeFromVariable(feedback.id)
+          } else {
+            // Subscription already exists with same paths, skip
+            return
+          }
+        }
+        
+        instance.subscribeToVariable(
+          feedback.id,
+          variableName,
+          objectPath,
+          propertyPath,
+          updateFrequency > 0 ? updateFrequency : undefined
+        )
+      },
+      unsubscribe: async (feedback) => {
+        instance.feedbackOptionsCache.delete(feedback.id)
+        instance.unsubscribeFromVariable(feedback.id)
       },
     },
   }

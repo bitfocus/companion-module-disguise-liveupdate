@@ -2,32 +2,39 @@ import {
   CompanionActionDefinition,
   CompanionActionDefinitions,
   CompanionActionEvent,
+  CompanionActionContext,
   Regex,
 } from '@companion-module/base'
 import type { DisguiseInstance } from './index'
 
 export interface DisguiseActionDefinitions extends CompanionActionDefinitions {
-  subscribe: CompanionActionDefinition
-  unsubscribe: CompanionActionDefinition
-  setPropertyString: CompanionActionDefinition
-  setPropertyNumber: CompanionActionDefinition
-  setPropertyBoolean: CompanionActionDefinition
-  setPropertyJSON: CompanionActionDefinition
+  setToDisguiseString: CompanionActionDefinition
+  setToDisguiseNumber: CompanionActionDefinition
+  setToDisguiseBoolean: CompanionActionDefinition
+  setToDisguiseJSON: CompanionActionDefinition
 }
 
 export function getActionDefinitions(instance: DisguiseInstance): DisguiseActionDefinitions {
   return {
-    subscribe: {
-      name: 'Subscribe to Property',
-      description: 'Subscribe to a LiveUpdate property to monitor its value',
+    setToDisguiseString: {
+      name: 'Set to Disguise (String)',
+      description: 'Set a Disguise property from a value (string)',
       options: [
+        {
+          type: 'textinput',
+          label: 'Value',
+          id: 'value',
+          default: '',
+          useVariables: true,
+          tooltip: 'The value to set (can use variables like \$(liveupdate:my_var))',
+        },
         {
           type: 'textinput',
           label: 'Object Path',
           id: 'objectPath',
           default: 'track:track_1',
           useVariables: true,
-          tooltip: 'Designer expression to find the object (e.g., "track:track_1", "screen2:screen_1")',
+          tooltip: 'Designer expression to find the object',
         },
         {
           type: 'textinput',
@@ -35,127 +42,31 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
           id: 'propertyPath',
           default: 'object.description',
           useVariables: true,
-          tooltip: 'Python expression to access property (e.g., "object.description", "object.lengthInBeats")',
-        },
-        {
-          type: 'textinput',
-          label: 'Custom Variable Name (optional)',
-          id: 'customVariableName',
-          default: '',
-          useVariables: false,
-          tooltip: 'Optional: Create a variable with this name (e.g., "fps" creates $(disguise-liveupdate:fps))',
-        },
-        {
-          type: 'number',
-          label: 'Update Frequency (ms)',
-          id: 'updateFrequency',
-          default: 0,
-          min: 0,
-          max: 60000,
-          tooltip: 'Minimum time between updates in milliseconds (0 = as fast as possible)',
-        },
-        {
-          type: 'checkbox',
-          label: 'Auto-subscribe on connect',
-          id: 'autoSubscribe',
-          default: false,
-          tooltip: 'Automatically subscribe to this property whenever Companion connects or reconnects to Disguise',
+          tooltip: 'Python expression to access property',
         },
       ],
-      callback: async (action: CompanionActionEvent) => {
+      callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
+        const valueRaw = String(action.options.value || '')
         const objectPathRaw = String(action.options.objectPath || '')
         const propertyPathRaw = String(action.options.propertyPath || '')
-
+        
+        const value = await instance.parseVariablesInString(valueRaw)
         const objectPath = await instance.parseVariablesInString(objectPathRaw)
         const propertyPath = await instance.parseVariablesInString(propertyPathRaw)
-
-        const customVariableName = String(action.options.customVariableName || '')
-        const updateFrequency = Number(action.options.updateFrequency)
-        const autoSubscribe = Boolean(action.options.autoSubscribe)
-
+        
         if (!objectPath || !propertyPath) {
+          instance.log('warn', 'Object path and property path are required')
           return
         }
-
-        instance.subscribe(
-          objectPath,
-          [propertyPath],
-          customVariableName || undefined,
-          updateFrequency > 0 ? updateFrequency : undefined,
-          autoSubscribe
-        )
+        
+        instance.setPropertyByPath(objectPath, propertyPath, value)
       },
     },
 
-    unsubscribe: {
-      name: 'Unsubscribe from Property',
-      description: 'Unsubscribe from a LiveUpdate property by subscription ID',
+    setToDisguiseNumber: {
+      name: 'Set to Disguise (Number)',
+      description: 'Set a Disguise property from a numeric value',
       options: [
-        {
-          type: 'number',
-          label: 'Subscription ID',
-          id: 'subscriptionId',
-          default: 0,
-          min: 0,
-          max: 999999,
-          tooltip: 'The subscription ID to unsubscribe from',
-        },
-        {
-          type: 'checkbox',
-          label: 'Remove from auto-subscribe list',
-          id: 'removeFromAutoSubscribe',
-          default: false,
-          tooltip: 'Also remove this subscription from the auto-subscribe list',
-        },
-      ],
-      callback: async (action: CompanionActionEvent) => {
-        const subscriptionId = Number(action.options.subscriptionId)
-        const removeFromAutoSubscribe = Boolean(action.options.removeFromAutoSubscribe)
-        instance.unsubscribe(subscriptionId, removeFromAutoSubscribe)
-      },
-    },
-
-    setPropertyString: {
-      name: 'Set Property (String)',
-      description: 'Set a string value for a subscribed property',
-      options: [
-        {
-          type: 'number',
-          label: 'Subscription ID',
-          id: 'subscriptionId',
-          default: 0,
-          min: 0,
-          max: 999999,
-          tooltip: 'The subscription ID of the property to set',
-        },
-        {
-          type: 'textinput',
-          label: 'Value',
-          id: 'value',
-          default: '',
-          useVariables: true,
-        },
-      ],
-      callback: async (action: CompanionActionEvent) => {
-        const subscriptionId = Number(action.options.subscriptionId)
-        const value = String(action.options.value || '')
-        instance.setProperty(subscriptionId, value)
-      },
-    },
-
-    setPropertyNumber: {
-      name: 'Set Property (Number)',
-      description: 'Set a numeric value for a subscribed property',
-      options: [
-        {
-          type: 'number',
-          label: 'Subscription ID',
-          id: 'subscriptionId',
-          default: 0,
-          min: 0,
-          max: 999999,
-          tooltip: 'The subscription ID of the property to set',
-        },
         {
           type: 'textinput',
           label: 'Value',
@@ -163,35 +74,53 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
           default: '0',
           useVariables: true,
           regex: Regex.SIGNED_FLOAT,
+          tooltip: 'The numeric value to set (can use variables)',
+        },
+        {
+          type: 'textinput',
+          label: 'Object Path',
+          id: 'objectPath',
+          default: 'track:track_1',
+          useVariables: true,
+          tooltip: 'Designer expression to find the object',
+        },
+        {
+          type: 'textinput',
+          label: 'Property Path',
+          id: 'propertyPath',
+          default: 'object.lengthInBeats',
+          useVariables: true,
+          tooltip: 'Python expression to access property',
         },
       ],
-      callback: async (action: CompanionActionEvent) => {
-        const subscriptionId = Number(action.options.subscriptionId)
-        const valueStr = String(action.options.value || '0')
-        const value = parseFloat(valueStr)
+      callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
+        const valueStr = await instance.parseVariablesInString(String(action.options.value || '0'))
+        const objectPathRaw = String(action.options.objectPath || '')
+        const propertyPathRaw = String(action.options.propertyPath || '')
         
-        if (isNaN(value)) {
-          instance.log('warn', `Invalid number value: ${valueStr}`)
+        const objectPath = await instance.parseVariablesInString(objectPathRaw)
+        const propertyPath = await instance.parseVariablesInString(propertyPathRaw)
+        
+        if (!objectPath || !propertyPath) {
+          instance.log('warn', 'Object path and property path are required')
           return
         }
         
-        instance.setProperty(subscriptionId, value)
+        const value = parseFloat(valueStr)
+        
+        if (isNaN(value)) {
+          instance.log('warn', `Value is not a valid number: ${valueStr}`)
+          return
+        }
+        
+        instance.setPropertyByPath(objectPath, propertyPath, value)
       },
     },
 
-    setPropertyBoolean: {
-      name: 'Set Property (Boolean)',
-      description: 'Set a boolean value for a subscribed property',
+    setToDisguiseBoolean: {
+      name: 'Set to Disguise (Boolean)',
+      description: 'Set a Disguise property to a boolean value',
       options: [
-        {
-          type: 'number',
-          label: 'Subscription ID',
-          id: 'subscriptionId',
-          default: 0,
-          min: 0,
-          max: 999999,
-          tooltip: 'The subscription ID of the property to set',
-        },
         {
           type: 'dropdown',
           label: 'Value',
@@ -201,28 +130,46 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
             { id: 'true', label: 'True' },
             { id: 'false', label: 'False' },
           ],
+          tooltip: 'The boolean value to set',
+        },
+        {
+          type: 'textinput',
+          label: 'Object Path',
+          id: 'objectPath',
+          default: 'track:track_1',
+          useVariables: true,
+          tooltip: 'Designer expression to find the object',
+        },
+        {
+          type: 'textinput',
+          label: 'Property Path',
+          id: 'propertyPath',
+          default: 'object.isEnabled',
+          useVariables: true,
+          tooltip: 'Python expression to access property',
         },
       ],
-      callback: async (action: CompanionActionEvent) => {
-        const subscriptionId = Number(action.options.subscriptionId)
+      callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
         const value = action.options.value === 'true'
-        instance.setProperty(subscriptionId, value)
+        const objectPathRaw = String(action.options.objectPath || '')
+        const propertyPathRaw = String(action.options.propertyPath || '')
+        
+        const objectPath = await instance.parseVariablesInString(objectPathRaw)
+        const propertyPath = await instance.parseVariablesInString(propertyPathRaw)
+        
+        if (!objectPath || !propertyPath) {
+          instance.log('warn', 'Object path and property path are required')
+          return
+        }
+        
+        instance.setPropertyByPath(objectPath, propertyPath, value)
       },
     },
 
-    setPropertyJSON: {
-      name: 'Set Property (JSON)',
-      description: 'Set a complex JSON value for a subscribed property',
+    setToDisguiseJSON: {
+      name: 'Set to Disguise (JSON)',
+      description: 'Set a Disguise property to a JSON value',
       options: [
-        {
-          type: 'number',
-          label: 'Subscription ID',
-          id: 'subscriptionId',
-          default: 0,
-          min: 0,
-          max: 999999,
-          tooltip: 'The subscription ID of the property to set',
-        },
         {
           type: 'textinput',
           label: 'JSON Value',
@@ -231,16 +178,41 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
           useVariables: true,
           tooltip: 'Valid JSON object or value (e.g., {"x": 1.0, "y": 2.0, "z": 3.0})',
         },
+        {
+          type: 'textinput',
+          label: 'Object Path',
+          id: 'objectPath',
+          default: 'screen2:screen_1',
+          useVariables: true,
+          tooltip: 'Designer expression to find the object',
+        },
+        {
+          type: 'textinput',
+          label: 'Property Path',
+          id: 'propertyPath',
+          default: 'object.offset',
+          useVariables: true,
+          tooltip: 'Python expression to access property',
+        },
       ],
-      callback: async (action: CompanionActionEvent) => {
-        const subscriptionId = Number(action.options.subscriptionId)
-        const valueStr = String(action.options.value || '{}')
+      callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
+        const valueStr = await instance.parseVariablesInString(String(action.options.value || '{}'))
+        const objectPathRaw = String(action.options.objectPath || '')
+        const propertyPathRaw = String(action.options.propertyPath || '')
+        
+        const objectPath = await instance.parseVariablesInString(objectPathRaw)
+        const propertyPath = await instance.parseVariablesInString(propertyPathRaw)
+        
+        if (!objectPath || !propertyPath) {
+          instance.log('warn', 'Object path and property path are required')
+          return
+        }
         
         try {
           const value = JSON.parse(valueStr)
-          instance.setProperty(subscriptionId, value)
+          instance.setPropertyByPath(objectPath, propertyPath, value)
         } catch (error) {
-          instance.log('error', `Invalid JSON: ${valueStr} - ${error instanceof Error ? error.message : String(error)}`)
+          instance.log('error', `Value is not valid JSON: ${valueStr}`)
         }
       },
     },
