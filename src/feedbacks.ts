@@ -22,7 +22,7 @@ export function getFeedbackDefinitions(
     liveUpdateVariable: {
       type: 'advanced',
       name: 'LiveUpdate Variable',
-      description: 'Create a live-updating variable that tracks a Disguise property',
+      description: 'Create a live-updating module variable that tracks a Disguise property. The variable is exposed as $(liveupdate:variable_name) and can be used anywhere in Companion.',
       options: [
         {
           type: 'textinput',
@@ -59,11 +59,19 @@ export function getFeedbackDefinitions(
         },
       ],
       callback: async (feedback) => {
+        // This callback is called regularly by Companion to evaluate the feedback.
+        // We use it to:
+        // 1. Ensure subscriptions exist (auto-subscribe when connection becomes ready)
+        // 2. Detect option changes and resubscribe if needed (self-healing)
+        // The actual variable value is set via setVariableValues() when data arrives from Disguise.
+        
         const variableName = String(feedback.options.variableName || '')
         const objectPath = String(feedback.options.objectPath || '')
         const propertyPath = String(feedback.options.propertyPath || '')
         const updateFrequency = Number(feedback.options.updateFrequency)
         
+        // Check if we need to create or update the subscription
+        // This ensures presets work immediately and subscriptions self-heal
         instance.checkAndUpdateSubscription(
           feedback.id, 
           variableName, 
@@ -72,6 +80,9 @@ export function getFeedbackDefinitions(
           updateFrequency > 0 ? updateFrequency : undefined
         )
         
+        // Return empty object - this feedback doesn't provide visual styling,
+        // it just manages the subscription. The variable value is exposed via
+        // Companion's module variable system as $(liveupdate:variable_name)
         return {}
       },
       subscribe: async (feedback) => {

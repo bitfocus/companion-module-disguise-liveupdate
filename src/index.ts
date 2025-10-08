@@ -177,8 +177,10 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
       return
     }
     
+    // Options haven't changed, but check if subscription is missing (e.g., connection was lost)
+    // This handles presets added while disconnected, or subscriptions that were dropped
     if (!existingSubscription && this.isConnectionReady() && variableName && objectPath && propertyPath) {
-      this.log('info', `Subscription for feedback ${feedbackId} was dropped, recreating automatically`)
+      this.log('info', `Auto-subscribing feedback ${feedbackId} (subscription was missing)`)
       this.subscribeToVariable(feedbackId, variableName, objectPath, propertyPath, updateFrequency)
     }
   }
@@ -188,6 +190,18 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
    */
   getSubscriptions(): Map<number, LiveUpdateSubscription> {
     return this.subscriptions
+  }
+
+  /**
+   * Get a subscription by variable name
+   */
+  getSubscriptionByVariableName(variableName: string): LiveUpdateSubscription | undefined {
+    for (const subscription of this.subscriptions.values()) {
+      if (subscription.variableName === variableName) {
+        return subscription
+      }
+    }
+    return undefined
   }
 
   private send(message: any): boolean {
@@ -223,6 +237,22 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
       return
     }
 
+    // Check if we already have a subscription for this object/property
+    for (const [subId, sub] of this.subscriptions.entries()) {
+      if (sub.objectPath === objectPath && sub.propertyPath === propertyPath) {
+        // Reuse existing subscription, just update the feedback mapping
+        this.log('info', `Reusing existing subscription ${subId} for feedback ${feedbackId}`)
+        this.feedbackIdToSubscriptionId.set(feedbackId, subId)
+        
+        // Update subscription to also use this variable name (support multiple feedbacks)
+        if (sub.variableName !== variableName) {
+          sub.variableName = variableName
+        }
+        
+        return
+      }
+    }
+
     const message: any = {
       subscribe: {
         object: objectPath,
@@ -242,7 +272,9 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
     
     const key = `${objectPath}:${propertyPath}`
     this.pendingSubscriptions.set(key, { feedbackId, variableName, timestamp: Date.now() })
-    this.setVariableValues({ [variableName]: '...' })
+    
+    // Initialize the module variable as undefined until first value arrives
+    this.setVariableValues({ [variableName]: undefined })
   }
 
   /**
@@ -306,29 +338,6 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
     this.send(message)
   }
 
-  /**
-   * Set a Disguise property value by object and property paths (one-time set, no subscription)
-   */
-  setPropertyByPath(objectPath: string, propertyPath: string, value: any): void {
-    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      this.log('warn', 'Cannot set property - WebSocket not connected')
-      return
-    }
-
-    let subscriptionId: number | undefined
-    for (const [id, sub] of this.subscriptions.entries()) {
-      if (sub.objectPath === objectPath && sub.propertyPath === propertyPath) {
-        subscriptionId = id
-        break
-      }
-    }
-
-    if (subscriptionId !== undefined) {
-      this.setProperty(subscriptionId, value)
-    } else {
-      this.log('warn', `Cannot set ${objectPath}.${propertyPath} - no active subscription`)
-    }
-  }
 
   private async applyConfig(config: DisguiseConfig): Promise<void> {
     this.config = config
@@ -556,6 +565,10 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
     return String(value)
   }
 
+  /**
+   * Handle value updates from Disguise LiveUpdate API.
+   * Updates module variables that Companion exposes as $(liveupdate:variable_name)
+   */
   private handleValuesChanged(values: any[]): void {
     const changedVars: Record<string, any> = {}
     
@@ -618,23 +631,29 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
         }
         
         // Update the module variable
+        // This makes the value available as $(liveupdate:variable_name) throughout Companion
         changedVars[subscription.variableName] = displayValue
       }
     }
 
-    // Set changed variables
+    // Push all updated variables to Companion's variable system in one batch
     if (Object.keys(changedVars).length > 0) {
       this.setVariableValues(changedVars)
     }
 
-    // Update feedbacks when values change
+    // Trigger feedback re-evaluation (for things like connectionState feedback)
     this.checkFeedbacks()
   }
 
+  /**
+   * Update Companion's list of available module variables.
+   * This tells Companion what variables exist (e.g., $(liveupdate:fps))
+   * The actual values are set via setVariableValues() when data arrives.
+   */
   private updateVariableDefinitions(): void {
     const variableDefinitions = getVariableDefinitions()
     
-    // Add dynamic variables for each subscription
+    // Add dynamic variable definitions for each active subscription
     this.subscriptions.forEach((sub) => {
       variableDefinitions.push({
         variableId: sub.variableName,

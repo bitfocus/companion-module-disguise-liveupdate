@@ -24,7 +24,7 @@ export function getPresetDefinitions(
       ],
       feedbacks: [
         {
-          feedbackId: 'subscribeToProperty',
+          feedbackId: 'liveUpdateVariable',
           options: {
             variableName: 'track_length',
             objectPath: 'track:track_1',
@@ -61,7 +61,7 @@ export function getPresetDefinitions(
       ],
       feedbacks: [
         {
-          feedbackId: 'subscribeToProperty',
+          feedbackId: 'liveUpdateVariable',
           options: {
             variableName: 'screen_name',
             objectPath: 'screen2:surface_1',
@@ -99,7 +99,7 @@ export function getPresetDefinitions(
       ],
       feedbacks: [
         {
-          feedbackId: 'subscribeToProperty',
+          feedbackId: 'liveUpdateVariable',
           options: {
             variableName: 'fps',
             objectPath: 'subsystem:MonitoringManager.findLocalMonitor("fps")',
@@ -137,7 +137,7 @@ export function getPresetDefinitions(
       ],
       feedbacks: [
         {
-          feedbackId: 'subscribeToProperty',
+          feedbackId: 'liveUpdateVariable',
           options: {
             variableName: 'playhead',
             objectPath: 'transportManager:default',
@@ -156,12 +156,12 @@ export function getPresetDefinitions(
       ],
     },
     
-    ledScreenOffset: {
+    screenOffsetMonitor: {
       type: 'button',
-      category: 'Screen Monitoring',
-      name: 'LED Screen Offset',
+      category: 'Screen Control',
+      name: 'Screen Offset Monitor',
       style: {
-        text: '`LED Offset\\nX: ${toFixed(jsonparse(parseVariables(\'$(liveupdate:ledscreen)\'))[\'x\'], 2)}\\nY: ${toFixed(jsonparse(parseVariables(\'$(liveupdate:ledscreen)\'))[\'y\'], 2)}\\nZ: ${toFixed(jsonparse(parseVariables(\'$(liveupdate:ledscreen)\'))[\'z\'], 2)}`',
+        text: '`Screen X\\n${toFixed($(liveupdate:screen_x), 1)}`',
         size: '14',
         color: combineRgb(255, 255, 255),
         bgcolor: combineRgb(50, 150, 200),
@@ -175,11 +175,11 @@ export function getPresetDefinitions(
       ],
       feedbacks: [
         {
-          feedbackId: 'subscribeToProperty',
+          feedbackId: 'liveUpdateVariable',
           options: {
-            variableName: 'ledscreen',
-            objectPath: 'ledscreen:myledscreen',
-            propertyPath: 'object.offset',
+            variableName: 'screen_x',
+            objectPath: 'screen2:surface_1',
+            propertyPath: 'object.offset.x',
             updateFrequency: 0,
           },
         },
@@ -194,5 +194,94 @@ export function getPresetDefinitions(
       ],
     },
     
+    screenOffsetSetPlus: {
+      type: 'button',
+      category: 'Screen Control',
+      name: 'Screen X +1',
+      style: {
+        text: 'X +1',
+        size: '18',
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 100, 200),
+      },
+      steps: [
+        {
+          down: [
+            {
+              actionId: 'setToDisguiseNumber',
+              options: {
+                variableName: 'screen_x',
+                value: '$(liveupdate:screen_x)+1',
+              },
+            },
+          ],
+          up: [],
+        },
+      ],
+      feedbacks: [
+        {
+          feedbackId: 'liveUpdateVariable',
+          options: {
+            variableName: 'screen_x',
+            objectPath: 'screen2:surface_1',
+            propertyPath: 'object.offset.x',
+            updateFrequency: 0,
+          },
+        },
+        {
+          feedbackId: 'connectionState',
+          options: {},
+          style: {
+            bgcolor: combineRgb(0, 200, 0),
+            color: combineRgb(0, 0, 0),
+          },
+        },
+      ],
+    },
+    
+    screenOffsetSetMinus: {
+      type: 'button',
+      category: 'Screen Control',
+      name: 'Screen X -1',
+      style: {
+        text: 'X -1',
+        size: '18',
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(200, 100, 0),
+      },
+      steps: [
+        {
+          down: [
+            {
+              actionId: 'setToDisguiseNumber',
+              options: {
+                variableName: 'screen_x',
+                value: '$(liveupdate:screen_x)-1',
+              },
+            },
+          ],
+          up: [],
+        },
+      ],
+      feedbacks: [
+        {
+          feedbackId: 'liveUpdateVariable',
+          options: {
+            variableName: 'screen_x',
+            objectPath: 'screen2:surface_1',
+            propertyPath: 'object.offset.x',
+            updateFrequency: 0,
+          },
+        },
+        {
+          feedbackId: 'connectionState',
+          options: {},
+          style: {
+            bgcolor: combineRgb(0, 200, 0),
+            color: combineRgb(0, 0, 0),
+          },
+        },
+      ],
+    },
   }
 }

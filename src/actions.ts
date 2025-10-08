@@ -18,102 +18,118 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
   return {
     setToDisguiseString: {
       name: 'Set to Disguise (String)',
-      description: 'Set a Disguise property from a value (string)',
+      description: 'Set a Disguise property using an existing LiveUpdate Variable',
       options: [
+        {
+          type: 'textinput',
+          label: 'Variable Name',
+          id: 'variableName',
+          default: '',
+          useVariables: false,
+          tooltip: 'The variable name from your LiveUpdate Variable feedback (e.g., "fps", "track_length")',
+        },
         {
           type: 'textinput',
           label: 'Value',
           id: 'value',
           default: '',
           useVariables: true,
-          tooltip: 'The value to set (can use variables like \$(liveupdate:my_var))',
-        },
-        {
-          type: 'textinput',
-          label: 'Object Path',
-          id: 'objectPath',
-          default: 'track:track_1',
-          useVariables: true,
-          tooltip: 'Designer expression to find the object',
-        },
-        {
-          type: 'textinput',
-          label: 'Property Path',
-          id: 'propertyPath',
-          default: 'object.description',
-          useVariables: true,
-          tooltip: 'Python expression to access property',
+          tooltip: 'The string value to set (can use variables like $(liveupdate:my_var))',
         },
       ],
       callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
-        const value = String(action.options.value || '')
-        const objectPath = String(action.options.objectPath || '')
-        const propertyPath = String(action.options.propertyPath || '')
+        const variableName = String(action.options.variableName || '')
+        const valueStr = String(action.options.value || '')
         
-        if (!objectPath || !propertyPath) {
-          instance.log('warn', 'Object path and property path are required')
+        if (!variableName) {
+          instance.log('warn', 'Variable name is required')
           return
         }
         
-        instance.setPropertyByPath(objectPath, propertyPath, value)
+        const subscription = instance.getSubscriptionByVariableName(variableName)
+        if (!subscription) {
+          instance.log('warn', `No LiveUpdate Variable found with name '${variableName}'. Add a LiveUpdate Variable feedback first.`)
+          return
+        }
+        
+        // Parse variables in the value string
+        const value = await context.parseVariablesInString(valueStr)
+        
+        instance.setProperty(subscription.id, value)
       },
     },
 
     setToDisguiseNumber: {
       name: 'Set to Disguise (Number)',
-      description: 'Set a Disguise property from a numeric value',
+      description: 'Set a Disguise property using an existing LiveUpdate Variable',
       options: [
+        {
+          type: 'textinput',
+          label: 'Variable Name',
+          id: 'variableName',
+          default: '',
+          useVariables: false,
+          tooltip: 'The variable name from your LiveUpdate Variable feedback (e.g., "fps", "track_length")',
+        },
         {
           type: 'textinput',
           label: 'Value',
           id: 'value',
           default: '0',
           useVariables: true,
-          regex: Regex.SIGNED_FLOAT,
-          tooltip: 'The numeric value to set (can use variables)',
-        },
-        {
-          type: 'textinput',
-          label: 'Object Path',
-          id: 'objectPath',
-          default: 'track:track_1',
-          useVariables: true,
-          tooltip: 'Designer expression to find the object',
-        },
-        {
-          type: 'textinput',
-          label: 'Property Path',
-          id: 'propertyPath',
-          default: 'object.lengthInBeats',
-          useVariables: true,
-          tooltip: 'Python expression to access property',
+          tooltip: 'The numeric value or expression to set (e.g., "5", "$(liveupdate:screen_x)+1", "$(liveupdate:fps)*2")',
         },
       ],
       callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
+        const variableName = String(action.options.variableName || '')
         const valueStr = String(action.options.value || '0')
-        const objectPath = String(action.options.objectPath || '')
-        const propertyPath = String(action.options.propertyPath || '')
         
-        if (!objectPath || !propertyPath) {
-          instance.log('warn', 'Object path and property path are required')
+        if (!variableName) {
+          instance.log('warn', 'Variable name is required')
           return
         }
         
-        const value = parseFloat(valueStr)
-        
-        if (isNaN(value)) {
-          instance.log('warn', `Value is not a valid number: ${valueStr}`)
+        const subscription = instance.getSubscriptionByVariableName(variableName)
+        if (!subscription) {
+          instance.log('warn', `No LiveUpdate Variable found with name '${variableName}'. Add a LiveUpdate Variable feedback first.`)
           return
         }
         
-        instance.setPropertyByPath(objectPath, propertyPath, value)
+        // Parse variables in the value string
+        const parsedValue = await context.parseVariablesInString(valueStr)
+        
+        // Evaluate the expression to get a numeric value
+        let value: number
+        try {
+          // Use Function constructor to safely evaluate mathematical expressions
+          // This allows expressions like "5+1", "10*2", "$(var)+1" (after variable substitution)
+          value = new Function('return ' + parsedValue)() as number
+          
+          if (typeof value !== 'number' || isNaN(value)) {
+            instance.log('warn', `Value is not a valid number: ${parsedValue} (from: ${valueStr})`)
+            return
+          }
+        } catch (error) {
+          instance.log('warn', `Could not evaluate expression: ${parsedValue} (from: ${valueStr})`)
+          return
+        }
+        
+        instance.setProperty(subscription.id, value)
       },
     },
 
     setToDisguiseBoolean: {
       name: 'Set to Disguise (Boolean)',
-      description: 'Set a Disguise property to a boolean value',
+      description: 'Set a Disguise property using an existing LiveUpdate Variable',
       options: [
+        {
+          type: 'textinput',
+          label: 'Variable Name',
+          id: 'variableName',
+          default: '',
+          useVariables: false,
+          tooltip: 'The variable name from your LiveUpdate Variable feedback (e.g., "fps", "track_length")',
+        },
         {
           type: 'dropdown',
           label: 'Value',
@@ -125,41 +141,38 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
           ],
           tooltip: 'The boolean value to set',
         },
-        {
-          type: 'textinput',
-          label: 'Object Path',
-          id: 'objectPath',
-          default: 'track:track_1',
-          useVariables: true,
-          tooltip: 'Designer expression to find the object',
-        },
-        {
-          type: 'textinput',
-          label: 'Property Path',
-          id: 'propertyPath',
-          default: 'object.isEnabled',
-          useVariables: true,
-          tooltip: 'Python expression to access property',
-        },
       ],
       callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
+        const variableName = String(action.options.variableName || '')
         const value = action.options.value === 'true'
-        const objectPath = String(action.options.objectPath || '')
-        const propertyPath = String(action.options.propertyPath || '')
         
-        if (!objectPath || !propertyPath) {
-          instance.log('warn', 'Object path and property path are required')
+        if (!variableName) {
+          instance.log('warn', 'Variable name is required')
           return
         }
         
-        instance.setPropertyByPath(objectPath, propertyPath, value)
+        const subscription = instance.getSubscriptionByVariableName(variableName)
+        if (!subscription) {
+          instance.log('warn', `No LiveUpdate Variable found with name '${variableName}'. Add a LiveUpdate Variable feedback first.`)
+          return
+        }
+        
+        instance.setProperty(subscription.id, value)
       },
     },
 
     setToDisguiseJSON: {
       name: 'Set to Disguise (JSON)',
-      description: 'Set a Disguise property to a JSON value',
+      description: 'Set a Disguise property using an existing LiveUpdate Variable',
       options: [
+        {
+          type: 'textinput',
+          label: 'Variable Name',
+          id: 'variableName',
+          default: '',
+          useVariables: false,
+          tooltip: 'The variable name from your LiveUpdate Variable feedback (e.g., "fps", "track_length")',
+        },
         {
           type: 'textinput',
           label: 'JSON Value',
@@ -168,38 +181,30 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
           useVariables: true,
           tooltip: 'Valid JSON object or value (e.g., {"x": 1.0, "y": 2.0, "z": 3.0})',
         },
-        {
-          type: 'textinput',
-          label: 'Object Path',
-          id: 'objectPath',
-          default: 'screen2:screen_1',
-          useVariables: true,
-          tooltip: 'Designer expression to find the object',
-        },
-        {
-          type: 'textinput',
-          label: 'Property Path',
-          id: 'propertyPath',
-          default: 'object.offset',
-          useVariables: true,
-          tooltip: 'Python expression to access property',
-        },
       ],
       callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
+        const variableName = String(action.options.variableName || '')
         const valueStr = String(action.options.value || '{}')
-        const objectPath = String(action.options.objectPath || '')
-        const propertyPath = String(action.options.propertyPath || '')
         
-        if (!objectPath || !propertyPath) {
-          instance.log('warn', 'Object path and property path are required')
+        if (!variableName) {
+          instance.log('warn', 'Variable name is required')
           return
         }
         
+        const subscription = instance.getSubscriptionByVariableName(variableName)
+        if (!subscription) {
+          instance.log('warn', `No LiveUpdate Variable found with name '${variableName}'. Add a LiveUpdate Variable feedback first.`)
+          return
+        }
+        
+        // Parse variables in the JSON string
+        const parsedValue = await context.parseVariablesInString(valueStr)
+        
         try {
-          const value = JSON.parse(valueStr)
-          instance.setPropertyByPath(objectPath, propertyPath, value)
+          const value = JSON.parse(parsedValue)
+          instance.setProperty(subscription.id, value)
         } catch (error) {
-          instance.log('error', `Value is not valid JSON: ${valueStr}`)
+          instance.log('error', `Value is not valid JSON: ${parsedValue} (from: ${valueStr})`)
         }
       },
     },
