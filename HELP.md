@@ -18,7 +18,7 @@ This module uses **Feedbacks** to subscribe to Disguise properties. Each feedbac
 
 ### 1. Monitor a Disguise Property
 
-1. Add the **"Subscribe to Disguise Property"** feedback to a button
+1. Add the **"LiveUpdate Variable"** feedback to a button
 2. Configure the feedback:
    - **Variable Name**: `fps` (or any name you choose)
    - **Object Path**: `subsystem:MonitoringManager.findLocalMonitor("fps")`
@@ -67,8 +67,8 @@ Use the **"Set to Disguise"** actions to change properties:
 
 ## Feedbacks
 
-### Subscribe to Disguise Property
-Creates a subscription to a Disguise property and exposes it as a module variable.
+### LiveUpdate Variable
+Creates a live-updating variable that tracks a Disguise property.
 
 **Options:**
 - **Variable Name**: Name for the module variable (e.g., "fps", "track_length")
@@ -86,7 +86,7 @@ Creates a subscription to a Disguise property and exposes it as a module variabl
 | Transport playhead | `transportManager:default` | `object.player.tRender` |
 | Screen offset (vector) | `ledscreen:myledscreen` | `object.offset` |
 
-**Note:** This feedback doesn't provide visual feedback itself - it only manages subscriptions. Use Companion's expression variables for visual feedback.
+**Note:** This feedback manages the subscription lifecycle. For visual feedback based on the variable value, use Companion's expression system.
 
 ### Connection OK
 Indicates whether the module is connected to Disguise Designer.

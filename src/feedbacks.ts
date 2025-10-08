@@ -19,14 +19,10 @@ export function getFeedbackDefinitions(
       callback: () => instance.isConnectionReady(),
     },
 
-    subscribeToProperty: {
-      type: 'boolean',
-      name: 'Subscribe to Disguise Property',
-      description: 'Subscribe to a Disguise property and expose it as a module variable. Use Companion expression variables for comparisons.',
-      defaultStyle: {
-        bgcolor: combineRgb(0, 0, 0),
-        color: combineRgb(255, 255, 255),
-      },
+    liveUpdateVariable: {
+      type: 'advanced',
+      name: 'LiveUpdate Variable',
+      description: 'Create a live-updating variable that tracks a Disguise property',
       options: [
         {
           type: 'textinput',
@@ -63,20 +59,11 @@ export function getFeedbackDefinitions(
         },
       ],
       callback: async (feedback) => {
-        // Always return false - this feedback is just for subscribing, not for visual feedback
-        // Users should use expression variables to create visual feedback based on the module variable value
-        
-        // Check if options have changed since last evaluation and ensure subscription is active
         const variableName = String(feedback.options.variableName || '')
-        const objectPathRaw = String(feedback.options.objectPath || '')
-        const propertyPathRaw = String(feedback.options.propertyPath || '')
+        const objectPath = String(feedback.options.objectPath || '')
+        const propertyPath = String(feedback.options.propertyPath || '')
         const updateFrequency = Number(feedback.options.updateFrequency)
         
-        const objectPath = await instance.parseVariablesInString(objectPathRaw)
-        const propertyPath = await instance.parseVariablesInString(propertyPathRaw)
-        
-        // Check if these differ from what we have subscribed, or if subscription was dropped
-        // This provides self-healing behavior
         instance.checkAndUpdateSubscription(
           feedback.id, 
           variableName, 
@@ -85,15 +72,12 @@ export function getFeedbackDefinitions(
           updateFrequency > 0 ? updateFrequency : undefined
         )
         
-        return false
+        return {}
       },
       subscribe: async (feedback) => {
         const variableName = String(feedback.options.variableName || '')
-        const objectPathRaw = String(feedback.options.objectPath || '')
-        const propertyPathRaw = String(feedback.options.propertyPath || '')
-        
-        const objectPath = await instance.parseVariablesInString(objectPathRaw)
-        const propertyPath = await instance.parseVariablesInString(propertyPathRaw)
+        const objectPath = String(feedback.options.objectPath || '')
+        const propertyPath = String(feedback.options.propertyPath || '')
         const updateFrequency = Number(feedback.options.updateFrequency)
         
         if (!variableName || !objectPath || !propertyPath) {
@@ -101,17 +85,13 @@ export function getFeedbackDefinitions(
           return
         }
         
-        // Check if we already have a subscription for this feedback with different paths
-        // This handles the case where user changes options but Companion doesn't call unsubscribe first
         const existingSubscription = instance.getSubscriptionByFeedbackId(feedback.id)
         if (existingSubscription) {
           const pathsChanged = existingSubscription.objectPath !== objectPath || existingSubscription.propertyPath !== propertyPath
           if (pathsChanged) {
             instance.log('info', `Feedback options changed, updating subscription for ${feedback.id}`)
-            // Unsubscribe old one first
             instance.unsubscribeFromVariable(feedback.id)
           } else {
-            // Subscription already exists with same paths, skip
             return
           }
         }

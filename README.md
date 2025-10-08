@@ -13,7 +13,7 @@ This module provides real-time integration with Disguise Designer through the We
 
 ## Key Features
 
-- **Feedback-Based Subscriptions**: Add "Subscribe to Disguise Property" feedbacks to buttons to create live-updating module variables
+- **Feedback-Based Subscriptions**: Add "LiveUpdate Variable" feedbacks to buttons to create live-updating module variables
 - **Self-Healing**: Automatic reconnection and subscription recovery after errors or connection loss
 - **Auto-Update Detection**: Subscriptions automatically update when you change feedback options
 - **Type-Safe Actions**: Separate actions for String, Number, Boolean, and JSON property types
@@ -34,7 +34,7 @@ This module provides real-time integration with Disguise Designer through the We
 
 ### 1. Monitor a Property
 
-1. Add **"Subscribe to Disguise Property"** feedback to a button
+1. Add **"LiveUpdate Variable"** feedback to a button
 2. Configure:
    - Variable Name: `fps`
    - Object Path: `subsystem:MonitoringManager.findLocalMonitor("fps")`
@@ -51,8 +51,8 @@ This module provides real-time integration with Disguise Designer through the We
 
 ## Feedbacks
 
-### Subscribe to Disguise Property
-Subscribes to a Designer property and creates a module variable that updates in real-time.
+### LiveUpdate Variable
+Creates a live-updating variable that tracks a Designer property in real-time.
 
 **Options:**
 - Variable Name

@@ -20,12 +20,12 @@ export interface LiveUpdateSubscription {
   id: number
   objectPath: string
   propertyPath: string
-  feedbackId: string // The feedback ID that created this subscription
-  variableName: string // The module variable to update
+  feedbackId: string
+  variableName: string
   value?: any
   changeTimestamp?: number
   messageTimestamp?: number
-  errorCount?: number // Track consecutive errors
+  errorCount?: number
 }
 
 /**
@@ -37,9 +37,9 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
   private reconnectTimer: NodeJS.Timeout | undefined
   private pendingCleanupTimer: NodeJS.Timeout | undefined
   private subscriptions: Map<number, LiveUpdateSubscription> = new Map()
-  private feedbackIdToSubscriptionId: Map<string, number> = new Map() // Map feedback ID to subscription ID
+  private feedbackIdToSubscriptionId: Map<string, number> = new Map()
   private pendingSubscriptions: Map<string, { feedbackId: string; variableName: string; timestamp: number }> = new Map()
-  public feedbackOptionsCache: Map<string, { objectPath: string; propertyPath: string; variableName: string }> = new Map() // Track last known options
+  public feedbackOptionsCache: Map<string, { objectPath: string; propertyPath: string; variableName: string }> = new Map()
   private connectionReady = false
   private shouldReconnect = false
 
@@ -139,8 +139,8 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
   }
 
   /**
-   * Check if feedback options have changed and update subscription if needed
-   * Also ensures subscription is active (self-healing)
+   * Check if feedback options have changed and update subscription if needed.
+   * Also ensures subscription is active (self-healing).
    */
   checkAndUpdateSubscription(
     feedbackId: string,
@@ -152,19 +152,15 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
     const cached = this.feedbackOptionsCache.get(feedbackId)
     const existingSubscription = this.getSubscriptionByFeedbackId(feedbackId)
     
-    // Check if we need to subscribe (first time or subscription was dropped)
     if (!cached) {
-      // First evaluation - cache it and check if we need to subscribe
       this.feedbackOptionsCache.set(feedbackId, { variableName, objectPath, propertyPath })
       
-      // If no active subscription and we're connected, subscribe
       if (!existingSubscription && this.isConnectionReady() && variableName && objectPath && propertyPath) {
         this.subscribeToVariable(feedbackId, variableName, objectPath, propertyPath, updateFrequency)
       }
       return
     }
     
-    // Check if options have changed
     const optionsChanged = 
       cached.variableName !== variableName ||
       cached.objectPath !== objectPath ||
@@ -172,21 +168,15 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
     
     if (optionsChanged) {
       this.log('info', `Feedback options changed: ${cached.objectPath}.${cached.propertyPath} → ${objectPath}.${propertyPath}`)
-      
-      // Update cache
       this.feedbackOptionsCache.set(feedbackId, { variableName, objectPath, propertyPath })
-      
-      // Unsubscribe old subscription if it exists
       this.unsubscribeFromVariable(feedbackId)
       
-      // Subscribe with new options
       if (variableName && objectPath && propertyPath) {
         this.subscribeToVariable(feedbackId, variableName, objectPath, propertyPath, updateFrequency)
       }
       return
     }
     
-    // Self-healing: if subscription was dropped but options haven't changed, recreate it
     if (!existingSubscription && this.isConnectionReady() && variableName && objectPath && propertyPath) {
       this.log('info', `Subscription for feedback ${feedbackId} was dropped, recreating automatically`)
       this.subscribeToVariable(feedbackId, variableName, objectPath, propertyPath, updateFrequency)
@@ -250,11 +240,8 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
       return
     }
     
-    // Store the subscription details for when we get the subscription ID back
     const key = `${objectPath}:${propertyPath}`
     this.pendingSubscriptions.set(key, { feedbackId, variableName, timestamp: Date.now() })
-    
-    // Set initial placeholder value and define the variable
     this.setVariableValues({ [variableName]: '...' })
   }
 
@@ -264,11 +251,9 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
   unsubscribeFromVariable(feedbackId: string): void {
     const subscriptionId = this.feedbackIdToSubscriptionId.get(feedbackId)
     
-    // Clean up any pending subscriptions for this feedback
     for (const [key, pending] of this.pendingSubscriptions.entries()) {
       if (pending.feedbackId === feedbackId) {
         this.pendingSubscriptions.delete(key)
-        // Cleaned up pending subscription
       }
     }
     
@@ -278,7 +263,6 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       this.log('warn', 'Cannot unsubscribe - WebSocket not connected')
-      // Still clean up local state even if not connected
       this.subscriptions.delete(subscriptionId)
       this.feedbackIdToSubscriptionId.delete(feedbackId)
       this.updateVariableDefinitions()
@@ -292,14 +276,10 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
     }
 
     this.log('info', `Unsubscribing from ${subscription?.objectPath}.${subscription?.propertyPath}`)
-    
     this.send(message)
     
-    // Clean up mappings
     this.subscriptions.delete(subscriptionId)
     this.feedbackIdToSubscriptionId.delete(feedbackId)
-    
-    // Update variable definitions after removing subscription
     this.updateVariableDefinitions()
   }
 
@@ -335,7 +315,6 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
       return
     }
 
-    // First, check if we already have a subscription for this property
     let subscriptionId: number | undefined
     for (const [id, sub] of this.subscriptions.entries()) {
       if (sub.objectPath === objectPath && sub.propertyPath === propertyPath) {
@@ -345,12 +324,9 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
     }
 
     if (subscriptionId !== undefined) {
-      // Use existing subscription to set the value
       this.setProperty(subscriptionId, value)
     } else {
-      // No subscription exists - we need to subscribe, set, and unsubscribe
-      // For now, just log a warning. In the future, we could implement temporary subscriptions.
-      this.log('warn', `Cannot set ${objectPath}.${propertyPath} - no active subscription. Use "Read from Disguise" action first.`)
+      this.log('warn', `Cannot set ${objectPath}.${propertyPath} - no active subscription`)
     }
   }
 
@@ -392,10 +368,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
           connection_status: 'Connected',
         })
         
-        // Re-subscribe all existing feedbacks
         this.subscribeFeedbacks()
-        
-        // Start periodic cleanup of pending subscriptions
         this.startPendingCleanupTimer()
       })
 
@@ -419,7 +392,6 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
           connection_status: 'Disconnected',
         })
         
-        // Clear timers on disconnect
         if (this.pendingCleanupTimer) {
           clearTimeout(this.pendingCleanupTimer)
           this.pendingCleanupTimer = undefined

@@ -46,13 +46,9 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
         },
       ],
       callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
-        const valueRaw = String(action.options.value || '')
-        const objectPathRaw = String(action.options.objectPath || '')
-        const propertyPathRaw = String(action.options.propertyPath || '')
-        
-        const value = await instance.parseVariablesInString(valueRaw)
-        const objectPath = await instance.parseVariablesInString(objectPathRaw)
-        const propertyPath = await instance.parseVariablesInString(propertyPathRaw)
+        const value = String(action.options.value || '')
+        const objectPath = String(action.options.objectPath || '')
+        const propertyPath = String(action.options.propertyPath || '')
         
         if (!objectPath || !propertyPath) {
           instance.log('warn', 'Object path and property path are required')
@@ -94,12 +90,9 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
         },
       ],
       callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
-        const valueStr = await instance.parseVariablesInString(String(action.options.value || '0'))
-        const objectPathRaw = String(action.options.objectPath || '')
-        const propertyPathRaw = String(action.options.propertyPath || '')
-        
-        const objectPath = await instance.parseVariablesInString(objectPathRaw)
-        const propertyPath = await instance.parseVariablesInString(propertyPathRaw)
+        const valueStr = String(action.options.value || '0')
+        const objectPath = String(action.options.objectPath || '')
+        const propertyPath = String(action.options.propertyPath || '')
         
         if (!objectPath || !propertyPath) {
           instance.log('warn', 'Object path and property path are required')
@@ -151,11 +144,8 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
       ],
       callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
         const value = action.options.value === 'true'
-        const objectPathRaw = String(action.options.objectPath || '')
-        const propertyPathRaw = String(action.options.propertyPath || '')
-        
-        const objectPath = await instance.parseVariablesInString(objectPathRaw)
-        const propertyPath = await instance.parseVariablesInString(propertyPathRaw)
+        const objectPath = String(action.options.objectPath || '')
+        const propertyPath = String(action.options.propertyPath || '')
         
         if (!objectPath || !propertyPath) {
           instance.log('warn', 'Object path and property path are required')
@@ -196,12 +186,9 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
         },
       ],
       callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
-        const valueStr = await instance.parseVariablesInString(String(action.options.value || '{}'))
-        const objectPathRaw = String(action.options.objectPath || '')
-        const propertyPathRaw = String(action.options.propertyPath || '')
-        
-        const objectPath = await instance.parseVariablesInString(objectPathRaw)
-        const propertyPath = await instance.parseVariablesInString(propertyPathRaw)
+        const valueStr = String(action.options.value || '{}')
+        const objectPath = String(action.options.objectPath || '')
+        const propertyPath = String(action.options.propertyPath || '')
         
         if (!objectPath || !propertyPath) {
           instance.log('warn', 'Object path and property path are required')
