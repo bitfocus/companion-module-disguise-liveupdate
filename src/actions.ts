@@ -6,12 +6,88 @@ import {
   Regex,
 } from '@companion-module/base'
 import type { DisguiseInstance } from './index'
+import type { LiveUpdateSubscription } from './index'
 
 export interface DisguiseActionDefinitions extends CompanionActionDefinitions {
   setToDisguiseString: CompanionActionDefinition
   setToDisguiseNumber: CompanionActionDefinition
   setToDisguiseBoolean: CompanionActionDefinition
   setToDisguiseJSON: CompanionActionDefinition
+}
+
+/**
+ * Helper function to validate variable name and get subscription
+ */
+function getSubscriptionForAction(
+  instance: DisguiseInstance,
+  variableName: string
+): LiveUpdateSubscription | null {
+  if (!variableName) {
+    instance.log('warn', 'Variable name is required')
+    return null
+  }
+
+  const subscription = instance.getSubscriptionByVariableName(variableName)
+  if (!subscription) {
+    instance.log('warn', `No LiveUpdate Variable found with name '${variableName}'. Add a LiveUpdate Variable feedback first.`)
+    return null
+  }
+
+  return subscription
+}
+
+/**
+ * Process a string value (parse variables)
+ */
+async function processStringValue(
+  context: CompanionActionContext,
+  valueStr: string
+): Promise<string> {
+  return await context.parseVariablesInString(valueStr)
+}
+
+/**
+ * Process a numeric value (parse variables and evaluate expression)
+ */
+async function processNumberValue(
+  instance: DisguiseInstance,
+  context: CompanionActionContext,
+  valueStr: string
+): Promise<number | null> {
+  const parsedValue = await context.parseVariablesInString(valueStr)
+
+  try {
+    // Evaluate mathematical expressions like "5+1", "10*2", "$(var)+1"
+    const value = new Function('return ' + parsedValue)() as number
+
+    if (typeof value !== 'number' || isNaN(value)) {
+      instance.log('warn', `Value is not a valid number: ${parsedValue} (from: ${valueStr})`)
+      return null
+    }
+
+    return value
+  } catch (error) {
+    instance.log('warn', `Could not evaluate expression: ${parsedValue} (from: ${valueStr})`)
+    return null
+  }
+}
+
+/**
+ * Process a JSON value (parse variables and parse JSON)
+ */
+async function processJSONValue(
+  instance: DisguiseInstance,
+  context: CompanionActionContext,
+  valueStr: string
+): Promise<any | null> {
+  const parsedValue = await context.parseVariablesInString(valueStr)
+
+  try {
+    return JSON.parse(parsedValue)
+  } catch (error) {
+    instance.log('error', `Value is not valid JSON: ${parsedValue} (from: ${valueStr})`)
+    return null
+  }
 }
 
 export function getActionDefinitions(instance: DisguiseInstance): DisguiseActionDefinitions {
@@ -40,21 +116,11 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
       callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
         const variableName = String(action.options.variableName || '')
         const valueStr = String(action.options.value || '')
-        
-        if (!variableName) {
-          instance.log('warn', 'Variable name is required')
-          return
-        }
-        
-        const subscription = instance.getSubscriptionByVariableName(variableName)
-        if (!subscription) {
-          instance.log('warn', `No LiveUpdate Variable found with name '${variableName}'. Add a LiveUpdate Variable feedback first.`)
-          return
-        }
-        
-        // Parse variables in the value string
-        const value = await context.parseVariablesInString(valueStr)
-        
+
+        const subscription = getSubscriptionForAction(instance, variableName)
+        if (!subscription) return
+
+        const value = await processStringValue(context, valueStr)
         instance.setProperty(subscription.id, value)
       },
     },
@@ -83,37 +149,13 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
       callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
         const variableName = String(action.options.variableName || '')
         const valueStr = String(action.options.value || '0')
-        
-        if (!variableName) {
-          instance.log('warn', 'Variable name is required')
-          return
-        }
-        
-        const subscription = instance.getSubscriptionByVariableName(variableName)
-        if (!subscription) {
-          instance.log('warn', `No LiveUpdate Variable found with name '${variableName}'. Add a LiveUpdate Variable feedback first.`)
-          return
-        }
-        
-        // Parse variables in the value string
-        const parsedValue = await context.parseVariablesInString(valueStr)
-        
-        // Evaluate the expression to get a numeric value
-        let value: number
-        try {
-          // Use Function constructor to safely evaluate mathematical expressions
-          // This allows expressions like "5+1", "10*2", "$(var)+1" (after variable substitution)
-          value = new Function('return ' + parsedValue)() as number
-          
-          if (typeof value !== 'number' || isNaN(value)) {
-            instance.log('warn', `Value is not a valid number: ${parsedValue} (from: ${valueStr})`)
-            return
-          }
-        } catch (error) {
-          instance.log('warn', `Could not evaluate expression: ${parsedValue} (from: ${valueStr})`)
-          return
-        }
-        
+
+        const subscription = getSubscriptionForAction(instance, variableName)
+        if (!subscription) return
+
+        const value = await processNumberValue(instance, context, valueStr)
+        if (value === null) return
+
         instance.setProperty(subscription.id, value)
       },
     },
@@ -131,32 +173,20 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
           tooltip: 'The variable name from your LiveUpdate Variable feedback (e.g., "fps", "track_length")',
         },
         {
-          type: 'dropdown',
+          type: 'checkbox',
           label: 'Value',
           id: 'value',
-          default: 'true',
-          choices: [
-            { id: 'true', label: 'True' },
-            { id: 'false', label: 'False' },
-          ],
+          default: true,
           tooltip: 'The boolean value to set',
         },
       ],
       callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
         const variableName = String(action.options.variableName || '')
-        const value = action.options.value === 'true'
-        
-        if (!variableName) {
-          instance.log('warn', 'Variable name is required')
-          return
-        }
-        
-        const subscription = instance.getSubscriptionByVariableName(variableName)
-        if (!subscription) {
-          instance.log('warn', `No LiveUpdate Variable found with name '${variableName}'. Add a LiveUpdate Variable feedback first.`)
-          return
-        }
-        
+        const value = Boolean(action.options.value)
+
+        const subscription = getSubscriptionForAction(instance, variableName)
+        if (!subscription) return
+
         instance.setProperty(subscription.id, value)
       },
     },
@@ -185,27 +215,14 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
       callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
         const variableName = String(action.options.variableName || '')
         const valueStr = String(action.options.value || '{}')
-        
-        if (!variableName) {
-          instance.log('warn', 'Variable name is required')
-          return
-        }
-        
-        const subscription = instance.getSubscriptionByVariableName(variableName)
-        if (!subscription) {
-          instance.log('warn', `No LiveUpdate Variable found with name '${variableName}'. Add a LiveUpdate Variable feedback first.`)
-          return
-        }
-        
-        // Parse variables in the JSON string
-        const parsedValue = await context.parseVariablesInString(valueStr)
-        
-        try {
-          const value = JSON.parse(parsedValue)
-          instance.setProperty(subscription.id, value)
-        } catch (error) {
-          instance.log('error', `Value is not valid JSON: ${parsedValue} (from: ${valueStr})`)
-        }
+
+        const subscription = getSubscriptionForAction(instance, variableName)
+        if (!subscription) return
+
+        const value = await processJSONValue(instance, context, valueStr)
+        if (value === null) return
+
+        instance.setProperty(subscription.id, value)
       },
     },
   }
