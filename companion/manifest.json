@@ -3,7 +3,7 @@
 	"name": "disguise: LiveUpdate",
 	"shortname": "liveupdate",
 	"description": "Control and monitor Disguise Designer using the LiveUpdate API",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"license": "MIT",
 	"repository": "git+https://github.com/bitfocus/companion-module-liveupdate.git",
 	"bugs": "https://github.com/bitfocus/companion-module-liveupdate/issues",
