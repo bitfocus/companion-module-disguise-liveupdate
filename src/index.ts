@@ -42,6 +42,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
   public feedbackOptionsCache: Map<string, { objectPath: string; propertyPath: string; variableName: string }> = new Map()
   private connectionReady = false
   private shouldReconnect = false
+  private hasLoggedConnectionError = false
 
   async init(config: DisguiseConfig): Promise<void> {
     this.log('debug', 'Initializing Disguise Designer LiveUpdate module')
@@ -362,8 +363,9 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
     }
 
     const url = `ws://${this.config.host}:${this.config.port}/api/session/liveupdate`
-    this.log('info', `Connecting to Disguise Designer at ${url}`)
+    this.log('debug', `Connecting to Disguise Designer at ${url}`)
     this.updateStatus(InstanceStatus.Connecting)
+    this.hasLoggedConnectionError = false // Reset before each connection attempt
 
     try {
       this.ws = new WebSocket(url)
@@ -372,6 +374,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
         this.log('info', 'Connected to Disguise Designer LiveUpdate API')
         this.updateStatus(InstanceStatus.Ok)
         this.connectionReady = true
+        this.hasLoggedConnectionError = false // Reset on successful connection
         this.stopReconnectTimer()
         this.setVariableValues({
           connection_status: 'Connected',
@@ -386,7 +389,10 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
       })
 
       this.ws.on('error', (error: Error) => {
-        this.log('error', `WebSocket error: ${error.message}`)
+        if (!this.hasLoggedConnectionError) {
+          this.log('error', `WebSocket error: ${error.message}`)
+          this.hasLoggedConnectionError = true
+        }
         this.updateStatus(InstanceStatus.ConnectionFailure, error.message)
       })
 
@@ -414,7 +420,10 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
         }
       })
     } catch (error) {
-      this.log('error', `Failed to create WebSocket: ${error}`)
+      if (!this.hasLoggedConnectionError) {
+        this.log('error', `Failed to create WebSocket: ${error}`)
+        this.hasLoggedConnectionError = true
+      }
       this.updateStatus(InstanceStatus.ConnectionFailure)
       this.scheduleReconnect()
     }

@@ -106,22 +106,22 @@ ${secondsToTimestamp($(liveupdate:playhead))}
 
 ### Setup
 ```bash
-npm install
+yarn install
 ```
 
 ### Building
 ```bash
-npm run build
+yarn build
 ```
 
 ### Development Mode
 ```bash
-npm run watch
+yarn watch
 ```
 
 ### Linting
 ```bash
-npm run lint
+yarn lint
 ```
 
 ## Architecture
