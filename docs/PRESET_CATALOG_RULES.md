@@ -85,7 +85,8 @@ Rules:
 - Quoted names (`track:"..."`) are used everywhere so names with spaces work (Designer r34 supports the quoted form; the sanitised `track_1` form is documented as the legacy fallback).
 - `transportManager:default` (casing as in disguise's own plugin guide) and `subsystem:...` paths carry no variable.
 - Selection references never appear in `variableName` (that option is not parsed).
-- `11 Templates` uses literal `<OBJECT_PATH>` / `<PROPERTY_PATH>` placeholders; the Phase 2 guard skips subscribing while a path contains `<`, `>`, `$NA`, an unparsed `$(` or an empty quoted name `""`.
+- `11 Templates` uses literal `<OBJECT_PATH>` / `<PROPERTY_PATH>` placeholders. The module's guard (`isUnresolvedPath` in `src/index.ts`) never subscribes while a path contains an `<UPPER_CASE>` placeholder token, `$NA`, an unparsed `$(...)` reference, an empty quoted name (`""` / `''`), an empty argument or index slot (`f(, 1)`, `f(1, )`, `a[]`) or the remote-node form without a hostname (`":d3"`). Unset selections publish `$NA`, so every preset built on them is covered whatever the slot looks like.
+- Selection values are validated by kind before use (`src/selections.ts`): names must not contain quotes, backslashes or line breaks; hosts are `[A-Za-z0-9._-]`; indices are plain decimal integers; UIDs are decimal or `0x` hex integers. Invalid values are rejected in the Set selection action and ignored (treated as unset) when read from the config.
 - Rejected alternatives: (a) literal `<TRACK_NAME>` placeholders in every path: one edit per button, no central re-pointing, and they trigger the subscribe-storm hazard until edited; they remain the documented manual fallback. (b) `$(custom:...)` inside shipped presets: broken by the host's label rewrite (above); operators may still type it into a placed button.
 
 ## 5. Variable names
@@ -116,7 +117,7 @@ button keeps its own editable `updateFrequency`. `0` (unthrottled) is never a li
 - Experimental: bgcolor `rgb(70,70,90)`.
 - `previewStyle` shows a representative value so the preset browser is readable.
 - Readouts do **not** stack the `connectionState` feedback (its green override would hide the readout colour); `01 Connection` provides the connection indicator once.
-- Colour-by-value needs a boolean feedback. Rows may declare a `stateColour` rule; it is implemented only if the proposed `liveUpdateCompare` feedback (extension 3) is approved.
+- Colour-by-value needs a boolean feedback. Rows may declare a `stateColour` rule; it becomes a `liveUpdateCompare` feedback (extension 3, implemented) on the same variable with the given operator, value and background colour.
 
 ## 8. Row composition
 
@@ -126,7 +127,7 @@ button keeps its own editable `updateFrequency`. `0` (unthrottled) is never a li
 | nudge | `liveUpdateVariable` | `setToDisguiseNumber` with `$(liveupdate:<var>)+<step>` on `down`; optional `rotate_left` / `rotate_right` with ∓/±step |
 | setValue | `liveUpdateVariable` | `setToDisguiseNumber` / `setToDisguiseString` with a literal value |
 | onOff | `liveUpdateVariable` | `setToDisguiseBoolean` with `value: true` or `false` (one preset each) |
-| toggle | `liveUpdateVariable` | proposed `setToDisguiseToggle` (extension 4); until approved, shipped as an onOff pair |
+| toggle | `liveUpdateVariable` | `setToDisguiseToggle` (extension 4, implemented); the onOff pair stays available as explicit ON / OFF buttons |
 | jsonSet | `liveUpdateVariable` | `setToDisguiseJSON` with a partial object (`{"x": 0.0}`) |
 
 Every row records the candidate ids it is built from, the source (URL or `d3.pyi:line`), the
@@ -140,17 +141,25 @@ Designer version notes, a live-test priority, and the number of subscriptions it
 
 ## 10. OSC parity and future integration
 
-`04 Transport State` provides a read-only counterpart for each disguise-osc variable listed in §5.
-Transport commands (play, stop, cue, fades) are not available through LiveUpdate; the HELP explains
-building one page with disguise-osc for commands and this module for state. Categories, colours and
-variable ids are aligned so that a later merge or a combined page needs no renaming.
+`04 Transport State` (normal tier) covers the disguise-osc variables `trackname`, `playMode`,
+`brightness` and `volume`; the section, bpm, track-position and timecode-position counterparts
+are experimental until they are verified on a Director (their expressions are chains that the
+LiveUpdate documentation does not show) and keep the OSC ids so they can be promoted without
+renaming. Transport commands (play, stop, cue, fades) are not available through LiveUpdate; the
+HELP explains building one page with disguise-osc for commands and this module for state.
+Categories, colours and variable ids are aligned so that a later merge or a combined page needs no
+renaming.
 
 ## 11. Module extensions required by the catalog (each a separate, backward-compatible commit)
 
-1. Placeholder / error guard: skip subscribing while a path contains `<`, `>`, `$NA` or `$(`; exponential back-off after subscription errors (approved).
-2. Connection settings: `showExperimentalPresets` (checkbox, default off) and the four `presetInterval*` fields (approved).
-3. `liveUpdateCompare` boolean feedback (variable name, operator, value) for colour-by-value (proposed).
-4. `setToDisguiseToggle` action (variable name) for boolean toggles (proposed).
-5. `companion/manifest.json` `apiVersion: 0.0.0`, `@companion-module/base` pinned to `~1.13.2` (approved).
-6. ESLint configuration and devDependency alignment (approved).
-7. Selection variables (proposed, replaces the custom-variable plan): module variables `selTrack`, `selLayer`, `selLayerIndex`, `selSection`, `selBeat`, `selScreen`, `selProjector`, `selScreenUid`, `selMachine`, `selHost`, `selWorkload`, `selInstance`, `selEvUid`, `selEvIndex` (plus the experimental set) fed from a "Selections" block of connection settings and from a `setSelection` action (dropdown of selection names + value textinput with `useVariables`); values persist in the config via `saveConfig`. No change to existing actions/feedbacks.
+All items below are implemented on the branch `feat/preset-library` (Phase 2).
+
+1. Unresolved-path guard and back-off (commits `b85b220`, `3c6a9d3`): never subscribe while a path contains an `<UPPER_CASE>` placeholder, `$NA`, an unparsed `$(...)`, an empty quoted name, an empty argument/index slot or `":d3"`; after a failed subscription (Director error, three property-path errors, or a pending request that times out) the feedback backs off 2 s doubling up to 60 s, a timer re-evaluates it when the delay elapses, and the back-off is cleared by the first good value or by editing the feedback. Subscribe requests are joined while in flight and shared subscriptions are reference counted.
+2. Connection settings `showExperimentalPresets` and the four `presetInterval*` fields (commit `21b527e`).
+3. `liveUpdateCompare` boolean feedback (commit `55983c2`).
+4. `setToDisguiseToggle` action (commit `2267b4a`).
+5. `companion/manifest.json` `apiVersion: 0.0.0`, `@companion-module/base` pinned to `~1.13.2` (commit `a670566`).
+6. ESLint 9 flat configuration, prettier and devDependency alignment (commit `e6fbaec`).
+7. Selection variables (commit `d74c201`, validation in `3c6a9d3`): module variables `selTrack`, `selLayer`, `selLayerIndex`, `selSection`, `selBeat`, `selScreen`, `selProjector`, `selScreenUid`, `selMachine`, `selHost`, `selWorkload`, `selInstance`, `selEvUid`, `selEvIndex` (plus the experimental set) fed from a "Selections" block of the connection settings and from the `setSelection` action; values are validated by kind, persisted with `saveConfig`, and published as `$NA` while unset. `sel...` and `connection_status` are reserved variable names.
+8. `configUpdated` keeps the WebSocket when only preset settings or selections changed (commit `d74c201`).
+9. Every variable owned by a placed LiveUpdate Variable feedback stays defined, the Connection OK feedback is re-evaluated on connect/disconnect, and editing Update Frequency re-subscribes (commit `3c6a9d3`).

@@ -1102,7 +1102,7 @@
    "liveTestPriority": "low",
    "subscriptions": 1,
    "designerVersion": "r34.0.3",
-   "notes": "Sibling metadata (.xUnits, .graphTitle, .maxValue, .minData, .maxData) is available on the same snapshot if a units suffix or percent-of-max bar is wanted later.",
+   "notes": "Sibling metadata (.xUnits,.graphTitle,.maxValue,.minData,.maxData) is available on the same snapshot if a units suffix or percent-of-max bar is wanted later.",
    "dimension": "monitoring",
    "verifierOk": true,
    "verifierProblems": [],
@@ -1599,7 +1599,7 @@
     "bgcolor": "rgb(178,34,34)"
    },
    "designerVersion": "r34.0.3",
-   "notes": "Numbering taken from the TrackPlayer constants; the mapping of constants to .state values is reasonable but unproven - confirm live. Different numbering from object.play_mode. Do not subscribe to object.player.playMode itself (untested _BlipValue JSON shape). Suggested extra compare rules: ==0 green (Play), ==4/==5 rgb(178,34,34) (holding).",
+   "notes": "Numbering taken from the TrackPlayer constants; the mapping of constants to.state values is reasonable but unproven - confirm live. Different numbering from object.play_mode. Do not subscribe to object.player.playMode itself (untested _BlipValue JSON shape). Suggested extra compare rules: ==0 green (Play), ==4/==5 rgb(178,34,34) (holding).",
    "dimension": "transport",
    "verifierOk": true,
    "verifierProblems": [],
@@ -1977,6 +1977,14 @@
       "variableName": "brightness",
       "value": "$(liveupdate:brightness)+0.05"
      }
+    },
+    {
+     "set": "rotate_left",
+     "actionId": "setToDisguiseNumber",
+     "options": {
+      "variableName": "brightness",
+      "value": "$(liveupdate:brightness)-0.05"
+     }
     }
    ],
    "designerVersion": "r34.0.3",
@@ -2031,6 +2039,14 @@
      "options": {
       "variableName": "brightness",
       "value": "$(liveupdate:brightness)-0.05"
+     }
+    },
+    {
+     "set": "rotate_right",
+     "actionId": "setToDisguiseNumber",
+     "options": {
+      "variableName": "brightness",
+      "value": "$(liveupdate:brightness)+0.05"
      }
     }
    ],
@@ -2223,10 +2239,18 @@
       "variableName": "volume",
       "value": "$(liveupdate:volume)+0.05"
      }
+    },
+    {
+     "set": "rotate_left",
+     "actionId": "setToDisguiseNumber",
+     "options": {
+      "variableName": "volume",
+      "value": "$(liveupdate:volume)-0.05"
+     }
     }
    ],
    "designerVersion": "r34.0.3",
-   "notes": "No clamp above 1.0 (Designer behaviour untested; Math.min(1, ...) is possible because the module evaluates the value with new Function). Set-semantics caveat as for brightness; REST POST /api/session/transport/volume is the documented command.",
+   "notes": "No clamp above 1.0 (Designer behaviour untested; Math.min(1,...) is possible because the module evaluates the value with new Function). Set-semantics caveat as for brightness; REST POST /api/session/transport/volume is the documented command.",
    "dimension": "transport",
    "verifierOk": true,
    "verifierProblems": [],
@@ -2277,6 +2301,14 @@
      "options": {
       "variableName": "volume",
       "value": "$(liveupdate:volume)-0.05"
+     }
+    },
+    {
+     "set": "rotate_right",
+     "actionId": "setToDisguiseNumber",
+     "options": {
+      "variableName": "volume",
+      "value": "$(liveupdate:volume)+0.05"
      }
     }
    ],
@@ -2520,7 +2552,7 @@
    "homeCategory": "04 Transport State",
    "tier": "normal",
    "name": "Engaged toggle",
-   "purpose": "Toggle engaged on/off with one button (proposed setToDisguiseToggle action; falls back to the separate engage / disengage presets).",
+   "purpose": "Toggle engaged on/off with one button (Toggle Disguise Boolean action action; falls back to the separate engage / disengage presets).",
    "controlKind": "toggle",
    "objectPath": "transportManager:default",
    "propertyPath": "object.engaged",
@@ -2562,7 +2594,7 @@
     "bgcolor": "rgb(0,100,0)"
    },
    "designerVersion": "r34.0.3",
-   "notes": "Requires the proposed setToDisguiseToggle module extension; until it ships, generate the two-step onOff fallback (tr_engage / tr_disengage).",
+   "notes": "Requires the Toggle Disguise Boolean action module extension; until it ships, generate the two-step onOff fallback (tr_engage / tr_disengage).",
    "dimension": "transport",
    "verifierOk": true,
    "verifierProblems": [],
@@ -4509,7 +4541,7 @@
     "lay-enabled",
     "trk-findLayerByName-object"
    ],
-   "notes": "Set via LiveUpdate is not shown verbatim (only key .v is) but the setter exists and the doc says sets are undoable and persistent. Object path chains SuperTrack.findLayerByName (pyi 48138) on the documented track: prefix in the documented chaining style; the exact call is not shown verbatim in any doc. A missing or duplicate layer name is undocumented (None -> path error).",
+   "notes": "Set via LiveUpdate is not shown verbatim (only key.v is) but the setter exists and the doc says sets are undoable and persistent. Object path chains SuperTrack.findLayerByName (pyi 48138) on the documented track: prefix in the documented chaining style; the exact call is not shown verbatim in any doc. A missing or duplicate layer name is undocumented (None -> path error).",
    "homeCategory": "06 Layer Control",
    "dimension": "track_layer",
    "verifierOk": true,
@@ -4590,7 +4622,7 @@
    "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
    "presetId": "lay_enable_toggle",
    "name": "Layer enable toggle",
-   "purpose": "Toggle the layer enable flag (proposed setToDisguiseToggle); green while enabled.",
+   "purpose": "Toggle the layer enable flag (Toggle Disguise Boolean action); green while enabled.",
    "propertyPath": "object.enabled",
    "variableName": "layerEnabled",
    "valueType": "boolean",
@@ -4610,7 +4642,7 @@
     "lay-enabled",
     "trk-findLayerByName-object"
    ],
-   "notes": "Requires the proposed setToDisguiseToggle action; until it exists the generator should emit lay_enable_on / lay_enable_off instead.",
+   "notes": "Requires the Toggle Disguise Boolean action action; until it exists the generator should emit lay_enable_on / lay_enable_off instead.",
    "homeCategory": "06 Layer Control",
    "dimension": "track_layer",
    "verifierOk": true,
@@ -6374,7 +6406,7 @@
     "key-text-s",
     "trk-findLayerByName-object"
    ],
-   "notes": "Field name \"text\" is shown only in the expressions guide; .s presence depends on the runtime key class. A setToDisguiseString write is the obvious follow-up once verified live.",
+   "notes": "Field name \"text\" is shown only in the expressions guide;.s presence depends on the runtime key class. A setToDisguiseString write is the obvious follow-up once verified live.",
    "dimension": "track_layer",
    "verifierOk": true,
    "verifierProblems": [],
@@ -6701,7 +6733,7 @@
    "status": "doc-verified",
    "liveTestPriority": "high",
    "subscriptions": 1,
-   "notes": "GATED: do not include in the shipped preset list until a live test confirms that a LiveUpdate set on object.offset.x is accepted (stage-003 writable=unknown). If it fails, replace with a jsonSet row on object.offset (stage-002, documented partial set) using a literal or a custom-variable value, or request a module-side numeric-nudge-into-JSON extension. Read path documented (projector:projector_1.offset.x).",
+   "notes": "Lead decision: shipped in the normal tier. The Vec.x field has a Python setter (rules §1) and the v1.0.2 module already shipped the same \"Screen X +1 / -1\" write on object.offset.x, so removing it would regress existing users. A scalar set on object.offset.x is not shown in the LiveUpdate documentation (the documented form is a partial JSON set on object.offset, see stg_screen_offset_reset); confirm on a Director before relying on it (live-test priority high). If the scalar set is rejected, replace the action with a JSON set {\"x\": <value>} on object.offset.",
    "dimension": "stage",
    "verifierOk": false,
    "verifierProblems": [
@@ -6771,7 +6803,7 @@
    "status": "doc-verified",
    "liveTestPriority": "high",
    "subscriptions": 1,
-   "notes": "GATED: do not include in the shipped preset list until a live test confirms that a LiveUpdate set on object.offset.x is accepted (stage-003 writable=unknown). If it fails, replace with a jsonSet row on object.offset (stage-002, documented partial set) using a literal or a custom-variable value, or request a module-side numeric-nudge-into-JSON extension. Read path documented (projector:projector_1.offset.x).",
+   "notes": "Lead decision: shipped in the normal tier. The Vec.x field has a Python setter (rules §1) and the v1.0.2 module already shipped the same \"Screen X +1 / -1\" write on object.offset.x, so removing it would regress existing users. A scalar set on object.offset.x is not shown in the LiveUpdate documentation (the documented form is a partial JSON set on object.offset, see stg_screen_offset_reset); confirm on a Director before relying on it (live-test priority high). If the scalar set is rejected, replace the action with a JSON set {\"x\": <value>} on object.offset.",
    "dimension": "stage",
    "verifierOk": false,
    "verifierProblems": [
@@ -7199,7 +7231,7 @@
    "homeCategory": "07 Stage & Screen",
    "tier": "normal",
    "name": "Screen hold toggle",
-   "purpose": "Toggle the per-display Hold with one button (needs the proposed setToDisguiseToggle action).",
+   "purpose": "Toggle the per-display Hold with one button (needs the Toggle Disguise Boolean action action).",
    "controlKind": "toggle",
    "objectPath": "screen2:\"$(liveupdate:selScreen)\"",
    "propertyPath": "object.holdOutput",
@@ -7928,7 +7960,7 @@
    "homeCategory": "07 Stage & Screen",
    "tier": "normal",
    "name": "Projector hold toggle",
-   "purpose": "Toggle the per-display Hold with one button (needs the proposed setToDisguiseToggle action).",
+   "purpose": "Toggle the per-display Hold with one button (needs the Toggle Disguise Boolean action action).",
    "controlKind": "toggle",
    "objectPath": "projector:\"$(liveupdate:selProjector)\"",
    "propertyPath": "object.holdOutput",
@@ -8403,7 +8435,7 @@
    "homeCategory": "07 Stage & Screen",
    "tier": "normal",
    "name": "Display (UID) hold toggle",
-   "purpose": "Toggle the per-display Hold with one button (needs the proposed setToDisguiseToggle action).",
+   "purpose": "Toggle the per-display Hold with one button (needs the Toggle Disguise Boolean action action).",
    "controlKind": "toggle",
    "objectPath": "getByUID($(liveupdate:selScreenUid))",
    "propertyPath": "object.holdOutput",
@@ -8997,7 +9029,7 @@
    "subscriptions": 1,
    "actions": [],
    "designerVersion": "r34.0.3 (pyi r34.0; no ExpressionVariable* change-log entries r30.8-r34.0)",
-   "notes": "Read-only by design: pyi has a defaultFloat setter (d3.pyi:16052) and the official useful-strings snippet writes var.defaultFloat, but no doc shows a LiveUpdate set through a list subscript (only .sequence.key(0).v). After the live test this row becomes the nudge knob (setToDisguiseNumber '$(liveupdate:evFloat)+<step>'). Whether defaultFloat is the LIVE value for device variables (pyi UserName 'Default') also needs confirming. selEvUid must be an unquoted 0x hex literal; selEvIndex a plain integer. IndexError if the index is out of range.",
+   "notes": "Read-only by design: pyi has a defaultFloat setter (d3.pyi:16052) and the official useful-strings snippet writes var.defaultFloat, but no doc shows a LiveUpdate set through a list subscript (only.sequence.key(0).v). After the live test this row becomes the nudge knob (setToDisguiseNumber '$(liveupdate:evFloat)+<step>'). Whether defaultFloat is the LIVE value for device variables (pyi UserName 'Default') also needs confirming. selEvUid must be an unquoted 0x hex literal; selEvIndex a plain integer. IndexError if the index is out of range.",
    "dimension": "exprvars",
    "verifierOk": true,
    "verifierProblems": [
@@ -9238,7 +9270,7 @@
    "subscriptions": 1,
    "actions": [],
    "designerVersion": "r34.0.3 (pyi r34.0)",
-   "notes": "Marginal; valid indices are 0 .. count-1.",
+   "notes": "Marginal; valid indices are 0.. count-1.",
    "dimension": "exprvars",
    "verifierOk": true,
    "verifierProblems": [],
@@ -10291,7 +10323,7 @@
    "subscriptions": 1,
    "designerVersion": "r34.0.3",
    "actions": [],
-   "notes": "Also .priority and .details exist on WorkloadHealth; not shipped as separate rows.",
+   "notes": "Also.priority and.details exist on WorkloadHealth; not shipped as separate rows.",
    "dimension": "renderstream",
    "verifierOk": true,
    "verifierProblems": [],
@@ -10926,7 +10958,7 @@
    "subscriptions": 1,
    "designerVersion": "r34.0.3",
    "actions": [],
-   "notes": "Siblings .detailedStatusString, .isOnline, .ipAddress exist on RenderStreamMachine (not shipped).",
+   "notes": "Siblings.detailedStatusString,.isOnline,.ipAddress exist on RenderStreamMachine (not shipped).",
    "dimension": "renderstream",
    "verifierOk": true,
    "verifierProblems": [],
@@ -11098,7 +11130,7 @@
    "writable": "no",
    "freqClass": "state",
    "freqRationale": "Boolean health flag -> state class. It is a method call that may be re-evaluated per cycle on the Director; keep the 500 ms default, raise to 1000 ms (the candidate's suggestion) if Director load is a concern.",
-   "textTemplate": "Taken over\n${$(liveupdate:machineTakenOver) === true ? 'YES' : $(liveupdate:machineTakenOver) === false ? 'no' : $(liveupdate:machineTakenOver)}",
+   "textTemplate": "`Taken over\\n${$(liveupdate:machineTakenOver) === true ? 'YES' : $(liveupdate:machineTakenOver) === false ? 'no' : $(liveupdate:machineTakenOver)}`",
    "textExpression": true,
    "previewText": "Taken over\nno",
    "bgcolor": "rgb(40,40,43)",
@@ -11141,7 +11173,7 @@
    "range": "true/false",
    "writable": "no",
    "freqClass": "state",
-   "textTemplate": "Failed\n${$(liveupdate:machineFailed) === true ? 'FAILED' : $(liveupdate:machineFailed) === false ? 'ok' : $(liveupdate:machineFailed)}",
+   "textTemplate": "`Failed\\n${$(liveupdate:machineFailed) === true ? 'FAILED' : $(liveupdate:machineFailed) === false ? 'ok' : $(liveupdate:machineFailed)}`",
    "textExpression": true,
    "previewText": "Failed\nok",
    "bgcolor": "rgb(40,40,43)",
@@ -11184,7 +11216,7 @@
    "range": "true/false",
    "writable": "no",
    "freqClass": "state",
-   "textTemplate": "Auto failover\n${$(liveupdate:failoverDisabled) === true ? 'DISABLED' : $(liveupdate:failoverDisabled) === false ? 'enabled' : $(liveupdate:failoverDisabled)}",
+   "textTemplate": "`Auto failover\\n${$(liveupdate:failoverDisabled) === true ? 'DISABLED' : $(liveupdate:failoverDisabled) === false ? 'enabled' : $(liveupdate:failoverDisabled)}`",
    "textExpression": true,
    "previewText": "Auto failover\nenabled",
    "bgcolor": "rgb(40,40,43)",
@@ -11227,7 +11259,7 @@
    "range": "true/false",
    "writable": "no",
    "freqClass": "state",
-   "textTemplate": "Network\n${$(liveupdate:networkConnected) === true ? 'online' : $(liveupdate:networkConnected) === false ? 'OFFLINE' : $(liveupdate:networkConnected)}",
+   "textTemplate": "`Network\\n${$(liveupdate:networkConnected) === true ? 'online' : $(liveupdate:networkConnected) === false ? 'OFFLINE' : $(liveupdate:networkConnected)}`",
    "textExpression": true,
    "previewText": "Network\nonline",
    "bgcolor": "rgb(40,40,43)",
@@ -11308,7 +11340,7 @@
    "range": "true/false",
    "writable": "no",
    "freqClass": "state",
-   "textTemplate": "Active\n${$(liveupdate:machineActive) === true ? 'active' : $(liveupdate:machineActive) === false ? 'INACTIVE' : $(liveupdate:machineActive)}",
+   "textTemplate": "`Active\\n${$(liveupdate:machineActive) === true ? 'active' : $(liveupdate:machineActive) === false ? 'INACTIVE' : $(liveupdate:machineActive)}`",
    "textExpression": true,
    "previewText": "Active\nactive",
    "bgcolor": "rgb(40,40,43)",
@@ -11342,7 +11374,7 @@
    "homeCategory": "10 Failover & d3Net",
    "tier": "normal",
    "name": "Machine role",
-   "purpose": "Shows the machine's d3Net role (Director / Actor / Understudy ...). Read-only on purpose: the setter reconfigures the session.",
+   "purpose": "Shows the machine's d3Net role (Director / Actor / Understudy...). Read-only on purpose: the setter reconfigures the session.",
    "controlKind": "readout",
    "objectPath": "Machine:\"$(liveupdate:selMachine)\"",
    "propertyPath": "object.role",
@@ -11352,7 +11384,7 @@
    "writable": "yes",
    "freqClass": "static",
    "freqRationale": "Enum, but it only changes on session reconfiguration; static (5000 ms) is enough and updates are change-driven anyway.",
-   "textTemplate": "Role\n${$(liveupdate:machineRole) === 3 ? 'Actor' : $(liveupdate:machineRole) === 4 ? 'Understudy' : $(liveupdate:machineRole) === 1 ? 'Director' : $(liveupdate:machineRole) === 2 ? 'Director (non-ded)' : $(liveupdate:machineRole) === 0 ? 'Solo' : $(liveupdate:machineRole) === 5 ? 'Mobile editor' : '?'} (${$(liveupdate:machineRole)})",
+   "textTemplate": "`Role\\n${$(liveupdate:machineRole) === 3 ? 'Actor' : $(liveupdate:machineRole) === 4 ? 'Understudy' : $(liveupdate:machineRole) === 1 ? 'Director' : $(liveupdate:machineRole) === 2 ? 'Director (non-ded)' : $(liveupdate:machineRole) === 0 ? 'Solo' : $(liveupdate:machineRole) === 5 ? 'Mobile editor' : '?'} (${$(liveupdate:machineRole)})`",
    "textExpression": true,
    "previewText": "Role\nActor (3)",
    "bgcolor": "rgb(40,40,43)",
@@ -11424,7 +11456,7 @@
    "designerVersion": "r34.0.3",
    "liveTestPriority": "high",
    "subscriptions": 1,
-   "notes": "Chains the doc-verified Machine.name (fo-13) through the runningAs resource reference, which the LiveUpdate doc documents ('Chaining through resource references') and the candidate itself recommends. TEST FIRST: what runningAs returns when the machine has NOT taken over (self, empty name, or a null resource) - if .name raises, the module marks PATH_ERROR and after 3 strikes unsubscribes/resubscribes in a loop; in that case ship fo_running_as_ref instead.",
+   "notes": "Chains the doc-verified Machine.name (fo-13) through the runningAs resource reference, which the LiveUpdate doc documents ('Chaining through resource references') and the candidate itself recommends. TEST FIRST: what runningAs returns when the machine has NOT taken over (self, empty name, or a null resource) - if.name raises, the module marks PATH_ERROR and after 3 strikes unsubscribes/resubscribes in a loop; in that case ship fo_running_as_ref instead.",
    "dimension": "failover",
    "verifierOk": true,
    "verifierProblems": [
@@ -11447,7 +11479,7 @@
    "range": "list",
    "writable": "yes",
    "freqClass": "static",
-   "textTemplate": "Targets\n${length(jsonparse($(liveupdate:understudyTargets)))}",
+   "textTemplate": "`Targets\\n${length(jsonparse($(liveupdate:understudyTargets)))}`",
    "textExpression": true,
    "previewText": "Targets\n2",
    "bgcolor": "rgb(40,40,43)",
@@ -11648,7 +11680,7 @@
    "range": "true/false",
    "writable": "no",
    "freqClass": "state",
-   "textTemplate": "GUI\n${$(liveupdate:guiVisible) === true ? 'visible' : $(liveupdate:guiVisible) === false ? 'hidden' : $(liveupdate:guiVisible)}",
+   "textTemplate": "`GUI\\n${$(liveupdate:guiVisible) === true ? 'visible' : $(liveupdate:guiVisible) === false ? 'hidden' : $(liveupdate:guiVisible)}`",
    "textExpression": true,
    "previewText": "GUI\nhidden",
    "bgcolor": "rgb(40,40,43)",
@@ -11727,7 +11759,7 @@
    "writable": "no",
    "freqClass": "static",
    "freqRationale": "lead: reset to the class table (vectors/lists are change-driven or static)",
-   "textTemplate": "Health\n${$(liveupdate:machineHealthWorst) === 0 ? 'Ready' : $(liveupdate:machineHealthWorst) === 1 ? 'Warning' : $(liveupdate:machineHealthWorst) === 2 ? 'ERROR' : $(liveupdate:machineHealthWorst) === 3 ? 'Busy' : $(liveupdate:machineHealthWorst) === 4 ? 'OFFLINE' : $(liveupdate:machineHealthWorst) === -1 ? 'not in session' : $(liveupdate:machineHealthWorst)}",
+   "textTemplate": "`Health\\n${$(liveupdate:machineHealthWorst) === 0 ? 'Ready' : $(liveupdate:machineHealthWorst) === 1 ? 'Warning' : $(liveupdate:machineHealthWorst) === 2 ? 'ERROR' : $(liveupdate:machineHealthWorst) === 3 ? 'Busy' : $(liveupdate:machineHealthWorst) === 4 ? 'OFFLINE' : $(liveupdate:machineHealthWorst) === -1 ? 'not in session' : $(liveupdate:machineHealthWorst)}`",
    "textExpression": true,
    "previewText": "Health\nReady",
    "bgcolor": "rgb(70,70,90)",
@@ -11884,7 +11916,7 @@
    "designerVersion": "r34.0.3",
    "liveTestPriority": "high",
    "subscriptions": 1,
-   "notes": "Key test for global-name reachability ('from d3 import *' exposes d3NetManager, state, ... if the LiveUpdate namespace matches the /python/execute one). A NameError decides between the two routes for every other experimental row. subsystem:MonitoringManager is used as the anchor because it is the documented subsystem prefix, so only the global is under test.",
+   "notes": "Key test for global-name reachability ('from d3 import *' exposes d3NetManager, state,... if the LiveUpdate namespace matches the /python/execute one). A NameError decides between the two routes for every other experimental row. subsystem:MonitoringManager is used as the anchor because it is the documented subsystem prefix, so only the global is under test.",
    "dimension": "failover",
    "verifierOk": true,
    "verifierProblems": [],
@@ -11923,7 +11955,7 @@
    "designerVersion": "r34.0.3",
    "liveTestPriority": "high",
    "subscriptions": 1,
-   "notes": "The .name chain is read-only; the underlying director property has a setter (assigns a new Director) and is never written.",
+   "notes": "The.name chain is read-only; the underlying director property has a setter (assigns a new Director) and is never written.",
    "dimension": "failover",
    "verifierOk": true,
    "verifierProblems": [],
@@ -11944,7 +11976,7 @@
    "range": "true/false",
    "writable": "no",
    "freqClass": "state",
-   "textTemplate": "Is director\n${$(liveupdate:isDirector) === true ? 'YES' : $(liveupdate:isDirector) === false ? 'no' : $(liveupdate:isDirector)}",
+   "textTemplate": "`Is director\\n${$(liveupdate:isDirector) === true ? 'YES' : $(liveupdate:isDirector) === false ? 'no' : $(liveupdate:isDirector)}`",
    "textExpression": true,
    "previewText": "Is director\nYES",
    "bgcolor": "rgb(70,70,90)",
@@ -11988,7 +12020,7 @@
    "range": "true/false",
    "writable": "no",
    "freqClass": "state",
-   "textTemplate": "Director mode\n${$(liveupdate:directorMode) === true ? 'on' : $(liveupdate:directorMode) === false ? 'off' : $(liveupdate:directorMode)}",
+   "textTemplate": "`Director mode\\n${$(liveupdate:directorMode) === true ? 'on' : $(liveupdate:directorMode) === false ? 'off' : $(liveupdate:directorMode)}`",
    "textExpression": true,
    "previewText": "Director mode\non",
    "bgcolor": "rgb(70,70,90)",
@@ -12027,7 +12059,7 @@
    "range": "true/false",
    "writable": "no",
    "freqClass": "state",
-   "textTemplate": "Understudy\n${$(liveupdate:understudyMode) === true ? 'yes' : $(liveupdate:understudyMode) === false ? 'no' : $(liveupdate:understudyMode)}",
+   "textTemplate": "`Understudy\\n${$(liveupdate:understudyMode) === true ? 'yes' : $(liveupdate:understudyMode) === false ? 'no' : $(liveupdate:understudyMode)}`",
    "textExpression": true,
    "previewText": "Understudy\nno",
    "bgcolor": "rgb(70,70,90)",
@@ -12068,7 +12100,7 @@
    "range": "true/false",
    "writable": "no",
    "freqClass": "state",
-   "textTemplate": "Solo mode\n${$(liveupdate:soloMode) === true ? 'SOLO' : $(liveupdate:soloMode) === false ? 'session' : $(liveupdate:soloMode)}",
+   "textTemplate": "`Solo mode\\n${$(liveupdate:soloMode) === true ? 'SOLO' : $(liveupdate:soloMode) === false ? 'session' : $(liveupdate:soloMode)}`",
    "textExpression": true,
    "previewText": "Solo mode\nsession",
    "bgcolor": "rgb(70,70,90)",
@@ -12109,7 +12141,7 @@
    "range": "true/false",
    "writable": "no",
    "freqClass": "state",
-   "textTemplate": "Director valid\n${$(liveupdate:hasValidDirector) === true ? 'ok' : $(liveupdate:hasValidDirector) === false ? 'NO DIRECTOR' : $(liveupdate:hasValidDirector)}",
+   "textTemplate": "`Director valid\\n${$(liveupdate:hasValidDirector) === true ? 'ok' : $(liveupdate:hasValidDirector) === false ? 'NO DIRECTOR' : $(liveupdate:hasValidDirector)}`",
    "textExpression": true,
    "previewText": "Director valid\nok",
    "bgcolor": "rgb(70,70,90)",
@@ -12155,7 +12187,7 @@
    "range": "true/false",
    "writable": "no",
    "freqClass": "state",
-   "textTemplate": "Taken over\n${$(liveupdate:localTakenOver) === true ? 'YES' : $(liveupdate:localTakenOver) === false ? 'no' : $(liveupdate:localTakenOver)}",
+   "textTemplate": "`Taken over\\n${$(liveupdate:localTakenOver) === true ? 'YES' : $(liveupdate:localTakenOver) === false ? 'no' : $(liveupdate:localTakenOver)}`",
    "textExpression": true,
    "previewText": "Taken over\nno",
    "bgcolor": "rgb(70,70,90)",
@@ -12589,7 +12621,7 @@
    "designerVersion": "r34.0.3",
    "liveTestPriority": "medium",
    "subscriptions": 1,
-   "notes": "May return a null resource when no understudy covers the Director - check that .name yields '' rather than raising (same PATH_ERROR loop hazard as fo_running_as).",
+   "notes": "May return a null resource when no understudy covers the Director - check that.name yields '' rather than raising (same PATH_ERROR loop hazard as fo_running_as).",
    "dimension": "failover",
    "verifierOk": true,
    "verifierProblems": [],
@@ -12610,7 +12642,7 @@
    "range": "0 = disabled; units undocumented (seconds assumed)",
    "writable": "yes",
    "freqClass": "state",
-   "textTemplate": "Failover t/o\n${$(liveupdate:failoverTimeout) === 0 ? 'OFF (0)' : $(liveupdate:failoverTimeout)}",
+   "textTemplate": "`Failover t/o\\n${$(liveupdate:failoverTimeout) === 0 ? 'OFF (0)' : $(liveupdate:failoverTimeout)}`",
    "textExpression": true,
    "previewText": "Failover t/o\n10",
    "bgcolor": "rgb(70,70,90)",
@@ -12653,7 +12685,7 @@
    "range": "true/false",
    "writable": "no",
    "freqClass": "state",
-   "textTemplate": "Taken over\n${$(liveupdate:hostTakenOver) === true ? 'YES' : $(liveupdate:hostTakenOver) === false ? 'no' : $(liveupdate:hostTakenOver)}",
+   "textTemplate": "`Taken over\\n${$(liveupdate:hostTakenOver) === true ? 'YES' : $(liveupdate:hostTakenOver) === false ? 'no' : $(liveupdate:hostTakenOver)}`",
    "textExpression": true,
    "previewText": "Taken over\nno",
    "bgcolor": "rgb(70,70,90)",
@@ -12696,7 +12728,7 @@
    "range": "",
    "writable": "no",
    "freqClass": "static",
-   "textTemplate": "d3Net uid\n${jsonparse($(liveupdate:d3NetManagerRef)).uid}",
+   "textTemplate": "`d3Net uid\\n${jsonparse($(liveupdate:d3NetManagerRef)).uid}`",
    "textExpression": true,
    "previewText": "d3Net uid\n0x0123456789abcdef",
    "bgcolor": "rgb(70,70,90)",
@@ -12734,7 +12766,7 @@
    "range": "true/false",
    "writable": "yes",
    "freqClass": "state",
-   "textTemplate": "Locked to dir\n${$(liveupdate:lockedToDirector) === true ? 'locked' : $(liveupdate:lockedToDirector) === false ? 'free' : $(liveupdate:lockedToDirector)}",
+   "textTemplate": "`Locked to dir\\n${$(liveupdate:lockedToDirector) === true ? 'locked' : $(liveupdate:lockedToDirector) === false ? 'free' : $(liveupdate:lockedToDirector)}`",
    "textExpression": true,
    "previewText": "Locked to dir\nlocked",
    "bgcolor": "rgb(70,70,90)",
@@ -12984,7 +13016,7 @@
    "range": "true/false",
    "writable": "no",
    "freqClass": "state",
-   "textTemplate": "In show\n${$(liveupdate:isInShow) === true ? 'YES' : $(liveupdate:isInShow) === false ? 'no' : $(liveupdate:isInShow)}",
+   "textTemplate": "`In show\\n${$(liveupdate:isInShow) === true ? 'YES' : $(liveupdate:isInShow) === false ? 'no' : $(liveupdate:isInShow)}`",
    "textExpression": true,
    "previewText": "In show\nno",
    "bgcolor": "rgb(70,70,90)",
@@ -13379,7 +13411,7 @@
    "homeCategory": "11 Templates",
    "tier": "normal",
    "name": "Toggle Boolean",
-   "purpose": "Generic toggle for a boolean property using the proposed setToDisguiseToggle action; until that extension is approved the generator must ship the onOff pair in fallbackIds instead.",
+   "purpose": "Generic toggle for a boolean property using the Toggle Disguise Boolean action action; until that extension is approved the generator must ship the onOff pair in fallbackIds instead.",
    "controlKind": "toggle",
    "objectPath": "<OBJECT_PATH>",
    "propertyPath": "object.<PROPERTY_PATH>",
@@ -13670,7 +13702,7 @@
    "category": "07 Stage & Screen",
    "homeCategory": "07 Stage & Screen",
    "name": "Display (UID) render layer",
-   "purpose": "Render layer of any display addressed by UID (0 Off stage, 1 On stage, 2 Frontplate, 3 Backplate ...).",
+   "purpose": "Render layer of any display addressed by UID (0 Off stage, 1 On stage, 2 Frontplate, 3 Backplate...).",
    "objectPath": "getByUID($(liveupdate:selScreenUid))",
    "propertyPath": "object.renderLayer",
    "variableName": "uidRenderLayer",
@@ -14056,21 +14088,21 @@
    "presetId": "monl_setup",
    "category": "02 Monitoring Local",
    "name": "Setup: local monitors",
-   "text": "Local monitors need NO selection variable(s) - every preset subscribes to subsystem:MonitoringManager.findLocalMonitor(...) on the Director Companion is connected to.\n\nShown: FPS (latest, 10-sample and 60-sample average), GPU profiler frame time (Total, Compositor, GUI, Render Everything, DMX, Video Upload, Capture Upload) in ms, CPU Total (unit ms per help site, confirm live), GPU memory (MB), Designer process memory (MB), the 'Machine' health monitor percentages (CPU/GPU time, CPU/GPU memory, Disk - source: disguise's official Grafana dashboard, verify on r34.0.3), Disk read/write MB/s (Grafana source; the developer guide says Disk over LiveUpdate is still in development, DSOF-20732) and the global graphs-paused flag.\n\nUpdate rate: monitoring class (default 1000 ms) for values, state class (500 ms) for the paused flag. Never set 0 - monitors push every frame. Colour rules assume a 60 Hz project: red when FPS falls 10 below (latest) or 5 below (averages), GPU Total >= 17 ms, Machine % >= 80.",
+   "text": "Local monitors need no selection: every preset subscribes to subsystem:MonitoringManager.findLocalMonitor(...) on the Director Companion is connected to.\n\nShown: FPS (latest, 10-sample and 60-sample average), GPU profiler frame time (Total, Compositor, GUI, Render Everything, DMX, Video Upload, Capture Upload) in ms, CPU Total (unit ms per the help site, confirm live), GPU memory (MB), Designer process memory (MB) and the \"Machine\" health monitor percentages (CPU/GPU time, CPU/GPU memory, Disk; source: disguise's official Grafana dashboard, verify on r34).\n\nExperimental (99): Disk read/write MB/s (the developer guide says Disk over LiveUpdate is still in development), monitor and series name discovery.\n\nUpdate rate: monitoring class (default 1000 ms). Never set 0: monitors push every frame. Colour rules assume a 60 Hz project: red when FPS falls 10 below (latest) or 5 below (averages), GPU Total >= 17 ms, Machine % >= 80.",
    "dimension": "monitoring"
   },
   {
    "presetId": "monr_setup",
    "category": "03 Monitoring Remote",
    "name": "Setup: remote monitors",
-   "text": "Create these selection variables before using remote presets:\n- selHost = hostname of the remote Designer machine WITHOUT the ':d3' suffix (the presets append ':d3', e.g. selHost = ACTOR01 -> \"ACTOR01:d3\"). Hostname case sensitivity is undocumented - copy it exactly as shown in d3Net / the Remote nodes preset.\n- selMachine = the Machine resource name as shown in Designer (used for Machine:\"...\" identity lookups).\n\nShown: remote FPS (latest and 10-sample average), whether that remote fps graph has expired (stopped receiving data), the resolved node name string, the list of remote nodes the MonitoringManager knows (discovery aid for selHost) and Machine.nodeName for the selected machine.\n\nOpen points: only 'fps' is documented as a remote monitor name; whether the Director must first mark the remote graph in use (MonitoringManager.useMonitorByName) is untested. A wrong selHost produces LiveUpdate errors and, until the module guard lands, repeated re-subscribe attempts.",
+   "text": "Set the selection selHost to the hostname of the remote Designer machine WITHOUT the \":d3\" suffix (the presets append it, e.g. selHost = ACTOR01 -> \"ACTOR01:d3\"). Hostname case sensitivity is undocumented: copy it exactly as shown in d3Net / the \"Remote nodes list\" preset.\n\nShown: remote FPS (latest and 10-sample average), whether that remote fps graph has expired (stopped receiving data) and the list of remote nodes the MonitoringManager knows (discovery aid for selHost).\n\nExperimental (99): remote GPU/CPU/memory monitors and per-node monitor names.\n\nOpen points: only \"fps\" is documented as a remote monitor name; whether the Director must first mark the remote graph in use (MonitoringManager.useMonitorByName) is untested. A wrong selHost produces a LiveUpdate error; the module backs off before retrying.",
    "dimension": "monitoring"
   },
   {
    "presetId": "tr_setup",
    "category": "04 Transport State",
    "name": "Transport State: setup",
-   "text": "TRANSPORT STATE - SETUP\nObject path for every preset in this category: transportManager:default (Designer's default transport manager; no selection variable(s) needed). If your transport manager is renamed, use the experimental 'Playhead (named transport)' row with selection variable(s) selTransport = the transport manager name.\nReadouts: playhead in BEATS (equals seconds only at 60 bpm), play mode string and state enum (0 Play, 1 PlaySection, 2 LoopSection, 3 Stop, 4 HoldSection, 5 HoldEnd), playing / stopped / holding, play-to-end and loop-section flags, track loaded, speed (r34.0+), master brightness and volume, engaged, current track name and resource ref, section count, chase status and raw TC status, pre-roll seconds, TC source, incoming timecode, TC source status, set list, transport name.\nControls: brightness and volume +/-0.05 nudges (rotary supported) plus FULL / ZERO sets, ENGAGE / DISENGAGE (and a proposed toggle). No clamp is applied: a nudge past 1.0 or below 0.0 is sent as-is. LiveUpdate sets are undoable Designer edits; whether they propagate to actors like a TransportCommand is untested - verify before a show. Play / stop / next section / go-to are NOT available over LiveUpdate (REST POST /api/session/transport/* only).\nCaveats: rows under object.timecode.* fail on projects without a timecode source (the module unsubscribes after 3 path errors); play-mode strings are not documented, capture them live before building compare feedbacks.\nExperimental (99 Experimental > Transport State): seconds / timecode conversions (trackposition, timecodeposition), free-running flag, bpm, section index / current name / next name / elapsed / remaining, TC source name, set-list track names, active layer count, subsystem:GuiSystem playhead, named transport playhead.",
+   "text": "Object path for every preset in this category: transportManager:default (Designer's default transport manager; no selection needed). Readouts: playhead in beats (equals seconds at 60 bpm), play mode as string and as state enum, playing / stopped / holding flags, play-to-end and loop-section modes, track loaded, playback speed, current track name and length, section count, timecode chase and source status strings, incoming timecode and pre-roll countdown. Controls: master brightness and volume (readout, +/-5 % nudges with rotary support, FULL / ZERO / MUTE), ENGAGE / DISENGAGE and a one-button Engaged toggle (Toggle Disguise Boolean action). Values with state colours use the LiveUpdate Compare feedback. Transport commands (play, stop, cue, section navigation) are not available over LiveUpdate: pair this module with companion-module-disguise-osc or the REST Transport API.\n\nExperimental (99): seconds / timecode conversions, section names, section elapsed and remaining (in beats), BPM at playhead, set-list track names.",
    "dimension": "transport"
   },
   {
@@ -14105,7 +14137,7 @@
    "presetId": "rs_setup",
    "category": "09 RenderStream",
    "name": "RenderStream setup",
-   "text": "RenderStream presets read subsystem:RenderStreamSystem (cluster/instance health, per-node flags, receive statuses, active latency) and Machine takeover. Create these selection variables first: selWorkload = workload ID as a Python int - copy it from the Cluster Workload widget ('Copy UID') or from REST GET /api/session/renderstream/layers then GET /api/session/renderstream/layerstatus?uid=<layer uid> (workload.uid); if the copied value is hex, enter it as 0x... ; selInstance = zero-based instance index inside the workload (0 = first render node); selMachine = render node / machine name exactly as shown in the Cluster Workload widget Instances > Machine column. The 'RS Workload IDs (discovery)' preset lists the ids of running workloads without REST. Experimental layer-route presets (99 Experimental) also need selTrack (track name) and selRsLayer (zero-based index of the RenderStream layer among the track's RenderStream leaf layers). All RenderStream rows are read-only; workload start/stop/restart is only available through the REST session API, not LiveUpdate. While a workload is stopped, per-instance rows return an error - see open questions about resubscribe storms.",
+   "text": "RenderStream presets read subsystem:RenderStreamSystem (cluster/instance health, per-node flags, receive statuses, active latency) and Machine takeover. Create these selection variables first: selWorkload = workload ID as a Python int - copy it from the Cluster Workload widget ('Copy UID') or from REST GET /api/session/renderstream/layers then GET /api/session/renderstream/layerstatus?uid=<layer uid> (workload.uid); if the copied value is hex, enter it as 0x...; selInstance = zero-based instance index inside the workload (0 = first render node); selMachine = render node / machine name exactly as shown in the Cluster Workload widget Instances > Machine column. The 'RS Workload IDs (discovery)' preset lists the ids of running workloads without REST. Experimental layer-route presets (99 Experimental) also need selTrack (track name) and selRsLayer (zero-based index of the RenderStream layer among the track's RenderStream leaf layers). All RenderStream rows are read-only; workload start/stop/restart is only available through the REST session API, not LiveUpdate. While a workload is stopped, per-instance rows return an error - see open questions about resubscribe storms.",
    "dimension": "renderstream"
   },
   {
@@ -14119,7 +14151,7 @@
    "presetId": "conn_setup",
    "category": "01 Connection",
    "name": "Setup: selections & settings",
-   "text": "LiveUpdate can READ and SET Designer properties; it cannot issue transport commands (play, stop, cue, section navigation). Pair this module with companion-module-disguise-osc or the REST Transport API for commands.\n\nPresets address show objects through the module's own selection variables ($(liveupdate:selTrack), $(liveupdate:selScreen), ...). Set them once in the connection settings (section \"Selections\") or from a button with the \"Set selection\" action; every preset that uses a selection re-subscribes automatically when it changes. Normal-tier selections: selBeat = a track beat as a number, e.g. 32; selEvIndex = 0-based row index of the variable inside the device (unquoted integer); selEvUid = UID of the Expression Variables device, hex with 0x prefix; selHost = hostname of the remote machine WITHOUT the :d3 suffix (the presets append it); selInstance = 0-based RenderStream instance index (unquoted integer); selLayer = layer name inside d3_track, e.g. Video 1; selLayerIndex = 0-based leaf-layer index (unquoted integer) for the index-based probes; selMachine = Machine resource name exactly as listed in d3Net Manager (the same string is used for remote node lookups and RenderStream machine names; confirm on your Director); selProjector = projector name; selScreen = Surface (screen2) name; selScreenUid = UID of any display, hex with 0x prefix (right-click the editor title bar > Copy UID); selSection = 0-based section index (unquoted integer); selTrack = track name as shown in Designer, e.g. Track 1 (quoted by the paths); selWorkload = RenderStream workload id as an unquoted integer (REST GET /api/session/renderstream/layerstatus or the Cluster Workload widget > Copy UID).\n\nExperimental presets (category 99, names prefixed [EXP]) are hidden until the connection setting \"Show experimental presets\" is on; they use: selDmxScreen = DMX screen name; selEvDevice = Expression Variables device name (file name part of objects/ExpressionVariablesDevice/<name>.apx); selEvLayer = Expression Variables layer name (module: prefix); selEvName = expression variable name, case-sensitive; selLedScreen = LED screen name; selRsLayer = 0-based index among the track's RenderStream leaf layers; selStageUid = Stage UID, hex with 0x prefix; selTransport = transport manager name other than default.\n\nUpdate intervals are prefilled from the connection settings (Monitoring / Playhead / State / Static) and can be edited per button.",
+   "text": "LiveUpdate can READ and SET Designer properties; it cannot issue transport commands (play, stop, cue, section navigation). Pair this module with companion-module-disguise-osc or the REST Transport API for commands. Presets address show objects through the module's own selection variables ($(liveupdate:selTrack), $(liveupdate:selScreen),...). Set them once in the connection settings (section \"Selections\") or from a button with the \"Set selection\" action; every preset that uses a selection re-subscribes automatically when it changes. Normal-tier selections: selBeat = a track beat as a number, e.g. 32; selEvIndex = 0-based row index of the variable inside the device (unquoted integer); selEvUid = UID of the Expression Variables device, hex with 0x prefix; selHost = hostname of the remote machine WITHOUT the:d3 suffix (the presets append it); selInstance = 0-based RenderStream instance index (unquoted integer); selLayer = layer name inside the selected track (selTrack), e.g. Video 1; selLayerIndex = 0-based leaf-layer index (unquoted integer) for the index-based probes; selMachine = Machine resource name exactly as listed in d3Net Manager (the same string is used for remote node lookups and RenderStream machine names; confirm on your Director); selProjector = projector name; selScreen = Surface (screen2) name; selScreenUid = UID of any display, hex with 0x prefix (right-click the editor title bar > Copy UID); selSection = 0-based section index (unquoted integer); selTrack = track name as shown in Designer, e.g. Track 1 (quoted by the paths); selWorkload = RenderStream workload id as an unquoted integer (REST GET /api/session/renderstream/layerstatus or the Cluster Workload widget > Copy UID). Experimental presets (category 99, names prefixed [EXP]) are hidden until the connection setting \"Show experimental presets\" is on; they use: selDmxScreen = DMX screen name; selEvDevice = Expression Variables device name (file name part of objects/ExpressionVariablesDevice/<name>.apx); selEvLayer = Expression Variables layer name (module: prefix); selEvName = expression variable name, case-sensitive; selLedScreen = LED screen name; selRsLayer = 0-based index among the track's RenderStream leaf layers; selStageUid = Stage UID, hex with 0x prefix; selTransport = transport manager name other than default. Update intervals are prefilled from the connection settings (Monitoring / Playhead / State / Static) and can be edited per button.",
    "dimension": "connection_templates"
   },
   {
@@ -14271,7 +14303,9 @@
   "add ev_uid_description",
   "add ev_uid_float_up",
   "add ev_uid_float_down",
-  "add fo_network_adaptors"
+  "add fo_network_adaptors",
+  "keep stg_screen_offset_x_up / stg_screen_offset_x_down in the normal tier (Vec.x setter + v1.0.2 precedent); live-test priority high; fall back to a JSON set on object.offset if the scalar set is rejected",
+  "review fixes: failover expression texts wrapped as template literals; transport brightness/volume nudges bind both rotary directions; stale Phase-1 wording (proposed toggle/compare, d3_* custom variables, \"until the guard lands\") replaced"
  ],
  "issues": [],
  "perDim": [

@@ -10,7 +10,8 @@ or the Designer REST Transport API. This module gives you the state readouts and
 around those commands; the two modules are meant to sit on the same page (see *Using with the OSC
 module* below).
 
-Tested against Designer r34. Requires Companion 4.1 or newer.
+Object paths are verified against the Designer r34 LiveUpdate documentation and Python API stubs
+(d3.pyi r34.0); live verification on a Director is pending. Requires Companion 4.1 or newer.
 
 ## Configuration
 
@@ -27,7 +28,9 @@ Tested against Designer r34. Requires Companion 4.1 or newer.
   path is not documented for LiveUpdate, see *Experimental presets*). Off by default.
 - **Monitoring / Playhead / State / Static interval (ms)**: the update intervals written into the
   presets when you place them (defaults 1000 / 250 / 500 / 5000). A placed button keeps its own
-  value and can be edited per feedback. `0` means "every frame" and is not recommended for monitors.
+  value and can be edited per feedback; editing it re-subscribes. Buttons that share one property
+  share one subscription, so the interval of the first placed button applies to all of them. `0`
+  means "every frame" and is not recommended for monitors.
 
 ### Selections
 
@@ -58,8 +61,12 @@ Experimental presets use eight more selections (`selTransport`, `selLedScreen`, 
 `selStageUid`, `selEvDevice`, `selEvName`, `selEvLayer`, `selRsLayer`); they only appear in the
 settings when experimental presets are enabled.
 
-Names are used verbatim (case-sensitive) inside quotes; indices and ids are unquoted numbers. While
-a selection is empty the presets that depend on it show `$NA` and do not subscribe.
+Names are used verbatim (case-sensitive) inside quotes and must not contain quotes, backslashes or
+line breaks; hostnames allow letters, digits, `.`, `_` and `-`; indices are plain decimal integers
+(no leading zero); UIDs and workload ids are decimal or `0x` hex integers. Invalid values are
+rejected with a log message. While a selection is empty the presets that depend on it show `$NA`
+and do not subscribe. The variable names `sel...` and `connection_status` are reserved for the
+module and cannot be used as LiveUpdate Variable names.
 
 ## Quick start
 
@@ -112,7 +119,7 @@ _203 presets ship by default; 130 experimental presets appear when "Show experim
 
 ### 01 Connection
 
-> LiveUpdate can READ and SET Designer properties; it cannot issue transport commands (play, stop, cue, section navigation). Pair this module with companion-module-disguise-osc or the REST Transport API for commands.  Presets address show objects through the module's own selection variables ($(liveupdate:selTrack), $(liveupdate:selScreen), ...). Set them once in the connection settings (section "Selections") or from a button with the "Set selection" action; every preset that uses a selection re-subscribes automatically when it changes. Normal-tier selections: selBeat = a track beat as a number, e.g. 32; selEvIndex = 0-based row index of the variable inside the device (unquoted integer); selEvUid = UID of the Expression Variables device, hex with 0x prefix; selHost = hostname of the remote machine WITHOUT the :d3 suffix (the presets append it); selInstance = 0-based RenderStream instance index (unquoted integer); selLayer = layer name inside d3_track, e.g. Video 1; selLayerIndex = 0-based leaf-layer index (unquoted integer) for the index-based probes; selMachine = Machine resource name exactly as listed in d3Net Manager (the same string is used for remote node lookups and RenderStream machine names; confirm on your Director); selProjector = projector name; selScreen = Surface (screen2) name; selScreenUid = UID of any display, hex with 0x prefix (right-click the editor title bar > Copy UID); selSection = 0-based section index (unquoted integer); selTrack = track name as shown in Designer, e.g. Track 1 (quoted by the paths); selWorkload = RenderStream workload id as an unquoted integer (REST GET /api/session/renderstream/layerstatus or the Cluster Workload widget > Copy UID).  Experimental presets (category 99, names prefixed [EXP]) are hidden until the connection setting "Show experimental presets" is on; they use: selDmxScreen = DMX screen name; selEvDevice = Expression Variables device name (file name part of objects/ExpressionVariablesDevice/<name>.apx); selEvLayer = Expression Variables layer name (module: prefix); selEvName = expression variable name, case-sensitive; selLedScreen = LED screen name; selRsLayer = 0-based index among the track's RenderStream leaf layers; selStageUid = Stage UID, hex with 0x prefix; selTransport = transport manager name other than default.  Update intervals are prefilled from the connection settings (Monitoring / Playhead / State / Static) and can be edited per button.
+> LiveUpdate can READ and SET Designer properties; it cannot issue transport commands (play, stop, cue, section navigation). Pair this module with companion-module-disguise-osc or the REST Transport API for commands. Presets address show objects through the module's own selection variables ($(liveupdate:selTrack), $(liveupdate:selScreen),...). Set them once in the connection settings (section "Selections") or from a button with the "Set selection" action; every preset that uses a selection re-subscribes automatically when it changes. Normal-tier selections: selBeat = a track beat as a number, e.g. 32; selEvIndex = 0-based row index of the variable inside the device (unquoted integer); selEvUid = UID of the Expression Variables device, hex with 0x prefix; selHost = hostname of the remote machine WITHOUT the:d3 suffix (the presets append it); selInstance = 0-based RenderStream instance index (unquoted integer); selLayer = layer name inside the selected track (selTrack), e.g. Video 1; selLayerIndex = 0-based leaf-layer index (unquoted integer) for the index-based probes; selMachine = Machine resource name exactly as listed in d3Net Manager (the same string is used for remote node lookups and RenderStream machine names; confirm on your Director); selProjector = projector name; selScreen = Surface (screen2) name; selScreenUid = UID of any display, hex with 0x prefix (right-click the editor title bar > Copy UID); selSection = 0-based section index (unquoted integer); selTrack = track name as shown in Designer, e.g. Track 1 (quoted by the paths); selWorkload = RenderStream workload id as an unquoted integer (REST GET /api/session/renderstream/layerstatus or the Cluster Workload widget > Copy UID). Experimental presets (category 99, names prefixed [EXP]) are hidden until the connection setting "Show experimental presets" is on; they use: selDmxScreen = DMX screen name; selEvDevice = Expression Variables device name (file name part of objects/ExpressionVariablesDevice/<name>.apx); selEvLayer = Expression Variables layer name (module: prefix); selEvName = expression variable name, case-sensitive; selLedScreen = LED screen name; selRsLayer = 0-based index among the track's RenderStream leaf layers; selStageUid = Stage UID, hex with 0x prefix; selTransport = transport manager name other than default. Update intervals are prefilled from the connection settings (Monitoring / Playhead / State / Static) and can be edited per button.
 
 | Preset | What it does | Object path | Property path | Variable | Kind |
 |---|---|---|---|---|---|
@@ -120,7 +127,7 @@ _203 presets ship by default; 130 experimental presets appear when "Show experim
 
 ### 02 Monitoring Local
 
-> Local monitors need NO selection variable(s) - every preset subscribes to subsystem:MonitoringManager.findLocalMonitor(...) on the Director Companion is connected to.  Shown: FPS (latest, 10-sample and 60-sample average), GPU profiler frame time (Total, Compositor, GUI, Render Everything, DMX, Video Upload, Capture Upload) in ms, CPU Total (unit ms per help site, confirm live), GPU memory (MB), Designer process memory (MB), the 'Machine' health monitor percentages (CPU/GPU time, CPU/GPU memory, Disk - source: disguise's official Grafana dashboard, verify on r34.0.3), Disk read/write MB/s (Grafana source; the developer guide says Disk over LiveUpdate is still in development, DSOF-20732) and the global graphs-paused flag.  Update rate: monitoring class (default 1000 ms) for values, state class (500 ms) for the paused flag. Never set 0 - monitors push every frame. Colour rules assume a 60 Hz project: red when FPS falls 10 below (latest) or 5 below (averages), GPU Total >= 17 ms, Machine % >= 80.
+> Local monitors need no selection: every preset subscribes to subsystem:MonitoringManager.findLocalMonitor(...) on the Director Companion is connected to.  Shown: FPS (latest, 10-sample and 60-sample average), GPU profiler frame time (Total, Compositor, GUI, Render Everything, DMX, Video Upload, Capture Upload) in ms, CPU Total (unit ms per the help site, confirm live), GPU memory (MB), Designer process memory (MB) and the "Machine" health monitor percentages (CPU/GPU time, CPU/GPU memory, Disk; source: disguise's official Grafana dashboard, verify on r34).  Experimental (99): Disk read/write MB/s (the developer guide says Disk over LiveUpdate is still in development), monitor and series name discovery.  Update rate: monitoring class (default 1000 ms). Never set 0: monitors push every frame. Colour rules assume a 60 Hz project: red when FPS falls 10 below (latest) or 5 below (averages), GPU Total >= 17 ms, Machine % >= 80.
 
 | Preset | What it does | Object path | Property path | Variable | Kind |
 |---|---|---|---|---|---|
@@ -145,7 +152,7 @@ _203 presets ship by default; 130 experimental presets appear when "Show experim
 
 ### 03 Monitoring Remote
 
-> Create these selection variables before using remote presets: - selHost = hostname of the remote Designer machine WITHOUT the ':d3' suffix (the presets append ':d3', e.g. selHost = ACTOR01 -> "ACTOR01:d3"). Hostname case sensitivity is undocumented - copy it exactly as shown in d3Net / the Remote nodes preset. - selMachine = the Machine resource name as shown in Designer (used for Machine:"..." identity lookups).  Shown: remote FPS (latest and 10-sample average), whether that remote fps graph has expired (stopped receiving data), the resolved node name string, the list of remote nodes the MonitoringManager knows (discovery aid for selHost) and Machine.nodeName for the selected machine.  Open points: only 'fps' is documented as a remote monitor name; whether the Director must first mark the remote graph in use (MonitoringManager.useMonitorByName) is untested. A wrong selHost produces LiveUpdate errors and, until the module guard lands, repeated re-subscribe attempts.
+> Set the selection selHost to the hostname of the remote Designer machine WITHOUT the ":d3" suffix (the presets append it, e.g. selHost = ACTOR01 -> "ACTOR01:d3"). Hostname case sensitivity is undocumented: copy it exactly as shown in d3Net / the "Remote nodes list" preset.  Shown: remote FPS (latest and 10-sample average), whether that remote fps graph has expired (stopped receiving data) and the list of remote nodes the MonitoringManager knows (discovery aid for selHost).  Experimental (99): remote GPU/CPU/memory monitors and per-node monitor names.  Open points: only "fps" is documented as a remote monitor name; whether the Director must first mark the remote graph in use (MonitoringManager.useMonitorByName) is untested. A wrong selHost produces a LiveUpdate error; the module backs off before retrying.
 
 | Preset | What it does | Object path | Property path | Variable | Kind |
 |---|---|---|---|---|---|
@@ -156,7 +163,7 @@ _203 presets ship by default; 130 experimental presets appear when "Show experim
 
 ### 04 Transport State
 
-> TRANSPORT STATE - SETUP Object path for every preset in this category: transportManager:default (Designer's default transport manager; no selection variable(s) needed). If your transport manager is renamed, use the experimental 'Playhead (named transport)' row with selection variable(s) selTransport = the transport manager name. Readouts: playhead in BEATS (equals seconds only at 60 bpm), play mode string and state enum (0 Play, 1 PlaySection, 2 LoopSection, 3 Stop, 4 HoldSection, 5 HoldEnd), playing / stopped / holding, play-to-end and loop-section flags, track loaded, speed (r34.0+), master brightness and volume, engaged, current track name and resource ref, section count, chase status and raw TC status, pre-roll seconds, TC source, incoming timecode, TC source status, set list, transport name. Controls: brightness and volume +/-0.05 nudges (rotary supported) plus FULL / ZERO sets, ENGAGE / DISENGAGE (and a proposed toggle). No clamp is applied: a nudge past 1.0 or below 0.0 is sent as-is. LiveUpdate sets are undoable Designer edits; whether they propagate to actors like a TransportCommand is untested - verify before a show. Play / stop / next section / go-to are NOT available over LiveUpdate (REST POST /api/session/transport/* only). Caveats: rows under object.timecode.* fail on projects without a timecode source (the module unsubscribes after 3 path errors); play-mode strings are not documented, capture them live before building compare feedbacks. Experimental (99 Experimental > Transport State): seconds / timecode conversions (trackposition, timecodeposition), free-running flag, bpm, section index / current name / next name / elapsed / remaining, TC source name, set-list track names, active layer count, subsystem:GuiSystem playhead, named transport playhead.
+> Object path for every preset in this category: transportManager:default (Designer's default transport manager; no selection needed). Readouts: playhead in beats (equals seconds at 60 bpm), play mode as string and as state enum, playing / stopped / holding flags, play-to-end and loop-section modes, track loaded, playback speed, current track name and length, section count, timecode chase and source status strings, incoming timecode and pre-roll countdown. Controls: master brightness and volume (readout, +/-5 % nudges with rotary support, FULL / ZERO / MUTE), ENGAGE / DISENGAGE and a one-button Engaged toggle (Toggle Disguise Boolean action). Values with state colours use the LiveUpdate Compare feedback. Transport commands (play, stop, cue, section navigation) are not available over LiveUpdate: pair this module with companion-module-disguise-osc or the REST Transport API.  Experimental (99): seconds / timecode conversions, section names, section elapsed and remaining (in beats), BPM at playhead, set-list track names.
 
 | Preset | What it does | Object path | Property path | Variable | Kind |
 |---|---|---|---|---|---|
@@ -183,7 +190,7 @@ _203 presets ship by default; 130 experimental presets appear when "Show experim
 | Engaged state | Whether the transport manager honours external (remote) transport control; when disengaged all external control signals are ignored. | `transportManager:default` | `object.engaged` | `engaged` | readout |
 | ENGAGE transport | Set engaged = true (honour external transport control). | `transportManager:default` | `object.engaged` | `engaged` | set on/off |
 | DISENGAGE transport | Set engaged = false (ignore external transport control). | `transportManager:default` | `object.engaged` | `engaged` | set on/off |
-| Engaged toggle | Toggle engaged on/off with one button (proposed setToDisguiseToggle action; falls back to the separate engage / disengage presets). | `transportManager:default` | `object.engaged` | `engaged` | toggle |
+| Engaged toggle | Toggle engaged on/off with one button (Toggle Disguise Boolean action action; falls back to the separate engage / disengage presets). | `transportManager:default` | `object.engaged` | `engaged` | toggle |
 | Current track name | User-visible name of the track currently loaded in the transport - the 'NOW PLAYING' label. Mirrors the OSC module's trackname variable. | `transportManager:default` | `object.track.description` | `trackname` | readout |
 | Section count | Number of sections in the current track (denominator for 'cue 3 / 12' displays). | `transportManager:default` | `object.track.nSections()` | `sectionCount` | readout |
 | Chase status | Timecode / chase status message as shown under the transport manager's timecode readout (after 'Forced' timecode-mode overrides). Usually… | `transportManager:default` | `object.statusString` | `transportStatus` | readout |
@@ -236,7 +243,7 @@ _203 presets ship by default; 130 experimental presets appear when "Show experim
 |---|---|---|---|---|---|
 | Layer enable | Enable the layer (setToDisguiseBoolean true). | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.enabled` | `layerEnabled` | set on/off |
 | Layer disable | Disable the layer (setToDisguiseBoolean false). | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.enabled` | `layerEnabled` | set on/off |
-| Layer enable toggle | Toggle the layer enable flag (proposed setToDisguiseToggle); green while enabled. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.enabled` | `layerEnabled` | toggle |
+| Layer enable toggle | Toggle the layer enable flag (Toggle Disguise Boolean action); green while enabled. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.enabled` | `layerEnabled` | toggle |
 | Layer start +1 beat (knob) | Move the layer start later by one beat; rotary right/left = +/-1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.tStart` | `layerTStart` | nudge (Set to Disguise Number) |
 | Layer start -1 beat | Move the layer start earlier by one beat. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.tStart` | `layerTStart` | nudge (Set to Disguise Number) |
 | Layer length +1 beat (knob) | Lengthen the layer by one beat; rotary right/left = +/-1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.tLength` | `layerTLength` | nudge (Set to Disguise Number) |
@@ -280,7 +287,7 @@ _203 presets ship by default; 130 experimental presets appear when "Show experim
 | Screen hold output | Whether the screen output is frozen (per-display Hold). | `screen2:"$(liveupdate:selScreen)"` | `object.holdOutput` | `screenHoldOutput` | readout |
 | Screen hold ON | Freeze this display output while sequencing continues. | `screen2:"$(liveupdate:selScreen)"` | `object.holdOutput` | `screenHoldOutput` | set on/off |
 | Screen hold OFF | Release the per-display Hold. | `screen2:"$(liveupdate:selScreen)"` | `object.holdOutput` | `screenHoldOutput` | set on/off |
-| Screen hold toggle | Toggle the per-display Hold with one button (needs the proposed setToDisguiseToggle action). | `screen2:"$(liveupdate:selScreen)"` | `object.holdOutput` | `screenHoldOutput` | toggle |
+| Screen hold toggle | Toggle the per-display Hold with one button (needs the Toggle Disguise Boolean action action). | `screen2:"$(liveupdate:selScreen)"` | `object.holdOutput` | `screenHoldOutput` | toggle |
 | Screen render layer | Where the surface renders: Off stage / On stage / Frontplate / Backplate / Set Extension mask / Set Extension addition / Live action volume… | `screen2:"$(liveupdate:selScreen)"` | `object.renderLayer` | `screenRenderLayer` | readout |
 | Screen ON stage | Put the surface back on stage (renderLayer = 1). | `screen2:"$(liveupdate:selScreen)"` | `object.renderLayer` | `screenRenderLayer` | set value |
 | Screen OFF stage | Remove the surface from all outputs (renderLayer = 0). | `screen2:"$(liveupdate:selScreen)"` | `object.renderLayer` | `screenRenderLayer` | set value |
@@ -296,7 +303,7 @@ _203 presets ship by default; 130 experimental presets appear when "Show experim
 | Projector hold output | Whether the projector output is frozen (per-display Hold). | `projector:"$(liveupdate:selProjector)"` | `object.holdOutput` | `projectorHoldOutput` | readout |
 | Projector hold ON | Freeze this display output while sequencing continues. | `projector:"$(liveupdate:selProjector)"` | `object.holdOutput` | `projectorHoldOutput` | set on/off |
 | Projector hold OFF | Release the per-display Hold. | `projector:"$(liveupdate:selProjector)"` | `object.holdOutput` | `projectorHoldOutput` | set on/off |
-| Projector hold toggle | Toggle the per-display Hold with one button (needs the proposed setToDisguiseToggle action). | `projector:"$(liveupdate:selProjector)"` | `object.holdOutput` | `projectorHoldOutput` | toggle |
+| Projector hold toggle | Toggle the per-display Hold with one button (needs the Toggle Disguise Boolean action action). | `projector:"$(liveupdate:selProjector)"` | `object.holdOutput` | `projectorHoldOutput` | toggle |
 | Display (UID) name | Name of the display addressed by UID; confirms that $(liveupdate:selScreenUid) points at the right object. | `getByUID($(liveupdate:selScreenUid))` | `object.description` | `uidName` | readout |
 | Display (UID) master fade | Output brightness of the display addressed by UID (0..1, applied at Feed level, not shown in the visualiser). | `getByUID($(liveupdate:selScreenUid))` | `object.master_fade` | `uidMasterFade` | readout |
 | Display (UID) fade +0.05 | Raise master fade by 0.05 (rotary: right = up, left = down). | `getByUID($(liveupdate:selScreenUid))` | `object.master_fade` | `uidMasterFade` | nudge (Set to Disguise Number) |
@@ -306,8 +313,8 @@ _203 presets ship by default; 130 experimental presets appear when "Show experim
 | Display (UID) hold output | Whether the display addressed by UID is frozen (per-display Hold). | `getByUID($(liveupdate:selScreenUid))` | `object.holdOutput` | `uidHoldOutput` | readout |
 | Display (UID) hold ON | Freeze this display output while sequencing continues. | `getByUID($(liveupdate:selScreenUid))` | `object.holdOutput` | `uidHoldOutput` | set on/off |
 | Display (UID) hold OFF | Release the per-display Hold. | `getByUID($(liveupdate:selScreenUid))` | `object.holdOutput` | `uidHoldOutput` | set on/off |
-| Display (UID) hold toggle | Toggle the per-display Hold with one button (needs the proposed setToDisguiseToggle action). | `getByUID($(liveupdate:selScreenUid))` | `object.holdOutput` | `uidHoldOutput` | toggle |
-| Display (UID) render layer | Render layer of any display addressed by UID (0 Off stage, 1 On stage, 2 Frontplate, 3 Backplate ...). | `getByUID($(liveupdate:selScreenUid))` | `object.renderLayer` | `uidRenderLayer` | readout |
+| Display (UID) hold toggle | Toggle the per-display Hold with one button (needs the Toggle Disguise Boolean action action). | `getByUID($(liveupdate:selScreenUid))` | `object.holdOutput` | `uidHoldOutput` | toggle |
+| Display (UID) render layer | Render layer of any display addressed by UID (0 Off stage, 1 On stage, 2 Frontplate, 3 Backplate...). | `getByUID($(liveupdate:selScreenUid))` | `object.renderLayer` | `uidRenderLayer` | readout |
 | Display (UID) ON stage | Set renderLayer = 1 (On stage) on the UID-addressed display. | `getByUID($(liveupdate:selScreenUid))` | `object.renderLayer` | `uidRenderLayer` | set value |
 | Display (UID) OFF stage | Set renderLayer = 0 (Off stage) on the UID-addressed display. | `getByUID($(liveupdate:selScreenUid))` | `object.renderLayer` | `uidRenderLayer` | set value |
 | Display (UID) in error | Resource health flag (bad, incomplete or not found) of the UID-addressed display. | `getByUID($(liveupdate:selScreenUid))` | `object.isInError` | `uidInError` | readout |
@@ -329,7 +336,7 @@ _203 presets ship by default; 130 experimental presets appear when "Show experim
 
 ### 09 RenderStream
 
-> RenderStream presets read subsystem:RenderStreamSystem (cluster/instance health, per-node flags, receive statuses, active latency) and Machine takeover. Create these selection variables first: selWorkload = workload ID as a Python int - copy it from the Cluster Workload widget ('Copy UID') or from REST GET /api/session/renderstream/layers then GET /api/session/renderstream/layerstatus?uid=<layer uid> (workload.uid); if the copied value is hex, enter it as 0x... ; selInstance = zero-based instance index inside the workload (0 = first render node); selMachine = render node / machine name exactly as shown in the Cluster Workload widget Instances > Machine column. The 'RS Workload IDs (discovery)' preset lists the ids of running workloads without REST. Experimental layer-route presets (99 Experimental) also need selTrack (track name) and selRsLayer (zero-based index of the RenderStream layer among the track's RenderStream leaf layers). All RenderStream rows are read-only; workload start/stop/restart is only available through the REST session API, not LiveUpdate. While a workload is stopped, per-instance rows return an error - see open questions about resubscribe storms.
+> RenderStream presets read subsystem:RenderStreamSystem (cluster/instance health, per-node flags, receive statuses, active latency) and Machine takeover. Create these selection variables first: selWorkload = workload ID as a Python int - copy it from the Cluster Workload widget ('Copy UID') or from REST GET /api/session/renderstream/layers then GET /api/session/renderstream/layerstatus?uid=<layer uid> (workload.uid); if the copied value is hex, enter it as 0x...; selInstance = zero-based instance index inside the workload (0 = first render node); selMachine = render node / machine name exactly as shown in the Cluster Workload widget Instances > Machine column. The 'RS Workload IDs (discovery)' preset lists the ids of running workloads without REST. Experimental layer-route presets (99 Experimental) also need selTrack (track name) and selRsLayer (zero-based index of the RenderStream layer among the track's RenderStream leaf layers). All RenderStream rows are read-only; workload start/stop/restart is only available through the REST session API, not LiveUpdate. While a workload is stopped, per-instance rows return an error - see open questions about resubscribe storms.
 
 | Preset | What it does | Object path | Property path | Variable | Kind |
 |---|---|---|---|---|---|
@@ -362,7 +369,7 @@ _203 presets ship by default; 130 experimental presets appear when "Show experim
 | Network connected | Online indicator: whether the machine is currently connected on the d3Net network. | `Machine:"$(liveupdate:selMachine)"` | `object.networkConnected` | `networkConnected` | readout |
 | Network status code | Raw integer network status of the machine for diagnosis; the enum is not documented, so the number is shown as-is. | `Machine:"$(liveupdate:selMachine)"` | `object.networkStatus` | `networkStatus` | readout |
 | Machine active | Session membership indicator: whether the machine is active in the running session. | `Machine:"$(liveupdate:selMachine)"` | `object.active` | `machineActive` | readout |
-| Machine role | Shows the machine's d3Net role (Director / Actor / Understudy ...). Read-only on purpose: the setter reconfigures the session. | `Machine:"$(liveupdate:selMachine)"` | `object.role` | `machineRole` | readout |
+| Machine role | Shows the machine's d3Net role (Director / Actor / Understudy...). Read-only on purpose: the setter reconfigures the session. | `Machine:"$(liveupdate:selMachine)"` | `object.role` | `machineRole` | readout |
 | Running as | Name of the machine this machine is currently running as - on an Understudy that has taken over, the failed Actor it is impersonating (REST… | `Machine:"$(liveupdate:selMachine)"` | `object.runningAs.name` | `runningAs` | readout |
 | Understudy target count | How many Actors this Understudy is configured to cover (0 = misconfigured understudy). | `Machine:"$(liveupdate:selMachine)"` | `object.targets` | `understudyTargets` | readout |
 | Machine hostname | Network hostname of the machine, to cross-check selMachine against the physical box. | `Machine:"$(liveupdate:selMachine)"` | `object.hostname` | `machineHostname` | readout |
@@ -385,7 +392,7 @@ _203 presets ship by default; 130 experimental presets appear when "Show experim
 | Set String | Generic setter that writes a literal string to the watched property and shows the current value. | `<OBJECT_PATH>` | `object.<PROPERTY_PATH>` | `myValue` | set value |
 | Set Boolean true | Generic enable button: writes true to the watched boolean property. | `<OBJECT_PATH>` | `object.<PROPERTY_PATH>` | `myValue` | set on/off |
 | Set Boolean false | Generic disable button: writes false to the watched boolean property. | `<OBJECT_PATH>` | `object.<PROPERTY_PATH>` | `myValue` | set on/off |
-| Toggle Boolean | Generic toggle for a boolean property using the proposed setToDisguiseToggle action; until that extension is approved the generator must… | `<OBJECT_PATH>` | `object.<PROPERTY_PATH>` | `myValue` | toggle |
+| Toggle Boolean | Generic toggle for a boolean property using the Toggle Disguise Boolean action action; until that extension is approved the generator must… | `<OBJECT_PATH>` | `object.<PROPERTY_PATH>` | `myValue` | toggle |
 | Set JSON {x: 0} | Generic partial-object write: sets only field x of a vector/object property (the Director merges partial JSON) and shows the current x. | `<OBJECT_PATH>` | `object.<PROPERTY_PATH>` | `myValue` | set JSON |
 | Nudge +1 | Generic increment: adds 1 to the current numeric value on press; rotary right +1 / left -1 when rotary actions are enabled. | `<OBJECT_PATH>` | `object.<PROPERTY_PATH>` | `myValue` | nudge (Set to Disguise Number) |
 | Nudge -1 | Generic decrement: subtracts 1 from the current numeric value on press; rotary left -1 / right +1 when rotary actions are enabled. | `<OBJECT_PATH>` | `object.<PROPERTY_PATH>` | `myValue` | nudge (Set to Disguise Number) |
@@ -620,7 +627,10 @@ matches, so button expressions can be swapped between the two:
   prefix, object does not exist). The subscription is retried with a growing back-off (2 s up to
   60 s) until you fix the path.
 - Variable shows `PATH_ERROR` / `PATH_ERROR (unsubscribed)`: the object exists but the property
-  expression fails; after three errors the module unsubscribes and retries with back-off.
+  expression fails; after three errors the module unsubscribes and retries with the same back-off
+  (2 s doubling up to 60 s, reset by the first good value or by editing the feedback).
+- Log says "Selection rejected" or "Selection ignored": the value contains characters that are not
+  allowed for that selection (see *Selections*); the selection stays unset.
 - A control does nothing: the button needs the LiveUpdate Variable feedback with the same variable
   name; check the log for "No LiveUpdate Variable found".
 - Connection closes right after a set: wrong value type for the property, see *Set to Disguise*.

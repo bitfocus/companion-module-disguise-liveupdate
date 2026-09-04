@@ -15,8 +15,18 @@
 - *LiveUpdate Compare* boolean feedback (state colours for any LiveUpdate Variable).
 - *Toggle Disguise Boolean* action.
 - Connection settings for the default preset update intervals (monitoring, playhead, state, static).
-- Guard against unresolved object paths (template placeholders, `$NA`, empty names) and an
-  exponential back-off after failed subscriptions instead of retrying on every value update.
+- Guard against unresolved object paths (template placeholders, `$NA`, empty names or argument
+  slots) and an exponential back-off after failed subscriptions (2 s doubling up to 60 s, with a
+  timer that retries on its own) instead of retrying on every value update.
+- Selection values are validated for the slot they fill (names without quotes or line breaks,
+  plain decimal indices, decimal or `0x` hex ids); unset selections publish `$NA` so presets stay
+  quiet until they are filled in. `sel...` and `connection_status` are reserved variable names.
+- Subscribe requests are de-duplicated while in flight and shared subscriptions are reference
+  counted, so placing many presets or changing a selection sends one request per property and the
+  Director subscription is released only when the last button using it goes away.
+- Every variable owned by a placed LiveUpdate Variable feedback stays defined, so `ERROR` and
+  `PATH_ERROR` indicators reach the button; the Connection OK feedback refreshes on connect and
+  disconnect; editing a feedback's Update Frequency re-subscribes with the new interval.
 - `scripts/gen-presets.mjs` and `scripts/gen-help.mjs` to regenerate the preset table and the HELP
   preset list from the catalog JSON.
 
