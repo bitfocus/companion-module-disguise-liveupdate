@@ -6,7 +6,7 @@ import {
 } from '@companion-module/base'
 import type { DisguiseInstance } from './index'
 import type { LiveUpdateSubscription } from './index'
-import { SELECTIONS } from './selections'
+import { isReservedVariableName, SELECTIONS } from './selections'
 
 export interface DisguiseActionDefinitions extends CompanionActionDefinitions {
 	setToDisguiseString: CompanionActionDefinition
@@ -69,6 +69,21 @@ async function processNumberValue(
 	context: CompanionActionContext,
 	valueStr: string,
 ): Promise<number | null> {
+	// A nudge such as "$(liveupdate:brightness)-0.05" must not fire before the first value has
+	// arrived: the host substitutes an empty string for a variable it has no value for, the
+	// expression collapses to "-0.05" and the Director would receive that as an absolute value.
+	for (const match of valueStr.matchAll(/\$\(liveupdate:([A-Za-z0-9_]+)\)/g)) {
+		const referenced = match[1]
+		if (isReservedVariableName(referenced)) continue
+		const current = instance.getSubscriptionByVariableName(referenced)?.value
+		if (typeof current === 'number' && Number.isFinite(current)) continue
+		instance.log(
+			'warn',
+			`Not writing: '${referenced}' has no numeric value yet (${JSON.stringify(current)}), so '${valueStr}' would be sent as an absolute value`,
+		)
+		return null
+	}
+
 	const parsedValue = await context.parseVariablesInString(valueStr)
 
 	try {
@@ -97,14 +112,15 @@ async function processJSONValue(
 	instance: DisguiseInstance,
 	context: CompanionActionContext,
 	valueStr: string,
-): Promise<any | null> {
+): Promise<any | undefined> {
 	const parsedValue = await context.parseVariablesInString(valueStr)
 
 	try {
+		// undefined marks a parse failure so a deliberate JSON null is still written
 		return JSON.parse(parsedValue)
 	} catch {
 		instance.log('error', `Value is not valid JSON: ${parsedValue} (from: ${valueStr})`)
-		return null
+		return undefined
 	}
 }
 
@@ -239,7 +255,7 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
 				if (!subscription) return
 
 				const value = await processJSONValue(instance, context, valueStr)
-				if (value === null) return
+				if (value === undefined) return
 
 				instance.setProperty(subscription.id, value)
 			},

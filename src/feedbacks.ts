@@ -232,10 +232,17 @@ export function getFeedbackDefinitions(instance: DisguiseInstance): DisguiseFeed
 					isVisible: (options) => options.operator !== 'truthy',
 				},
 			],
+			subscribe: (feedback) => {
+				instance.registerCompareFeedback(feedback.id, String(feedback.options.variableName || ''))
+			},
+			unsubscribe: (feedback) => {
+				instance.registerCompareFeedback(feedback.id, undefined)
+			},
 			callback: (feedback) => {
 				const variableName = String(feedback.options.variableName || '')
 				const operator = String(feedback.options.operator || 'eq') as CompareOperator
 				const expected = String(feedback.options.value ?? '')
+				instance.registerCompareFeedback(feedback.id, variableName)
 				const subscription = instance.getSubscriptionByVariableName(variableName)
 				return compareValues(subscription?.value, operator, expected)
 			},

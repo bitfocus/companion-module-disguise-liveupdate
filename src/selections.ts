@@ -253,6 +253,10 @@ export function validateSelection(id: string, value: string): string | undefined
 	if (!definition) return `unknown selection '${id}'`
 	const trimmed = value.trim()
 	if (trimmed === '') return undefined
+	// Companion resolves a variable reference recursively when the value is used, so a selection
+	// holding one would smuggle unvalidated text into the Python expression of every preset built
+	// on it. The presets already substitute the selection; its value must be literal.
+	if (trimmed.includes('$(')) return `${definition.label}: '${value}' must be a literal value, not a variable reference`
 	const rule = KIND_RULES[definition.kind]
 	if (!rule.pattern.test(trimmed)) return `${definition.label}: '${value}' ${rule.hint}`
 	return undefined

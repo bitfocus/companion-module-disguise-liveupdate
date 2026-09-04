@@ -3,7 +3,9 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { FakeDirector, liveUpdateFeedback, newInstance, settle, tick } from './harness'
+import { FakeDirector, liveUpdateFeedback, loadDist, newInstance, settle, tick } from './harness'
+
+const dist = loadDist()
 
 const TRACK = 'track:"Track 1"'
 
@@ -271,5 +273,98 @@ test('a shared subscription keeps the variable name of the feedback that created
 		host.logs.some((l) => l.level === 'warn' && l.message.includes("'lenA' will receive the values")),
 		'the second feedback is told which name wins',
 	)
+	await inst.destroy()
+})
+
+test('a disconnect replaces every readout with OFFLINE and keeps the variable defined', async () => {
+	const director = new FakeDirector({ valueFor: () => 0.42 })
+	const { inst, host } = await newInstance(director, [
+		liveUpdateFeedback('b', 'transportManager:default', 'object.brightness', 'brightness'),
+	])
+	await settle(50)
+	assert.equal(host.variables.get('brightness'), 0.42)
+
+	director.sock!.drop()
+	await settle(50)
+	assert.ok(host.definedVariables.has('brightness'), 'the variable stays defined while the feedback is placed')
+	assert.equal(host.variables.get('brightness'), 'OFFLINE', 'the stale value is replaced')
+	assert.equal(host.variables.get('connection_status'), 'Disconnected')
+	await inst.destroy()
+})
+
+test('a shared subscription runs at the smallest interval any feedback asks for', async () => {
+	const director = new FakeDirector({ refCount: true, valueFor: () => 1 })
+	const slow = liveUpdateFeedback('slow', TRACK, 'object.lengthInBeats', 'len', 5000)
+	const { inst } = await newInstance(director, [slow])
+	await settle(50)
+	assert.equal(director.subs[0].updateFrequencyMs, 5000)
+
+	inst.updateFeedbacks({ fast: liveUpdateFeedback('fast', TRACK, 'object.lengthInBeats', 'len', 250) })
+	await settle(50)
+	assert.equal(director.count('unsubscribe'), 1, 'the slow subscription is released')
+	assert.equal(director.subs.at(-1)?.updateFrequencyMs, 250, 'and asked again at the faster rate')
+	await inst.destroy()
+})
+
+test('a Director subscription no feedback owns is released', async () => {
+	const director = new FakeDirector({ valueFor: () => 1 })
+	const { inst } = await newInstance(director, [liveUpdateFeedback('a', TRACK, 'object.lengthInBeats', 'len')])
+	await settle(50)
+	const before = director.count('unsubscribe')
+
+	// the Director reports a subscription the module never asked for
+	director.announce([{ id: 999, objectPath: 'track:"Ghost"', propertyPath: 'object.name' }])
+	await settle(50)
+	assert.equal(director.count('unsubscribe'), before + 1, 'the unknown subscription is released')
+	await inst.destroy()
+})
+
+test('an error that names no path fails the only request in flight', async () => {
+	const director = new FakeDirector({ errorFor: () => "Unable to subscribe to object: Name 'Layer' not found" })
+	const { inst, host } = await newInstance(director, [
+		liveUpdateFeedback('e', 'track:"A".getLeafLayers(Layer)[0]', 'object.name', 'layerName'),
+	])
+	await settle(50)
+	assert.equal(host.variables.get('layerName'), 'ERROR')
+	await inst.destroy()
+})
+
+test('a nudge does not write before the first value has arrived', async () => {
+	// the subscription is confirmed but the Director has not sent a value yet
+	const director = new FakeDirector({ valueFor: () => undefined })
+	const { inst, host } = await newInstance(director, [
+		liveUpdateFeedback('n', 'transportManager:default', 'object.brightness', 'brightness'),
+	])
+	await settle(50)
+	const actions = dist.getActionDefinitions(inst)
+	const context = { parseVariablesInString: async (text: string) => text.replace('$(liveupdate:brightness)', '') }
+	await actions.setToDisguiseNumber.callback(
+		{ options: { variableName: 'brightness', value: '$(liveupdate:brightness)-0.05' } },
+		context,
+	)
+	assert.equal(director.count('set'), 0, 'no absolute value is written')
+	assert.ok(host.logs.some((l) => l.message.includes('has no numeric value yet')))
+	await inst.destroy()
+})
+
+test('a variable name that is not a Companion variable id is refused', async () => {
+	const director = new FakeDirector({ valueFor: () => 1 })
+	const { inst, host } = await newInstance(director, [
+		liveUpdateFeedback('bad', TRACK, 'object.lengthInBeats', 'layer brightness'),
+		liveUpdateFeedback('ok', TRACK, 'object.bpm', 'trackBpm'),
+	])
+	await settle(50)
+	assert.equal(director.count('subscribe'), 1, 'only the valid one subscribes')
+	assert.ok(host.logs.some((l) => l.message.includes('is not a valid Companion variable id')))
+	await inst.destroy()
+})
+
+test('setSelection treats an unresolved variable as a clear', async () => {
+	const director = new FakeDirector()
+	const { inst, host } = await newInstance(director)
+	inst.setSelection('selLayerIndex', '3')
+	assert.equal(host.variables.get('selLayerIndex'), '3')
+	inst.setSelection('selLayerIndex', '$NA')
+	assert.equal(host.variables.get('selLayerIndex'), '$NA', 'the numeric selection is cleared, not kept')
 	await inst.destroy()
 })

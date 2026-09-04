@@ -4,6 +4,7 @@ import {
 	runEntrypoint,
 	SomeCompanionConfigField,
 	CompanionStaticUpgradeScript,
+	CompanionVariableValues,
 } from '@companion-module/base'
 import WebSocket from 'ws'
 import { getConfigFields, DisguiseConfig } from './config'
@@ -21,6 +22,19 @@ const CONNECTION_CONFIG_KEYS = ['host', 'port', 'reconnectInterval', 'pendingSub
 
 const BACKOFF_BASE_MS = 2000
 const BACKOFF_MAX_MS = 60000
+
+/** Written into every subscription variable while the Director is not connected */
+export const OFFLINE_VALUE = 'OFFLINE'
+
+/**
+ * How long an id the module has just released stays remembered. A `subscriptions` message that was
+ * already on the wire when the unsubscribe was sent still lists it; without this the module would
+ * answer that echo with a second unsubscribe for an id it no longer holds.
+ */
+const RELEASED_ID_GRACE_MS = 5000
+
+/** Companion variable ids: a letter or underscore, then letters, digits or underscores */
+const VARIABLE_ID = /^[A-Za-z_][A-Za-z0-9_]*$/
 
 /** Template placeholders such as <TRACK_NAME> or <OBJECT_PATH> */
 const PLACEHOLDER_TOKEN = /<[A-Z][A-Z0-9_]*>/
@@ -77,6 +91,8 @@ export interface LiveUpdateSubscription {
 	id: number
 	objectPath: string
 	propertyPath: string
+	/** The updateFrequencyMs this subscription was created with (undefined = the Director default) */
+	updateFrequencyMs?: number
 	/** The feedback that created the subscription; other feedbacks may share it (see feedbackIdToSubscriptionId) */
 	feedbackId: string
 	variableName: string
@@ -127,6 +143,15 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	private subscriptionBackoff: Map<string, BackoffEntry> = new Map()
 	/** Feedbacks already logged as "path not resolved yet" / "reserved name" (avoid repeating the message) */
 	private unresolvedLogged: Set<string> = new Set()
+	/** Ids the module has just released, so a stale `subscriptions` echo is not answered twice */
+	private releasedSubscriptionIds: Map<number, number> = new Map()
+	/**
+	 * Variable names of the feedbacks that are placed, kept across a disconnect so their buttons keep
+	 * a defined variable to show OFFLINE in. Only destroy() empties it.
+	 */
+	private retainedVariables: Map<string, string> = new Map()
+	/** Compare feedbacks by the variable name they watch, so a value change re-checks only them */
+	private compareFeedbacks: Map<string, string> = new Map()
 	private connectionReady = false
 	private shouldReconnect = false
 	private hasLoggedConnectionError = false
@@ -157,6 +182,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		this.feedbackIdToSubscriptionId.clear()
 		this.pendingSubscriptions.clear()
 		this.feedbackOptionsCache.clear()
+		this.retainedVariables.clear()
 		this.clearAllBackoff()
 	}
 
@@ -254,6 +280,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 
 		if (!cached) {
 			this.feedbackOptionsCache.set(feedbackId, { variableName, objectPath, propertyPath, updateFrequency })
+			this.retainedVariables.set(feedbackId, variableName)
 			// The variable exists from the moment the feedback is placed, so error indicators can reach it
 			this.updateVariableDefinitions()
 
@@ -275,6 +302,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				`Feedback options changed: ${cached.objectPath}.${cached.propertyPath} → ${objectPath}.${propertyPath}`,
 			)
 			this.feedbackOptionsCache.set(feedbackId, { variableName, objectPath, propertyPath, updateFrequency })
+			this.retainedVariables.set(feedbackId, variableName)
 			this.unsubscribeFromVariable(feedbackId)
 			this.updateVariableDefinitions()
 
@@ -367,6 +395,18 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			return
 		}
 
+		// The name becomes a Companion variable id and the lookup key of every Set / Toggle action
+		if (!VARIABLE_ID.test(variableName)) {
+			if (!this.unresolvedLogged.has(feedbackId)) {
+				this.unresolvedLogged.add(feedbackId)
+				this.log(
+					'warn',
+					`Variable name '${variableName}' of feedback ${feedbackId} is not a valid Companion variable id (a letter or underscore, then letters, digits or underscores); the subscription is skipped`,
+				)
+			}
+			return
+		}
+
 		// Never send template placeholders, unresolved variables or empty names to the Director
 		if (isUnresolvedPath(objectPath) || isUnresolvedPath(propertyPath)) {
 			if (!this.unresolvedLogged.has(feedbackId)) {
@@ -421,6 +461,17 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		// Check if we already have a subscription for this object/property
 		for (const [subId, sub] of this.subscriptions.entries()) {
 			if (pairKey(sub.objectPath, sub.propertyPath) === key) {
+				const wanted = this.effectiveInterval(objectPath, propertyPath, updateFrequencyMs)
+				if (wanted !== sub.updateFrequencyMs) {
+					// A feedback asks for a faster rate than the one this subscription runs at; the
+					// Director has no way to change it, so the old id is released and asked again.
+					this.log(
+						'debug',
+						`Re-subscribing ${objectPath}.${propertyPath} at ${wanted ?? 'the Director default'} ms (was ${sub.updateFrequencyMs ?? 'the Director default'} ms)`,
+					)
+					this.releaseSubscription(subId)
+					break
+				}
 				// Reuse existing subscription, just update the feedback mapping
 				this.log('debug', `Reusing existing subscription ${subId} for feedback ${feedbackId}`)
 				this.feedbackIdToSubscriptionId.set(feedbackId, subId)
@@ -470,12 +521,60 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		this.setVariableValues({ [variableName]: undefined })
 	}
 
+	/** Remember which variable a Compare feedback watches (undefined removes it) */
+	registerCompareFeedback(feedbackId: string, variableName: string | undefined): void {
+		if (variableName) this.compareFeedbacks.set(feedbackId, variableName)
+		else this.compareFeedbacks.delete(feedbackId)
+	}
+
+	/** Every feedback that reads one of these variables: the owning readouts and the Compare feedbacks */
+	private feedbacksOfVariables(variableNames: Set<string>): string[] {
+		const ids: string[] = []
+		for (const [feedbackId, entry] of this.feedbackOptionsCache.entries())
+			if (variableNames.has(entry.variableName)) ids.push(feedbackId)
+		for (const [feedbackId, variableName] of this.compareFeedbacks.entries())
+			if (variableNames.has(variableName)) ids.push(feedbackId)
+		return ids
+	}
+
+	/**
+	 * Drop one Director subscription and every local trace of it. The id is remembered briefly so a
+	 * `subscriptions` message that was already in flight is not answered with a second unsubscribe.
+	 */
+	private releaseSubscription(subscriptionId: number): void {
+		this.send({ unsubscribe: { id: subscriptionId } })
+		this.subscriptions.delete(subscriptionId)
+		for (const [feedbackId, id] of this.feedbackIdToSubscriptionId.entries()) {
+			if (id === subscriptionId) this.feedbackIdToSubscriptionId.delete(feedbackId)
+		}
+		this.releasedSubscriptionIds.set(subscriptionId, Date.now())
+	}
+
+	/**
+	 * The interval a pair should run at: the smallest one any placed feedback asks for, so a fast
+	 * readout is not slowed down by a slower one that happens to share the property.
+	 */
+	private effectiveInterval(objectPath: string, propertyPath: string, alsoWanted?: number): number | undefined {
+		const key = pairKey(objectPath, propertyPath)
+		// The caller may not be in the options cache yet: a feedback can reach subscribeToVariable
+		// from its own callback before checkAndUpdateSubscription has stored its options.
+		let smallest: number | undefined = typeof alsoWanted === 'number' && alsoWanted > 0 ? alsoWanted : undefined
+		for (const entry of this.feedbackOptionsCache.values()) {
+			if (pairKey(entry.objectPath, entry.propertyPath) !== key) continue
+			const wanted = entry.updateFrequency
+			if (typeof wanted !== 'number' || !(wanted > 0)) continue
+			if (smallest === undefined || wanted < smallest) smallest = wanted
+		}
+		return smallest
+	}
+
 	/**
 	 * Unsubscribe from a LiveUpdate property by feedback ID. The Director subscription is only
 	 * released when no other feedback uses it.
 	 */
 	unsubscribeFromVariable(feedbackId: string): void {
 		const subscriptionId = this.feedbackIdToSubscriptionId.get(feedbackId)
+		if (!this.feedbackOptionsCache.has(feedbackId)) this.retainedVariables.delete(feedbackId)
 
 		// A removed or edited feedback starts over without back-off
 		this.clearBackoff(feedbackId)
@@ -513,6 +612,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		this.send({ unsubscribe: { id: subscriptionId } })
 
 		this.subscriptions.delete(subscriptionId)
+		this.releasedSubscriptionIds.set(subscriptionId, Date.now())
 		this.updateVariableDefinitions()
 	}
 
@@ -551,7 +651,10 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			return
 		}
 
-		const trimmed = value.trim()
+		// The action ran the value through the host parser, so an unknown variable arrives as $NA and
+		// a nested reference as a raw $(...). Both mean "no value", which is a clear, not a rejection.
+		const raw = value.trim()
+		const trimmed = raw === UNSET_SELECTION || raw.includes('$(') ? '' : raw
 		const problem = validateSelection(selectionId, trimmed)
 		if (problem) {
 			this.log('warn', `Selection rejected: ${problem}`)
@@ -699,10 +802,16 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				this.feedbackIdToSubscriptionId.clear()
 				this.pendingSubscriptions.clear()
 				this.feedbackOptionsCache.clear()
+				this.releasedSubscriptionIds.clear()
 				this.clearAllBackoff()
-				this.setVariableValues({
-					connection_status: 'Disconnected',
-				})
+				// The feedbacks are still on their buttons, so their variables stay defined (they are
+				// remembered in retainedVariables). Without this every readout would keep showing the
+				// last value it had before the Director went away, which during a show is worse than
+				// saying nothing.
+				const offline: CompanionVariableValues = { connection_status: 'Disconnected' }
+				for (const variableName of this.retainedVariables.values()) offline[variableName] = OFFLINE_VALUE
+				this.updateVariableDefinitions()
+				this.setVariableValues(offline)
 				this.checkFeedbacks('connectionState')
 
 				if (this.pendingCleanupTimer) {
@@ -812,13 +921,26 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			this.setVariableValues({ [pending.variableName]: 'ERROR' })
 		}
 
-		if (!matched && this.pendingSubscriptions.size > 0) {
+		if (!matched && this.pendingSubscriptions.size === 1) {
+			// The Director also reports a bad object without echoing the paths, for example
+			// "Unable to subscribe to object: Name 'Layer' not found". With a single request in
+			// flight there is no ambiguity about which one it refers to.
+			const [[key, pending]] = [...this.pendingSubscriptions.entries()]
+			this.log('warn', `Attributing the error to the only request in flight ('${pending.variableName}')`)
+			this.pendingSubscriptions.delete(key)
+			for (const feedbackId of pending.feedbackIds) this.noteSubscriptionFailure(feedbackId, error)
+			this.setVariableValues({ [pending.variableName]: 'ERROR' })
+		} else if (!matched && this.pendingSubscriptions.size > 1) {
 			this.log('debug', 'Error did not name a pending subscription; pending requests are kept until they time out')
 		}
 	}
 
 	private handleSubscriptionsUpdate(subscriptions: any[]): void {
 		this.log('debug', `Subscriptions updated: ${subscriptions.length} active`)
+
+		const staleBefore = Date.now() - RELEASED_ID_GRACE_MS
+		for (const [id, at] of this.releasedSubscriptionIds.entries())
+			if (at < staleBefore) this.releasedSubscriptionIds.delete(id)
 
 		// Update our subscription map
 		const newSubscriptions = new Map<number, LiveUpdateSubscription>()
@@ -846,6 +968,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 					propertyPath: sub.propertyPath,
 					feedbackId: firstFeedbackId,
 					variableName: pending.variableName,
+					updateFrequencyMs: this.effectiveInterval(String(sub.objectPath ?? ''), String(sub.propertyPath ?? '')),
 					value: existing?.value,
 					changeTimestamp: existing?.changeTimestamp,
 					messageTimestamp: existing?.messageTimestamp,
@@ -865,7 +988,16 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 					newFeedbackMap.set(feedbackId, sub.id)
 				}
 			} else {
-				this.log('debug', `Director reports subscription ${sub.id} (${sub.objectPath}) that no feedback owns`)
+				if (this.releasedSubscriptionIds.has(sub.id)) {
+					// The echo of a list the Director built before it processed our unsubscribe
+					this.log('debug', `Ignoring the echo of released subscription ${sub.id}`)
+				} else {
+					// Nobody owns it and we did not just release it, so the two sides disagree. Left
+					// alone the Director would keep evaluating a property whose value nothing reads.
+					this.log('warn', `Releasing subscription ${sub.id} (${sub.objectPath}) that no feedback owns`)
+					this.send({ unsubscribe: { id: sub.id } })
+					this.releasedSubscriptionIds.set(sub.id, Date.now())
+				}
 			}
 		}
 
@@ -882,6 +1014,8 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	 * Updates module variables that Companion exposes as $(liveupdate:variable_name)
 	 */
 	private handleValuesChanged(values: any[]): void {
+		/** Variable names whose value changed in this message */
+		const affected = new Set<string>()
 		const changedVars: Record<string, any> = {}
 		let definitionsChanged = false
 
@@ -928,6 +1062,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				} else {
 					changedVars[subscription.variableName] = 'PATH_ERROR'
 				}
+				affected.add(subscription.variableName)
 
 				continue
 			}
@@ -949,6 +1084,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			// Update the module variable
 			// This makes the value available as $(liveupdate:variable_name) throughout Companion
 			changedVars[subscription.variableName] = displayValue
+			affected.add(subscription.variableName)
 		}
 
 		// Definitions first, so an error indicator written below reaches a defined variable
@@ -961,8 +1097,11 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			this.setVariableValues(changedVars)
 		}
 
-		// Trigger feedback re-evaluation (compare feedbacks, self-healing of missing subscriptions)
-		this.checkFeedbacks()
+		// Re-evaluate only the feedbacks bound to the variables that changed. The Director sends one
+		// message per changed property, so re-checking every feedback of the connection here would
+		// cost (messages per second) x (buttons on the page).
+		const toCheck = this.feedbacksOfVariables(affected)
+		if (toCheck.length > 0) this.checkFeedbacksById(...toCheck)
 	}
 
 	/**
@@ -985,6 +1124,9 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		}
 		for (const cached of this.feedbackOptionsCache.values()) {
 			add(cached.variableName, `${cached.objectPath}.${cached.propertyPath}`)
+		}
+		for (const variableName of this.retainedVariables.values()) {
+			add(variableName, variableName)
 		}
 
 		this.log('debug', `Setting ${variableDefinitions.length} variable definitions`)

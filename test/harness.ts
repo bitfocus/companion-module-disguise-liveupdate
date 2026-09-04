@@ -57,6 +57,16 @@ export class FakeDirector {
 		this.sock = sock
 	}
 
+	/** Report a subscription list the module did not ask for (an out-of-band Director state) */
+	announce(extra: { id: number; objectPath: string; propertyPath: string }[]): void {
+		this.reply({
+			subscriptions: [
+				...this.subs.map((s) => ({ id: s.id, objectPath: s.objectPath, propertyPath: s.propertyPath })),
+				...extra,
+			],
+		})
+	}
+
 	reply(msg: unknown): void {
 		const sock = this.sock
 		setImmediate(() => sock?.emit('message', Buffer.from(JSON.stringify(msg))))
