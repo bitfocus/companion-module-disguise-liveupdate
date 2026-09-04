@@ -6,8 +6,8 @@
 
 - Preset library: 310 presets in 11 categories (connection, local and remote monitoring, transport
   state, track and layer inspection, layer control, stage and screen, expression variables,
-  RenderStream, failover/d3Net, templates) generated from `docs/PRESET_CATALOG.md`, where every row
-  is traced to a documented Designer API member. 25 read-only experimental presets
+  RenderStream, failover/d3Net, templates) generated from `docs/research/phase1-catalog.json`, where
+  every row is traced to a documented Designer API member and rendered to `docs/PRESET_CATALOG.md`. 25 read-only experimental presets
   (`99 Experimental`) are available behind the new *Show experimental presets* setting.
 - Selection variables (`selTrack`, `selScreen`, `selMachine`, ...) with a *Selections* block in the
   connection settings and a *Set selection* action; the presets address show objects through them
@@ -40,8 +40,11 @@
   (`docs/PRESET_CATALOG.md`, column *live*). 103 experimental presets that returned a value
   were promoted to their home categories (ids and variable names unchanged); `selLedScreen`,
   `selStageUid` and `selRsLayer` are regular selections now.
+- `scripts/live-write-verify.mjs`: write verification that reads the current value, writes a small
+  change, writes the original back and re-reads everything; a restore that fails stops the run and an
+  interrupt restores the value in flight before exiting.
 - Write verification on the same Director: 22 properties written and restored through the protocol
-  (`scripts/live-write-verify.mjs`, groups `neutral` and `output`) and three through the module's own
+  (groups `neutral`, which touches only a track that is not on air, and `output`) and three through the module's own
   actions (`test/live-write.e2e.ts`: Set Number with an expression, Toggle Boolean, Set JSON with a
   partial object). Every value came back to its original; the results are in
   `docs/research/live-write-*.json` and in the *write* column of `docs/PRESET_CATALOG.md`.
