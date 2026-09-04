@@ -340,6 +340,16 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
 			},
 		},
 
+		checkPresets: {
+			name: 'Check presets against this Director',
+			description:
+				'Subscribes once to every preset property whose selections are filled in, records whether the Director accepted it and releases it again. The counts land in the selfcheck_* variables. It does not touch the subscriptions your buttons already hold.',
+			options: [],
+			callback: async () => {
+				await instance.runSelfCheck()
+			},
+		},
+
 		refreshSelectionLists: {
 			name: 'Refresh selection lists',
 			description:

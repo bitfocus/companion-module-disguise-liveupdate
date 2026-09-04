@@ -4,6 +4,13 @@
 
 ### Added
 
+- *Check presets against this Director* action: subscribes once to every preset property whose
+  selections are filled in, records whether the Director accepted it and releases it again, then
+  reports the counts in the selfcheck_* variables. It is the in-product form of the verification
+  script and answers "which of these presets work on this Designer and this show file" without
+  touching the subscriptions the buttons already hold.
+- The Designer version of the connected Director is published as a variable, and the module says so
+  in the log when the major version differs from the one the catalog was verified on.
 - *LiveUpdate Sparkline* feedback: draws the recent values of a LiveUpdate Variable as a line on
   the button, so a frame rate or a latency shows its trend and not only its current number. The
   module renders the pixels itself, with no drawing dependency; the history is bounded and kept only
@@ -75,6 +82,9 @@
 
 ### Changed
 
+- A burst of writes to the same property is collapsed: the first goes out at once so a single
+  press stays instant, and a fast rotary spin becomes one write per 40 ms window carrying the value
+  the operator stopped on, instead of one write per detent.
 - The live-verification evidence carries no identity of the rig it was recorded on: the project,
   track, layer, screen, cue and machine names the Director returned are replaced by neutral
   placeholders, addresses by RFC 5737 documentation addresses, and any value that is not part of

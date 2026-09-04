@@ -413,3 +413,33 @@ test('a selection profile applies several selections at once', async () => {
 	assert.equal(host.variables.get('selLayer'), '$NA', 'an empty field leaves the selection alone')
 	await inst.destroy()
 })
+
+test('a burst of writes to one property is collapsed to the last value', async () => {
+	const director = new FakeDirector({ valueFor: () => 1 })
+	const { inst } = await newInstance(director, [liveUpdateFeedback('w', TRACK, 'object.tc_adjust', 'tcAdjust')])
+	await settle(50)
+	const id = director.subs[0].id
+
+	// a rotary spin: one action per detent, faster than the coalescing window
+	for (const value of [1, 2, 3, 4, 5]) inst.setProperty(id, value)
+	await settle(120)
+
+	const sets = director.received.filter((m: { set?: unknown }) => m.set) as { set: { id: number; value: number }[] }[]
+	assert.equal(sets.length, 2, 'the first value goes out at once and the rest collapse into one')
+	assert.equal(sets[0].set[0].value, 1, 'a single press is never delayed')
+	assert.equal(sets[1].set[0].value, 5, 'and the value the operator stopped on is the one that sticks')
+	await inst.destroy()
+})
+
+test('the preset check reads every resolvable pair and releases it again', async () => {
+	const director = new FakeDirector({ valueFor: () => 1 })
+	const { inst, host } = await newInstance(director, [], { selTrack: 'demo' })
+	await settle(50)
+	await inst.runSelfCheck()
+	await settle(50)
+
+	assert.equal(director.subs.length, 0, 'the check leaves no subscription behind')
+	assert.ok(Number(host.variables.get('selfcheck_ok')) > 0, 'properties answered')
+	assert.ok(host.logs.some((l) => l.message.includes('Preset check:')))
+	await inst.destroy()
+})

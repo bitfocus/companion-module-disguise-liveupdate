@@ -18,6 +18,7 @@ import { RestClient, RestCommand, REST_ENDPOINTS } from './rest'
 import { getRestActionDefinitions } from './restActions'
 import { choicesFrom, DISCOVERY_SOURCES } from './discovery'
 import { ValueHistory } from './sparkline'
+import { PRESET_CATALOG } from './presetCatalog'
 
 /**
  * Config keys that require the WebSocket connection to be re-established when they change
@@ -36,6 +37,16 @@ export const OFFLINE_VALUE = 'OFFLINE'
  * answer that echo with a second unsubscribe for an id it no longer holds.
  */
 const RELEASED_ID_GRACE_MS = 5000
+
+/**
+ * A rotary encoder produces one action per detent. The first write of a burst goes out at once so a
+ * single press stays instant; further writes to the same property inside this window are collapsed
+ * to the last value, which is the one the operator is turning towards anyway.
+ */
+const WRITE_COALESCE_MS = 40
+
+/** The Designer major version every catalog row was verified against */
+const CATALOG_DESIGNER_MAJOR = '34'
 
 /** Companion variable ids: a letter or underscore, then letters, digits or underscores */
 const VARIABLE_ID = /^[A-Za-z_][A-Za-z0-9_]*$/
@@ -165,6 +176,10 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	private armed: Map<string, { at: number; describe: string; timer: NodeJS.Timeout }> = new Map()
 	/** One-shot reads that no feedback owns, keyed by object/property pair */
 	private probes: Map<string, { resolve: (value: unknown) => void; timer: NodeJS.Timeout; id?: number }> = new Map()
+	/** Writes waiting out the coalescing window, by subscription id */
+	private pendingWrites: Map<number, { value: unknown; timer: NodeJS.Timeout }> = new Map()
+	/** The preset check walks the whole catalog, so only one may run at a time */
+	private selfCheckRunning = false
 	/** The lists the Set selection action offers, read from the Director */
 	public discoveryChoices: Map<string, string[]> = new Map()
 	/** Value history per variable, kept only while a Sparkline feedback asks for it */
@@ -211,6 +226,8 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		this.retainedVariables.clear()
 		for (const armed of this.armed.values()) clearTimeout(armed.timer)
 		this.armed.clear()
+		for (const write of this.pendingWrites.values()) clearTimeout(write.timer)
+		this.pendingWrites.clear()
 		this.clearAllBackoff()
 	}
 
@@ -669,6 +686,77 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		})
 	}
 
+	/**
+	 * Read the Designer version once per connection. Several object paths in the catalog behave
+	 * differently between builds, so the version is published as a variable and checked against the
+	 * one the catalog was verified on.
+	 */
+	private async readDesignerVersion(): Promise<void> {
+		const value = await this.probeValue('subsystem:MonitoringManager', 'ReleaseVersion.versionString()')
+		if (typeof value !== 'string' || !value) return
+		this.setVariableValues({ designer_version: value })
+		const major = /^r?(d+)/.exec(value)?.[1]
+		if (major && major !== CATALOG_DESIGNER_MAJOR) {
+			this.log(
+				'warn',
+				`This Director runs Designer ${value}; the preset catalog was verified on r${CATALOG_DESIGNER_MAJOR}. Object paths can differ between major versions - check the readouts before the show.`,
+			)
+		}
+	}
+
+	/**
+	 * Subscribe once to every catalog pair whose selections resolve, record whether the Director
+	 * accepted it, and release it again. The in-product form of scripts/live-verify.mjs: it says
+	 * which presets work on THIS Director and project without touching the buttons already placed.
+	 */
+	async runSelfCheck(): Promise<void> {
+		if (!this.isConnectionReady()) {
+			this.log('warn', 'Not connected, so the preset check cannot run')
+			return
+		}
+		if (this.selfCheckRunning) {
+			this.log('warn', 'The preset check is already running')
+			return
+		}
+		this.selfCheckRunning = true
+		const selections = readSelections(this.config as unknown as Record<string, unknown>)
+		const pairs = new Map<string, { objectPath: string; propertyPath: string }>()
+		for (const entry of PRESET_CATALOG) {
+			if (!entry.objectPath || !entry.propertyPath) continue
+			const objectPath = this.substituteSelections(entry.objectPath, selections)
+			const propertyPath = this.substituteSelections(entry.propertyPath, selections)
+			if (isUnresolvedPath(objectPath) || isUnresolvedPath(propertyPath)) continue
+			pairs.set(pairKey(objectPath, propertyPath), { objectPath, propertyPath })
+		}
+		this.log('info', `Checking ${pairs.size} preset properties against this Director`)
+		let value = 0
+		let failed = 0
+		let index = 0
+		for (const pair of pairs.values()) {
+			if (!this.isConnectionReady()) break
+			index++
+			const answer = await this.probeValue(pair.objectPath, pair.propertyPath, 3000)
+			const isError = answer !== null && typeof answer === 'object' && 'errorType' in answer
+			if (answer === undefined || isError) failed++
+			else value++
+			if (index % 25 === 0) {
+				this.setVariableValues({ selfcheck_progress: `${index}/${pairs.size}` })
+			}
+		}
+		const skipped = PRESET_CATALOG.length - pairs.size
+		this.setVariableValues({
+			selfcheck_progress: `${index}/${pairs.size}`,
+			selfcheck_ok: String(value),
+			selfcheck_failed: String(failed),
+			selfcheck_skipped: String(skipped),
+		})
+		this.log(
+			'info',
+			`Preset check: ${value} of ${pairs.size} properties answered with a value, ${failed} did not; ${skipped} rows were skipped because a selection is empty`,
+		)
+		this.selfCheckRunning = false
+	}
+
 	/** Forget which commands answered 404 so a Director that gained them is picked up */
 	rescanRestCommands(): void {
 		this.rest.forget()
@@ -824,13 +912,30 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			return
 		}
 
-		const message = {
-			set: [{ id, value }],
+		const waiting = this.pendingWrites.get(id)
+		if (waiting) {
+			// inside the window of a burst: keep the newest value, the timer will send it
+			waiting.value = value
+			return
 		}
 
 		this.log('debug', `Setting property ID ${id} to: ${JSON.stringify(value)}`)
+		this.send({ set: [{ id, value }] })
 
-		this.send(message)
+		// hold the window open so a fast rotary spin becomes one write per window, not one per detent
+		const entry: { value: unknown; timer: NodeJS.Timeout } = {
+			value,
+			timer: setTimeout(() => {
+				const pending = this.pendingWrites.get(id)
+				this.pendingWrites.delete(id)
+				if (pending && pending.value !== value && this.ws?.readyState === WebSocket.OPEN) {
+					this.log('debug', `Setting property ID ${id} to: ${JSON.stringify(pending.value)} (coalesced)`)
+					this.send({ set: [{ id, value: pending.value }] })
+				}
+			}, WRITE_COALESCE_MS),
+		}
+		if (typeof entry.timer.unref === 'function') entry.timer.unref()
+		this.pendingWrites.set(id, entry)
 	}
 
 	/**
@@ -981,7 +1086,9 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				this.subscribeFeedbacks()
 				this.startPendingCleanupTimer()
 				// the names the operator picks from, read once per connection
-				if (this.config?.discoverOnConnect !== false) void this.refreshDiscovery()
+				if (this.config?.discoverOnConnect !== false) {
+					void this.readDesignerVersion().then(async () => this.refreshDiscovery())
+				}
 			})
 
 			this.ws.on('message', (data: WebSocket.RawData) => {
