@@ -24,6 +24,17 @@ const code = (s) => {
 	if (!s) return ''
 	return s.includes('`') ? '`` ' + s.replace(/\|/g, '\\|') + ' ``' : '`' + s.replace(/\|/g, '\\|') + '`'
 }
+const liveCell = (x) =>
+	x.live
+		? esc(x.live.status) +
+			(x.live.note
+				? ': ' + esc(x.live.note)
+				: x.live.message
+					? ': ' + esc(x.live.message)
+					: x.live.value !== undefined
+						? ' (' + code(x.live.value) + ')'
+						: '')
+		: 'not run'
 const FREQ = { monitoring: 1000, playhead: 250, state: 500, static: 5000 }
 const FREQ_WHY = {
 	monitoring: 'Director pushes every frame when unthrottled; a button needs ≤ 1–2 Hz',
@@ -48,7 +59,8 @@ const CAT_ORDER = [
 const SEL_DEFS = {
 	selTrack: 'track name as shown in Designer, e.g. Track 1 (quoted by the paths)',
 	selLayer: 'layer name inside the selected track, e.g. Video 1',
-	selLayerIndex: '0-based leaf-layer index (unquoted integer) for the index-based probes',
+	selLayerIndex:
+		'0-based position in the track layer list, track.layers (unquoted integer), for the "(by index)" presets',
 	selSection: '0-based section index (unquoted integer)',
 	selBeat: 'a track beat as a number, e.g. 32',
 	selScreen: 'Surface (screen2) name',
@@ -57,7 +69,7 @@ const SEL_DEFS = {
 	selMachine: 'Machine resource name as listed in d3Net Manager',
 	selHost: 'hostname of the remote machine WITHOUT the :d3 suffix (the presets append it)',
 	selWorkload:
-		'RenderStream workload id as an unquoted integer (REST layerstatus or the Cluster Workload widget > Copy UID)',
+		'RenderStream workload id as unquoted decimal digits (uint64; the [EXP] RS Layer Workload ID preset shows it as text, or Cluster Workload widget > Copy UID / REST layerstatus)',
 	selInstance: '0-based RenderStream instance index (unquoted integer)',
 	selEvUid: 'UID of the Expression Variables device, hex with 0x prefix',
 	selEvIndex: '0-based row index of the variable inside the device (unquoted integer)',
@@ -91,7 +103,7 @@ md.push(
 )
 md.push('')
 md.push(
-	'Status values: `doc-verified` (normal tier, shipped by default), `unverified` (Experimental tier: read-only, shown only when the connection setting *Show experimental presets* is on), `doc-verified` rows inside 99 Experimental are documented comprehensions kept there by rule. `live-verified` is reserved for Phase 3.',
+	'Status values: `doc-verified` (normal tier, shipped by default), `unverified` (Experimental tier: read-only, shown only when the connection setting *Show experimental presets* is on), `doc-verified` rows inside 99 Experimental are documented comprehensions kept there by rule. `live-verified` = the exact object/property pair returned a value from a Designer r34.0.3 Director on 2026-09-04 (Phase 3; evidence in `docs/research/live-verification.json` and `docs/research/live-verification-probes.json`). The *live* column shows the per-row result: `confirmed-value`, `confirmed-path-error` (subscription accepted, the Director reported an evaluation error, in every remaining case a project-specific one), `confirmed-no-value` (accepted, no value within the timeout), `not-run` (a selection had no value in the test project) or `n/a` (templates). Rows in 99 Experimental keep their tier even when confirmed; promotion is a separate decision.',
 )
 md.push('')
 md.push('## Summary')
@@ -139,6 +151,31 @@ if ((catalog.issues || []).length) {
 }
 md.push('')
 
+if (catalog.liveVerification) {
+	const lv = catalog.liveVerification
+	md.push('## Live verification (Phase 3)')
+	md.push('')
+	md.push(esc(lv.method))
+	md.push('')
+	md.push(`Environment: ${esc(lv.env)}. Date: ${lv.date}. Evidence: ${lv.files.map((f) => '`' + f + '`').join(', ')}.`)
+	md.push('')
+	md.push('| live result | normal | experimental |')
+	md.push('|---|---|---|')
+	for (const [k, v] of Object.entries(lv.summary)) md.push(`| ${k} | ${v.normal ?? 0} | ${v.experimental ?? 0} |`)
+	md.push('')
+	md.push('Changes applied to the catalog after the live run:')
+	md.push('')
+	for (const c of lv.changes) md.push('- ' + esc(c))
+	md.push('')
+	if (lv.removed.length) {
+		md.push('Rows removed after the live run:')
+		md.push('')
+		for (const x of lv.removed)
+			md.push(`- \`${x.presetId}\` ${code(x.objectPath)} / ${code(x.propertyPath)}: ${esc(x.reason)}`)
+		md.push('')
+	}
+}
+
 for (const catName of CAT_ORDER) {
 	const rows = allRows.filter((x) => x.category === catName)
 	const texts = allText.filter((t) => t.category === catName)
@@ -157,7 +194,7 @@ for (const catName of CAT_ORDER) {
 			md.push('')
 		}
 		md.push(
-			'| preset id | name | purpose | kind / actions | object path | property path | variable | value type / range | writable | update freq (class → default ms) and rationale | source | status | live test |',
+			'| preset id | name | purpose | kind / actions | object path | property path | variable | value type / range | writable | update freq (class → default ms) and rationale | source | status | live (r34.0.3, 2026-09-04) |',
 		)
 		md.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|')
 		for (const x of grows) {
@@ -177,7 +214,7 @@ for (const catName of CAT_ORDER) {
 			const typ = [x.valueType, x.range].filter(Boolean).map(esc).join('; ')
 			const nm = (x.tier === 'experimental' ? '[EXP] ' : '') + x.name
 			md.push(
-				`| \`${x.presetId}\`${flag} | ${esc(nm)} | ${esc(x.purpose)} | ${kind} | ${code(x.objectPath)} | ${code(x.propertyPath)} | \`${esc(x.variableName)}\` | ${typ} | ${esc(x.writable)} | ${freq} | ${src} | ${esc(x.status)}${x.designerVersion ? ' (' + esc(x.designerVersion) + ')' : ''} | ${esc(x.liveTestPriority)} |`,
+				`| \`${x.presetId}\`${flag} | ${esc(nm)} | ${esc(x.purpose)} | ${kind} | ${code(x.objectPath)} | ${code(x.propertyPath)} | \`${esc(x.variableName)}\` | ${typ} | ${esc(x.writable)} | ${freq} | ${src} | ${esc(x.status)}${x.designerVersion ? ' (' + esc(x.designerVersion) + ')' : ''} | ${liveCell(x)} |`,
 			)
 		}
 		md.push('')

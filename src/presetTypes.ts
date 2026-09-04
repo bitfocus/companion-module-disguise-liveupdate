@@ -48,7 +48,7 @@ export interface PresetCatalogEntry {
 	color: RGB
 	stateColour?: PresetStateColour
 	actions: readonly PresetCatalogAction[]
-	status: 'doc-verified' | 'unverified'
+	status: 'doc-verified' | 'unverified' | 'live-verified'
 }
 
 /** A text preset used as a heading inside a category */

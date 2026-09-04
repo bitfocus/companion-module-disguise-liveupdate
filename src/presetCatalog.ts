@@ -9,7 +9,7 @@ export const PRESET_TEXTS: readonly PresetCatalogText[] = [
 		id: 'monl_setup',
 		category: '02 Monitoring Local',
 		name: 'Setup: local monitors',
-		text: 'Local monitors need no selection: every preset subscribes to subsystem:MonitoringManager.findLocalMonitor(...) on the Director Companion is connected to.\n\nShown: FPS (latest, 10-sample and 60-sample average), GPU profiler frame time (Total, Compositor, GUI, Render Everything, DMX, Video Upload, Capture Upload) in ms, CPU Total (unit ms per the help site, confirm live), GPU memory (MB), Designer process memory (MB) and the "Machine" health monitor percentages (CPU/GPU time, CPU/GPU memory, Disk; source: disguise\'s official Grafana dashboard, verify on r34).\n\nExperimental (99): Disk read/write MB/s (the developer guide says Disk over LiveUpdate is still in development), monitor and series name discovery.\n\nUpdate rate: monitoring class (default 1000 ms). Never set 0: monitors push every frame. Colour rules assume a 60 Hz project: red when FPS falls 10 below (latest) or 5 below (averages), GPU Total >= 17 ms, Machine % >= 80.',
+		text: 'Local monitors need no selection: every preset subscribes to subsystem:MonitoringManager.findLocalMonitor(...) on the Director Companion is connected to.\n\nShown: FPS (latest, 10-sample and 60-sample average), GPU profiler frame time (Total, Compositor, GUI, Render Everything, DMX, Video Upload, Capture Upload) in ms, CPU Total (unit stated as ms by the help site; live on r34.0.3 the graph reports yUnits = "Units", so treat the number as relative), GPU memory (MB), Designer process memory (MB) and the "Machine" health monitor percentages (CPU/GPU time, CPU/GPU memory, Disk; source: disguise\'s official Grafana dashboard; values confirmed live on r34.0.3 in the 0-100 range).\n\nExperimental (99): Disk read/write MB/s (the developer guide says Disk over LiveUpdate is still in development), monitor and series name discovery.\n\nUpdate rate: monitoring class (default 1000 ms). Never set 0: monitors push every frame. Colour rules assume a 60 Hz project: red when FPS falls 10 below (latest) or 5 below (averages), GPU Total >= 17 ms, Machine % >= 80.',
 	},
 	{
 		id: 'monr_setup',
@@ -27,7 +27,7 @@ export const PRESET_TEXTS: readonly PresetCatalogText[] = [
 		id: 'trk_setup',
 		category: '05 Track & Layer',
 		name: 'Setup: Track & Layer',
-		text: 'Create these selection variables before adding presets from this category: selTrack = track name as shown in Designer (quoted automatically, e.g. Track 1); selLayer = layer name inside that track (Layer editor name, e.g. Video 1); selSection = 0-based section index for the section presets; selBeat = a track beat (float) for the note/beat presets; selLayerIndex = 0-based leaf-layer index for the "(by index)" presets. Readouts show: track name/length/BPM, section and layer counts, section start/end, note at beat, beat-to-time, cue count, TC adjust, and per-layer name / enabled / live / start / end / length / anchored plus the key-0 values of pos.x, pos.y, scale and brightness. Readouts are grey; the TC-adjust knob presets (amber) write to Designer. All values are track beats unless labelled time.',
+		text: 'Create these selection variables before adding presets from this category: selTrack = track name as shown in Designer (quoted automatically, e.g. Track 1); selLayer = layer name inside that track (Layer editor name, e.g. Video 1); selSection = 0-based section index for the section presets; selBeat = a track beat (float) for the note/beat presets; selLayerIndex = 0-based position in the track layer list for the "(by index)" presets. Readouts show: track name/length/BPM, section and layer counts, section start/end, note at beat, beat-to-time, cue count, TC adjust, and per-layer name / enabled / live / start / end / length / anchored plus the key-0 values of pos.x, pos.y, scale and brightness. Readouts are grey; the TC-adjust knob presets (amber) write to Designer. All values are track beats unless labelled time.',
 	},
 	{
 		id: 'lay_setup',
@@ -51,7 +51,7 @@ export const PRESET_TEXTS: readonly PresetCatalogText[] = [
 		id: 'rs_setup',
 		category: '09 RenderStream',
 		name: 'RenderStream setup',
-		text: "RenderStream presets read subsystem:RenderStreamSystem (cluster/instance health, per-node flags, receive statuses, active latency) and Machine takeover. Create these selection variables first: selWorkload = workload ID as a Python int - copy it from the Cluster Workload widget ('Copy UID') or from REST GET /api/session/renderstream/layers then GET /api/session/renderstream/layerstatus?uid=<layer uid> (workload.uid); if the copied value is hex, enter it as 0x...; selInstance = zero-based instance index inside the workload (0 = first render node); selMachine = render node / machine name exactly as shown in the Cluster Workload widget Instances > Machine column. The 'RS Workload IDs (discovery)' preset lists the ids of running workloads without REST. Experimental layer-route presets (99 Experimental) also need selTrack (track name) and selRsLayer (zero-based index of the RenderStream layer among the track's RenderStream leaf layers). All RenderStream rows are read-only; workload start/stop/restart is only available through the REST session API, not LiveUpdate. While a workload is stopped, per-instance rows return an error - see open questions about resubscribe storms.",
+		text: "RenderStream presets read subsystem:RenderStreamSystem (cluster/instance health, per-node flags, receive statuses, active latency) and Machine takeover. Create these selection variables first: selWorkload = workload ID as a Python int - copy it from the Cluster Workload widget ('Copy UID') or from REST GET /api/session/renderstream/layers then GET /api/session/renderstream/layerstatus?uid=<layer uid> (workload.uid); if the copied value is hex, enter it as 0x...; selInstance = zero-based instance index inside the workload (0 = first render node); selMachine = render node / machine name exactly as shown in the Cluster Workload widget Instances > Machine column. The 'RS Workload IDs (discovery)' preset lists the ids of running workloads without REST. Experimental layer-route presets (99 Experimental) also need selTrack (track name) and selRsLayer (zero-based index of the RenderStream layer among the track's RenderStream leaf layers); the [EXP] RS Layer Workload ID preset shows the workload id as text ready for selWorkload. All RenderStream rows are read-only; workload start/stop/restart is only available through the REST session API, not LiveUpdate. While a workload has no running instances the per-instance rows show PATH_ERROR (the Director answers \"out of range error accessing workload instance\"); the module backs off and retries on its own.",
 	},
 	{
 		id: 'fo_setup',
@@ -97,7 +97,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'lt',
 			value: 50,
@@ -121,7 +121,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'lt',
 			value: 55,
@@ -145,7 +145,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'lt',
 			value: 55,
@@ -169,7 +169,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'ge',
 			value: 17,
@@ -193,7 +193,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monl_gpu_gui',
@@ -212,7 +212,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monl_gpu_render_everything',
@@ -231,7 +231,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monl_gpu_dmx',
@@ -250,7 +250,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monl_gpu_video_upload',
@@ -269,7 +269,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monl_gpu_capture_upload',
@@ -288,7 +288,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monl_cpu_total',
@@ -307,7 +307,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monl_gpu_mem',
@@ -326,7 +326,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monl_proc_mem',
@@ -345,7 +345,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monl_machine_cpu_time',
@@ -364,7 +364,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'ge',
 			value: 80,
@@ -388,7 +388,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'ge',
 			value: 80,
@@ -412,7 +412,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'ge',
 			value: 80,
@@ -436,7 +436,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'ge',
 			value: 80,
@@ -460,7 +460,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'ge',
 			value: 80,
@@ -484,7 +484,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monl_disk_write',
@@ -503,7 +503,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monr_fps',
@@ -522,7 +522,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'lt',
 			value: 50,
@@ -546,7 +546,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'lt',
 			value: 55,
@@ -570,7 +570,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -594,7 +594,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monl_monitor_names',
@@ -613,7 +613,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monl_cpu_series_names',
@@ -632,7 +632,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monl_cpu_units',
@@ -651,7 +651,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monl_gpu_mem_units',
@@ -670,7 +670,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monl_gpu_thresholds',
@@ -689,7 +689,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monl_fps_minmax',
@@ -709,7 +709,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monl_graph_categories',
@@ -728,7 +728,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monr_node_monitor_names',
@@ -747,7 +747,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monr_machine_cpu_time',
@@ -766,7 +766,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monr_machine_gpu_time',
@@ -785,7 +785,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monr_gpu_total',
@@ -804,7 +804,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monr_cpu_total',
@@ -823,7 +823,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'monr_gpu_mem',
@@ -842,7 +842,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_playhead_beats',
@@ -861,7 +861,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_playmode',
@@ -880,7 +880,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_playmode_state',
@@ -899,7 +899,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: 3,
@@ -923,7 +923,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -947,7 +947,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -971,7 +971,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -995,7 +995,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -1019,7 +1019,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -1043,7 +1043,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: false,
@@ -1067,7 +1067,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'ne',
 			value: 1,
@@ -1091,7 +1091,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: 0,
@@ -1140,7 +1140,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_brightness_down',
@@ -1184,7 +1184,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_brightness_full',
@@ -1212,7 +1212,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_brightness_zero',
@@ -1240,7 +1240,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_volume',
@@ -1259,7 +1259,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: 0,
@@ -1308,7 +1308,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_volume_down',
@@ -1352,7 +1352,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_volume_full',
@@ -1380,7 +1380,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_volume_mute',
@@ -1408,7 +1408,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_engaged',
@@ -1427,7 +1427,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: false,
@@ -1460,7 +1460,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_disengage',
@@ -1488,7 +1488,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_engaged_toggle',
@@ -1515,7 +1515,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -1539,7 +1539,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_section_count',
@@ -1558,7 +1558,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_transport_status',
@@ -1577,7 +1577,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_tc_status',
@@ -1596,7 +1596,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_preroll',
@@ -1615,7 +1615,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_tc_incoming',
@@ -1625,7 +1625,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		name: 'Incoming timecode',
 		kind: 'readout',
 		objectPath: 'transportManager:default',
-		propertyPath: 'object.timecode.current.__str__()',
+		propertyPath: '(object.timecode.current.__str__() if object.timecode is not None else "")',
 		variableName: 'tcIncoming',
 		freqClass: 'playhead',
 		text: 'TC in\n$(liveupdate:tcIncoming)',
@@ -1644,7 +1644,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		name: 'TC source status',
 		kind: 'readout',
 		objectPath: 'transportManager:default',
-		propertyPath: 'object.timecode.statusString',
+		propertyPath: '(object.timecode.statusString if object.timecode is not None else "")',
 		variableName: 'tcSourceStatus',
 		freqClass: 'state',
 		text: 'TC src\n$(liveupdate:tcSourceStatus)',
@@ -1672,7 +1672,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_timecodeposition',
@@ -1691,7 +1691,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_free_running',
@@ -1710,7 +1710,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_bpm',
@@ -1729,7 +1729,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_section_index',
@@ -1748,7 +1748,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_current_section_name',
@@ -1768,7 +1768,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_next_section_name',
@@ -1788,7 +1788,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_section_remaining',
@@ -1807,7 +1807,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_section_elapsed',
@@ -1827,7 +1827,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_tc_source_name',
@@ -1837,7 +1837,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		name: 'TC source name',
 		kind: 'readout',
 		objectPath: 'transportManager:default',
-		propertyPath: 'object.timecode.description',
+		propertyPath: '(object.timecode.description if object.timecode is not None else "")',
 		variableName: 'tcSourceName',
 		freqClass: 'static',
 		text: 'TC source\n$(liveupdate:tcSourceName)',
@@ -1865,7 +1865,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_active_layer_count',
@@ -1884,7 +1884,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_gui_playhead_beats',
@@ -1903,7 +1903,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'tr_named_playhead_beats',
@@ -1941,7 +1941,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_length_beats',
@@ -1960,7 +1960,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_length_sec',
@@ -1979,7 +1979,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_bpm',
@@ -1998,7 +1998,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_nsections',
@@ -2017,7 +2017,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_nlayers',
@@ -2036,7 +2036,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_section_start',
@@ -2055,7 +2055,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_section_end',
@@ -2074,7 +2074,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_note_at_beat',
@@ -2093,7 +2093,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_beat_to_sec',
@@ -2112,7 +2112,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_tc_adjust',
@@ -2131,7 +2131,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_tc_adjust_plus',
@@ -2175,7 +2175,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_tc_adjust_minus',
@@ -2203,7 +2203,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_tc_adjust_reset',
@@ -2231,7 +2231,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_layer_name',
@@ -2250,7 +2250,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_layer_enabled',
@@ -2269,7 +2269,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -2293,7 +2293,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -2317,7 +2317,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_layer_tend',
@@ -2336,7 +2336,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_layer_tlength',
@@ -2355,7 +2355,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_layer_anchored',
@@ -2374,7 +2374,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -2398,7 +2398,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_key_posy',
@@ -2455,7 +2455,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_brightness_const',
@@ -2474,7 +2474,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -2488,7 +2488,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		tier: 'normal',
 		name: 'Layer name (by index)',
 		kind: 'readout',
-		objectPath: 'track:"$(liveupdate:selTrack)".getLeafLayers()[$(liveupdate:selLayerIndex)]',
+		objectPath: 'track:"$(liveupdate:selTrack)".layers[$(liveupdate:selLayerIndex)]',
 		propertyPath: 'object.name',
 		variableName: 'idxLayerName',
 		freqClass: 'static',
@@ -2498,7 +2498,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_key_posx_idx',
@@ -2507,7 +2507,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		tier: 'normal',
 		name: 'pos.x key 0 (by index)',
 		kind: 'readout',
-		objectPath: 'track:"$(liveupdate:selTrack)".getLeafLayers()[$(liveupdate:selLayerIndex)]',
+		objectPath: 'track:"$(liveupdate:selTrack)".layers[$(liveupdate:selLayerIndex)]',
 		propertyPath: 'object.findSequence("pos.x").sequence.key(0).v',
 		variableName: 'idxKeyPosX',
 		freqClass: 'state',
@@ -2545,7 +2545,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'lay_enable_off',
@@ -2573,7 +2573,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'lay_enable_toggle',
@@ -2600,7 +2600,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -2649,7 +2649,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'lay_tstart_minus',
@@ -2677,7 +2677,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'lay_tlength_plus',
@@ -2721,7 +2721,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'lay_tlength_minus',
@@ -2749,7 +2749,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'lay_posx_plus',
@@ -2793,7 +2793,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'lay_posx_minus',
@@ -2821,7 +2821,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'lay_posx_zero',
@@ -2849,7 +2849,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'lay_posy_plus',
@@ -3093,7 +3093,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'lay_bright_minus',
@@ -3121,7 +3121,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'lay_bright_full',
@@ -3149,7 +3149,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'lay_bright_zero',
@@ -3177,7 +3177,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'lay_bright_const_on',
@@ -3205,7 +3205,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'lay_bright_const_off',
@@ -3233,7 +3233,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_layer_names',
@@ -3252,7 +3252,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_layer_tstart_bycomp',
@@ -3271,7 +3271,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_section_table',
@@ -3291,7 +3291,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_section_note',
@@ -3310,7 +3310,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_section_length',
@@ -3329,7 +3329,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_section_start_sec',
@@ -3348,7 +3348,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_section_of_beat',
@@ -3367,7 +3367,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_cue_tag_at_beat',
@@ -3387,7 +3387,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_tags_at_beat',
@@ -3406,7 +3406,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_cue_table',
@@ -3446,7 +3446,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_layer_crashed',
@@ -3465,7 +3465,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -3489,7 +3489,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_layer_fields',
@@ -3509,7 +3509,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_layer_keytimes',
@@ -3528,7 +3528,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_key_posx_all',
@@ -3567,7 +3567,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -3591,7 +3591,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'trk_key_text',
@@ -3648,7 +3648,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_screen_in_error',
@@ -3667,7 +3667,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -3691,7 +3691,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: false,
@@ -3715,7 +3715,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_screen_offset_reset',
@@ -3743,7 +3743,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_screen_offset_x',
@@ -3762,7 +3762,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_screen_offset_x_up',
@@ -3806,7 +3806,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_screen_offset_x_down',
@@ -3850,7 +3850,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_screen_rotation',
@@ -3869,7 +3869,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_screen_fade',
@@ -3888,7 +3888,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'lt',
 			value: 1,
@@ -3937,7 +3937,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_screen_fade_down',
@@ -3981,7 +3981,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_screen_fade_full',
@@ -4009,7 +4009,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_screen_fade_zero',
@@ -4037,7 +4037,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_screen_hold',
@@ -4056,7 +4056,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -4089,7 +4089,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_screen_hold_off',
@@ -4117,7 +4117,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_screen_hold_toggle',
@@ -4144,7 +4144,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -4168,7 +4168,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: 0,
@@ -4201,7 +4201,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_screen_off_stage',
@@ -4229,7 +4229,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_screen_tracking_live',
@@ -4248,7 +4248,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -4272,7 +4272,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_proj_in_error',
@@ -4291,7 +4291,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -4315,7 +4315,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: false,
@@ -4339,7 +4339,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'lt',
 			value: 1,
@@ -4388,7 +4388,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_proj_fade_down',
@@ -4432,7 +4432,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_proj_fade_full',
@@ -4460,7 +4460,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_proj_fade_zero',
@@ -4488,7 +4488,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_proj_hold',
@@ -4507,7 +4507,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -4540,7 +4540,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_proj_hold_off',
@@ -4568,7 +4568,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_proj_hold_toggle',
@@ -4595,7 +4595,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -4619,7 +4619,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_uid_fade',
@@ -4638,7 +4638,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'lt',
 			value: 1,
@@ -4687,7 +4687,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_uid_fade_down',
@@ -4731,7 +4731,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_uid_fade_full',
@@ -4759,7 +4759,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_uid_fade_zero',
@@ -4787,7 +4787,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_uid_hold',
@@ -4806,7 +4806,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -4839,7 +4839,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_uid_hold_off',
@@ -4867,7 +4867,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_uid_hold_toggle',
@@ -4894,7 +4894,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -4918,7 +4918,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_proj_screens',
@@ -4937,7 +4937,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_led_name',
@@ -5553,7 +5553,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: false,
@@ -5577,7 +5577,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'ne',
 			value: 2,
@@ -5601,7 +5601,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_workload_layers',
@@ -5620,7 +5620,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_workload_instances',
@@ -5639,7 +5639,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_workload_receive',
@@ -5658,7 +5658,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_stream_receive',
@@ -5677,7 +5677,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_inst_machine',
@@ -5895,7 +5895,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_running_count',
@@ -5915,7 +5915,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_any_dropping',
@@ -5935,7 +5935,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -5960,7 +5960,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -5985,7 +5985,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_min_fps',
@@ -6005,7 +6005,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_max_latency',
@@ -6025,7 +6025,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_dropped_total',
@@ -6044,7 +6044,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_all_subscribed',
@@ -6064,7 +6064,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: false,
@@ -6089,7 +6089,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_status_msgs',
@@ -6109,7 +6109,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_layer_workload_id',
@@ -6118,8 +6118,8 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		tier: 'experimental',
 		name: 'RS Layer Workload ID',
 		kind: 'readout',
-		objectPath: 'track:"$(liveupdate:selTrack)".getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)]',
-		propertyPath: 'object.moduleConfig.workloadId',
+		objectPath: 'track:"$(liveupdate:selTrack)"',
+		propertyPath: 'str(object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.workloadId)',
 		variableName: 'rsLayerWorkloadId',
 		freqClass: 'static',
 		text: 'Workload ID\\n$(liveupdate:rsLayerWorkloadId)',
@@ -6128,7 +6128,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_layer_health',
@@ -6137,8 +6137,9 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		tier: 'experimental',
 		name: 'RS Layer Cluster Health',
 		kind: 'readout',
-		objectPath: 'track:"$(liveupdate:selTrack)".getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)]',
-		propertyPath: 'object.moduleConfig.cluster.workloadHealth',
+		objectPath: 'track:"$(liveupdate:selTrack)"',
+		propertyPath:
+			'object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.cluster.workloadHealth',
 		variableName: 'rsLayerClusterHealth',
 		freqClass: 'state',
 		text: "`Cluster\\n${jsonpath(jsonparse($(liveupdate:rsLayerClusterHealth)), '$.message')}`",
@@ -6147,7 +6148,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_layer_any_running',
@@ -6156,8 +6157,9 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		tier: 'experimental',
 		name: 'RS Layer Any Running',
 		kind: 'readout',
-		objectPath: 'track:"$(liveupdate:selTrack)".getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)]',
-		propertyPath: 'object.moduleConfig.cluster.anyInstanceIsRunning',
+		objectPath: 'track:"$(liveupdate:selTrack)"',
+		propertyPath:
+			'object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.cluster.anyInstanceIsRunning',
 		variableName: 'rsLayerAnyRunning',
 		freqClass: 'state',
 		text: "`Cluster\\n${bool($(liveupdate:rsLayerAnyRunning)) ? 'RUNNING' : 'STOPPED'}`",
@@ -6166,7 +6168,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: false,
@@ -6180,8 +6182,8 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		tier: 'experimental',
 		name: 'RS Layer Instance Count',
 		kind: 'readout',
-		objectPath: 'track:"$(liveupdate:selTrack)".getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)]',
-		propertyPath: 'object.moduleConfig.cluster.nInstances',
+		objectPath: 'track:"$(liveupdate:selTrack)"',
+		propertyPath: 'object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.cluster.nInstances',
 		variableName: 'rsLayerInstanceCount',
 		freqClass: 'static',
 		text: 'Instances\\n$(liveupdate:rsLayerInstanceCount)',
@@ -6190,7 +6192,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_layer_inst_health',
@@ -6199,8 +6201,9 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		tier: 'experimental',
 		name: 'RS Layer Instance Health',
 		kind: 'readout',
-		objectPath: 'track:"$(liveupdate:selTrack)".getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)]',
-		propertyPath: 'object.moduleConfig.cluster.instanceHealth($(liveupdate:selInstance)).message',
+		objectPath: 'track:"$(liveupdate:selTrack)"',
+		propertyPath:
+			'object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.cluster.instanceHealth($(liveupdate:selInstance)).message',
 		variableName: 'rsLayerInstanceHealthMessage',
 		freqClass: 'state',
 		text: 'Inst Health\\n$(liveupdate:rsLayerInstanceHealthMessage)',
@@ -6209,7 +6212,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_layer_inst_machine',
@@ -6218,8 +6221,9 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		tier: 'experimental',
 		name: 'RS Layer Node Status',
 		kind: 'readout',
-		objectPath: 'track:"$(liveupdate:selTrack)".getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)]',
-		propertyPath: 'object.moduleConfig.cluster.instanceMachine($(liveupdate:selInstance)).statusString',
+		objectPath: 'track:"$(liveupdate:selTrack)"',
+		propertyPath:
+			'object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.cluster.instanceMachine($(liveupdate:selInstance)).statusString',
 		variableName: 'rsLayerInstanceMachineStatus',
 		freqClass: 'state',
 		text: 'Node Status\\n$(liveupdate:rsLayerInstanceMachineStatus)',
@@ -6237,9 +6241,9 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		tier: 'experimental',
 		name: 'RS Pool Machines Online',
 		kind: 'readout',
-		objectPath: 'track:"$(liveupdate:selTrack)".getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)]',
+		objectPath: 'track:"$(liveupdate:selTrack)"',
 		propertyPath:
-			'"%d/%d online" % (len(object.moduleConfig.pool.getOnlineRenderMachines()), len(object.moduleConfig.pool.machines))',
+			'"%d/%d online" % (len(object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.pool.getOnlineRenderMachines()), len(object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.pool.machines))',
 		variableName: 'rsLayerPoolOnline',
 		freqClass: 'state',
 		text: 'Pool\\n$(liveupdate:rsLayerPoolOnline)',
@@ -6248,7 +6252,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_layer_asset_errors',
@@ -6257,8 +6261,9 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		tier: 'experimental',
 		name: 'RS Asset Errors',
 		kind: 'readout',
-		objectPath: 'track:"$(liveupdate:selTrack)".getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)]',
-		propertyPath: 'object.moduleConfig.pool.assetErrors(object.moduleConfig.asset)',
+		objectPath: 'track:"$(liveupdate:selTrack)"',
+		propertyPath:
+			'object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.pool.assetErrors(object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.asset)',
 		variableName: 'rsLayerAssetErrors',
 		freqClass: 'static',
 		text: '`Asset Errors\\n${jsonparse($(liveupdate:rsLayerAssetErrors))}`',
@@ -6267,7 +6272,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'rs_layer_asset_available',
@@ -6276,8 +6281,8 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		tier: 'experimental',
 		name: 'RS Asset Available',
 		kind: 'readout',
-		objectPath: 'track:"$(liveupdate:selTrack)".getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)]',
-		propertyPath: 'object.moduleConfig.asset.available',
+		objectPath: 'track:"$(liveupdate:selTrack)"',
+		propertyPath: 'object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.asset.available',
 		variableName: 'rsLayerAssetAvailable',
 		freqClass: 'state',
 		text: "`Asset\\n${bool($(liveupdate:rsLayerAssetAvailable)) ? 'AVAILABLE' : 'MISSING'}`",
@@ -6286,7 +6291,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: false,
@@ -6300,8 +6305,8 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		tier: 'experimental',
 		name: 'RS Framerate Fraction',
 		kind: 'readout',
-		objectPath: 'track:"$(liveupdate:selTrack)".getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)]',
-		propertyPath: 'object.moduleConfig.framerateFraction',
+		objectPath: 'track:"$(liveupdate:selTrack)"',
+		propertyPath: 'object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.framerateFraction',
 		variableName: 'rsLayerFramerateFraction',
 		freqClass: 'state',
 		text: "`FPS Fraction\\n${$(liveupdate:rsLayerFramerateFraction) == 0 ? '1' : $(liveupdate:rsLayerFramerateFraction) == 1 ? '1/2' : $(liveupdate:rsLayerFramerateFraction) == 2 ? '1/3' : '1/4'}`",
@@ -6310,7 +6315,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_taken_over',
@@ -6329,7 +6334,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -6353,7 +6358,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -6377,7 +6382,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -6401,7 +6406,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: false,
@@ -6425,7 +6430,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_active',
@@ -6444,7 +6449,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: false,
@@ -6468,7 +6473,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_running_as',
@@ -6487,7 +6492,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_targets',
@@ -6506,7 +6511,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_hostname',
@@ -6525,7 +6530,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_ip',
@@ -6544,7 +6549,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_name',
@@ -6563,7 +6568,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_type',
@@ -6582,7 +6587,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_gui_visible',
@@ -6601,7 +6606,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_status',
@@ -6620,52 +6625,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
-	},
-	{
-		id: 'fo_health_worst',
-		category: '99 Experimental',
-		homeCategory: '10 Failover & d3Net',
-		tier: 'experimental',
-		name: 'Worst health severity',
-		kind: 'readout',
-		objectPath: 'Machine:"$(liveupdate:selMachine)"',
-		propertyPath:
-			'max([s.severity for s in d3NetManager.machineStatus(object.nodeId).states] or [0]) if object.nodeId is not None else -1',
-		variableName: 'machineHealthWorst',
-		freqClass: 'static',
-		text: "`Health\\n${$(liveupdate:machineHealthWorst) === 0 ? 'Ready' : $(liveupdate:machineHealthWorst) === 1 ? 'Warning' : $(liveupdate:machineHealthWorst) === 2 ? 'ERROR' : $(liveupdate:machineHealthWorst) === 3 ? 'Busy' : $(liveupdate:machineHealthWorst) === 4 ? 'OFFLINE' : $(liveupdate:machineHealthWorst) === -1 ? 'not in session' : $(liveupdate:machineHealthWorst)}`",
-		textExpression: true,
-		previewText: 'Health\nReady',
-		bgcolor: [70, 70, 90],
-		color: [220, 220, 220],
-		actions: [],
-		status: 'unverified',
-		stateColour: {
-			operator: 'gt',
-			value: 1,
-			bgcolor: [178, 34, 34],
-		},
-	},
-	{
-		id: 'fo_health_states',
-		category: '99 Experimental',
-		homeCategory: '10 Failover & d3Net',
-		tier: 'experimental',
-		name: 'Health sub-states (JSON)',
-		kind: 'readout',
-		objectPath: 'Machine:"$(liveupdate:selMachine)"',
-		propertyPath:
-			'[{"name": s.name, "category": s.category, "severity": s.severity, "detail": s.detail} for s in d3NetManager.machineStatus(object.nodeId).states] if object.nodeId is not None else []',
-		variableName: 'machineHealthStates',
-		freqClass: 'static',
-		text: 'Health states\n$(liveupdate:machineHealthStates)',
-		textExpression: false,
-		previewText: 'Health states\n[{"name":"Genlock","category":2,"severity":0,"detail":""}]',
-		bgcolor: [70, 70, 90],
-		color: [220, 220, 220],
-		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_local_name',
@@ -6684,7 +6644,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_local_name_alt',
@@ -6703,7 +6663,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_director_name',
@@ -6722,7 +6682,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_is_director',
@@ -6741,7 +6701,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: false,
@@ -6765,7 +6725,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_understudy_mode',
@@ -6784,7 +6744,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_solo_mode',
@@ -6803,7 +6763,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_has_valid_director',
@@ -6822,7 +6782,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: false,
@@ -6846,7 +6806,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -6870,7 +6830,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_machine_count',
@@ -6889,7 +6849,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_offline_machines',
@@ -6908,7 +6868,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'ne',
 			value: '[]',
@@ -6932,7 +6892,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'ne',
 			value: '[]',
@@ -6956,7 +6916,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'ne',
 			value: '[]',
@@ -6981,7 +6941,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_actor_names',
@@ -7000,7 +6960,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_understudy_names',
@@ -7019,7 +6979,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_understudy_table',
@@ -7039,7 +6999,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_director_understudy',
@@ -7049,7 +7009,8 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		name: "Director's understudy",
 		kind: 'readout',
 		objectPath: 'subsystem:D3NetManagerSystem',
-		propertyPath: 'object.d3NetManager.getDirectorUnderstudy().name',
+		propertyPath:
+			'(object.d3NetManager.getDirectorUnderstudy().name if object.d3NetManager.getDirectorUnderstudy() is not None else "")',
 		variableName: 'directorUnderstudy',
 		freqClass: 'static',
 		text: 'Dir. understudy\n$(liveupdate:directorUnderstudy)',
@@ -7077,7 +7038,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: 0,
@@ -7101,7 +7062,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -7125,7 +7086,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'fo_locked_to_director',
@@ -7144,7 +7105,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'conn_session_name',
@@ -7163,7 +7124,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'conn_project_name',
@@ -7182,7 +7143,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'conn_designer_version',
@@ -7201,7 +7162,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'conn_designer_version_name',
@@ -7220,7 +7181,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'conn_licence_days',
@@ -7239,7 +7200,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'lt',
 			value: 14,
@@ -7263,7 +7224,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'unverified',
+		status: 'live-verified',
 	},
 	{
 		id: 'conn_status',
@@ -7613,7 +7574,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_uid_render_layer',
@@ -7632,7 +7593,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_uid_on_stage',
@@ -7660,7 +7621,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_uid_off_stage',
@@ -7688,7 +7649,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				},
 			},
 		],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 	{
 		id: 'stg_uid_in_error',
@@ -7707,7 +7668,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: true,
@@ -7731,7 +7692,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [40, 40, 43],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 		stateColour: {
 			operator: 'eq',
 			value: false,
@@ -7847,6 +7808,6 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		bgcolor: [70, 70, 90],
 		color: [220, 220, 220],
 		actions: [],
-		status: 'doc-verified',
+		status: 'live-verified',
 	},
 ]

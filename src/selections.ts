@@ -58,7 +58,7 @@ export const SELECTIONS: readonly SelectionDefinition[] = [
 	{
 		id: 'selLayerIndex',
 		label: 'Layer index',
-		description: '0-based leaf-layer index used by the index-based layer probes',
+		description: '0-based position in the track layer list (track.layers) used by the "(by index)" presets',
 		example: '0',
 		kind: 'int',
 		experimental: false,
@@ -123,7 +123,7 @@ export const SELECTIONS: readonly SelectionDefinition[] = [
 		id: 'selWorkload',
 		label: 'RenderStream workload id',
 		description:
-			'Workload id as an integer (REST GET /api/session/renderstream/layerstatus or the Cluster Workload widget > Copy UID)',
+			'Workload id as decimal digits (the [EXP] RS Layer Workload ID preset shows it as text; also Cluster Workload widget > Copy UID or REST GET /api/session/renderstream/layerstatus)',
 		example: '1234',
 		kind: 'uid',
 		experimental: false,
