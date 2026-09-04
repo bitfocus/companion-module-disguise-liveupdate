@@ -249,6 +249,8 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 
 		if (!cached) {
 			this.feedbackOptionsCache.set(feedbackId, { variableName, objectPath, propertyPath, updateFrequency })
+			// The variable exists from the moment the feedback is placed, so error indicators can reach it
+			this.updateVariableDefinitions()
 
 			if (!existingSubscription && this.isConnectionReady() && complete) {
 				this.subscribeToVariable(feedbackId, variableName, objectPath, propertyPath, updateFrequency)
@@ -269,6 +271,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			)
 			this.feedbackOptionsCache.set(feedbackId, { variableName, objectPath, propertyPath, updateFrequency })
 			this.unsubscribeFromVariable(feedbackId)
+			this.updateVariableDefinitions()
 
 			if (complete) {
 				this.subscribeToVariable(feedbackId, variableName, objectPath, propertyPath, updateFrequency)
