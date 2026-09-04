@@ -4,10 +4,10 @@
 
 ### Added
 
-- Preset library: 203 presets in 11 categories (connection, local and remote monitoring, transport
+- Preset library: 306 presets in 11 categories (connection, local and remote monitoring, transport
   state, track and layer inspection, layer control, stage and screen, expression variables,
   RenderStream, failover/d3Net, templates) generated from `docs/PRESET_CATALOG.md`, where every row
-  is traced to a documented Designer API member. 128 read-only experimental presets
+  is traced to a documented Designer API member. 25 read-only experimental presets
   (`99 Experimental`) are available behind the new *Show experimental presets* setting.
 - Selection variables (`selTrack`, `selScreen`, `selMachine`, ...) with a *Selections* block in the
   connection settings and a *Set selection* action; the presets address show objects through them
@@ -35,9 +35,11 @@
   mock Director (subscribe, set, toggle, JSON merge, reconnect).
 - `scripts/live-verify.mjs`: read-only live verification of every catalog pair against a Director;
   results and follow-up probes are kept in `docs/research/live-verification*.json`.
-- Live verification on Designer r34.0.3 (2026-09-04): 164 default and 94 experimental presets
-  confirmed with a value; every catalog row carries its live result (`docs/PRESET_CATALOG.md`,
-  column *live*).
+- Live verification on Designer r34.0.3 (2026-09-04, two read-only passes): 272 of the 306
+  default presets confirmed with a value; every catalog row carries its live result
+  (`docs/PRESET_CATALOG.md`, column *live*). 103 experimental presets that returned a value
+  were promoted to their home categories (ids and variable names unchanged); `selLedScreen`,
+  `selStageUid` and `selRsLayer` are regular selections now.
 
 ### Changed
 

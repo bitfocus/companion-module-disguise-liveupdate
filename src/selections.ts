@@ -162,11 +162,11 @@ export const SELECTIONS: readonly SelectionDefinition[] = [
 	},
 	{
 		id: 'selLedScreen',
-		label: 'LED screen (experimental)',
+		label: 'LED screen',
 		description: 'LED screen name',
 		example: 'LED 1',
 		kind: 'name',
-		experimental: true,
+		experimental: false,
 	},
 	{
 		id: 'selDmxScreen',
@@ -178,11 +178,11 @@ export const SELECTIONS: readonly SelectionDefinition[] = [
 	},
 	{
 		id: 'selStageUid',
-		label: 'Stage UID (experimental)',
+		label: 'Stage UID',
 		description: 'Stage UID, hex with 0x prefix',
 		example: '0x0123456789abcdef',
 		kind: 'uid',
-		experimental: true,
+		experimental: false,
 	},
 	{
 		id: 'selEvDevice',
@@ -210,11 +210,11 @@ export const SELECTIONS: readonly SelectionDefinition[] = [
 	},
 	{
 		id: 'selRsLayer',
-		label: 'RenderStream layer index (experimental)',
+		label: 'RenderStream layer index',
 		description: "0-based index among the selected track's RenderStream leaf layers",
 		example: '0',
 		kind: 'int',
-		experimental: true,
+		experimental: false,
 	},
 ]
 

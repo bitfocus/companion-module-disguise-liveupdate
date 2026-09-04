@@ -10,9 +10,9 @@ The module connects to the WebSocket LiveUpdate API of a Designer Director and l
   variables (`$(liveupdate:fps)`, `$(liveupdate:playheadBeats)`, ...)
 - Set property values (strings, numbers, booleans, JSON objects) and toggle booleans
 - Colour buttons from a value with the **LiveUpdate Compare** feedback
-- Drop ready-made buttons from a **preset library** of 203 presets (monitoring, transport state,
+- Drop ready-made buttons from a **preset library** of 306 presets (monitoring, transport state,
   track and layer, layer control, stage and screen, expression variables, RenderStream,
-  failover) plus 130 experimental presets; the presets address the show through **selection
+  failover) plus 25 experimental presets; the presets address the show through **selection
   variables** (`selTrack`, `selScreen`, `selMachine`, ...) set once in the connection settings
 - Recover automatically from connection loss and subscription errors
 

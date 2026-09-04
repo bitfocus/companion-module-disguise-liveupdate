@@ -24,7 +24,9 @@ rejects are corrected or removed before release, never shipped as they are. Rows
 the test project lacks a feature (timecode source, Expression Variables device, running RenderStream
 workload, LED/DMX screens) keep their tier with the Director's message as a note. Live-confirmed
 experimental rows are promotion candidates; promotion is decided per row with the user and, by the
-rule above, changes only category and name prefix.
+rule above, changes only category and name prefix. On 2026-09-04 the user decided to promote every
+live-confirmed experimental row (103 rows, listed under `promotion` in the catalog JSON); the
+selections they use (selLedScreen, selStageUid, selRsLayer) became regular selections at the same time.
 
 ## 2. Categories
 

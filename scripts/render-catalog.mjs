@@ -74,14 +74,14 @@ const SEL_DEFS = {
 	selEvUid: 'UID of the Expression Variables device, hex with 0x prefix',
 	selEvIndex: '0-based row index of the variable inside the device (unquoted integer)',
 	selTransport: '[Experimental] transport manager name other than default',
-	selLedScreen: '[Experimental] LED screen name',
+	selLedScreen: 'LED screen name',
 	selDmxScreen: '[Experimental] DMX screen name',
-	selStageUid: '[Experimental] Stage UID, hex with 0x prefix',
+	selStageUid: 'Stage UID, hex with 0x prefix',
 	selEvDevice:
 		'[Experimental] Expression Variables device name (file name part of objects/ExpressionVariablesDevice/<name>.apx)',
 	selEvName: '[Experimental] expression variable name, case-sensitive',
 	selEvLayer: '[Experimental] Expression Variables layer name (module: prefix)',
-	selRsLayer: "[Experimental] 0-based index among the track's RenderStream leaf layers",
+	selRsLayer: "0-based index among the track's RenderStream leaf layers",
 }
 
 const allRows = catalog.rows
@@ -103,7 +103,7 @@ md.push(
 )
 md.push('')
 md.push(
-	'Status values: `doc-verified` (normal tier, shipped by default), `unverified` (Experimental tier: read-only, shown only when the connection setting *Show experimental presets* is on), `doc-verified` rows inside 99 Experimental are documented comprehensions kept there by rule. `live-verified` = the exact object/property pair returned a value from a Designer r34.0.3 Director on 2026-09-04 (Phase 3; evidence in `docs/research/live-verification.json` and `docs/research/live-verification-probes.json`). The *live* column shows the per-row result: `confirmed-value`, `confirmed-path-error` (subscription accepted, the Director reported an evaluation error, in every remaining case a project-specific one), `confirmed-no-value` (accepted, no value within the timeout), `not-run` (a selection had no value in the test project) or `n/a` (templates). Rows in 99 Experimental keep their tier even when confirmed; promotion is a separate decision.',
+	'Status values: `doc-verified` (normal tier, shipped by default), `unverified` (Experimental tier: read-only, shown only when the connection setting *Show experimental presets* is on), `doc-verified` rows inside 99 Experimental are documented comprehensions kept there by rule. `live-verified` = the exact object/property pair returned a value from a Designer r34.0.3 Director on 2026-09-04 (Phase 3; evidence in `docs/research/live-verification.json` and `docs/research/live-verification-probes.json`). The *live* column shows the per-row result: `confirmed-value`, `confirmed-path-error` (subscription accepted, the Director reported an evaluation error, in every remaining case a project-specific one), `confirmed-no-value` (accepted, no value within the timeout), `not-run` (a selection had no value in the test project) or `n/a` (templates). Live-confirmed experimental rows were promoted to their home categories on 2026-09-04 (user decision; the JSON key `promotion` lists them).',
 )
 md.push('')
 md.push('## Summary')

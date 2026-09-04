@@ -867,9 +867,9 @@
   },
   {
    "presetId": "monl_disk_read",
-   "category": "99 Experimental",
+   "category": "02 Monitoring Local",
    "homeCategory": "02 Monitoring Local",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Disk read (MB/s)",
    "purpose": "Disk read throughput in MB/s - shows content-load plateaus and starved playback.",
    "controlKind": "readout",
@@ -882,7 +882,7 @@
    "textTemplate": "`Disk read\\n${toFixed($(liveupdate:diskReadMbs), 1)} MB/s`",
    "textExpression": true,
    "previewText": "Disk read\n120.5 MB/s",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -907,13 +907,18 @@
     "value": "0.00000667572021484375",
     "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"Disk\")",
     "propertyPath": "object.seriesAverage(\"Read (MB/s)\", 1)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "monl_disk_write",
-   "category": "99 Experimental",
+   "category": "02 Monitoring Local",
    "homeCategory": "02 Monitoring Local",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Disk write (MB/s)",
    "purpose": "Disk write throughput in MB/s (recording / caching activity).",
    "controlKind": "readout",
@@ -926,7 +931,7 @@
    "textTemplate": "`Disk write\\n${toFixed($(liveupdate:diskWriteMbs), 1)} MB/s`",
    "textExpression": true,
    "previewText": "Disk write\n4.2 MB/s",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -951,6 +956,11 @@
     "value": "0",
     "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"Disk\")",
     "propertyPath": "object.seriesAverage(\"Write (MB/s)\", 1)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
@@ -1154,9 +1164,9 @@
   },
   {
    "presetId": "monl_monitor_names",
-   "category": "99 Experimental",
+   "category": "02 Monitoring Local",
    "homeCategory": "02 Monitoring Local",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Local monitor names (discovery)",
    "purpose": "Runtime list of every local monitor name on this build - the authoritative way to learn the strings findLocalMonitor accepts (Output Latency, Frame Latency, PCI/CPU IO, Timer, RenderStream graphs are undocumented).",
    "controlKind": "readout",
@@ -1169,7 +1179,7 @@
    "textTemplate": "Monitors\n$(liveupdate:localMonitorNames)",
    "textExpression": false,
    "previewText": "Monitors\n[\"fps\",\"GPUProfiler\",\"CPU\"]",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -1194,13 +1204,18 @@
     "value": "<redacted: project content>",
     "objectPath": "subsystem:MonitoringManager",
     "propertyPath": "[m.name for m in object.localMonitors().all()]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "monl_cpu_series_names",
-   "category": "99 Experimental",
+   "category": "02 Monitoring Local",
    "homeCategory": "02 Monitoring Local",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "CPU series titles (discovery)",
    "purpose": "Exact series titles of the CPU monitor - resolves the UI-label-vs-API-title ambiguity (e.g. whether 'Working Time (ms)' exists) before more CPU presets are shipped.",
    "controlKind": "readout",
@@ -1213,7 +1228,7 @@
    "textTemplate": "CPU series\n$(liveupdate:cpuSeriesNames)",
    "textExpression": false,
    "previewText": "CPU series\n[\"Total\",\"Working Time (ms)\"]",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -1238,13 +1253,18 @@
     "value": "[\"Update\",\"Render\",\"Total\"]",
     "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"CPU\")",
     "propertyPath": "[s.name for s in object.graphDescriptor(False).dataSeries]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "monl_cpu_units",
-   "category": "99 Experimental",
+   "category": "02 Monitoring Local",
    "homeCategory": "02 Monitoring Local",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "CPU graph Y units",
    "purpose": "Y-axis unit label of the CPU monitor - directly answers the open 'ms vs percent' question for monl_cpu_total.",
    "controlKind": "readout",
@@ -1257,7 +1277,7 @@
    "textTemplate": "CPU units\n$(liveupdate:cpuUnits)",
    "textExpression": false,
    "previewText": "CPU units\nms",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -1286,13 +1306,18 @@
     "value": "Units",
     "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"CPU\")",
     "propertyPath": "object.graphDescriptor(False).yUnits"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "monl_gpu_mem_units",
-   "category": "99 Experimental",
+   "category": "02 Monitoring Local",
    "homeCategory": "02 Monitoring Local",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "GPU memory graph Y units",
    "purpose": "Y-axis unit label of the GPU memory monitor (candidate-exact form of the units expression; expected 'MB').",
    "controlKind": "readout",
@@ -1305,7 +1330,7 @@
    "textTemplate": "GPU mem units\n$(liveupdate:gpuMemUnits)",
    "textExpression": false,
    "previewText": "GPU mem units\nMB",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -1330,13 +1355,18 @@
     "value": "Units",
     "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUMemory\")",
     "propertyPath": "object.graphDescriptor(False).yUnits"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "monl_gpu_thresholds",
-   "category": "99 Experimental",
+   "category": "02 Monitoring Local",
    "homeCategory": "02 Monitoring Local",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "GPU profiler thresholds",
    "purpose": "Designer's own dotted threshold lines on the GPU profiler (50/60 fps frame budgets) as label/value pairs - lets a future colour rule use Designer's limits instead of a hard-coded 17 ms.",
    "controlKind": "readout",
@@ -1349,7 +1379,7 @@
    "textTemplate": "GPU limits\n$(liveupdate:gpuThresholds)",
    "textExpression": false,
    "previewText": "GPU limits\n[{\"label\":\"60fps\",\"value\":16.7}]",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -1374,13 +1404,18 @@
     "value": "<redacted: project content>",
     "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
     "propertyPath": "[{\"label\": t.label, \"value\": t.value} for t in object.graphDescriptor(False).thresholds]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "monl_fps_minmax",
-   "category": "99 Experimental",
+   "category": "02 Monitoring Local",
    "homeCategory": "02 Monitoring Local",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "FPS min/max in buffer",
    "purpose": "Worst and best FPS over the whole FIFO buffer plus the latest sample - 'worst fps in the last N frames', which seriesAverage cannot give.",
    "controlKind": "readout",
@@ -1393,7 +1428,7 @@
    "textTemplate": "`FPS min\\n${toFixed(jsonpath(jsonparse($(liveupdate:fpsMinMax)), '$.Actual.min'), 1)}`",
    "textExpression": true,
    "previewText": "FPS min\n58.2",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -1420,13 +1455,18 @@
     "value": "<redacted: project content>",
     "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"fps\")",
     "propertyPath": "{s.name: {\"latest\": s.samples()[-1], \"min\": min(s.samples()), \"max\": max(s.samples())} for s in object.graphDescriptor(False).dataSeries if s.samples()}"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "monl_graph_categories",
-   "category": "99 Experimental",
+   "category": "02 Monitoring Local",
    "homeCategory": "02 Monitoring Local",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Graph categories (discovery)",
    "purpose": "Static list of Monitoring Manager graph category names - also a probe for whether bare d3 type names resolve inside a LiveUpdate property path.",
    "controlKind": "readout",
@@ -1439,7 +1479,7 @@
    "textTemplate": "Categories\n$(liveupdate:graphCategories)",
    "textExpression": false,
    "previewText": "Categories\n[\"Local\",\"RenderStream\"]",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -1464,13 +1504,18 @@
     "value": "[\"renderstream\"]",
     "objectPath": "subsystem:MonitoringManager",
     "propertyPath": "MetricGraphCategories.categories()"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "monr_node_monitor_names",
-   "category": "99 Experimental",
+   "category": "03 Monitoring Remote",
    "homeCategory": "03 Monitoring Remote",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Remote node monitor names",
    "purpose": "Monitor names published by the node in selHost - discovery for the monitorName argument of findRemoteMonitor before promoting any non-fps remote row.",
    "controlKind": "readout",
@@ -1483,7 +1528,7 @@
    "textTemplate": "Remote monitors\n$(liveupdate:remoteMonitorNames)",
    "textExpression": false,
    "previewText": "Remote monitors\n[\"fps\",\"GPUProfiler\"]",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -1508,13 +1553,18 @@
     "value": "<redacted: project content>",
     "objectPath": "subsystem:MonitoringManager",
     "propertyPath": "[m.name for m in object.remoteMetricMonitorsForNode(\"ACTOR01:d3\").all()]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "monr_machine_cpu_time",
-   "category": "99 Experimental",
+   "category": "03 Monitoring Remote",
    "homeCategory": "03 Monitoring Remote",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Remote Machine CPU time %",
    "purpose": "CPU-time percentage of the remote machine in selHost from its 'Machine' monitor (candidate-exact example of the remote-any pattern).",
    "controlKind": "readout",
@@ -1528,7 +1578,7 @@
    "textTemplate": "`${$(liveupdate:selHost)} CPU %\\n${toFixed($(liveupdate:remoteMachineCpuPct), 0)}%`",
    "textExpression": true,
    "previewText": "ACTOR01 CPU %\n42%",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -1564,13 +1614,18 @@
     "value": "12.599292397499084",
     "objectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"ACTOR01:d3\", \"Machine\")",
     "propertyPath": "object.seriesAverage(\"CPU Time\", 1)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "monr_machine_gpu_time",
-   "category": "99 Experimental",
+   "category": "03 Monitoring Remote",
    "homeCategory": "03 Monitoring Remote",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Remote Machine GPU time %",
    "purpose": "GPU-time percentage of the remote machine in selHost.",
    "controlKind": "readout",
@@ -1584,7 +1639,7 @@
    "textTemplate": "`${$(liveupdate:selHost)} GPU %\\n${toFixed($(liveupdate:remoteMachineGpuPct), 0)}%`",
    "textExpression": true,
    "previewText": "ACTOR01 GPU %\n65%",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -1621,13 +1676,18 @@
     "value": "11.934884071350098",
     "objectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"ACTOR01:d3\", \"Machine\")",
     "propertyPath": "object.seriesAverage(\"GPU Time\", 1)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "monr_gpu_total",
-   "category": "99 Experimental",
+   "category": "03 Monitoring Remote",
    "homeCategory": "03 Monitoring Remote",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Remote GPU frame time (Total)",
    "purpose": "GPU profiler total frame time (ms) of the remote machine in selHost.",
    "controlKind": "readout",
@@ -1641,7 +1701,7 @@
    "textTemplate": "`${$(liveupdate:selHost)} GPU ms\\n${toFixed($(liveupdate:remoteGpuTotalMs), 1)}`",
    "textExpression": true,
    "previewText": "ACTOR01 GPU ms\n12.3",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -1678,13 +1738,18 @@
     "value": "0",
     "objectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"ACTOR01:d3\", \"GPUProfiler\")",
     "propertyPath": "object.seriesAverage(\"Total\", 1)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "monr_cpu_total",
-   "category": "99 Experimental",
+   "category": "03 Monitoring Remote",
    "homeCategory": "03 Monitoring Remote",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Remote CPU frame time (Total)",
    "purpose": "CPU 'Total' of the remote machine in selHost (unit open, see monl_cpu_total).",
    "controlKind": "readout",
@@ -1697,7 +1762,7 @@
    "textTemplate": "`${$(liveupdate:selHost)} CPU total\\n${toFixed($(liveupdate:remoteCpuTotalMs), 1)}`",
    "textExpression": true,
    "previewText": "ACTOR01 CPU total\n9.4",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -1734,13 +1799,18 @@
     "value": "0",
     "objectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"ACTOR01:d3\", \"CPU\")",
     "propertyPath": "object.seriesAverage(\"Total\", 1)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "monr_gpu_mem",
-   "category": "99 Experimental",
+   "category": "03 Monitoring Remote",
    "homeCategory": "03 Monitoring Remote",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Remote GPU memory (MB)",
    "purpose": "GPU memory in use on the remote machine in selHost.",
    "controlKind": "readout",
@@ -1753,7 +1823,7 @@
    "textTemplate": "`${$(liveupdate:selHost)} GPU mem\\n${round($(liveupdate:remoteGpuMemMb))} MB`",
    "textExpression": true,
    "previewText": "ACTOR01 GPU mem\n3210 MB",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -1782,6 +1852,11 @@
     "value": "0",
     "objectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"ACTOR01:d3\", \"GPUMemory\")",
     "propertyPath": "object.seriesAverage(\"Usage(MB)\", 1)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
@@ -3349,12 +3424,12 @@
    "corrected": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "probe2",
+    "probe": "sweep2",
+    "objectPath": "transportManager:default",
+    "propertyPath": "(object.timecode.current.__str__() if object.timecode is not None else \"\")",
     "status": "confirmed-value",
     "value": "",
-    "note": "only the None branch was exercised (no timecode source in the test project)",
-    "objectPath": "transportManager:default",
-    "propertyPath": "(object.timecode.current.__str__() if object.timecode is not None else \"\")"
+    "note": "only the None branch was exercised (the feature is absent in the test project)"
    }
   },
   {
@@ -3395,19 +3470,19 @@
    "corrected": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "probe2",
+    "probe": "sweep2",
+    "objectPath": "transportManager:default",
+    "propertyPath": "(object.timecode.statusString if object.timecode is not None else \"\")",
     "status": "confirmed-value",
     "value": "",
-    "note": "only the None branch was exercised (no timecode source in the test project)",
-    "objectPath": "transportManager:default",
-    "propertyPath": "(object.timecode.statusString if object.timecode is not None else \"\")"
+    "note": "only the None branch was exercised (the feature is absent in the test project)"
    }
   },
   {
    "presetId": "tr_trackposition",
-   "category": "99 Experimental",
+   "category": "04 Transport State",
    "homeCategory": "04 Transport State",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Track position (seconds)",
    "purpose": "Playhead converted to seconds through the current track's tempo map (correct when bpm != 60). Mirrors the OSC module's trackposition variable.",
    "controlKind": "readout",
@@ -3420,7 +3495,7 @@
    "textTemplate": "`Position\\n${secondsToTimestamp($(liveupdate:trackposition))}`",
    "textExpression": true,
    "previewText": "Position\n00:00:12",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "range": "0 .. object.track.lengthInSec",
    "candidateIds": [
@@ -3448,13 +3523,18 @@
     "value": "3210.8333333333335",
     "objectPath": "transportManager:default",
     "propertyPath": "object.track.beatToTime(object.player.tRender)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "tr_timecodeposition",
-   "category": "99 Experimental",
+   "category": "04 Transport State",
    "homeCategory": "04 Transport State",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Timecode position",
    "purpose": "Playhead as a timecode string (HH:MM:SS:FF) matched against the track's TC tags, like Designer's own timecode readout. Mirrors the OSC module's timecodeposition variable.",
    "controlKind": "readout",
@@ -3467,7 +3547,7 @@
    "textTemplate": "Timecode\n$(liveupdate:timecodeposition)",
    "textExpression": false,
    "previewText": "Timecode\n01:00:12:04",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "tr-04"
@@ -3495,13 +3575,18 @@
     "value": "<redacted: project content>",
     "objectPath": "transportManager:default",
     "propertyPath": "object.beatToTimecode(object.player.tRender).__str__()"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "tr_free_running",
-   "category": "99 Experimental",
+   "category": "04 Transport State",
    "homeCategory": "04 Transport State",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Free running",
    "purpose": "Possibly true when the player is free-running rather than chasing an external clock (semantics guessed from the name).",
    "controlKind": "readout",
@@ -3514,7 +3599,7 @@
    "textTemplate": "`Free run\\n${$(liveupdate:isFreeRunning) ? 'YES' : 'no'}`",
    "textExpression": true,
    "previewText": "Free run\nYES",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "tr-12"
@@ -3539,13 +3624,18 @@
     "value": "true",
     "objectPath": "transportManager:default",
     "propertyPath": "object.player.isFreeRunning"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "tr_bpm",
-   "category": "99 Experimental",
+   "category": "04 Transport State",
    "homeCategory": "04 Transport State",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "BPM at playhead",
    "purpose": "Tempo at the playhead (varies per section on quantised tracks). Mirrors the OSC module's bpm variable.",
    "controlKind": "readout",
@@ -3558,7 +3648,7 @@
    "textTemplate": "`BPM\\n${toFixed($(liveupdate:bpm), 1)}`",
    "textExpression": true,
    "previewText": "BPM\n120.0",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "tr-23"
@@ -3585,13 +3675,18 @@
     "value": "60",
     "objectPath": "transportManager:default",
     "propertyPath": "object.track.bpmAt(object.player.tRender)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "tr_section_index",
-   "category": "99 Experimental",
+   "category": "04 Transport State",
    "homeCategory": "04 Transport State",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Current section number",
    "purpose": "Index of the section the playhead is in (0-based from Designer; displayed +1).",
    "controlKind": "readout",
@@ -3604,7 +3699,7 @@
    "textTemplate": "`Section\\n${$(liveupdate:sectionIndex) + 1}`",
    "textExpression": true,
    "previewText": "Section\n3",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "range": "0 .. object.track.nSections()-1",
    "candidateIds": [
@@ -3631,13 +3726,18 @@
     "value": "32",
     "objectPath": "transportManager:default",
     "propertyPath": "object.track.beatToSection(object.player.tRender)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "tr_current_section_name",
-   "category": "99 Experimental",
+   "category": "04 Transport State",
    "homeCategory": "04 Transport State",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Current section name",
    "purpose": "Note at the start of the current section - Designer's own 'current section name' expression. Mirrors the OSC module's currentSectionName variable.",
    "controlKind": "readout",
@@ -3650,7 +3750,7 @@
    "textTemplate": "Section\n$(liveupdate:currentSectionName)",
    "textExpression": false,
    "previewText": "Section\nVerse 2",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "tr-25"
@@ -3678,13 +3778,18 @@
     "value": "<redacted: project content>",
     "objectPath": "transportManager:default",
     "propertyPath": "object.track.noteAtBeat(object.track.sectionToBeat(object.track.beatToSection(object.player.tRender)))"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "tr_next_section_name",
-   "category": "99 Experimental",
+   "category": "04 Transport State",
    "homeCategory": "04 Transport State",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Next section name",
    "purpose": "Note at the start of the NEXT section ('what is the next cue'). Mirrors the OSC module's nextSectionName variable.",
    "controlKind": "readout",
@@ -3697,7 +3802,7 @@
    "textTemplate": "Next\n$(liveupdate:nextSectionName)",
    "textExpression": false,
    "previewText": "Next\nChorus",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "tr-26"
@@ -3723,13 +3828,18 @@
     "value": "",
     "objectPath": "transportManager:default",
     "propertyPath": "object.track.noteAtBeat(object.track.sectionToBeat(object.track.beatToSection(object.player.tRender) + 1))"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "tr_section_remaining",
-   "category": "99 Experimental",
+   "category": "04 Transport State",
    "homeCategory": "04 Transport State",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Section remaining (beats)",
    "purpose": "Beats remaining until the end of the current section (countdown to the hold / next cue). Mirrors the OSC module's sectionRemaining variable.",
    "controlKind": "readout",
@@ -3742,7 +3852,7 @@
    "textTemplate": "`Sec remain\\n${toFixed($(liveupdate:sectionRemaining), 1)}`",
    "textExpression": true,
    "previewText": "Sec remain\n12.3",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "tr-28"
@@ -3768,13 +3878,18 @@
     "value": "179.7573349394006",
     "objectPath": "transportManager:default",
     "propertyPath": "object.track.tLastBeatInSection(object.player.tRender) - object.player.tRender"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "tr_section_elapsed",
-   "category": "99 Experimental",
+   "category": "04 Transport State",
    "homeCategory": "04 Transport State",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Section elapsed (beats)",
    "purpose": "Beats elapsed since the start of the current section. Mirrors the OSC module's sectionElapsed variable.",
    "controlKind": "readout",
@@ -3787,7 +3902,7 @@
    "textTemplate": "`Sec elapsed\\n${toFixed($(liveupdate:sectionElapsed), 1)}`",
    "textExpression": true,
    "previewText": "Sec elapsed\n4.2",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "tr-29"
@@ -3813,6 +3928,11 @@
     "value": "0",
     "objectPath": "transportManager:default",
     "propertyPath": "object.player.tRender - object.track.sectionToBeat(object.track.beatToSection(object.player.tRender))"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
@@ -3853,19 +3973,19 @@
    "actions": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "probe2",
+    "probe": "sweep2",
+    "objectPath": "transportManager:default",
+    "propertyPath": "(object.timecode.description if object.timecode is not None else \"\")",
     "status": "confirmed-value",
     "value": "",
-    "note": "only the None branch was exercised (no timecode source in the test project)",
-    "objectPath": "transportManager:default",
-    "propertyPath": "(object.timecode.description if object.timecode is not None else \"\")"
+    "note": "only the None branch was exercised (the feature is absent in the test project)"
    }
   },
   {
    "presetId": "tr_setlist_tracks",
-   "category": "99 Experimental",
+   "category": "04 Transport State",
    "homeCategory": "04 Transport State",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Set list track names",
    "purpose": "Names of all tracks in the active set list (JSON array) - lets a page label next / prev track buttons.",
    "controlKind": "readout",
@@ -3878,7 +3998,7 @@
    "textTemplate": "Set list\n$(liveupdate:setListTracks)",
    "textExpression": false,
    "previewText": "Set list\n[\"Act 1\",\"Act 2\"]",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "tr-41"
@@ -3904,13 +4024,18 @@
     "value": "[\"Show Track\"]",
     "objectPath": "transportManager:default",
     "propertyPath": "[t.description for t in object.setList.tracks]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "tr_active_layer_count",
-   "category": "99 Experimental",
+   "category": "04 Transport State",
    "homeCategory": "04 Transport State",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Active layer count",
    "purpose": "Number of layers currently active under the playhead - an 'is anything rendering' sanity light.",
    "controlKind": "readout",
@@ -3923,7 +4048,7 @@
    "textTemplate": "Active layers\n$(liveupdate:activeLayerCount)",
    "textExpression": false,
    "previewText": "Active layers\n3",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "tr-43"
@@ -3948,13 +4073,18 @@
     "value": "6",
     "objectPath": "transportManager:default",
     "propertyPath": "len(object.player.activeLayers)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "tr_gui_playhead_beats",
-   "category": "99 Experimental",
+   "category": "04 Transport State",
    "homeCategory": "04 Transport State",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Playhead (GUI transport)",
    "purpose": "Alternative object path that follows whichever transport manager is currently active in the d3State bar (GuiSystem.player).",
    "controlKind": "readout",
@@ -3967,7 +4097,7 @@
    "textTemplate": "`GUI playhead\\n${toFixed($(liveupdate:guiPlayheadBeats), 2)}`",
    "textExpression": true,
    "previewText": "GUI playhead\n12.50",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "tr-48"
@@ -3996,6 +4126,11 @@
     "value": "3210.8333333333335",
     "objectPath": "subsystem:GuiSystem",
     "propertyPath": "object.player.tRender"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
@@ -5099,7 +5234,7 @@
    "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "yes",
-   "status": "doc-verified",
+   "status": "live-verified",
    "liveTestPriority": "high",
    "subscriptions": 1,
    "sources": [
@@ -5129,12 +5264,12 @@
    "corrected": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
-    "status": "confirmed-path-error",
-    "message": "'NoneType' object has no attribute 'sequence'",
-    "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
+    "probe": "sweep2",
+    "objectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
     "propertyPath": "object.findSequence(\"pos.y\").sequence.key(0).v",
-    "note": "the test layer \"Colour Layer\" is a ColourAdjust layer without this field, so findSequence() returned None; the same property form returned a value on the ColourAdjust layer for \"brightness\" (1) and on the Video layer \"Video 26\" for \"pos.x\" (0), see probe 1"
+    "status": "confirmed-value",
+    "value": "0",
+    "note": "run 1: confirmed-path-error ('NoneType' object has no attribute 'sequence')"
    }
   },
   {
@@ -5345,7 +5480,7 @@
    "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "yes",
-   "status": "doc-verified",
+   "status": "live-verified",
    "liveTestPriority": "high",
    "subscriptions": 1,
    "sources": [
@@ -5383,12 +5518,11 @@
    },
    "live": {
     "date": "2026-09-04",
-    "probe": "probe2",
+    "probe": "sweep2",
+    "objectPath": "track:\"Show Track\".layers[2]",
+    "propertyPath": "object.findSequence(\"pos.x\").sequence.key(0).v",
     "status": "confirmed-value",
-    "value": "1",
-    "note": "object path confirmed with layers[0] / findSequence(\"brightness\") (value 1) and the pos.x property form with findLayerByName(\"Video 26\") (value 0); the exact pair was not run because layer 0 of the test track is a ColourAdjust layer without pos.x",
-    "objectPath": "track:\"Show Track\".layers[0]",
-    "propertyPath": "object.findSequence(\"brightness\").sequence.key(0).v"
+    "value": "0"
    }
   },
   {
@@ -6039,7 +6173,7 @@
    "bgcolor": "rgb(140,70,0)",
    "color": "rgb(255,255,255)",
    "writable": "yes",
-   "status": "doc-verified",
+   "status": "live-verified",
    "liveTestPriority": "high",
    "subscriptions": 1,
    "sources": [
@@ -6069,12 +6203,12 @@
    "corrected": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
-    "status": "confirmed-path-error",
-    "message": "'NoneType' object has no attribute 'sequence'",
-    "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
+    "probe": "sweep2",
+    "objectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
     "propertyPath": "object.findSequence(\"pos.y\").sequence.key(0).v",
-    "note": "the test layer \"Colour Layer\" is a ColourAdjust layer without this field, so findSequence() returned None; the same property form returned a value on the ColourAdjust layer for \"brightness\" (1) and on the Video layer \"Video 26\" for \"pos.x\" (0), see probe 1"
+    "status": "confirmed-value",
+    "value": "0",
+    "note": "run 1: confirmed-path-error ('NoneType' object has no attribute 'sequence')"
    }
   },
   {
@@ -6095,7 +6229,7 @@
    "bgcolor": "rgb(140,70,0)",
    "color": "rgb(255,255,255)",
    "writable": "yes",
-   "status": "doc-verified",
+   "status": "live-verified",
    "liveTestPriority": "high",
    "subscriptions": 1,
    "sources": [
@@ -6125,12 +6259,12 @@
    "corrected": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
-    "status": "confirmed-path-error",
-    "message": "'NoneType' object has no attribute 'sequence'",
-    "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
+    "probe": "sweep2",
+    "objectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
     "propertyPath": "object.findSequence(\"pos.y\").sequence.key(0).v",
-    "note": "the test layer \"Colour Layer\" is a ColourAdjust layer without this field, so findSequence() returned None; the same property form returned a value on the ColourAdjust layer for \"brightness\" (1) and on the Video layer \"Video 26\" for \"pos.x\" (0), see probe 1"
+    "status": "confirmed-value",
+    "value": "0",
+    "note": "run 1: confirmed-path-error ('NoneType' object has no attribute 'sequence')"
    }
   },
   {
@@ -6151,7 +6285,7 @@
    "bgcolor": "rgb(140,70,0)",
    "color": "rgb(255,255,255)",
    "writable": "yes",
-   "status": "doc-verified",
+   "status": "live-verified",
    "liveTestPriority": "high",
    "subscriptions": 1,
    "sources": [
@@ -6181,12 +6315,12 @@
    "corrected": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
-    "status": "confirmed-path-error",
-    "message": "'NoneType' object has no attribute 'sequence'",
-    "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
+    "probe": "sweep2",
+    "objectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
     "propertyPath": "object.findSequence(\"pos.y\").sequence.key(0).v",
-    "note": "the test layer \"Colour Layer\" is a ColourAdjust layer without this field, so findSequence() returned None; the same property form returned a value on the ColourAdjust layer for \"brightness\" (1) and on the Video layer \"Video 26\" for \"pos.x\" (0), see probe 1"
+    "status": "confirmed-value",
+    "value": "0",
+    "note": "run 1: confirmed-path-error ('NoneType' object has no attribute 'sequence')"
    }
   },
   {
@@ -6724,11 +6858,11 @@
   },
   {
    "designerVersion": "r34.0.3",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": true,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
    "status": "live-verified",
@@ -6737,7 +6871,7 @@
    "sources": [
     "liveupdate.txt (list comprehensions documented; object.layers documented); d3.pyi:47857 SuperLayer.name"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_layer_names",
    "name": "Layer names (list)",
@@ -6772,15 +6906,20 @@
     "value": "<redacted: project content>",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "[l.name for l in object.layers]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "designerVersion": "r34.0.3",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": true,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
    "status": "live-verified",
@@ -6789,7 +6928,7 @@
    "sources": [
     "track-and-sequencing guide: 'my_layer = next((l for l in track.layers if l.name == \"My Layer\"), None)'; liveupdate.txt comprehension filtering example"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_layer_tstart_bycomp",
    "name": "Layer start via comprehension",
@@ -6816,15 +6955,20 @@
     "value": "0",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "[l for l in object.layers if l.name == \"Colour Layer\"][0].tStart"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "designerVersion": "r33.1+ (sectionInfo)",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": true,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
    "status": "live-verified",
@@ -6833,7 +6977,7 @@
    "sources": [
     "d3.pyi:49911 sectionInfo, d3.pyi:49922 sectionLengthBeats, d3.pyi:49837 noteAtBeat, d3.pyi:48106 beatToTime, d3.pyi:49829 nSections"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_section_table",
    "name": "Section table (JSON)",
@@ -6867,15 +7011,20 @@
     "value": "<redacted: project content>",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "[{\"i\": i, \"start\": object.sectionInfo(i).tStart, \"end\": object.sectionInfo(i).tEnd, \"lengthBeats\": object.sectionLengthBeats(i), \"note\": object.noteAtBeat(object.sectionInfo(i).tStart), \"startSec\": object.beatToTime(object.sectionInfo(i).tStart)} for i in range(object.nSections())]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "designerVersion": "r33.1+ (sectionInfo)",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": false,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
    "status": "live-verified",
@@ -6886,7 +7035,7 @@
     "d3.pyi:49837",
     "d3.pyi:49911 Track.sectionInfo; d3.pyi:42808/42828/42818 SectionInfo.iSection/tStart/tEnd"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_section_note",
    "name": "Section note",
@@ -6917,15 +7066,20 @@
     "value": "<redacted: project content>",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "object.noteAtBeat(object.sectionInfo(0).tStart)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "designerVersion": "r34.0.3",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": true,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
    "status": "live-verified",
@@ -6934,7 +7088,7 @@
    "sources": [
     "d3.pyi:49911 sectionInfo, d3.pyi:49922 sectionLengthBeats, d3.pyi:49837 noteAtBeat, d3.pyi:48106 beatToTime, d3.pyi:49829 nSections"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_section_length",
    "name": "Section length (beats)",
@@ -6961,15 +7115,20 @@
     "value": "5",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "object.sectionLengthBeats(0)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "designerVersion": "r33.1+ (sectionInfo)",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": true,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
    "status": "live-verified",
@@ -6980,7 +7139,7 @@
     "d3.pyi:48106 beatToTime, d3.pyi:48296 timeToBeat; track-and-sequencing guide",
     "d3.pyi:49911 Track.sectionInfo; d3.pyi:42808/42828/42818 SectionInfo.iSection/tStart/tEnd"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_section_start_sec",
    "name": "Section start (time)",
@@ -7008,15 +7167,20 @@
     "value": "0",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "object.beatToTime(object.sectionInfo(0).tStart)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "designerVersion": "r34.0.3",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": false,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
    "status": "live-verified",
@@ -7025,7 +7189,7 @@
    "sources": [
     "d3.pyi:49652"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_section_of_beat",
    "name": "Section index at beat",
@@ -7052,15 +7216,20 @@
     "value": "0",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "object.beatToSection(0)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "designerVersion": "r34.0.3",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": false,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
    "status": "live-verified",
@@ -7069,7 +7238,7 @@
    "sources": [
     "d3.pyi:49985 Track.tagAtBeat; d3.pyi:48435 'CUE: Final[int] = 1'; d3.pyi:48440 Tag.text"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_cue_tag_at_beat",
    "name": "CUE number at beat",
@@ -7096,15 +7265,20 @@
     "value": "1",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "(object.tagAtBeat(0, 1).text if object.tagAtBeat(0, 1) else \"\")"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "designerVersion": "r34.0.3",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": true,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
    "status": "live-verified",
@@ -7113,7 +7287,7 @@
    "sources": [
     "d3.pyi:49996"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_tags_at_beat",
    "name": "Tags at beat (JSON)",
@@ -7146,30 +7320,36 @@
     "value": "[{\"text\":\"1\",\"type\":1}]",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "[{\"type\": t.type, \"text\": t.text} for t in object.tagsAtBeat(0)]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "designerVersion": "r34.0.3",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": true,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
-   "status": "unverified",
+   "status": "live-verified",
    "liveTestPriority": "low",
    "subscriptions": 1,
    "sources": [
-    "d3.pyi:664 TimeSequence.getT, d3.pyi:667 getV, d3.pyi:670 n; d3.pyi:9882 Cue.note, d3.pyi:9889 Cue.section, d3.pyi:9908 Cue.getTags; d3.pyi:48435-48437 Tag.CUE/MIDI/TC, d3.pyi:48440 Tag.text, d3.pyi:48447 Tag.type; dict comprehension serialisation documented in liveupdate.txt"
+    "d3.pyi:664 TimeSequence.getT, d3.pyi:667 getV, d3.pyi:670 n; d3.pyi:9882 Cue.note, d3.pyi:9889 Cue.section, d3.pyi:9908 Cue.getTags; d3.pyi:48435-48437 Tag.CUE/MIDI/TC, d3.pyi:48440 Tag.text, d3.pyi:48447 Tag.type; dict comprehension serialisation documented in liveupdate.txt",
+    "live probe 5 (r34.0.3, 2026-09-04): a list of {beat, note, section} objects"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_cue_table",
    "name": "Cue table (JSON)",
-   "purpose": "Full cue table: beat, note, is-section flag and tags for every cue.",
+   "purpose": "Cue table: beat, note and is-section flag for every cue (JSON array).",
    "objectPath": "track:\"$(liveupdate:selTrack)\"",
-   "propertyPath": "[{\"beat\": object.cues.getT(i), \"note\": object.cues.getV(i).note, \"section\": object.cues.getV(i).section, \"tags\": [{\"type\": t.type, \"text\": t.text} for t in object.cues.getV(i).getTags()]} for i in range(object.cues.n())]",
+   "propertyPath": "[{\"beat\": object.cues.getT(i), \"note\": object.cues.getV(i).note, \"section\": object.cues.getV(i).section} for i in range(object.cues.n())]",
    "variableName": "trackCueTable",
    "valueType": "array of objects (JSON string)",
    "freqClass": "static",
@@ -7178,7 +7358,7 @@
    "candidateIds": [
     "trk-cueTable"
    ],
-   "notes": "Walks every cue and chains through Cue resource refs; heavy, keep at 5 s.",
+   "notes": "Walks every cue and chains through Cue resource refs; heavy, keep at 5 s. The nested tag comprehension ([... for t in cue.getTags()]) never delivered a value within the timeout on r34.0.3 although its pieces evaluate; use \"Cue tags at beat\" for tags.",
    "dimension": "track_layer",
    "verifierOk": false,
    "verifierProblems": [
@@ -7192,19 +7372,25 @@
    },
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
-    "status": "confirmed-no-value",
+    "probe": "probe5",
+    "status": "confirmed-value",
+    "value": "<redacted: project content>",
     "objectPath": "track:\"Show Track\"",
-    "propertyPath": "[{\"beat\": object.cues.getT(i), \"note\": object.cues.getV(i).note, \"section\": object.cues.getV(i).section, \"tags\": [{\"type\": t.type, \"text\": t.text} for t in object.cues.getV(i).getTags()]} for i in range(object.cues.n())]"
+    "propertyPath": "[{\"beat\": object.cues.getT(i), \"note\": object.cues.getV(i).note, \"section\": object.cues.getV(i).section} for i in range(object.cues.n())]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "designerVersion": "r33.2+ (enabledIncludingParents)",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": true,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
    "status": "live-verified",
@@ -7214,7 +7400,7 @@
     "liveupdate.txt (dict comprehension / dictionary serialisation); members cited above",
     "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_layer_extents",
    "name": "Layer summary (JSON)",
@@ -7241,15 +7427,20 @@
     "value": "{\"start\":0,\"length\":4500,\"end\":4500,\"name\":\"Colour Layer\",\"enabled\":true}",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "{\"name\": object.name, \"start\": object.tStart, \"end\": object.tEnd, \"length\": object.tLength, \"enabled\": object.enabledIncludingParents}"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "designerVersion": "r34.0.3",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": true,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
    "status": "live-verified",
@@ -7259,7 +7450,7 @@
     "d3.pyi:47820",
     "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_layer_crashed",
    "name": "Layer crashed",
@@ -7291,15 +7482,20 @@
     "value": "false",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.crashed"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "designerVersion": "r34.0.3",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": true,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
    "status": "live-verified",
@@ -7309,7 +7505,7 @@
     "d3.pyi:47849",
     "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_layer_dormant",
    "name": "Layer dormant",
@@ -7336,15 +7532,20 @@
     "value": "false",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.isDormant"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "designerVersion": "r34.0.3",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": true,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
    "status": "live-verified",
@@ -7354,7 +7555,7 @@
     "d3.pyi:21786 Layer.fields; d3.pyi:17146 name, 17176 userName, 17172 typeName, 17124 disableSequencing, 17138 isPatched; useful-strings page uses layer.fields[i]",
     "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_layer_fields",
    "name": "Layer fields (JSON)",
@@ -7389,15 +7590,20 @@
     "value": "<redacted: project content>",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "[{\"name\": f.name, \"user\": f.userName, \"type\": f.typeName, \"sequenced\": not f.disableSequencing, \"patched\": f.isPatched} for f in object.fields]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "designerVersion": "r34.0.3",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": true,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
    "status": "live-verified",
@@ -7407,7 +7613,7 @@
     "d3.pyi:21858 keyTimes, d3.pyi:21861 nSequences",
     "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_layer_keytimes",
    "name": "Layer keyframe beats (JSON)",
@@ -7441,31 +7647,37 @@
     "value": "[]",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.keyTimes()"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "designerVersion": "r34.0.3",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": true,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
-   "status": "doc-verified",
+   "status": "live-verified",
    "liveTestPriority": "medium",
    "subscriptions": 1,
    "sources": [
     "liveupdate.txt",
-    "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented"
+    "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented",
+    "live probe 5 (r34.0.3, 2026-09-04): nKeys() -> 1, full comprehension -> [{\"t\":944.61,\"v\":0}] on findLayerByName(\"Video 26\")"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_key_posx_all",
    "name": "pos.x all keys (JSON)",
    "purpose": "All pos.x keyframes as [{t,v}] (doc-verbatim comprehension, name-based layer path).",
    "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
-   "propertyPath": "[{\"t\": object.findSequence(\"pos.x\").sequence.key(i).localT, \"v\": object.findSequence(\"pos.x\").sequence.key(i).v} for i in range(object.findSequence(\"pos.x\").sequence.nKeys)]",
+   "propertyPath": "[{\"t\": object.findSequence(\"pos.x\").sequence.key(i).localT, \"v\": object.findSequence(\"pos.x\").sequence.key(i).v} for i in range(object.findSequence(\"pos.x\").sequence.nKeys())]",
    "variableName": "keyPosXAll",
    "valueType": "array of {t:float,v:float} (JSON string)",
    "freqClass": "static",
@@ -7490,21 +7702,25 @@
    },
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
-    "status": "confirmed-path-error",
-    "message": "'NoneType' object has no attribute 'sequence'",
-    "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
-    "propertyPath": "[{\"t\": object.findSequence(\"pos.x\").sequence.key(i).localT, \"v\": object.findSequence(\"pos.x\").sequence.key(i).v} for i in range(object.findSequence(\"pos.x\").sequence.nKeys)]",
-    "note": "the test layer \"Colour Layer\" is a ColourAdjust layer without this field, so findSequence() returned None; the same property form returned a value on the ColourAdjust layer for \"brightness\" (1) and on the Video layer \"Video 26\" for \"pos.x\" (0), see probe 1"
+    "probe": "probe5",
+    "status": "confirmed-value",
+    "value": "[{\"t\":944.6112995866902,\"v\":0}]",
+    "objectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+    "propertyPath": "[{\"t\": object.findSequence(\"pos.x\").sequence.key(i).localT, \"v\": object.findSequence(\"pos.x\").sequence.key(i).v} for i in range(object.findSequence(\"pos.x\").sequence.nKeys())]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "designerVersion": "r34.0.3",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": true,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
    "status": "live-verified",
@@ -7514,7 +7730,7 @@
     "d3.pyi:17138 isPatched; d3.pyi:17240 sockpuppetControlled",
     "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_brightness_patched",
    "name": "Brightness patched",
@@ -7546,15 +7762,20 @@
     "value": "false",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.findSequence(\"brightness\").isPatched"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "designerVersion": "r34.0.3",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": false,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
    "status": "live-verified",
@@ -7564,7 +7785,7 @@
     "d3.pyi:21241 KeySequence.evalString; d3.pyi:17189 FieldSequence.getSequencedValue",
     "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_brightness_at_beat",
    "name": "Brightness at beat",
@@ -7591,6 +7812,11 @@
     "value": "1",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.findSequence(\"brightness\").sequence.evalString(0)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
@@ -7642,21 +7868,21 @@
   },
   {
    "designerVersion": "r34.0.3",
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "actions": [],
    "textExpression": true,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "no",
-   "status": "unverified",
+   "status": "live-verified",
    "liveTestPriority": "low",
    "subscriptions": 1,
    "sources": [
     "d3.pyi:21201 KeyResource.r, d3.pyi:21203 setter; d3.pyi:53561 VariableVideoModule.video (UserName 'Video'); track guide 'keyseq.key(i).r = resource_obj'",
     "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented"
    ],
-   "category": "99 Experimental",
+   "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",
    "presetId": "trk_key_video",
    "name": "Video clip (key 0)",
@@ -7679,12 +7905,17 @@
    "corrected": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
-    "status": "confirmed-path-error",
-    "message": "'NoneType' object has no attribute 'sequence'",
-    "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
+    "probe": "sweep2",
+    "objectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
     "propertyPath": "object.findSequence(\"video\").sequence.key(0).r",
-    "note": "the test layer \"Colour Layer\" is a ColourAdjust layer without this field, so findSequence() returned None; the same property form returned a value on the ColourAdjust layer for \"brightness\" (1) and on the Video layer \"Video 26\" for \"pos.x\" (0), see probe 1"
+    "status": "confirmed-value",
+    "value": "<redacted: project content>",
+    "note": "run 1: confirmed-path-error ('NoneType' object has no attribute 'sequence')"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
@@ -10074,9 +10305,9 @@
   },
   {
    "presetId": "stg_screen_projectors",
-   "category": "99 Experimental",
+   "category": "07 Stage & Screen",
    "homeCategory": "07 Stage & Screen",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Screen projectors (list)",
    "purpose": "Names of the projectors assigned to the surface (JSON array).",
    "controlKind": "readout",
@@ -10089,7 +10320,7 @@
    "textTemplate": "Projectors\n$(liveupdate:screenProjectors)",
    "textExpression": false,
    "previewText": "Projectors\n[\"projector 1\",\"projector 2\"]",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "stage-028"
@@ -10113,13 +10344,18 @@
     "value": "[\"projector 1\"]",
     "objectPath": "screen2:\"surface 1\"",
     "propertyPath": "[p.description for p in object.projectors]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "stg_proj_screens",
-   "category": "99 Experimental",
+   "category": "07 Stage & Screen",
    "homeCategory": "07 Stage & Screen",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Projector screens (list)",
    "purpose": "Names of the surfaces this projector renders (JSON array).",
    "controlKind": "readout",
@@ -10132,7 +10368,7 @@
    "textTemplate": "Screens\n$(liveupdate:projectorScreens)",
    "textExpression": false,
    "previewText": "Screens\n[\"Surface 1\"]",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "stage-044"
@@ -10156,13 +10392,18 @@
     "value": "[\"surface 1\"]",
     "objectPath": "projector:\"projector 1\"",
     "propertyPath": "[s.description for s in object.screens]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "stg_led_name",
-   "category": "99 Experimental",
+   "category": "07 Stage & Screen",
    "homeCategory": "07 Stage & Screen",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "LED screen name",
    "purpose": "Name of the LED screen; proves whether the ledscreen: prefix resolves.",
    "controlKind": "readout",
@@ -10175,7 +10416,7 @@
    "textTemplate": "LED\n$(liveupdate:ledName)",
    "textExpression": false,
    "previewText": "LED\nLED wall",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "stage-029",
@@ -10185,7 +10426,7 @@
     "d3.pyi:22148 (class LedScreen(SlcAwareDisplay)) + d3.pyi:12086-12095; prefix rule https://help.disguise.one/designer/configuration/expressions/accessing-resources.html",
     "https://developer.disguise.one/api/session/liveupdate (liveupdate.txt 'screen2:screen_1 / object.description') + d3.pyi:40438"
    ],
-   "status": "unverified",
+   "status": "live-verified",
    "liveTestPriority": "high",
    "subscriptions": 1,
    "notes": "Resource.description on the inferred ledscreen: path (stage-029 notes: all Display/Object/Resource members apply to LedScreen). Prefix ledscreen: follows the documented type:name rule but appears in no fetched page (verifier grep count 0); confirm by Alt+dragging the LED screen from its editor into an expression field. Use the Display (UID) presets for control.",
@@ -10196,16 +10437,24 @@
    "actions": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
-    "status": "not-run",
-    "note": "selLedScreen: experimental selection, no value supplied"
+    "probe": "sweep2",
+    "objectPath": "ledscreen:\"LED Screen 1\"",
+    "propertyPath": "object.description",
+    "status": "confirmed-value",
+    "value": "LED Screen 1",
+    "note": "run 1: not-run"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "stg_led_fade",
-   "category": "99 Experimental",
+   "category": "07 Stage & Screen",
    "homeCategory": "07 Stage & Screen",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "LED screen master fade",
    "purpose": "Output brightness of the LED screen (0..1), read-only until the prefix is confirmed.",
    "controlKind": "readout",
@@ -10219,7 +10468,7 @@
    "textTemplate": "`LED fade\\n${toFixed($(liveupdate:ledMasterFade), 2)}`",
    "textExpression": true,
    "previewText": "LED fade\n1.00",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "stage-029"
@@ -10227,7 +10476,7 @@
    "sources": [
     "d3.pyi:22148 (class LedScreen(SlcAwareDisplay)) + d3.pyi:12086-12095; prefix rule https://help.disguise.one/designer/configuration/expressions/accessing-resources.html"
    ],
-   "status": "unverified",
+   "status": "live-verified",
    "liveTestPriority": "medium",
    "subscriptions": 1,
    "notes": "Write excluded (inferred). Prefix ledscreen: follows the documented type:name rule but appears in no fetched page (verifier grep count 0); confirm by Alt+dragging the LED screen from its editor into an expression field. Use the Display (UID) presets for control.",
@@ -10238,16 +10487,24 @@
    "actions": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
-    "status": "not-run",
-    "note": "selLedScreen: experimental selection, no value supplied"
+    "probe": "sweep2",
+    "objectPath": "ledscreen:\"LED Screen 1\"",
+    "propertyPath": "object.master_fade",
+    "status": "confirmed-value",
+    "value": "1",
+    "note": "run 1: not-run"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "stg_led_hold",
-   "category": "99 Experimental",
+   "category": "07 Stage & Screen",
    "homeCategory": "07 Stage & Screen",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "LED screen hold output",
    "purpose": "Whether the LED screen output is frozen.",
    "controlKind": "readout",
@@ -10260,7 +10517,7 @@
    "textTemplate": "`LED hold\\n${$(liveupdate:ledHoldOutput) ? 'HELD' : 'Live'}`",
    "textExpression": true,
    "previewText": "LED hold\nLive",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "stateColour": {
     "operator": "==",
@@ -10273,7 +10530,7 @@
    "sources": [
     "d3.pyi:12053-12062 via d3.pyi:22148 inheritance"
    ],
-   "status": "unverified",
+   "status": "live-verified",
    "liveTestPriority": "medium",
    "subscriptions": 1,
    "notes": "Write excluded (inferred). Prefix ledscreen: follows the documented type:name rule but appears in no fetched page (verifier grep count 0); confirm by Alt+dragging the LED screen from its editor into an expression field. Use the Display (UID) presets for control.",
@@ -10284,16 +10541,24 @@
    "actions": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
-    "status": "not-run",
-    "note": "selLedScreen: experimental selection, no value supplied"
+    "probe": "sweep2",
+    "objectPath": "ledscreen:\"LED Screen 1\"",
+    "propertyPath": "object.holdOutput",
+    "status": "confirmed-value",
+    "value": "false",
+    "note": "run 1: not-run"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "stg_led_offset",
-   "category": "99 Experimental",
+   "category": "07 Stage & Screen",
    "homeCategory": "07 Stage & Screen",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "LED screen offset XYZ",
    "purpose": "LED screen position in metres (kinetic LED may be tracking-driven).",
    "controlKind": "readout",
@@ -10307,7 +10572,7 @@
    "textTemplate": "`LED pos\\n${toFixed(jsonpath(jsonparse($(liveupdate:ledOffset)), '$.x'), 2)} ${toFixed(jsonpath(jsonparse($(liveupdate:ledOffset)), '$.y'), 2)} ${toFixed(jsonpath(jsonparse($(liveupdate:ledOffset)), '$.z'), 2)}`",
    "textExpression": true,
    "previewText": "LED pos\n0.00 2.00 0.00",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "stage-033"
@@ -10315,7 +10580,7 @@
    "sources": [
     "d3.pyi:29224-29232 via LedScreen inheritance; https://developer.disguise.one/python-api/useful-strings shows new_resource.offset = Vec(...) on LedScreen"
    ],
-   "status": "unverified",
+   "status": "live-verified",
    "liveTestPriority": "medium",
    "subscriptions": 1,
    "notes": "Write excluded (inferred). Prefix ledscreen: follows the documented type:name rule but appears in no fetched page (verifier grep count 0); confirm by Alt+dragging the LED screen from its editor into an expression field. Use the Display (UID) presets for control.",
@@ -10326,9 +10591,17 @@
    "actions": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
-    "status": "not-run",
-    "note": "selLedScreen: experimental selection, no value supplied"
+    "probe": "sweep2",
+    "objectPath": "ledscreen:\"LED Screen 1\"",
+    "propertyPath": "object.offset",
+    "status": "confirmed-value",
+    "value": "{\"x\":0,\"y\":3.619999885559082,\"z\":2.450000047683716}",
+    "note": "run 1: not-run"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
@@ -10552,9 +10825,9 @@
   },
   {
    "presetId": "stg_stage_displays",
-   "category": "99 Experimental",
+   "category": "07 Stage & Screen",
    "homeCategory": "07 Stage & Screen",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Stage display count",
    "purpose": "Number of display surfaces on the stage.",
    "controlKind": "readout",
@@ -10567,7 +10840,7 @@
    "textTemplate": "Displays\n$(liveupdate:stageDisplayCount)",
    "textExpression": false,
    "previewText": "Displays\n6",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "stage-051"
@@ -10575,7 +10848,7 @@
    "sources": [
     "d3.pyi:46315; liveupdate.txt 'object: \"getByUID(<machine UID>)\"'; https://help.disguise.one/designer/configuration/expressions/functions 'getByUID - Resource access'"
    ],
-   "status": "unverified",
+   "status": "live-verified",
    "liveTestPriority": "high",
    "subscriptions": 1,
    "notes": "No stage: prefix is documented; the Stage is reached by getByUID with the UID from the Stage editor title bar stored (with 0x prefix) in $(liveupdate:selStageUid). Whether the Stage editor offers Copy UID is an open question.",
@@ -10586,16 +10859,24 @@
    "actions": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
-    "status": "not-run",
-    "note": "selStageUid: experimental selection, no value supplied"
+    "probe": "sweep2",
+    "objectPath": "getByUID(0x0123456789abcde0)",
+    "propertyPath": "object.nDisplays()",
+    "status": "confirmed-value",
+    "value": "24",
+    "note": "run 1: not-run"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "stg_stage_dyn_blend",
-   "category": "99 Experimental",
+   "category": "07 Stage & Screen",
    "homeCategory": "07 Stage & Screen",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Stage dynamic blend master",
    "purpose": "Stage-wide Dynamic Blend master switch.",
    "controlKind": "readout",
@@ -10609,7 +10890,7 @@
    "textTemplate": "`Dyn blend\\n${$(liveupdate:stageDynBlend) == 1 ? 'On' : 'Off'}`",
    "textExpression": true,
    "previewText": "Dyn blend\nOn",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "stage-053"
@@ -10617,7 +10898,7 @@
    "sources": [
     "d3.pyi:45845-45855"
    ],
-   "status": "unverified",
+   "status": "live-verified",
    "liveTestPriority": "medium",
    "subscriptions": 1,
    "notes": "Write excluded (inferred). No stage: prefix is documented; the Stage is reached by getByUID with the UID from the Stage editor title bar stored (with 0x prefix) in $(liveupdate:selStageUid). Whether the Stage editor offers Copy UID is an open question.",
@@ -10628,9 +10909,17 @@
    "actions": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
-    "status": "not-run",
-    "note": "selStageUid: experimental selection, no value supplied"
+    "probe": "sweep2",
+    "objectPath": "getByUID(0x0123456789abcde0)",
+    "propertyPath": "object.autoSoftEdge",
+    "status": "confirmed-value",
+    "value": "0",
+    "note": "run 1: not-run"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
@@ -10642,7 +10931,7 @@
    "purpose": "Name of the active venue.",
    "controlKind": "readout",
    "objectPath": "getByUID($(liveupdate:selStageUid))",
-   "propertyPath": "object.venue.description",
+   "propertyPath": "(object.venue.description if object.venue is not None else \"\")",
    "variableName": "stageVenue",
    "valueType": "string",
    "writable": "no",
@@ -10661,7 +10950,7 @@
    "status": "unverified",
    "liveTestPriority": "medium",
    "subscriptions": 1,
-   "notes": "Fails to evaluate when venue is None. No stage: prefix is documented; the Stage is reached by getByUID with the UID from the Stage editor title bar stored (with 0x prefix) in $(liveupdate:selStageUid). Whether the Stage editor offers Copy UID is an open question.",
+   "notes": "Fails to evaluate when venue is None. No stage: prefix is documented; the Stage is reached by getByUID with the UID from the Stage editor title bar stored (with 0x prefix) in $(liveupdate:selStageUid). Whether the Stage editor offers Copy UID is an open question. Empty string while the stage has no venue (verified live in that state only).",
    "dimension": "stage",
    "verifierOk": true,
    "verifierProblems": [],
@@ -10669,9 +10958,12 @@
    "actions": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
-    "status": "not-run",
-    "note": "selStageUid: experimental selection, no value supplied"
+    "probe": "probe5",
+    "status": "confirmed-value",
+    "value": "",
+    "objectPath": "getByUID(0x0123456789abcde0)",
+    "propertyPath": "(object.venue.description if object.venue is not None else \"\")",
+    "note": "only the None branch was exercised (no venue in the test project)"
    }
   },
   {
@@ -11640,43 +11932,44 @@
    "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
    "tier": "normal",
-   "name": "RS Workload IDs (discovery)",
-   "purpose": "Discovery: map of running workload ID -> RenderStream layer resource, so the operator can read the ids to paste into selWorkload without REST or the widget.",
+   "name": "RS workload layer count",
+   "purpose": "Number of layers that carry a RenderStream workload (len of RenderStreamSystem.getWorkloadLayers()).",
    "controlKind": "readout",
    "objectPath": "subsystem:RenderStreamSystem",
-   "propertyPath": "object.getWorkloadLayers()",
+   "propertyPath": "len(object.getWorkloadLayers())",
    "variableName": "rsWorkloadLayers",
-   "valueType": "JSON object keyed by workload id (int keys become strings) with Layer resource values {uid,path,type}",
+   "valueType": "integer",
    "writable": "no",
    "freqClass": "static",
-   "textTemplate": "Workloads\\n$(liveupdate:rsWorkloadLayers)",
+   "textTemplate": "RS workload\nlayers: $(liveupdate:rsWorkloadLayers)",
    "textExpression": false,
-   "previewText": "Workloads\\n{\"123456\":{\"uid\":\"0x..\",\"path\":\"..\",\"type\":\"Layer\"}}",
+   "previewText": "RS workload\nlayers: 5",
    "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "rs-workload-layers-map"
    ],
    "sources": [
-    "d3.pyi:40373"
+    "d3.pyi:40373",
+    "live probe 5 (r34.0.3, 2026-09-04): len(object.getWorkloadLayers()) -> 5; probe 1: object.getWorkloadLayers() -> {}"
    ],
    "status": "live-verified",
    "liveTestPriority": "high",
    "subscriptions": 1,
    "designerVersion": "r34.0.3",
    "actions": [],
-   "notes": "The JSON keys are the workload ids. Whether the pyi 'map' _BlipValue serialises as a dictionary is undocumented, and uint64 ids may lose precision if emitted as JSON numbers - verify live. Raw JSON is shown because the keys, not a scalar, are the payload.",
+   "notes": "The JSON keys are the workload ids. Whether the pyi 'map' _BlipValue serialises as a dictionary is undocumented, and uint64 ids may lose precision if emitted as JSON numbers - verify live. Raw JSON is shown because the keys, not a scalar, are the payload. getWorkloadLayers() is a map<uint64, Layer>; on r34.0.3 the LiveUpdate serialiser emits {} for it and iterating its keys fails with \"long too big to convert\". len() works. Read workload ids through the RS Layer Workload ID preset.",
    "dimension": "renderstream",
    "verifierOk": true,
    "verifierProblems": [],
    "corrected": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
+    "probe": "probe5",
     "status": "confirmed-value",
-    "value": "{}",
+    "value": "5",
     "objectPath": "subsystem:RenderStreamSystem",
-    "propertyPath": "object.getWorkloadLayers()"
+    "propertyPath": "len(object.getWorkloadLayers())"
    }
   },
   {
@@ -12265,9 +12558,9 @@
   },
   {
    "presetId": "rs_nodes_summary",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Nodes Summary",
    "purpose": "One-line cluster overview: each render node with RUN/OFF/ERR.",
    "controlKind": "readout",
@@ -12280,7 +12573,7 @@
    "textTemplate": "Nodes\\n$(liveupdate:rsInstancesSummary)",
    "textExpression": false,
    "previewText": "Nodes\\nRX1:RUN | RX2:RUN",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "rs-instances-summary-string"
@@ -12306,13 +12599,18 @@
     "value": "",
     "objectPath": "subsystem:RenderStreamSystem",
     "propertyPath": "\" | \".join([i.machineName + (\":ERR\" if i.unrecoverableError else (\":RUN\" if i.isProcessRunning else \":OFF\")) for i in object.getWorkloadInstances(1000000000000000001)])"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "rs_running_count",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Running / Total",
    "purpose": "Running/total instance count for the workload, e.g. 4/4.",
    "controlKind": "readout",
@@ -12325,7 +12623,7 @@
    "textTemplate": "Running\\n$(liveupdate:rsInstancesRunningCount)",
    "textExpression": false,
    "previewText": "Running\\n4/4",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "rs-instances-running-count"
@@ -12351,13 +12649,18 @@
     "value": "0/0",
     "objectPath": "subsystem:RenderStreamSystem",
     "propertyPath": "\"%d/%d\" % (len([i for i in object.getWorkloadInstances(1000000000000000001) if i.isProcessRunning]), len(object.getWorkloadInstances(1000000000000000001)))"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "rs_any_dropping",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Any Node Dropping",
    "purpose": "True if any render node in the workload is dropping output or input frames.",
    "controlKind": "readout",
@@ -12370,7 +12673,7 @@
    "textTemplate": "`Any Drop\\n${bool($(liveupdate:rsAnyInstanceDropping)) ? 'DROPPING' : 'OK'}`",
    "textExpression": true,
    "previewText": "Any Drop\\nOK",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "stateColour": {
     "operator": "==",
@@ -12400,13 +12703,18 @@
     "value": "false",
     "objectPath": "subsystem:RenderStreamSystem",
     "propertyPath": "any([i.isDroppingFrames or i.isDroppingInputFrames for i in object.getWorkloadInstances(1000000000000000001)])"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "rs_any_down",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Any Node Down",
    "purpose": "True if any instance is not running or in unrecoverable error.",
    "controlKind": "readout",
@@ -12419,7 +12727,7 @@
    "textTemplate": "`Any Down\\n${bool($(liveupdate:rsAnyInstanceDown)) ? 'DOWN' : 'OK'}`",
    "textExpression": true,
    "previewText": "Any Down\\nOK",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "stateColour": {
     "operator": "==",
@@ -12450,13 +12758,18 @@
     "value": "false",
     "objectPath": "subsystem:RenderStreamSystem",
     "propertyPath": "any([i.unrecoverableError or not i.isProcessRunning for i in object.getWorkloadInstances(1000000000000000001)])"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "rs_health_list",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Health List",
    "purpose": "Per-instance machine name plus health message/status in one subscription; button lists the messages.",
    "controlKind": "readout",
@@ -12469,7 +12782,7 @@
    "textTemplate": "`Health\\n${jsonpath(jsonparse($(liveupdate:rsInstancesHealthList)), '$[*].health')}`",
    "textExpression": true,
    "previewText": "Health\\nRunning,Running",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "rs-instances-health-list"
@@ -12495,13 +12808,18 @@
     "value": "[]",
     "objectPath": "subsystem:RenderStreamSystem",
     "propertyPath": "[{\"machine\": i.machineName, \"health\": i.health().message, \"status\": i.health().status} for i in object.getWorkloadInstances(1000000000000000001)]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "rs_min_fps",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Min Receive FPS",
    "purpose": "Lowest recent receive fps across all stream subscriptions in the workload.",
    "controlKind": "readout",
@@ -12514,7 +12832,7 @@
    "textTemplate": "`Min RX FPS\\n${toFixed($(liveupdate:rsReceiveMinFps), 1)}`",
    "textExpression": true,
    "previewText": "Min RX FPS\\n60.0",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "rs-receive-min-fps"
@@ -12541,13 +12859,18 @@
     "note": "probed with the id rounded by JSON number parsing (1000000000000000000); the receive-status functions returned [] for the rounded and (probe 3) the exact id alike",
     "objectPath": "subsystem:RenderStreamSystem",
     "propertyPath": "min([s.recentReceivedFPS() for s in object.getWorkloadReceiveStatuses(1000000000000000000)] or [0.0])"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "rs_max_latency",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Max Stream Latency",
    "purpose": "Worst active latency among received streams in the workload (units undocumented).",
    "controlKind": "readout",
@@ -12560,7 +12883,7 @@
    "textTemplate": "`Max Latency\\n${toFixed($(liveupdate:rsReceiveMaxLatency), 2)}`",
    "textExpression": true,
    "previewText": "Max Latency\\n1.00",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "rs-receive-max-active-latency"
@@ -12587,13 +12910,18 @@
     "note": "probed with the id rounded by JSON number parsing (1000000000000000000); the receive-status functions returned [] for the rounded and (probe 3) the exact id alike",
     "objectPath": "subsystem:RenderStreamSystem",
     "propertyPath": "max([s.activeLatency for s in object.getWorkloadReceiveStatuses(1000000000000000000)] or [0.0])"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "rs_dropped_total",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Dropped Packets",
    "purpose": "Total dropped packets summed over all stream subscriptions (monotonic counter; watch for increases).",
    "controlKind": "readout",
@@ -12606,7 +12934,7 @@
    "textTemplate": "Dropped Pkts\\n$(liveupdate:rsReceiveDroppedTotal)",
    "textExpression": false,
    "previewText": "Dropped Pkts\\n0",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "rs-receive-dropped-total"
@@ -12640,13 +12968,18 @@
     "note": "probed with the id rounded by JSON number parsing (1000000000000000000); the receive-status functions returned [] for the rounded and (probe 3) the exact id alike",
     "objectPath": "subsystem:RenderStreamSystem",
     "propertyPath": "sum([s.totalDroppedPackets for s in object.getWorkloadReceiveStatuses(1000000000000000000)])"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "rs_all_subscribed",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS All Streams Subscribed",
    "purpose": "True when every wanted stream subscription is established (green light for the receive side).",
    "controlKind": "readout",
@@ -12659,7 +12992,7 @@
    "textTemplate": "`Subs\\n${bool($(liveupdate:rsReceiveAllSubscribed)) ? 'ALL OK' : 'MISSING'}`",
    "textExpression": true,
    "previewText": "Subs\\nALL OK",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "stateColour": {
     "operator": "==",
@@ -12691,13 +13024,18 @@
     "note": "probed with the id rounded by JSON number parsing (1000000000000000000); the receive-status functions returned [] for the rounded and (probe 3) the exact id alike",
     "objectPath": "subsystem:RenderStreamSystem",
     "propertyPath": "all([s.subscribeSuccessful for s in object.getWorkloadReceiveStatuses(1000000000000000000) if s.subscriptionWanted])"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "rs_last_errors",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Stream Last Errors",
    "purpose": "Concatenated last error message per stream that has one.",
    "controlKind": "readout",
@@ -12710,7 +13048,7 @@
    "textTemplate": "Stream Errors\\n$(liveupdate:rsReceiveLastErrors)",
    "textExpression": false,
    "previewText": "Stream Errors\\n",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "rs-receive-last-errors"
@@ -12737,13 +13075,18 @@
     "note": "probed with the id rounded by JSON number parsing (1000000000000000000); the receive-status functions returned [] for the rounded and (probe 3) the exact id alike",
     "objectPath": "subsystem:RenderStreamSystem",
     "propertyPath": "\"; \".join([s.streamIdentifier.streamName + \": \" + s.tLastErrorMessage for s in object.getWorkloadReceiveStatuses(1000000000000000000) if s.tLastErrorMessage])"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "rs_status_msgs",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Stream Status Messages",
    "purpose": "Designer-generated status message per stream subscription (same text as the Cluster Workload widget).",
    "controlKind": "readout",
@@ -12756,7 +13099,7 @@
    "textTemplate": "`Stream Status\\n${jsonparse($(liveupdate:rsReceiveStatusMessages))}`",
    "textExpression": true,
    "previewText": "Stream Status\\nReceiving,Receiving",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "rs-receive-status-messages"
@@ -12783,13 +13126,18 @@
     "note": "probed with the id rounded by JSON number parsing (1000000000000000000); the receive-status functions returned [] for the rounded and (probe 3) the exact id alike",
     "objectPath": "subsystem:RenderStreamSystem",
     "propertyPath": "[s.generateStreamStatusMsg(False).message for s in object.getWorkloadReceiveStatuses(1000000000000000000)]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "rs_layer_workload_id",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Layer Workload ID",
    "purpose": "Discovery via the layer route: workload ID of the selRsLayer-th RenderStream layer on track selTrack as text (copy into selWorkload).",
    "controlKind": "readout",
@@ -12802,7 +13150,7 @@
    "textTemplate": "Workload ID\\n$(liveupdate:rsLayerWorkloadId)",
    "textExpression": false,
    "previewText": "Workload ID\\n123456",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "layer-workload-id"
@@ -12828,13 +13176,18 @@
     "value": "1000000000000000001",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "str(object.getLeafLayers(RenderStreamModule)[0].moduleConfig.workloadId)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "rs_layer_health",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Layer Cluster Health",
    "purpose": "Cluster-level aggregated WorkloadHealth for the layer's workload - no workload ID needed; button shows the message.",
    "controlKind": "readout",
@@ -12847,7 +13200,7 @@
    "textTemplate": "`Cluster\\n${jsonpath(jsonparse($(liveupdate:rsLayerClusterHealth)), '$.message')}`",
    "textExpression": true,
    "previewText": "Cluster\\nRunning",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "layer-cluster-workload-health"
@@ -12873,13 +13226,18 @@
     "value": "{\"status\":0,\"priority\":0,\"message\":\"Not started\",\"details\":\"\"}",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.cluster.workloadHealth"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "rs_layer_any_running",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Layer Any Running",
    "purpose": "Any instance of the layer's workload is running.",
    "controlKind": "readout",
@@ -12892,7 +13250,7 @@
    "textTemplate": "`Cluster\\n${bool($(liveupdate:rsLayerAnyRunning)) ? 'RUNNING' : 'STOPPED'}`",
    "textExpression": true,
    "previewText": "Cluster\\nRUNNING",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "stateColour": {
     "operator": "==",
@@ -12922,13 +13280,18 @@
     "value": "false",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.cluster.anyInstanceIsRunning"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "rs_layer_n_instances",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Layer Instance Count",
    "purpose": "Number of instances in the layer's cluster (upper bound for selInstance).",
    "controlKind": "readout",
@@ -12941,7 +13304,7 @@
    "textTemplate": "Instances\\n$(liveupdate:rsLayerInstanceCount)",
    "textExpression": false,
    "previewText": "Instances\\n4",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "layer-cluster-n-instances"
@@ -12966,13 +13329,18 @@
     "value": "0",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.cluster.nInstances"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "rs_layer_inst_health",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Layer Instance Health",
    "purpose": "Health message of instance selInstance via the cluster object (alternative to the subsystem route, no workload ID needed).",
    "controlKind": "readout",
@@ -12985,7 +13353,7 @@
    "textTemplate": "Inst Health\\n$(liveupdate:rsLayerInstanceHealthMessage)",
    "textExpression": false,
    "previewText": "Inst Health\\nRunning",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "layer-cluster-instance-health-message"
@@ -13010,6 +13378,11 @@
     "value": "Instance not found",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.cluster.instanceHealth(0).message"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
@@ -13060,9 +13433,9 @@
   },
   {
    "presetId": "rs_layer_pool_online",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Pool Machines Online",
    "purpose": "Online render machines vs configured machines in the layer's cluster pool.",
    "controlKind": "readout",
@@ -13075,7 +13448,7 @@
    "textTemplate": "Pool\\n$(liveupdate:rsLayerPoolOnline)",
    "textExpression": false,
    "previewText": "Pool\\n4/4 online",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "layer-pool-online-machines"
@@ -13101,13 +13474,18 @@
     "value": "0/3 online",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "\"%d/%d online\" % (len(object.getLeafLayers(RenderStreamModule)[0].moduleConfig.pool.getOnlineRenderMachines()), len(object.getLeafLayers(RenderStreamModule)[0].moduleConfig.pool.machines))"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "rs_layer_asset_errors",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Asset Errors",
    "purpose": "Asset validation errors for the layer's asset against its pool (same data as REST layerstatus assetErrors).",
    "controlKind": "readout",
@@ -13120,7 +13498,7 @@
    "textTemplate": "`Asset Errors\\n${jsonparse($(liveupdate:rsLayerAssetErrors))}`",
    "textExpression": true,
    "previewText": "Asset Errors\\n",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "layer-pool-asset-errors"
@@ -13146,13 +13524,18 @@
     "value": "<redacted: project content>",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.pool.assetErrors(object.getLeafLayers(RenderStreamModule)[0].moduleConfig.asset)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "rs_layer_asset_available",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Asset Available",
    "purpose": "Whether the layer's RenderStream asset is available anywhere on the network.",
    "controlKind": "readout",
@@ -13166,7 +13549,7 @@
    "textTemplate": "`Asset\\n${bool($(liveupdate:rsLayerAssetAvailable)) ? 'AVAILABLE' : 'MISSING'}`",
    "textExpression": true,
    "previewText": "Asset\\nAVAILABLE",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "stateColour": {
     "operator": "==",
@@ -13196,13 +13579,18 @@
     "value": "false",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.asset.available"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "rs_layer_framerate",
-   "category": "99 Experimental",
+   "category": "09 RenderStream",
    "homeCategory": "09 RenderStream",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "RS Framerate Fraction",
    "purpose": "Read-only view of the layer's framerate fraction (1, 1/2, 1/3, 1/4). The member has a setter but the write is inferred and therefore not shipped.",
    "controlKind": "readout",
@@ -13216,7 +13604,7 @@
    "textTemplate": "`FPS Fraction\\n${$(liveupdate:rsLayerFramerateFraction) == 0 ? '1' : $(liveupdate:rsLayerFramerateFraction) == 1 ? '1/2' : $(liveupdate:rsLayerFramerateFraction) == 2 ? '1/3' : '1/4'}`",
    "textExpression": true,
    "previewText": "FPS Fraction\\n1",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
     "layer-framerate-fraction"
@@ -13242,6 +13630,11 @@
     "value": "1",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.framerateFraction"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
@@ -13995,9 +14388,9 @@
   },
   {
    "presetId": "fo_local_name",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "This machine name",
    "purpose": "Name of the machine evaluating the subscription (the machine Companion is connected to) without knowing it in advance.",
    "controlKind": "readout",
@@ -14011,7 +14404,7 @@
    "textTemplate": "This machine\n$(liveupdate:localMachineName)",
    "textExpression": false,
    "previewText": "This machine\nvx4-director",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "fallbackIds": [
@@ -14044,13 +14437,18 @@
     "value": "DIRECTOR01",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "object.d3NetManager.localMachine.name"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_local_name_alt",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "This machine name (global)",
    "purpose": "Same value as fo_local_name via the module global d3NetManager inside the property expression; the object (a documented subsystem path) is ignored.",
    "controlKind": "readout",
@@ -14064,7 +14462,7 @@
    "textTemplate": "This machine\n$(liveupdate:localMachineNameAlt)",
    "textExpression": false,
    "previewText": "This machine\nvx4-director",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -14091,13 +14489,18 @@
     "value": "DIRECTOR01",
     "objectPath": "subsystem:MonitoringManager",
     "propertyPath": "d3NetManager.localMachine.name"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_director_name",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Director name",
    "purpose": "Name of the current (acting) Director without knowing it in advance; changes when a director failover happens.",
    "controlKind": "readout",
@@ -14111,7 +14514,7 @@
    "textTemplate": "Director\n$(liveupdate:directorName)",
    "textExpression": false,
    "previewText": "Director\nvx4-director",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -14138,13 +14541,18 @@
     "value": "DIRECTOR01",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "object.d3NetManager.director.name"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_is_director",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Connected to director?",
    "purpose": "'Am I (the connected machine) the Director?' using the equality idiom from the D3Net guide.",
    "controlKind": "readout",
@@ -14158,7 +14566,7 @@
    "textTemplate": "`Is director\\n${$(liveupdate:isDirector) === true ? 'YES' : $(liveupdate:isDirector) === false ? 'no' : $(liveupdate:isDirector)}`",
    "textExpression": true,
    "previewText": "Is director\nYES",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "stateColour": {
@@ -14190,13 +14598,18 @@
     "value": "true",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "object.d3NetManager.director == object.d3NetManager.localMachine"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_director_mode",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Director mode",
    "purpose": "Whether the connected machine is in director mode.",
    "controlKind": "readout",
@@ -14210,7 +14623,7 @@
    "textTemplate": "`Director mode\\n${$(liveupdate:directorMode) === true ? 'on' : $(liveupdate:directorMode) === false ? 'off' : $(liveupdate:directorMode)}`",
    "textExpression": true,
    "previewText": "Director mode\non",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -14237,13 +14650,18 @@
     "value": "true",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "object.d3NetManager.directorMode"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_understudy_mode",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Understudy mode",
    "purpose": "Whether the connected machine is running as an Understudy.",
    "controlKind": "readout",
@@ -14257,7 +14675,7 @@
    "textTemplate": "`Understudy\\n${$(liveupdate:understudyMode) === true ? 'yes' : $(liveupdate:understudyMode) === false ? 'no' : $(liveupdate:understudyMode)}`",
    "textExpression": true,
    "previewText": "Understudy\nno",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -14286,13 +14704,18 @@
     "value": "false",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "object.d3NetManager.understudy"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_solo_mode",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Solo mode",
    "purpose": "Whether the connected machine runs solo (no d3Net session) - REST 'isRunningSolo'.",
    "controlKind": "readout",
@@ -14306,7 +14729,7 @@
    "textTemplate": "`Solo mode\\n${$(liveupdate:soloMode) === true ? 'SOLO' : $(liveupdate:soloMode) === false ? 'session' : $(liveupdate:soloMode)}`",
    "textExpression": true,
    "previewText": "Solo mode\nsession",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -14335,13 +14758,18 @@
     "value": "false",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "object.d3NetManager.soloMode"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_has_valid_director",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Has valid director",
    "purpose": "Session health: whether the d3Net currently has a valid Director.",
    "controlKind": "readout",
@@ -14355,7 +14783,7 @@
    "textTemplate": "`Director valid\\n${$(liveupdate:hasValidDirector) === true ? 'ok' : $(liveupdate:hasValidDirector) === false ? 'NO DIRECTOR' : $(liveupdate:hasValidDirector)}`",
    "textExpression": true,
    "previewText": "Director valid\nok",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "stateColour": {
@@ -14389,13 +14817,18 @@
     "value": "true",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "object.d3NetManager.hasValidDirector"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_local_taken_over",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "This machine taken over",
    "purpose": "Has the connected machine taken over a failed machine, without naming it.",
    "controlKind": "readout",
@@ -14409,7 +14842,7 @@
    "textTemplate": "`Taken over\\n${$(liveupdate:localTakenOver) === true ? 'YES' : $(liveupdate:localTakenOver) === false ? 'no' : $(liveupdate:localTakenOver)}`",
    "textExpression": true,
    "previewText": "Taken over\nno",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "stateColour": {
@@ -14441,13 +14874,18 @@
     "value": "false",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "object.d3NetManager.localMachine.hasTakenOverFailedMachine()"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_local_running_as",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "This machine running as",
    "purpose": "Name of the machine the connected machine is currently running as ('running as <actor>' after a takeover).",
    "controlKind": "readout",
@@ -14461,7 +14899,7 @@
    "textTemplate": "Running as\n$(liveupdate:localRunningAs)",
    "textExpression": false,
    "previewText": "Running as\nvx4-actor1",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -14489,13 +14927,18 @@
     "value": "DIRECTOR01",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "object.d3NetManager.localMachine.runningAs.name"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_machine_count",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Machine count",
    "purpose": "Number of machines in the d3Net; a quick 'everyone is here' check against the expected count.",
    "controlKind": "readout",
@@ -14509,7 +14952,7 @@
    "textTemplate": "Machines\n$(liveupdate:machineCount)",
    "textExpression": false,
    "previewText": "Machines\n4",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -14536,13 +14979,18 @@
     "value": "2",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "len(object.d3NetManager.machines)"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_offline_machines",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Offline machines",
    "purpose": "Names of every machine in the d3Net that is not network-connected; [] means all online.",
    "controlKind": "readout",
@@ -14557,7 +15005,7 @@
    "textTemplate": "Offline\n$(liveupdate:offlineMachines)",
    "textExpression": false,
    "previewText": "Offline\n[]",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "stateColour": {
@@ -14589,13 +15037,18 @@
     "value": "[]",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "[m.name for m in object.d3NetManager.machines if not m.networkConnected]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_failed_machines",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Failed machines",
    "purpose": "Names of every machine currently flagged failed; [] means none.",
    "controlKind": "readout",
@@ -14610,7 +15063,7 @@
    "textTemplate": "Failed\n$(liveupdate:failedMachines)",
    "textExpression": false,
    "previewText": "Failed\n[]",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "stateColour": {
@@ -14642,13 +15095,18 @@
     "value": "[]",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "[m.name for m in object.d3NetManager.machines if m.failed]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_takenover_machines",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Machines that took over",
    "purpose": "Names of the Understudies that have taken over a failed machine; [] means no failover is active.",
    "controlKind": "readout",
@@ -14663,7 +15121,7 @@
    "textTemplate": "Took over\n$(liveupdate:takenOverMachines)",
    "textExpression": false,
    "previewText": "Took over\n[]",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "stateColour": {
@@ -14695,13 +15153,18 @@
     "value": "[]",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "[m.name for m in object.d3NetManager.machines if m.hasTakenOverFailedMachine()]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_machines_table",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "d3Net machine table (JSON)",
    "purpose": "One-shot table of every machine with hostname, role, connected, active, failed and taken-over flags, for a status page or for other Companion logic.",
    "controlKind": "readout",
@@ -14716,7 +15179,7 @@
    "textTemplate": "d3Net table\n$(liveupdate:machinesTable)",
    "textExpression": false,
    "previewText": "d3Net table\n[{\"name\":\"vx4-1\",\"role\":3,\"connected\":true,...}]",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -14743,13 +15206,18 @@
     "value": "<redacted: project content>",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "[{\"name\": m.name, \"hostname\": m.hostname, \"role\": m.role, \"connected\": m.networkConnected, \"active\": m.active, \"failed\": m.failed, \"takenOver\": m.hasTakenOverFailedMachine()} for m in object.d3NetManager.machines]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_actor_names",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Actor names",
    "purpose": "Names of the Actor machines in the session (REST /api/session/status/session 'actors').",
    "controlKind": "readout",
@@ -14763,7 +15231,7 @@
    "textTemplate": "Actors\n$(liveupdate:actorNames)",
    "textExpression": false,
    "previewText": "Actors\n[\"vx4-1\",\"vx4-2\"]",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -14790,13 +15258,18 @@
     "value": "[\"actor 1\"]",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "[m.name for m in object.d3NetManager.actors]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_understudy_names",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Understudy names",
    "purpose": "Names of the Understudy machines in the session (REST 'understudies').",
    "controlKind": "readout",
@@ -14810,7 +15283,7 @@
    "textTemplate": "Understudies\n$(liveupdate:understudyNames)",
    "textExpression": false,
    "previewText": "Understudies\n[\"vx4-us1\"]",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -14837,13 +15310,18 @@
     "value": "[]",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "[m.name for m in object.d3NetManager.understudies]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_understudy_table",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Understudy config table (JSON)",
    "purpose": "Pre-show check of every Understudy: its targets, configuration status (OK=0, TARGET_OVERLAP=1, NO_TARGETS=2, NO_VALID_TARGETS=3, NON_OUTPUT_TARGET=4), taken-over flag and running-as name.",
    "controlKind": "readout",
@@ -14858,7 +15336,7 @@
    "textTemplate": "Understudies\n$(liveupdate:understudyTable)",
    "textExpression": false,
    "previewText": "Understudies\n[{\"understudy\":\"vx4-us1\",\"targets\":[\"vx4-1\"],\"configStatus\":0,...}]",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -14886,6 +15364,11 @@
     "value": "[]",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "[{\"understudy\": u.name, \"targets\": [t.name for t in u.targets], \"configStatus\": object.d3NetManager.getUnderstudyConfigStatus(u), \"takenOver\": u.hasTakenOverFailedMachine(), \"runningAs\": (u.runningAs.name if u.hasTakenOverFailedMachine() else \"\")} for u in object.d3NetManager.understudies]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
@@ -14927,19 +15410,19 @@
    "corrected": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "probe2",
+    "probe": "sweep2",
+    "objectPath": "subsystem:D3NetManagerSystem",
+    "propertyPath": "(object.d3NetManager.getDirectorUnderstudy().name if object.d3NetManager.getDirectorUnderstudy() is not None else \"\")",
     "status": "confirmed-value",
     "value": "",
-    "note": "only the None branch was exercised (no understudy in the test project)",
-    "objectPath": "subsystem:D3NetManagerSystem",
-    "propertyPath": "(object.d3NetManager.getDirectorUnderstudy().name if object.d3NetManager.getDirectorUnderstudy() is not None else \"\")"
+    "note": "only the None branch was exercised (the feature is absent in the test project)"
    }
   },
   {
    "presetId": "fo_failover_timeout",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Auto failover timeout",
    "purpose": "Session-wide automatic failover timeout (REST failover/settings 'timeout'); 0 means automatic failover is disabled.",
    "controlKind": "readout",
@@ -14953,7 +15436,7 @@
    "textTemplate": "`Failover t/o\\n${$(liveupdate:failoverTimeout) === 0 ? 'OFF (0)' : $(liveupdate:failoverTimeout)}`",
    "textExpression": true,
    "previewText": "Failover t/o\n10",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "stateColour": {
@@ -14984,13 +15467,18 @@
     "value": "0",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "object.d3NetManager.timeout"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_host_taken_over",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Taken over (by hostname)",
    "purpose": "Failover indicator for the machine whose hostname is in $(liveupdate:selHost) - for rigs where Companion config holds hostnames rather than machine names.",
    "controlKind": "readout",
@@ -15004,7 +15492,7 @@
    "textTemplate": "`Taken over\\n${$(liveupdate:hostTakenOver) === true ? 'YES' : $(liveupdate:hostTakenOver) === false ? 'no' : $(liveupdate:hostTakenOver)}`",
    "textExpression": true,
    "previewText": "Taken over\nno",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "stateColour": {
@@ -15035,13 +15523,18 @@
     "value": "false",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "object.d3NetManager.findMachineByHostname(\"ACTOR01\").hasTakenOverFailedMachine()"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_d3net_ref",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "d3NetManager uid (discovery)",
    "purpose": "Discovery probe: the D3NetManager resource as {uid,path,type}; the uid gives a documented getByUID(<uid>) object path to the manager if subsystem:D3NetManagerSystem does not resolve.",
    "controlKind": "readout",
@@ -15055,7 +15548,7 @@
    "textTemplate": "`d3Net uid\\n${jsonparse($(liveupdate:d3NetManagerRef)).uid}`",
    "textExpression": true,
    "previewText": "d3Net uid\n0x0123456789abcdef",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -15081,13 +15574,18 @@
     "value": "<redacted: project content>",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "object.d3NetManager"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "fo_locked_to_director",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Locked to director",
    "purpose": "D3State 'locked to director' flag (plausibly the GUI lock that keeps Actors following the Director); semantics undocumented.",
    "controlKind": "readout",
@@ -15101,7 +15599,7 @@
    "textTemplate": "`Locked to dir\\n${$(liveupdate:lockedToDirector) === true ? 'locked' : $(liveupdate:lockedToDirector) === false ? 'free' : $(liveupdate:lockedToDirector)}`",
    "textExpression": true,
    "previewText": "Locked to dir\nlocked",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -15127,13 +15625,18 @@
     "value": "false",
     "objectPath": "subsystem:MonitoringManager",
     "propertyPath": "state.lockedToDirector"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "conn_session_name",
-   "category": "99 Experimental",
+   "category": "01 Connection",
    "homeCategory": "01 Connection",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Session name",
    "purpose": "Name of the d3Net session the connected machine is in - confirms Companion is on the right session.",
    "controlKind": "readout",
@@ -15147,7 +15650,7 @@
    "textTemplate": "Session\n$(liveupdate:sessionName)",
    "textExpression": false,
    "previewText": "Session\nMainShow",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -15175,13 +15678,18 @@
     "value": "<redacted: project content>",
     "objectPath": "subsystem:SessionSystem",
     "propertyPath": "object.sessionName"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "conn_project_name",
-   "category": "99 Experimental",
+   "category": "01 Connection",
    "homeCategory": "01 Connection",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Project name",
    "purpose": "Name of the open project (D3State.projectName via the global state) - confirms the right show file is loaded.",
    "controlKind": "readout",
@@ -15195,7 +15703,7 @@
    "textTemplate": "Project\n$(liveupdate:projectName)",
    "textExpression": false,
    "previewText": "Project\nMainShow_v12",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -15225,13 +15733,18 @@
     "value": "<redacted: project content>",
     "objectPath": "subsystem:MonitoringManager",
     "propertyPath": "state.projectName"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "conn_designer_version",
-   "category": "99 Experimental",
+   "category": "01 Connection",
    "homeCategory": "01 Connection",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Designer version",
    "purpose": "Designer version string of the machine evaluating the expression (ReleaseVersion static method).",
    "controlKind": "readout",
@@ -15246,7 +15759,7 @@
    "textTemplate": "Designer\n$(liveupdate:designerVersion)",
    "textExpression": false,
    "previewText": "Designer\nr34.0.3",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -15275,13 +15788,18 @@
     "value": "<redacted: project content>",
     "objectPath": "subsystem:MonitoringManager",
     "propertyPath": "ReleaseVersion.versionString()"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "conn_designer_version_name",
-   "category": "99 Experimental",
+   "category": "01 Connection",
    "homeCategory": "01 Connection",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Designer version name",
    "purpose": "Alternative version format (ReleaseVersion.versionName()); keep whichever of the two rows reads best.",
    "controlKind": "readout",
@@ -15295,7 +15813,7 @@
    "textTemplate": "Designer\n$(liveupdate:designerVersionName)",
    "textExpression": false,
    "previewText": "Designer\nr34.0.3 Release",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -15324,13 +15842,18 @@
     "value": "<redacted: project content>",
     "objectPath": "subsystem:MonitoringManager",
     "propertyPath": "ReleaseVersion.versionName()"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "conn_licence_days",
-   "category": "99 Experimental",
+   "category": "01 Connection",
    "homeCategory": "01 Connection",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "Licence days left",
    "purpose": "Days left on the Designer licence of the connected machine; red when under two weeks.",
    "controlKind": "readout",
@@ -15345,7 +15868,7 @@
    "textTemplate": "Licence days\n$(liveupdate:licenceDaysLeft)",
    "textExpression": false,
    "previewText": "Licence days\n120",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "stateColour": {
@@ -15379,13 +15902,18 @@
     "value": "-1",
     "objectPath": "subsystem:MonitoringManager",
     "propertyPath": "state.getDaysLeftDesigner()"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
    "presetId": "conn_in_show",
-   "category": "99 Experimental",
+   "category": "01 Connection",
    "homeCategory": "01 Connection",
-   "tier": "experimental",
+   "tier": "normal",
    "name": "In show flag",
    "purpose": "D3State.isInShow - name suggests 'show mode engaged'; semantics undocumented, verify on the rig before relying on it.",
    "controlKind": "readout",
@@ -15399,7 +15927,7 @@
    "textTemplate": "`In show\\n${$(liveupdate:isInShow) === true ? 'YES' : $(liveupdate:isInShow) === false ? 'no' : $(liveupdate:isInShow)}`",
    "textExpression": true,
    "previewText": "In show\nno",
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "candidateIds": [
@@ -15427,6 +15955,11 @@
     "value": "false",
     "objectPath": "subsystem:MonitoringManager",
     "propertyPath": "state.isInShow"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   },
   {
@@ -16573,18 +17106,18 @@
    }
   },
   {
-   "tier": "experimental",
+   "tier": "normal",
    "controlKind": "readout",
    "writable": "no",
    "textExpression": false,
-   "bgcolor": "rgb(70,70,90)",
+   "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "actions": [],
    "liveTestPriority": "medium",
    "subscriptions": 1,
    "designerVersion": "r33.1+",
    "presetId": "fo_network_adaptors",
-   "category": "99 Experimental",
+   "category": "10 Failover & d3Net",
    "homeCategory": "10 Failover & d3Net",
    "name": "Network adaptors (JSON)",
    "purpose": "Link state and speed of every NIC on the machine (r33.1+).",
@@ -16614,6 +17147,11 @@
     "value": "<redacted: project content>",
     "objectPath": "Machine:\"DIRECTOR01\"",
     "propertyPath": "[{\"name\": a.adaptorName, \"ip\": a.ipAddressStr, \"up\": a.isUp, \"rx\": a.receiveLinkSpeed, \"tx\": a.transmitLinkSpeed} for a in object.getNetworkAdaptors()]"
+   },
+   "promoted": {
+    "date": "2026-09-04",
+    "from": "99 Experimental",
+    "reason": "exact pair returned a value on Designer r34.0.3; promotion of all live-verified rows decided by the user on 2026-09-04"
    }
   }
  ],
@@ -16622,28 +17160,28 @@
    "presetId": "monl_setup",
    "category": "02 Monitoring Local",
    "name": "Setup: local monitors",
-   "text": "Local monitors need no selection: every preset subscribes to subsystem:MonitoringManager.findLocalMonitor(...) on the Director Companion is connected to.\n\nShown: FPS (latest, 10-sample and 60-sample average), GPU profiler frame time (Total, Compositor, GUI, Render Everything, DMX, Video Upload, Capture Upload) in ms, CPU Total (unit stated as ms by the help site; live on r34.0.3 the graph reports yUnits = \"Units\", so treat the number as relative), GPU memory (MB), Designer process memory (MB) and the \"Machine\" health monitor percentages (CPU/GPU time, CPU/GPU memory, Disk; source: disguise's official Grafana dashboard; values confirmed live on r34.0.3 in the 0-100 range).\n\nExperimental (99): Disk read/write MB/s (the developer guide says Disk over LiveUpdate is still in development), monitor and series name discovery.\n\nUpdate rate: monitoring class (default 1000 ms). Never set 0: monitors push every frame. Colour rules assume a 60 Hz project: red when FPS falls 10 below (latest) or 5 below (averages), GPU Total >= 17 ms, Machine % >= 80.",
+   "text": "Local monitors need no selection: every preset subscribes to subsystem:MonitoringManager.findLocalMonitor(...) on the Director Companion is connected to.\n\nShown: FPS (latest, 10-sample and 60-sample average), GPU profiler frame time (Total, Compositor, GUI, Render Everything, DMX, Video Upload, Capture Upload) in ms, CPU Total (unit stated as ms by the help site; live on r34.0.3 the graph reports yUnits = \"Units\", so treat the number as relative), GPU memory (MB), Designer process memory (MB) and the \"Machine\" health monitor percentages (CPU/GPU time, CPU/GPU memory, Disk; source: disguise's official Grafana dashboard; values confirmed live on r34.0.3 in the 0-100 range).\n\nAlso included after the r34.0.3 live run: Disk read/write MB/s (the developer guide calls Disk over LiveUpdate work in progress, but the values arrive), monitor and series name discovery, GPU thresholds, FPS min/max and graph categories.\n\nUpdate rate: monitoring class (default 1000 ms). Never set 0: monitors push every frame. Colour rules assume a 60 Hz project: red when FPS falls 10 below (latest) or 5 below (averages), GPU Total >= 17 ms, Machine % >= 80.",
    "dimension": "monitoring"
   },
   {
    "presetId": "monr_setup",
    "category": "03 Monitoring Remote",
    "name": "Setup: remote monitors",
-   "text": "Set the selection selHost to the hostname of the remote Designer machine WITHOUT the \":d3\" suffix (the presets append it, e.g. selHost = ACTOR01 -> \"ACTOR01:d3\"). Hostname case sensitivity is undocumented: copy it exactly as shown in d3Net / the \"Remote nodes list\" preset.\n\nShown: remote FPS (latest and 10-sample average), whether that remote fps graph has expired (stopped receiving data) and the list of remote nodes the MonitoringManager knows (discovery aid for selHost).\n\nExperimental (99): remote GPU/CPU/memory monitors and per-node monitor names.\n\nOpen points: only \"fps\" is documented as a remote monitor name; whether the Director must first mark the remote graph in use (MonitoringManager.useMonitorByName) is untested. A wrong selHost produces a LiveUpdate error; the module backs off before retrying.",
+   "text": "Set the selection selHost to the hostname of the remote Designer machine WITHOUT the \":d3\" suffix (the presets append it, e.g. selHost = ACTOR01 -> \"ACTOR01:d3\"). Hostname case sensitivity is undocumented: copy it exactly as shown in d3Net / the \"Remote nodes list\" preset.\n\nShown: remote FPS (latest and 10-sample average), whether that remote fps graph has expired (stopped receiving data) and the list of remote nodes the MonitoringManager knows (discovery aid for selHost).\n\nAlso included after the live run: remote Machine CPU/GPU time, GPU/CPU totals, GPU memory and the per-node monitor name list.\n\nOpen points: only \"fps\" is documented as a remote monitor name; whether the Director must first mark the remote graph in use (MonitoringManager.useMonitorByName) is untested. A wrong selHost produces a LiveUpdate error; the module backs off before retrying.",
    "dimension": "monitoring"
   },
   {
    "presetId": "tr_setup",
    "category": "04 Transport State",
    "name": "Transport State: setup",
-   "text": "Object path for every preset in this category: transportManager:default (Designer's default transport manager; no selection needed). Readouts: playhead in beats (equals seconds at 60 bpm), play mode as string and as state enum, playing / stopped / holding flags, play-to-end and loop-section modes, track loaded, playback speed, current track name and length, section count, timecode chase and source status strings, incoming timecode and pre-roll countdown. Controls: master brightness and volume (readout, +/-5 % nudges with rotary support, FULL / ZERO / MUTE), ENGAGE / DISENGAGE and a one-button Engaged toggle (Toggle Disguise Boolean action). Values with state colours use the LiveUpdate Compare feedback. Transport commands (play, stop, cue, section navigation) are not available over LiveUpdate: pair this module with companion-module-disguise-osc or the REST Transport API.\n\nExperimental (99): seconds / timecode conversions, section names, section elapsed and remaining (in beats), BPM at playhead, set-list track names.",
+   "text": "Object path for every preset in this category: transportManager:default (Designer's default transport manager; no selection needed). Readouts: playhead in beats (equals seconds at 60 bpm), play mode as string and as state enum, playing / stopped / holding flags, play-to-end and loop-section modes, track loaded, playback speed, current track name and length, section count, timecode chase and source status strings, incoming timecode and pre-roll countdown. Controls: master brightness and volume (readout, +/-5 % nudges with rotary support, FULL / ZERO / MUTE), ENGAGE / DISENGAGE and a one-button Engaged toggle (Toggle Disguise Boolean action). Values with state colours use the LiveUpdate Compare feedback. Transport commands (play, stop, cue, section navigation) are not available over LiveUpdate: pair this module with companion-module-disguise-osc or the REST Transport API.\n\nAlso included after the live run: track position and timecode position strings, free-running flag, BPM at playhead, section index, current / next section names, section elapsed and remaining (beats), set-list track names, active layer count and the GUI playhead. Still experimental (99): the timecode source name and the playhead of a named transport (the test project has one transport and no timecode source).",
    "dimension": "transport"
   },
   {
    "presetId": "trk_setup",
    "category": "05 Track & Layer",
    "name": "Setup: Track & Layer",
-   "text": "Create these selection variables before adding presets from this category: selTrack = track name as shown in Designer (quoted automatically, e.g. Track 1); selLayer = layer name inside that track (Layer editor name, e.g. Video 1); selSection = 0-based section index for the section presets; selBeat = a track beat (float) for the note/beat presets; selLayerIndex = 0-based position in the track layer list for the \"(by index)\" presets. Readouts show: track name/length/BPM, section and layer counts, section start/end, note at beat, beat-to-time, cue count, TC adjust, and per-layer name / enabled / live / start / end / length / anchored plus the key-0 values of pos.x, pos.y, scale and brightness. Readouts are grey; the TC-adjust knob presets (amber) write to Designer. All values are track beats unless labelled time.",
+   "text": "Create these selection variables before adding presets from this category: selTrack = track name as shown in Designer (quoted automatically, e.g. Track 1); selLayer = layer name inside that track (Layer editor name, e.g. Video 1); selSection = 0-based section index for the section presets; selBeat = a track beat (float) for the note/beat presets; selLayerIndex = 0-based position in the track layer list for the \"(by index)\" presets. Readouts show: track name/length/BPM, section and layer counts, section start/end, note at beat, beat-to-time, cue count, TC adjust, and per-layer name / enabled / live / start / end / length / anchored plus the key-0 values of pos.x, pos.y, scale and brightness. Readouts are grey; the TC-adjust knob presets (amber) write to Designer. All values are track beats unless labelled time. Also included after the live run: layer name list, section table / note / length / start (s), section of a beat, cue tags at a beat, the cue table (beat, note, section flag), layer extents / crashed / dormant / fields / key times, patched brightness, brightness at a beat, all pos.x keys and the video key-0 resource. Still experimental (99): the text key (needs a Text layer).",
    "dimension": "track_layer"
   },
   {
@@ -16657,35 +17195,35 @@
    "presetId": "stg_setup",
    "category": "07 Stage & Screen",
    "name": "Stage & Screen setup",
-   "text": "Create these selection variable(s) in Companion before dropping the presets: selScreen = exact Designer name of the Surface (Screen2), e.g. Surface 1 (the presets add the quotes); selProjector = projector name, e.g. projector 1; selScreenUid = UID of any display copied from its editor title bar (right-click > Copy UID), including the 0x prefix - the \"Display (UID)\" presets work for LED and DMX screens too. Readouts: name, mesh, resolution, health flags, offset/rotation/scale (m / deg), master fade, hold, render layer, alpha, blend mode, tracking state; projector feed/output/shutter/blend/feather. Controls (amber = write, green = on/enable, red = off/hold): offset X/Y/Z +-0.1 m and reset, master fade +-0.05 / 1.0 / 0.0, hold ON/OFF/toggle, ON/OFF stage, external update ON/OFF, projector render mode, shutter OPEN/CLOSE, dynamic blend ON/OFF, feather +-0.05. Sets are undoable in Designer and persist in the project. Nudge presets also respond to rotary encoders (right = +, left = -).",
+   "text": "Create these selection variable(s) in Companion before dropping the presets: selScreen = exact Designer name of the Surface (Screen2), e.g. Surface 1 (the presets add the quotes); selProjector = projector name, e.g. projector 1; selScreenUid = UID of any display copied from its editor title bar (right-click > Copy UID), including the 0x prefix - the \"Display (UID)\" presets work for LED and DMX screens too. Readouts: name, mesh, resolution, health flags, offset/rotation/scale (m / deg), master fade, hold, render layer, alpha, blend mode, tracking state; projector feed/output/shutter/blend/feather. Controls (amber = write, green = on/enable, red = off/hold): offset X/Y/Z +-0.1 m and reset, master fade +-0.05 / 1.0 / 0.0, hold ON/OFF/toggle, ON/OFF stage, external update ON/OFF, projector render mode, shutter OPEN/CLOSE, dynamic blend ON/OFF, feather +-0.05. Sets are undoable in Designer and persist in the project. Nudge presets also respond to rotary encoders (right = +, left = -). Also included after the live run: the projectors of a surface, the surfaces of a projector, LED screen name / fade / hold / offset (selection selLedScreen = LED screen name) and stage display count / dynamic blend (selection selStageUid = Stage UID, hex with 0x prefix). Still experimental (99): DMX screen rows (no DMX screen in the test project) and the stage venue name (no venue assigned).",
    "dimension": "stage"
   },
   {
    "presetId": "ev_setup",
    "category": "08 Expression Variables",
    "name": "EV setup: custom variables",
-   "text": "Expression Variables device readouts. Create these selection variables first: selEvUid = the device UID as an unquoted hex literal (Designer: right-click the Expression Variables device editor title bar > Copy UID, e.g. 0x0123456789abcdef); selEvIndex = zero-based row index of the variable in the device editor (plain integer, no quotes; rows can be drag-reordered so re-check after edits). Presets in this category read the i-th variable through getByUID(selEvUid).container.variables[selEvIndex]: defaultFloat (value of a Float variable), defaultString (value of a String variable), name and type (0 Float, 1 String, 2 Function). All rows are read-only: the pyi setter exists but a LiveUpdate set through the list subscript is untested, so nudge/set knobs are deferred until the live test. Experimental rows (see 99 Experimental) additionally need selEvDevice (device name = filename part of objects/ExpressionVariablesDevice/<name>.apx), selEvName (variable name, case-sensitive) and selLayer (name of an ExpressionVariables layer currently under the playhead).",
+   "text": "Expression Variables device readouts. Create these selection variables first: selEvUid = the device UID as an unquoted hex literal (Designer: right-click the Expression Variables device editor title bar > Copy UID, e.g. 0x0123456789abcdef); selEvIndex = zero-based row index of the variable in the device editor (plain integer, no quotes; rows can be drag-reordered so re-check after edits). Presets in this category read the i-th variable through getByUID(selEvUid).container.variables[selEvIndex]: defaultFloat (value of a Float variable), defaultString (value of a String variable), name and type (0 Float, 1 String, 2 Function). All rows are read-only: the pyi setter exists but a LiveUpdate set through the list subscript is untested, so nudge/set knobs are deferred until the live test. Experimental rows (see 99 Experimental) additionally need selEvDevice (device name = filename part of objects/ExpressionVariablesDevice/<name>.apx), selEvName (variable name, case-sensitive) and selEvLayer (name of an ExpressionVariables layer currently under the playhead). None of the Expression Variables rows could be checked live: the test project has no Expression Variables device.",
    "dimension": "exprvars"
   },
   {
    "presetId": "rs_setup",
    "category": "09 RenderStream",
    "name": "RenderStream setup",
-   "text": "RenderStream presets read subsystem:RenderStreamSystem (cluster/instance health, per-node flags, receive statuses, active latency) and Machine takeover. Create these selection variables first: selWorkload = workload ID as a Python int - copy it from the Cluster Workload widget ('Copy UID') or from REST GET /api/session/renderstream/layers then GET /api/session/renderstream/layerstatus?uid=<layer uid> (workload.uid); if the copied value is hex, enter it as 0x...; selInstance = zero-based instance index inside the workload (0 = first render node); selMachine = render node / machine name exactly as shown in the Cluster Workload widget Instances > Machine column. The 'RS Workload IDs (discovery)' preset lists the ids of running workloads without REST. Experimental layer-route presets (99 Experimental) also need selTrack (track name) and selRsLayer (zero-based index of the RenderStream layer among the track's RenderStream leaf layers); the [EXP] RS Layer Workload ID preset shows the workload id as text ready for selWorkload. All RenderStream rows are read-only; workload start/stop/restart is only available through the REST session API, not LiveUpdate. While a workload has no running instances the per-instance rows show PATH_ERROR (the Director answers \"out of range error accessing workload instance\"); the module backs off and retries on its own.",
+   "text": "RenderStream presets read subsystem:RenderStreamSystem (cluster/instance health, per-node flags, receive statuses, active latency) and Machine takeover. Create these selection variables first: selWorkload = workload ID as a Python int - copy it from the Cluster Workload widget ('Copy UID') or from REST GET /api/session/renderstream/layers then GET /api/session/renderstream/layerstatus?uid=<layer uid> (workload.uid); if the copied value is hex, enter it as 0x...; selInstance = zero-based instance index inside the workload (0 = first render node); selMachine = render node / machine name exactly as shown in the Cluster Workload widget Instances > Machine column. The 'RS workload layer count' preset shows how many layers carry a workload (on r34.0.3 the id map itself serialises empty, so read ids through the RS Layer Workload ID preset). The layer-route presets (RS Layer ...) need selTrack (track name) and selRsLayer (zero-based index of the RenderStream layer among the track's RenderStream leaf layers); the RS Layer Workload ID preset shows the workload id as text ready for selWorkload. The aggregate rows (node summary, running count, any dropping / down, health list, min FPS, max latency, dropped total, all subscribed, last errors, status messages) were verified live with a workload that had no running instances. All RenderStream rows are read-only; workload start/stop/restart is only available through the REST session API, not LiveUpdate. While a workload has no running instances the per-instance rows show PATH_ERROR (the Director answers \"out of range error accessing workload instance\"); the module backs off and retries on its own.",
    "dimension": "renderstream"
   },
   {
    "presetId": "fo_setup",
    "category": "10 Failover & d3Net",
    "name": "Setup: Failover & d3Net",
-   "text": "These presets read the failover / d3Net state of ONE machine addressed by name. Create the selection variables selMachine and set it to the machine's resource name exactly as it appears in Designer's d3Net Manager / Machines list (the 'name' field of GET /api/session/status/health - not necessarily the Windows hostname). Every preset here uses the object path Machine:\"$(liveupdate:selMachine)\"; change the selection variable(s) and all presets re-point at once (duplicate the page and use a second selection variable(s) if you need two machines side by side). Readouts: taken over a failed machine (understudy side), failed (actor side), auto failover disabled, network connected, network status code, active, role, running as, understudy targets, plus identity: machine name, hostname, IP, hardware type, d3Net node id, GUI visible, resource status. There are deliberately NO write presets in this category: role, hostname, director and understudy targets reconfigure the session, and the fail / restore machine commands are not reachable through LiveUpdate set (use REST POST /api/session/failover/failovermachine and /restoremachine). Alarm colours: add the liveUpdateCompare feedback as noted per preset (red = failed / offline / taken over / inactive, amber = auto failover disabled). Experimental rows for the connected machine itself, the acting director, offline / failed / taken-over lists across the whole d3Net, understudy configuration, the failover timeout and by-hostname addressing (selection variable(s) selHost, shared with 03 Monitoring Remote) are in 99 Experimental under the '10 Failover & d3Net' heading. Values update at the state (500 ms) or static (5000 ms) rate; failover indicators are method calls that the Director may evaluate on every cycle, so do not lower them below the defaults.",
+   "text": "These presets read the failover / d3Net state of ONE machine addressed by name. Create the selection variables selMachine and set it to the machine's resource name exactly as it appears in Designer's d3Net Manager / Machines list (the 'name' field of GET /api/session/status/health - not necessarily the Windows hostname). Every preset here uses the object path Machine:\"$(liveupdate:selMachine)\"; change the selection variable(s) and all presets re-point at once (duplicate the page and use a second selection variable(s) if you need two machines side by side). Readouts: taken over a failed machine (understudy side), failed (actor side), auto failover disabled, network connected, network status code, active, role, running as, understudy targets, plus identity: machine name, hostname, IP, hardware type, d3Net node id, GUI visible, resource status. There are deliberately NO write presets in this category: role, hostname, director and understudy targets reconfigure the session, and the fail / restore machine commands are not reachable through LiveUpdate set (use REST POST /api/session/failover/failovermachine and /restoremachine). Alarm colours: add the liveUpdateCompare feedback as noted per preset (red = failed / offline / taken over / inactive, amber = auto failover disabled). Rows for the connected machine itself, the acting director, offline / failed / taken-over lists across the whole d3Net, understudy configuration, the failover timeout, network adaptors and by-hostname addressing (selection selHost, shared with 03 Monitoring Remote) were verified live and are included. Only the name of the Director's understudy stays experimental (no understudy in the test project). Values update at the state (500 ms) or static (5000 ms) rate; failover indicators are method calls that the Director may evaluate on every cycle, so do not lower them below the defaults.",
    "dimension": "failover"
   },
   {
    "presetId": "conn_setup",
    "category": "01 Connection",
    "name": "Setup: selections & settings",
-   "text": "LiveUpdate can READ and SET Designer properties; it cannot issue transport commands (play, stop, cue, section navigation). Pair this module with companion-module-disguise-osc or the REST Transport API for commands. Presets address show objects through the module's own selection variables ($(liveupdate:selTrack), $(liveupdate:selScreen),...). Set them once in the connection settings (section \"Selections\") or from a button with the \"Set selection\" action; every preset that uses a selection re-subscribes automatically when it changes. Normal-tier selections: selBeat = a track beat as a number, e.g. 32; selEvIndex = 0-based row index of the variable inside the device (unquoted integer); selEvUid = UID of the Expression Variables device, hex with 0x prefix; selHost = hostname of the remote machine WITHOUT the:d3 suffix (the presets append it); selInstance = 0-based RenderStream instance index (unquoted integer); selLayer = layer name inside the selected track (selTrack), e.g. Video 1; selLayerIndex = 0-based leaf-layer index (unquoted integer) for the index-based probes; selMachine = Machine resource name exactly as listed in d3Net Manager (the same string is used for remote node lookups and RenderStream machine names; confirm on your Director); selProjector = projector name; selScreen = Surface (screen2) name; selScreenUid = UID of any display, hex with 0x prefix (right-click the editor title bar > Copy UID); selSection = 0-based section index (unquoted integer); selTrack = track name as shown in Designer, e.g. Track 1 (quoted by the paths); selWorkload = RenderStream workload id as an unquoted integer (REST GET /api/session/renderstream/layerstatus or the Cluster Workload widget > Copy UID). Experimental presets (category 99, names prefixed [EXP]) are hidden until the connection setting \"Show experimental presets\" is on; they use: selDmxScreen = DMX screen name; selEvDevice = Expression Variables device name (file name part of objects/ExpressionVariablesDevice/<name>.apx); selEvLayer = Expression Variables layer name (module: prefix); selEvName = expression variable name, case-sensitive; selLedScreen = LED screen name; selRsLayer = 0-based index among the track's RenderStream leaf layers; selStageUid = Stage UID, hex with 0x prefix; selTransport = transport manager name other than default. Update intervals are prefilled from the connection settings (Monitoring / Playhead / State / Static) and can be edited per button.",
+   "text": "LiveUpdate can READ and SET Designer properties; it cannot issue transport commands (play, stop, cue, section navigation). Pair this module with companion-module-disguise-osc or the REST Transport API for commands. Presets address show objects through the module's own selection variables ($(liveupdate:selTrack), $(liveupdate:selScreen),...). Set them once in the connection settings (section \"Selections\") or from a button with the \"Set selection\" action; every preset that uses a selection re-subscribes automatically when it changes. Normal-tier selections: selBeat = a track beat as a number, e.g. 32; selEvIndex = 0-based row index of the variable inside the device (unquoted integer); selEvUid = UID of the Expression Variables device, hex with 0x prefix; selHost = hostname of the remote machine WITHOUT the:d3 suffix (the presets append it); selInstance = 0-based RenderStream instance index (unquoted integer); selLayer = layer name inside the selected track (selTrack), e.g. Video 1; selLayerIndex = 0-based position in the track layer list (unquoted integer) for the \"(by index)\" presets; selLedScreen = LED screen name; selMachine = Machine resource name exactly as listed in d3Net Manager (the same string is used for remote node lookups and RenderStream machine names; confirm on your Director); selProjector = projector name; selRsLayer = 0-based index among the track's RenderStream leaf layers; selScreen = Surface (screen2) name; selScreenUid = UID of any display, hex with 0x prefix (right-click the editor title bar > Copy UID); selSection = 0-based section index (unquoted integer); selStageUid = Stage UID, hex with 0x prefix; selTrack = track name as shown in Designer, e.g. Track 1 (quoted by the paths); selWorkload = RenderStream workload id as unquoted decimal digits (the RS Layer Workload ID preset shows it as text; also Cluster Workload widget > Copy UID or REST GET /api/session/renderstream/layerstatus). Experimental presets (category 99, names prefixed [EXP]) are hidden until the connection setting \"Show experimental presets\" is on; they use: selDmxScreen = DMX screen name; selEvDevice = Expression Variables device name (file name part of objects/ExpressionVariablesDevice/<name>.apx); selEvLayer = Expression Variables layer name (module: prefix); selEvName = expression variable name, case-sensitive; selTransport = transport manager name other than default. Update intervals are prefilled from the connection settings (Monitoring / Playhead / State / Static) and can be edited per button.",
    "dimension": "connection_templates"
   },
   {
@@ -16699,7 +17237,7 @@
    "presetId": "exp_setup",
    "category": "99 Experimental",
    "name": "About experimental presets",
-   "text": "Read-only presets built from members that exist in the official r34 Python stub but whose LiveUpdate object path is not documented. They may show ERROR / PATH_ERROR; that is not a module bug. Use them to test on your Director; verified rows are promoted to their home category in a later release without changing ids or variable names.",
+   "text": "Read-only presets that could not be confirmed on the r34.0.3 test rig: it had no Expression Variables device, DMX screen, timecode source, stage venue, Text layer or second transport, and one row (RS Layer Node Status) needs a running workload instance. They may show ERROR / PATH_ERROR; that is not a module bug. Confirmed rows are promoted to their home category without changing ids or variable names (103 rows were promoted after the 2026-09-04 live run).",
    "dimension": "lead"
   }
  ],
@@ -16841,7 +17379,8 @@
   "keep stg_screen_offset_x_up / stg_screen_offset_x_down in the normal tier (Vec.x setter + v1.0.2 precedent); live-test priority high; fall back to a JSON set on object.offset if the scalar set is rejected",
   "review fixes: failover expression texts wrapped as template literals; transport brightness/volume nudges bind both rotary directions; stale Phase-1 wording (proposed toggle/compare, d3_* custom variables, \"until the guard lands\") replaced",
   "drop fo_health_worst (live)",
-  "drop fo_health_states (live)"
+  "drop fo_health_states (live)",
+  "promote 103 live-verified experimental rows to their home categories (user decision 2026-09-04)"
  ],
  "issues": [],
  "perDim": [
@@ -17496,19 +18035,20 @@
   "method": "Read-only: scripts/live-verify.mjs subscribed to every unique object/property pair of the catalog once (selections discovered from the running project), recorded the first value or error and unsubscribed; four follow-up probe runs tested replacement forms for the rows that failed. No `set` was sent; write actions are still untested live.",
   "files": [
    "docs/research/live-verification.json",
-   "docs/research/live-verification-probes.json"
+   "docs/research/live-verification-probes.json",
+   "docs/research/live-verification-run2.json"
   ],
   "summary": {
    "confirmed-value": {
-    "normal": 167,
-    "experimental": 96
+    "normal": 171,
+    "experimental": 103
    },
    "not-run": {
     "normal": 7,
-    "experimental": 27
+    "experimental": 20
    },
    "confirmed-path-error": {
-    "normal": 17,
+    "normal": 13,
     "experimental": 4
    },
    "confirmed-no-value": {
@@ -17543,7 +18083,12 @@
    "text preset 09 RenderStream: wording updated after the live run",
    "text preset 09 RenderStream: wording updated after the live run",
    "text preset 02 Monitoring Local: wording updated after the live run",
-   "text preset 02 Monitoring Local: wording updated after the live run"
+   "text preset 02 Monitoring Local: wording updated after the live run",
+   "run 2 (2026-09-04): 12 rows confirmed with a Video layer / discovered selections and promoted to live-verified, 1 rows run for the first time",
+   "trk_key_posx_all: sequence.nKeys is a method on r34.0.3 (\"range() integer end argument expected, got instancemethod\"); now nKeys()",
+   "stg_stage_venue: guarded, the stage has no venue in the test project",
+   "trk_cue_table: tags dropped from the comprehension; with the nested getTags() comprehension the Director never delivered a value within 4 s, the beat/note/section form answers at once",
+   "rs_workload_layers: shows len(getWorkloadLayers()); on r34.0.3 the map itself serialises as {} (uint64 keys, \"long too big to convert\" when iterated) although len() reports 5"
   ],
   "removed": [
    {
@@ -17558,6 +18103,148 @@
     "propertyPath": "[{\"name\": s.name, \"category\": s.category, \"severity\": s.severity, \"detail\": s.detail} for s in d3NetManager.machineStatus(object.nodeId).states] if object.nodeId is not None else []",
     "reason": "live r34.0.3: d3NetManager.machineStatus(object.nodeId) raises \"Exception when converting between 'optional<uint>' and 'uint'\" (the nodeId member is an optional in this build)"
    }
+  ],
+  "run2": {
+   "date": "2026-09-04",
+   "selections": {
+    "selTrack": "Show Track",
+    "selLayer": "Video 26",
+    "selLayerIndex": "2",
+    "selHost": "ACTOR01",
+    "selMachine": "DIRECTOR01",
+    "selScreen": "surface 1",
+    "selProjector": "projector 1",
+    "selScreenUid": "0x0123456789abcdef",
+    "selLedScreen": "LED Screen 1",
+    "selStageUid": "0x0123456789abcde0",
+    "selWorkload": "1000000000000000001",
+    "selSection": "0",
+    "selBeat": "0",
+    "selInstance": "0",
+    "selEvIndex": "0",
+    "selRsLayer": "0"
+   },
+   "summary": {
+    "confirmed-value": 213,
+    "skipped-unset-selection": 25,
+    "confirmed-path-error": 14,
+    "confirmed-no-value": 1
+   },
+   "note": "Second read-only pass with selLayer set to a Video layer and the experimental selections discovered from the project (LED screen, stage UID, RenderStream workload id)."
+  }
+ },
+ "promotion": {
+  "date": "2026-09-04",
+  "count": 103,
+  "presetIds": [
+   "monl_disk_read",
+   "monl_disk_write",
+   "monl_monitor_names",
+   "monl_cpu_series_names",
+   "monl_cpu_units",
+   "monl_gpu_mem_units",
+   "monl_gpu_thresholds",
+   "monl_fps_minmax",
+   "monl_graph_categories",
+   "monr_node_monitor_names",
+   "monr_machine_cpu_time",
+   "monr_machine_gpu_time",
+   "monr_gpu_total",
+   "monr_cpu_total",
+   "monr_gpu_mem",
+   "tr_trackposition",
+   "tr_timecodeposition",
+   "tr_free_running",
+   "tr_bpm",
+   "tr_section_index",
+   "tr_current_section_name",
+   "tr_next_section_name",
+   "tr_section_remaining",
+   "tr_section_elapsed",
+   "tr_setlist_tracks",
+   "tr_active_layer_count",
+   "tr_gui_playhead_beats",
+   "trk_layer_names",
+   "trk_layer_tstart_bycomp",
+   "trk_section_table",
+   "trk_section_note",
+   "trk_section_length",
+   "trk_section_start_sec",
+   "trk_section_of_beat",
+   "trk_cue_tag_at_beat",
+   "trk_tags_at_beat",
+   "trk_layer_extents",
+   "trk_layer_crashed",
+   "trk_layer_dormant",
+   "trk_layer_fields",
+   "trk_layer_keytimes",
+   "trk_brightness_patched",
+   "trk_brightness_at_beat",
+   "trk_key_video",
+   "stg_screen_projectors",
+   "stg_proj_screens",
+   "stg_led_name",
+   "stg_led_fade",
+   "stg_led_hold",
+   "stg_led_offset",
+   "stg_stage_displays",
+   "stg_stage_dyn_blend",
+   "rs_nodes_summary",
+   "rs_running_count",
+   "rs_any_dropping",
+   "rs_any_down",
+   "rs_health_list",
+   "rs_min_fps",
+   "rs_max_latency",
+   "rs_dropped_total",
+   "rs_all_subscribed",
+   "rs_last_errors",
+   "rs_status_msgs",
+   "rs_layer_workload_id",
+   "rs_layer_health",
+   "rs_layer_any_running",
+   "rs_layer_n_instances",
+   "rs_layer_inst_health",
+   "rs_layer_pool_online",
+   "rs_layer_asset_errors",
+   "rs_layer_asset_available",
+   "rs_layer_framerate",
+   "fo_local_name",
+   "fo_local_name_alt",
+   "fo_director_name",
+   "fo_is_director",
+   "fo_director_mode",
+   "fo_understudy_mode",
+   "fo_solo_mode",
+   "fo_has_valid_director",
+   "fo_local_taken_over",
+   "fo_local_running_as",
+   "fo_machine_count",
+   "fo_offline_machines",
+   "fo_failed_machines",
+   "fo_takenover_machines",
+   "fo_machines_table",
+   "fo_actor_names",
+   "fo_understudy_names",
+   "fo_understudy_table",
+   "fo_failover_timeout",
+   "fo_host_taken_over",
+   "fo_d3net_ref",
+   "fo_locked_to_director",
+   "conn_session_name",
+   "conn_project_name",
+   "conn_designer_version",
+   "conn_designer_version_name",
+   "conn_licence_days",
+   "conn_in_show",
+   "fo_network_adaptors",
+   "trk_cue_table",
+   "trk_key_posx_all"
+  ],
+  "selections": [
+   "selLedScreen",
+   "selStageUid",
+   "selRsLayer"
   ]
  }
 }
