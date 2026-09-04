@@ -76,8 +76,10 @@ async function processNumberValue(
 		// eslint-disable-next-line @typescript-eslint/no-implied-eval -- existing behaviour: the Number action evaluates the operator's arithmetic expression
 		const value = new Function('return ' + parsedValue)() as number
 
-		if (typeof value !== 'number' || isNaN(value)) {
-			instance.log('warn', `Value is not a valid number: ${parsedValue} (from: ${valueStr})`)
+		// Infinity and -Infinity are numbers and are not NaN, but JSON.stringify turns them into
+		// null, which would put {"value":null} on the wire and into a live show property.
+		if (typeof value !== 'number' || !Number.isFinite(value)) {
+			instance.log('warn', `Value is not a finite number: ${parsedValue} (from: ${valueStr})`)
 			return null
 		}
 

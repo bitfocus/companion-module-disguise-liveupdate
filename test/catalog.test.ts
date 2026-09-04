@@ -318,3 +318,35 @@ test('write verification: recorded rows are writable, restored, and use known ac
 	assert.ok(recorded > 0, 'at least one row carries a write result')
 	assert.ok(catalog.writeVerification?.date, 'catalog carries the write verification summary')
 })
+
+test('expression button text keeps every variable reference inside a substitution', () => {
+	for (const [id, preset] of Object.entries(presets)) {
+		const p = preset
+		if (p.type === 'text' || !p.style?.textExpression) continue
+		const literal = String(p.style.text).replace(/\$\{[^}]*\}/g, '')
+		assert.ok(
+			!/\$\(liveupdate:/.test(literal),
+			`${id}: a $(liveupdate:...) reference outside \${ } renders as literal text: ${p.style.text}`,
+		)
+	}
+})
+
+test('preset previews carry no address or hostname from a real installation', () => {
+	const forbidden = /\b(?:10|172|192)\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/
+	for (const [id, preset] of Object.entries(presets)) {
+		const p = preset
+		const text = `${p.previewStyle?.text ?? ''} ${p.style?.text ?? ''} ${p.text ?? ''}`
+		const match = forbidden.exec(text)
+		// RFC 5737 documentation ranges are fine
+		if (match && !/^(192\.0\.2\.|198\.51\.100\.|203\.0\.113\.)/.test(match[0]))
+			assert.fail(`${id}: preview contains the address ${match[0]}`)
+	}
+})
+
+test('each Templates preset ships its own variable name', () => {
+	const templates = catalog.rows.filter((r: any) => r.category === '11 Templates')
+	const names = templates.map((r: any) => r.variableName)
+	assert.equal(new Set(names).size, names.length, `template variable names collide: ${names.join(', ')}`)
+	for (const row of templates)
+		assert.ok(/^[A-Za-z0-9_-]{1,40}$/.test(row.variableName), `${row.presetId}: bad variable ${row.variableName}`)
+})

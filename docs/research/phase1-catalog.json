@@ -4653,7 +4653,7 @@
    "variableName": "sectionStartBeats",
    "valueType": "float",
    "freqClass": "static",
-   "textTemplate": "`Sec $(liveupdate:selSection) start\\n${toFixed($(liveupdate:sectionStartBeats),1)} b`",
+   "textTemplate": "`Sec ${$(liveupdate:selSection)} start\\n${toFixed($(liveupdate:sectionStartBeats),1)} b`",
    "previewText": "Sec 2 start\n64.0 b",
    "candidateIds": [
     "trk-sectionInfo"
@@ -4697,7 +4697,7 @@
    "variableName": "sectionEndBeats",
    "valueType": "float",
    "freqClass": "static",
-   "textTemplate": "`Sec $(liveupdate:selSection) end\\n${toFixed($(liveupdate:sectionEndBeats),1)} b`",
+   "textTemplate": "`Sec ${$(liveupdate:selSection)} end\\n${toFixed($(liveupdate:sectionEndBeats),1)} b`",
    "previewText": "Sec 2 end\n96.0 b",
    "candidateIds": [
     "trk-sectionInfo"
@@ -4784,7 +4784,7 @@
    "variableName": "beatToSec",
    "valueType": "float",
    "freqClass": "static",
-   "textTemplate": "`Beat $(liveupdate:selBeat)\\n${secondsToTimestamp($(liveupdate:beatToSec))}`",
+   "textTemplate": "`Beat ${$(liveupdate:selBeat)}\\n${secondsToTimestamp($(liveupdate:beatToSec))}`",
    "previewText": "Beat 64\n00:00:32",
    "candidateIds": [
     "trk-beatToTime"
@@ -5141,7 +5141,7 @@
    "variableName": "layerEnabled",
    "valueType": "boolean",
    "freqClass": "state",
-   "textTemplate": "`$(liveupdate:selLayer)\\n${$(liveupdate:layerEnabled) ? 'ENABLED' : 'DISABLED'}`",
+   "textTemplate": "`${$(liveupdate:selLayer)}\\n${$(liveupdate:layerEnabled) ? 'ENABLED' : 'DISABLED'}`",
    "previewText": "Video 1\nENABLED",
    "candidateIds": [
     "lay-enabled",
@@ -5882,7 +5882,7 @@
    "variableName": "idxKeyPosX",
    "valueType": "float",
    "freqClass": "state",
-   "textTemplate": "`Pos X [$(liveupdate:selLayerIndex)]\\n${toFixed($(liveupdate:idxKeyPosX),2)}`",
+   "textTemplate": "`Pos X [${$(liveupdate:selLayerIndex)}]\\n${toFixed($(liveupdate:idxKeyPosX),2)}`",
    "previewText": "Pos X [0]\n0.00",
    "candidateIds": [
     "key-posx-v",
@@ -6108,7 +6108,7 @@
     "value": true,
     "bgcolor": "rgb(0,100,0)"
    },
-   "textTemplate": "`$(liveupdate:selLayer)\\n${$(liveupdate:layerEnabled) ? 'ON' : 'OFF'}`",
+   "textTemplate": "`${$(liveupdate:selLayer)}\\n${$(liveupdate:layerEnabled) ? 'ON' : 'OFF'}`",
    "previewText": "Video 1\nON",
    "candidateIds": [
     "lay-enabled",
@@ -7983,7 +7983,7 @@
    "variableName": "sectionLengthBeats",
    "valueType": "float",
    "freqClass": "static",
-   "textTemplate": "`Sec $(liveupdate:selSection) len\\n${toFixed($(liveupdate:sectionLengthBeats),1)} b`",
+   "textTemplate": "`Sec ${$(liveupdate:selSection)} len\\n${toFixed($(liveupdate:sectionLengthBeats),1)} b`",
    "previewText": "Sec 2 len\n32.0 b",
    "candidateIds": [
     "trk-sectionList"
@@ -8034,7 +8034,7 @@
    "variableName": "sectionStartSec",
    "valueType": "float",
    "freqClass": "static",
-   "textTemplate": "`Sec $(liveupdate:selSection) start\\n${secondsToTimestamp($(liveupdate:sectionStartSec))}`",
+   "textTemplate": "`Sec ${$(liveupdate:selSection)} start\\n${secondsToTimestamp($(liveupdate:sectionStartSec))}`",
    "previewText": "Sec 2 start\n00:00:32",
    "candidateIds": [
     "trk-sectionList",
@@ -8182,7 +8182,7 @@
    "variableName": "tagsAtBeat",
    "valueType": "array of {type:int,text:string} (JSON string)",
    "freqClass": "static",
-   "textTemplate": "`Tags @$(liveupdate:selBeat)\\n${jsonpath($(liveupdate:tagsAtBeat),'$.length')}`",
+   "textTemplate": "`Tags @${$(liveupdate:selBeat)}\\n${jsonpath($(liveupdate:tagsAtBeat),'$.length')}`",
    "previewText": "Tags @64\n1",
    "candidateIds": [
     "trk-tagsAtBeat"
@@ -17326,11 +17326,11 @@
    "controlKind": "readout",
    "objectPath": "<OBJECT_PATH>",
    "propertyPath": "object.<PROPERTY_PATH>",
-   "variableName": "myValue",
+   "variableName": "tplString",
    "valueType": "string",
    "writable": "unknown",
    "freqClass": "state",
-   "textTemplate": "Value\n$(liveupdate:myValue)",
+   "textTemplate": "Value\n$(liveupdate:tplString)",
    "textExpression": false,
    "previewText": "Value\nTrack 1",
    "bgcolor": "rgb(40,40,43)",
@@ -17355,7 +17355,8 @@
     "probe": "none",
     "status": "n/a",
     "note": "template with placeholders, nothing to subscribe"
-   }
+   },
+   "actions": []
   },
   {
    "presetId": "tpl_watch_number",
@@ -17367,11 +17368,11 @@
    "controlKind": "readout",
    "objectPath": "<OBJECT_PATH>",
    "propertyPath": "object.<PROPERTY_PATH>",
-   "variableName": "myValue",
+   "variableName": "tplNumber",
    "valueType": "number",
    "writable": "unknown",
    "freqClass": "state",
-   "textTemplate": "`Value\\n${toFixed($(liveupdate:myValue), 2)}`",
+   "textTemplate": "`Value\\n${toFixed($(liveupdate:tplNumber), 2)}`",
    "textExpression": true,
    "previewText": "Value\n12.34",
    "bgcolor": "rgb(40,40,43)",
@@ -17403,7 +17404,8 @@
     "probe": "none",
     "status": "n/a",
     "note": "template with placeholders, nothing to subscribe"
-   }
+   },
+   "actions": []
   },
   {
    "presetId": "tpl_watch_json",
@@ -17415,11 +17417,11 @@
    "controlKind": "readout",
    "objectPath": "<OBJECT_PATH>",
    "propertyPath": "object.<PROPERTY_PATH>",
-   "variableName": "myValue",
+   "variableName": "tplJson",
    "valueType": "json (object / array / resource {uid,path,type}) delivered as a JSON string",
    "writable": "unknown",
    "freqClass": "state",
-   "textTemplate": "`x\\n${jsonpath(jsonparse($(liveupdate:myValue)), '$.x')}`",
+   "textTemplate": "`x\\n${jsonpath(jsonparse($(liveupdate:tplJson)), '$.x')}`",
    "textExpression": true,
    "previewText": "x\n0.5",
    "bgcolor": "rgb(40,40,43)",
@@ -17454,7 +17456,8 @@
     "probe": "none",
     "status": "n/a",
     "note": "template with placeholders, nothing to subscribe"
-   }
+   },
+   "actions": []
   },
   {
    "presetId": "tpl_set_number",
@@ -17466,11 +17469,11 @@
    "controlKind": "setValue",
    "objectPath": "<OBJECT_PATH>",
    "propertyPath": "object.<PROPERTY_PATH>",
-   "variableName": "myValue",
+   "variableName": "tplSetNumber",
    "valueType": "number",
    "writable": "yes",
    "freqClass": "state",
-   "textTemplate": "`Set 0\\n${toFixed($(liveupdate:myValue), 2)}`",
+   "textTemplate": "`Set 0\\n${toFixed($(liveupdate:tplSetNumber), 2)}`",
    "textExpression": true,
    "previewText": "Set 0\n12.34",
    "bgcolor": "rgb(140,70,0)",
@@ -17489,7 +17492,7 @@
      "set": "down",
      "actionId": "setToDisguiseNumber",
      "options": {
-      "variableName": "myValue",
+      "variableName": "tplSetNumber",
       "value": "0"
      }
     }
@@ -17527,11 +17530,11 @@
    "controlKind": "setValue",
    "objectPath": "<OBJECT_PATH>",
    "propertyPath": "object.<PROPERTY_PATH>",
-   "variableName": "myValue",
+   "variableName": "tplSetString",
    "valueType": "string",
    "writable": "yes",
    "freqClass": "state",
-   "textTemplate": "Set text\n$(liveupdate:myValue)",
+   "textTemplate": "Set text\n$(liveupdate:tplSetString)",
    "textExpression": false,
    "previewText": "Set text\nold text",
    "bgcolor": "rgb(140,70,0)",
@@ -17550,7 +17553,7 @@
      "set": "down",
      "actionId": "setToDisguiseString",
      "options": {
-      "variableName": "myValue",
+      "variableName": "tplSetString",
       "value": "<redacted: project content>"
      }
     }
@@ -17578,11 +17581,11 @@
    "controlKind": "onOff",
    "objectPath": "<OBJECT_PATH>",
    "propertyPath": "object.<PROPERTY_PATH>",
-   "variableName": "myValue",
+   "variableName": "tplBoolTrue",
    "valueType": "boolean",
    "writable": "yes",
    "freqClass": "state",
-   "textTemplate": "Set ON\n$(liveupdate:myValue)",
+   "textTemplate": "Set ON\n$(liveupdate:tplBoolTrue)",
    "textExpression": false,
    "previewText": "Set ON\ntrue",
    "bgcolor": "rgb(0,100,0)",
@@ -17601,7 +17604,7 @@
      "set": "down",
      "actionId": "setToDisguiseBoolean",
      "options": {
-      "variableName": "myValue",
+      "variableName": "tplBoolTrue",
       "value": true
      }
     }
@@ -17629,11 +17632,11 @@
    "controlKind": "onOff",
    "objectPath": "<OBJECT_PATH>",
    "propertyPath": "object.<PROPERTY_PATH>",
-   "variableName": "myValue",
+   "variableName": "tplBoolFalse",
    "valueType": "boolean",
    "writable": "yes",
    "freqClass": "state",
-   "textTemplate": "Set OFF\n$(liveupdate:myValue)",
+   "textTemplate": "Set OFF\n$(liveupdate:tplBoolFalse)",
    "textExpression": false,
    "previewText": "Set OFF\nfalse",
    "bgcolor": "rgb(178,34,34)",
@@ -17652,7 +17655,7 @@
      "set": "down",
      "actionId": "setToDisguiseBoolean",
      "options": {
-      "variableName": "myValue",
+      "variableName": "tplBoolFalse",
       "value": false
      }
     }
@@ -17680,11 +17683,11 @@
    "controlKind": "toggle",
    "objectPath": "<OBJECT_PATH>",
    "propertyPath": "object.<PROPERTY_PATH>",
-   "variableName": "myValue",
+   "variableName": "tplToggle",
    "valueType": "boolean",
    "writable": "yes",
    "freqClass": "state",
-   "textTemplate": "Toggle\n$(liveupdate:myValue)",
+   "textTemplate": "Toggle\n$(liveupdate:tplToggle)",
    "textExpression": false,
    "previewText": "Toggle\ntrue",
    "bgcolor": "rgb(140,70,0)",
@@ -17703,7 +17706,7 @@
      "set": "down",
      "actionId": "setToDisguiseToggle",
      "options": {
-      "variableName": "myValue"
+      "variableName": "tplToggle"
      }
     }
    ],
@@ -17741,11 +17744,11 @@
    "controlKind": "jsonSet",
    "objectPath": "<OBJECT_PATH>",
    "propertyPath": "object.<PROPERTY_PATH>",
-   "variableName": "myValue",
+   "variableName": "tplSetJson",
    "valueType": "json (object / vector) delivered as a JSON string",
    "writable": "yes",
    "freqClass": "state",
-   "textTemplate": "`Set x=0\\n${jsonpath(jsonparse($(liveupdate:myValue)), '$.x')}`",
+   "textTemplate": "`Set x=0\\n${jsonpath(jsonparse($(liveupdate:tplSetJson)), '$.x')}`",
    "textExpression": true,
    "previewText": "Set x=0\n0.5",
    "bgcolor": "rgb(140,70,0)",
@@ -17764,7 +17767,7 @@
      "set": "down",
      "actionId": "setToDisguiseJSON",
      "options": {
-      "variableName": "myValue",
+      "variableName": "tplSetJson",
       "value": "{\"x\":0}"
      }
     }
@@ -17799,11 +17802,11 @@
    "controlKind": "nudge",
    "objectPath": "<OBJECT_PATH>",
    "propertyPath": "object.<PROPERTY_PATH>",
-   "variableName": "myValue",
+   "variableName": "tplNudgeUp",
    "valueType": "number",
    "writable": "yes",
    "freqClass": "state",
-   "textTemplate": "`+1\\n${toFixed($(liveupdate:myValue), 2)}`",
+   "textTemplate": "`+1\\n${toFixed($(liveupdate:tplNudgeUp), 2)}`",
    "textExpression": true,
    "previewText": "+1\n13.34",
    "bgcolor": "rgb(140,70,0)",
@@ -17822,24 +17825,24 @@
      "set": "down",
      "actionId": "setToDisguiseNumber",
      "options": {
-      "variableName": "myValue",
-      "value": "$(liveupdate:myValue)+1"
+      "variableName": "tplNudgeUp",
+      "value": "$(liveupdate:tplNudgeUp)+1"
      }
     },
     {
      "set": "rotate_right",
      "actionId": "setToDisguiseNumber",
      "options": {
-      "variableName": "myValue",
-      "value": "$(liveupdate:myValue)+1"
+      "variableName": "tplNudgeUp",
+      "value": "$(liveupdate:tplNudgeUp)+1"
      }
     },
     {
      "set": "rotate_left",
      "actionId": "setToDisguiseNumber",
      "options": {
-      "variableName": "myValue",
-      "value": "$(liveupdate:myValue)-1"
+      "variableName": "tplNudgeUp",
+      "value": "$(liveupdate:tplNudgeUp)-1"
      }
     }
    ],
@@ -17875,11 +17878,11 @@
    "controlKind": "nudge",
    "objectPath": "<OBJECT_PATH>",
    "propertyPath": "object.<PROPERTY_PATH>",
-   "variableName": "myValue",
+   "variableName": "tplNudgeDown",
    "valueType": "number",
    "writable": "yes",
    "freqClass": "state",
-   "textTemplate": "`-1\\n${toFixed($(liveupdate:myValue), 2)}`",
+   "textTemplate": "`-1\\n${toFixed($(liveupdate:tplNudgeDown), 2)}`",
    "textExpression": true,
    "previewText": "-1\n11.34",
    "bgcolor": "rgb(140,70,0)",
@@ -17898,24 +17901,24 @@
      "set": "down",
      "actionId": "setToDisguiseNumber",
      "options": {
-      "variableName": "myValue",
-      "value": "$(liveupdate:myValue)-1"
+      "variableName": "tplNudgeDown",
+      "value": "$(liveupdate:tplNudgeDown)-1"
      }
     },
     {
      "set": "rotate_left",
      "actionId": "setToDisguiseNumber",
      "options": {
-      "variableName": "myValue",
-      "value": "$(liveupdate:myValue)-1"
+      "variableName": "tplNudgeDown",
+      "value": "$(liveupdate:tplNudgeDown)-1"
      }
     },
     {
      "set": "rotate_right",
      "actionId": "setToDisguiseNumber",
      "options": {
-      "variableName": "myValue",
-      "value": "$(liveupdate:myValue)+1"
+      "variableName": "tplNudgeDown",
+      "value": "$(liveupdate:tplNudgeDown)+1"
      }
     }
    ],
@@ -18510,7 +18513,7 @@
    "presetId": "trk_setup",
    "category": "05 Track & Layer",
    "name": "Setup: Track & Layer",
-   "text": "Create these selection variables before adding presets from this category: selTrack = track name as shown in Designer (quoted automatically, e.g. Track 1); selLayer = layer name inside that track (Layer editor name, e.g. Video 1); selSection = 0-based section index for the section presets; selBeat = a track beat (float) for the note/beat presets; selLayerIndex = 0-based position in the track layer list for the \"(by index)\" presets. Readouts show: track name/length/BPM, section and layer counts, section start/end, note at beat, beat-to-time, cue count, TC adjust, and per-layer name / enabled / live / start / end / length / anchored plus the key-0 values of pos.x, pos.y, scale and brightness. Readouts are grey; the TC-adjust knob presets (amber) write to Designer. All values are track beats unless labelled time. Also included after the live run: layer name list, section table / note / length / start (s), section of a beat, cue tags at a beat, the cue table (beat, note, section flag), layer extents / crashed / dormant / fields / key times, patched brightness, brightness at a beat, all pos.x keys and the video key-0 resource. Still experimental (99): the text key (needs a Text layer).",
+   "text": "Fill these selections in first (connection settings > Selections, or the \"Set selection\" action): selTrack = track name as shown in Designer (quoted automatically, e.g. Track 1); selLayer = layer name inside that track (Layer editor name, e.g. Video 1); selSection = 0-based section index for the section presets; selBeat = a track beat (float) for the note/beat presets; selLayerIndex = 0-based position in the track layer list for the \"(by index)\" presets. Readouts show: track name/length/BPM, section and layer counts, section start/end, note at beat, beat-to-time, cue count, TC adjust, and per-layer name / enabled / live / start / end / length / anchored plus the key-0 values of pos.x, pos.y, scale and brightness. Readouts are grey; the TC-adjust knob presets (amber) write to Designer. All values are track beats unless labelled time. Also included after the live run: layer name list, section table / note / length / start (s), section of a beat, cue tags at a beat, the cue table (beat, note, section flag), layer extents / crashed / dormant / fields / key times, patched brightness, brightness at a beat, all pos.x keys and the video key-0 resource. Still experimental (99): the text key (needs a Text layer).",
    "dimension": "track_layer"
   },
   {
@@ -18524,28 +18527,28 @@
    "presetId": "stg_setup",
    "category": "07 Stage & Screen",
    "name": "Stage & Screen setup",
-   "text": "Create these selection variable(s) in Companion before dropping the presets: selScreen = exact Designer name of the Surface (Screen2), e.g. Surface 1 (the presets add the quotes); selProjector = projector name, e.g. projector 1; selScreenUid = UID of any display copied from its editor title bar (right-click > Copy UID), including the 0x prefix - the \"Display (UID)\" presets work for LED and DMX screens too. Readouts: name, mesh, resolution, health flags, offset/rotation/scale (m / deg), master fade, hold, render layer, alpha, blend mode, tracking state; projector feed/output/shutter/blend/feather. Controls (amber = write, green = on/enable, red = off/hold): offset X/Y/Z +-0.1 m and reset, master fade +-0.05 / 1.0 / 0.0, hold ON/OFF/toggle, ON/OFF stage, external update ON/OFF, projector render mode, shutter OPEN/CLOSE, dynamic blend ON/OFF, feather +-0.05. Sets are undoable in Designer and persist in the project. Nudge presets also respond to rotary encoders (right = +, left = -). Also included after the live run: the projectors of a surface, the surfaces of a projector, LED screen name / fade / hold / offset (selection selLedScreen = LED screen name) and stage display count / dynamic blend (selection selStageUid = Stage UID, hex with 0x prefix). Still experimental (99): DMX screen rows (no DMX screen in the test project) and the stage venue name (no venue assigned).",
+   "text": "Fill these selections in before dropping the presets (connection settings > Selections, or the \"Set selection\" action): selScreen = exact Designer name of the Surface (Screen2), e.g. Surface 1 (the presets add the quotes); selProjector = projector name, e.g. projector 1; selScreenUid = UID of any display copied from its editor title bar (right-click > Copy UID), including the 0x prefix - the \"Display (UID)\" presets work for LED and DMX screens too. Readouts: surface name, mesh and resolution, health flags, offset and rotation, master fade, hold output, render layer (on/off stage), the projectors of a surface and the surfaces of a projector; projector name, resolution and master fade. Controls (amber = write, green = on/enable, red = off/hold): offset X/Y/Z nudges and reset, master fade nudges and 1.0 / 0.0, hold ON/OFF/toggle, ON/OFF stage - for the surface, for the projector and for any display addressed by UID. Sets are undoable in Designer and persist in the project. Nudge presets also respond to rotary encoders (right = +, left = -). Also included after the live run: the projectors of a surface, the surfaces of a projector, LED screen name / fade / hold / offset (selection selLedScreen = LED screen name) and stage display count / dynamic blend (selection selStageUid = Stage UID, hex with 0x prefix). Still experimental (99): DMX screen rows (no DMX screen in the test project) and the stage venue name (no venue assigned).",
    "dimension": "stage"
   },
   {
    "presetId": "ev_setup",
    "category": "08 Expression Variables",
    "name": "EV setup: custom variables",
-   "text": "Expression Variables device readouts. Create these selection variables first: selEvUid = the device UID as an unquoted hex literal (Designer: right-click the Expression Variables device editor title bar > Copy UID, e.g. 0x0123456789abcdef); selEvIndex = zero-based row index of the variable in the device editor (plain integer, no quotes; rows can be drag-reordered so re-check after edits). Presets in this category read the i-th variable through getByUID(selEvUid).container.variables[selEvIndex]: defaultFloat (value of a Float variable), defaultString (value of a String variable), name and type (0 Float, 1 String, 2 Function). All rows are read-only: the pyi setter exists but a LiveUpdate set through the list subscript is untested, so nudge/set knobs are deferred until the live test. Experimental rows (see 99 Experimental) additionally need selEvDevice (device name = filename part of objects/ExpressionVariablesDevice/<name>.apx), selEvName (variable name, case-sensitive) and selEvLayer (name of an ExpressionVariables layer currently under the playhead). None of the Expression Variables rows could be checked live: the test project has no Expression Variables device.",
+   "text": "Expression Variables device readouts. Fill these selections in first (connection settings > Selections, or the \"Set selection\" action): selEvUid = the device UID as an unquoted hex literal (Designer: right-click the Expression Variables device editor title bar > Copy UID, e.g. 0x0123456789abcdef); selEvIndex = zero-based row index of the variable in the device editor (plain integer, no quotes; rows can be drag-reordered so re-check after edits). Presets in this category read the i-th variable through getByUID(selEvUid).container.variables[selEvIndex]: defaultFloat (value of a Float variable), defaultString (value of a String variable), name and type (0 Float, 1 String, 2 Function). The readouts are read-only. Two knobs (EV float +/-0.1) write defaultFloat through the list subscript; that write is the one part of this category that could not be tested on the verification rig, because the test project had no Expression Variables device. Try them on a spare variable before using them in a show. Experimental rows (see 99 Experimental) additionally need selEvDevice (device name = filename part of objects/ExpressionVariablesDevice/<name>.apx), selEvName (variable name, case-sensitive) and selEvLayer (name of an ExpressionVariables layer currently under the playhead). None of the Expression Variables rows could be checked live: the test project has no Expression Variables device.",
    "dimension": "exprvars"
   },
   {
    "presetId": "rs_setup",
    "category": "09 RenderStream",
    "name": "RenderStream setup",
-   "text": "RenderStream presets read subsystem:RenderStreamSystem (cluster/instance health, per-node flags, receive statuses, active latency) and Machine takeover. Create these selection variables first: selWorkload = workload ID as a Python int - copy it from the Cluster Workload widget ('Copy UID') or from REST GET /api/session/renderstream/layers then GET /api/session/renderstream/layerstatus?uid=<layer uid> (workload.uid); if the copied value is hex, enter it as 0x...; selInstance = zero-based instance index inside the workload (0 = first render node); selMachine = render node / machine name exactly as shown in the Cluster Workload widget Instances > Machine column. The 'RS workload layer count' preset shows how many layers carry a workload (on r34.0.3 the id map itself serialises empty, so read ids through the RS Layer Workload ID preset). The layer-route presets (RS Layer ...) need selTrack (track name) and selRsLayer (zero-based index of the RenderStream layer among the track's RenderStream leaf layers); the RS Layer Workload ID preset shows the workload id as text ready for selWorkload. The aggregate rows (node summary, running count, any dropping / down, health list, min FPS, max latency, dropped total, all subscribed, last errors, status messages) were verified live with a workload that had no running instances. All RenderStream rows are read-only; workload start/stop/restart is only available through the REST session API, not LiveUpdate. While a workload has no running instances the per-instance rows show PATH_ERROR (the Director answers \"out of range error accessing workload instance\"); the module backs off and retries on its own.",
+   "text": "RenderStream presets read subsystem:RenderStreamSystem (cluster/instance health, per-node flags, receive statuses, active latency) and Machine takeover. Fill these selections in first (connection settings > Selections, or the \"Set selection\" action): selWorkload = workload ID as a Python int - copy it from the Cluster Workload widget ('Copy UID') or from REST GET /api/session/renderstream/layers then GET /api/session/renderstream/layerstatus?uid=<layer uid> (workload.uid); if the copied value is hex, enter it as 0x...; selInstance = zero-based instance index inside the workload (0 = first render node); selMachine = render node / machine name exactly as shown in the Cluster Workload widget Instances > Machine column. The 'RS workload layer count' preset shows how many layers carry a workload (on r34.0.3 the id map itself serialises empty, so read ids through the RS Layer Workload ID preset). The layer-route presets (RS Layer ...) need selTrack (track name) and selRsLayer (zero-based index of the RenderStream layer among the track's RenderStream leaf layers); the RS Layer Workload ID preset shows the workload id as text ready for selWorkload. The aggregate rows (node summary, running count, any dropping / down, health list, min FPS, max latency, dropped total, all subscribed, last errors, status messages) were verified live with a workload that had no running instances. All RenderStream rows are read-only; workload start/stop/restart is only available through the REST session API, not LiveUpdate. While a workload has no running instances the per-instance rows show PATH_ERROR (the Director answers \"out of range error accessing workload instance\"); the module backs off and retries on its own.",
    "dimension": "renderstream"
   },
   {
    "presetId": "fo_setup",
    "category": "10 Failover & d3Net",
    "name": "Setup: Failover & d3Net",
-   "text": "These presets read the failover / d3Net state of ONE machine addressed by name. Create the selection variables selMachine and set it to the machine's resource name exactly as it appears in Designer's d3Net Manager / Machines list (the 'name' field of GET /api/session/status/health - not necessarily the Windows hostname). Every preset here uses the object path Machine:\"$(liveupdate:selMachine)\"; change the selection variable(s) and all presets re-point at once (duplicate the page and use a second selection variable(s) if you need two machines side by side). Readouts: taken over a failed machine (understudy side), failed (actor side), auto failover disabled, network connected, network status code, active, role, running as, understudy targets, plus identity: machine name, hostname, IP, hardware type, d3Net node id, GUI visible, resource status. There are deliberately NO write presets in this category: role, hostname, director and understudy targets reconfigure the session, and the fail / restore machine commands are not reachable through LiveUpdate set (use REST POST /api/session/failover/failovermachine and /restoremachine). Alarm colours: add the liveUpdateCompare feedback as noted per preset (red = failed / offline / taken over / inactive, amber = auto failover disabled). Rows for the connected machine itself, the acting director, offline / failed / taken-over lists across the whole d3Net, understudy configuration, the failover timeout, network adaptors and by-hostname addressing (selection selHost, shared with 03 Monitoring Remote) were verified live and are included. Only the name of the Director's understudy stays experimental (no understudy in the test project). Values update at the state (500 ms) or static (5000 ms) rate; failover indicators are method calls that the Director may evaluate on every cycle, so do not lower them below the defaults.",
+   "text": "These presets read the failover / d3Net state of ONE machine addressed by name. Fill in the selection selMachine and set it to the machine's resource name exactly as it appears in Designer's d3Net Manager / Machines list (the 'name' field of GET /api/session/status/health - not necessarily the Windows hostname). Every preset here uses the object path Machine:\"$(liveupdate:selMachine)\"; change the selection variable(s) and all presets re-point at once (duplicate the page and use a second selection variable(s) if you need two machines side by side). Readouts: taken over a failed machine (understudy side), failed (actor side), auto failover disabled, network connected, network status code, active, role, running as, understudy targets, plus identity: machine name, hostname, IP, hardware type, d3Net node id, GUI visible, resource status. There are deliberately NO write presets in this category: role, hostname, director and understudy targets reconfigure the session, and the fail / restore machine commands are not reachable through LiveUpdate set (use REST POST /api/session/failover/failovermachine and /restoremachine). Alarm colours: add the liveUpdateCompare feedback as noted per preset (red = failed / offline / taken over / inactive, amber = auto failover disabled). Rows for the connected machine itself, the acting director, offline / failed / taken-over lists across the whole d3Net, understudy configuration, the failover timeout, network adaptors and by-hostname addressing (selection selHost, shared with 03 Monitoring Remote) were verified live and are included. Only the name of the Director's understudy stays experimental (no understudy in the test project). Values update at the state (500 ms) or static (5000 ms) rate; failover indicators are method calls that the Director may evaluate on every cycle, so do not lower them below the defaults.",
    "dimension": "failover"
   },
   {
@@ -18559,7 +18562,7 @@
    "presetId": "tpl_setup",
    "category": "11 Templates",
    "name": "Setup: how to use templates",
-   "text": "Templates are generic buttons with literal placeholders; they do nothing until edited (the module skips subscribing while a path still contains '<' or '>'). After dragging one: (1) open the LiveUpdate Variable feedback and replace <OBJECT_PATH> with a Designer object expression (e.g. track:\"Track 1\", screen2:\"LED Wall\", transportManager:default, subsystem:MonitoringManager.findLocalMonitor(\"fps\")) and object.<PROPERTY_PATH> with the Python member path (e.g. object.description, object.lengthInBeats, object.player.tRender); (2) rename the variable myValue to something unique for that object/property pair (letters, digits, underscore, max 40 characters) and change every $(liveupdate:myValue) in the button text and in the actions to the new name; two buttons watching the same path must use the same variable name and the same Update Frequency; (3) keep Update Frequency above 0 (prefilled from the State interval setting, 500 ms). Set / Nudge / Toggle actions do not take paths: they write to the subscription that owns the variable name, which is why each control template carries the matching feedback. Number values are JavaScript expressions evaluated after variable substitution ($(liveupdate:myValue)+1 works; the result must be a finite number); Boolean is a checkbox; JSON is a partial object merged into the property ({\"x\": 0.0} changes only x of a vector); String is sent verbatim. Object, array and resource values ({uid, path, type}) arrive as JSON strings, so use jsonparse / jsonpath in expressions (see Watch: JSON field x). A readout shows ERROR or PATH_ERROR when the Director rejects the path; fix the path, the module resubscribes on its own.",
+   "text": "Templates are generic buttons with literal placeholders; they do nothing until edited (the module skips subscribing while a path still contains '<' or '>'). After dragging one: (1) open the LiveUpdate Variable feedback and replace <OBJECT_PATH> with a Designer object expression (e.g. track:\"Track 1\", screen2:\"LED Wall\", transportManager:default, subsystem:MonitoringManager.findLocalMonitor(\"fps\")) and object.<PROPERTY_PATH> with the Python member path (e.g. object.description, object.lengthInBeats, object.player.tRender); (2) each template carries its own variable name (tplString, tplSetNumber, ...); rename it to something meaningful for that object/property pair (letters, digits, underscore, max 40 characters) and change every $(liveupdate:...) in the button text and in the actions to the new name. One variable name must watch exactly one object/property pair: the module refuses a second subscription for a name that is already bound elsewhere and says so in the log, because the Set / Toggle actions find their subscription by variable name; two buttons watching the same path must use the same variable name; the interval of the feedback that subscribes first is the one that applies; (3) keep Update Frequency above 0 (prefilled from the State interval setting, 500 ms). Set / Nudge / Toggle actions do not take paths: they write to the subscription that owns the variable name, which is why each control template carries the matching feedback. Number values are JavaScript expressions evaluated after variable substitution ($(liveupdate:myValue)+1 works; the result must be a finite number); Boolean is a checkbox; JSON is a partial object merged into the property ({\"x\": 0.0} changes only x of a vector); String is sent verbatim. Object, array and resource values ({uid, path, type}) arrive as JSON strings, so use jsonparse / jsonpath in expressions (see Watch: JSON field x). A readout shows ERROR or PATH_ERROR when the Director rejects the path; fix the path, the module resubscribes on its own.",
    "dimension": "connection_templates"
   },
   {

@@ -150,3 +150,40 @@ test('getPresetInterval uses the connection settings with defaults and clamping'
 	assert.equal(dist.getPresetInterval({ host: 'x', port: 80, presetIntervalState: -5 }, 'state'), 0)
 	assert.equal(dist.getPresetInterval({ host: 'x', port: 80, presetIntervalState: 'abc' as any }, 'state'), 500)
 })
+
+test('a Python empty-string literal is a resolved path, an empty quoted name is not', () => {
+	const resolved = [
+		// the else branch of the catalog's None-guarded conditionals
+		'(object.timecode.current.__str__() if object.timecode is not None else "")',
+		'(object.timecode.statusString if object.timecode is not None else "")',
+		'(object.venue.description if object.venue is not None else "")',
+		'(object.d3NetManager.getDirectorUnderstudy().name if object.d3NetManager.getDirectorUnderstudy() is not None else "")',
+		'[{"runningAs": (m.runningAs.name if m.runningAs is not None else "")} for m in object.machines]',
+		'"; ".join([s.name + ": " + s.error for s in object.statuses if s.error])',
+	]
+	for (const path of resolved) assert.equal(dist.isUnresolvedPath(path), false, `resolved: ${path}`)
+
+	const unresolved = ['track:""', "track:''", 'track:"A".findLayerByName("")', 'object.f(1, "")', 'object.g([""])']
+	for (const path of unresolved) assert.equal(dist.isUnresolvedPath(path), true, `unresolved: ${path}`)
+})
+
+test('every catalog property path survives the guard once its selections are filled in', () => {
+	const examples: Record<string, string> = {}
+	for (const selection of dist.SELECTIONS) examples[selection.id] = selection.example
+	const substitute = (text: string): string =>
+		text.replace(/\$\(liveupdate:(sel[A-Za-z0-9_]+)\)/g, (m: string, id: string) => examples[id] ?? m)
+	for (const entry of dist.PRESET_CATALOG) {
+		if (!entry.objectPath) continue
+		if (entry.objectPath.includes('<') || entry.propertyPath.includes('<')) continue // templates
+		assert.equal(
+			dist.isUnresolvedPath(substitute(entry.objectPath)),
+			false,
+			`${entry.id}: object path refused by the guard: ${substitute(entry.objectPath)}`,
+		)
+		assert.equal(
+			dist.isUnresolvedPath(substitute(entry.propertyPath)),
+			false,
+			`${entry.id}: property path refused by the guard: ${substitute(entry.propertyPath)}`,
+		)
+	}
+})

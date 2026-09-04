@@ -239,3 +239,37 @@ test('connection loss resets state and the Connection OK feedback is re-checked'
 	assert.equal(host.variables.get('connection_status'), 'Disconnected')
 	await inst.destroy()
 })
+
+test('one variable name may not watch two different properties', async () => {
+	const director = new FakeDirector({ valueFor: (_o, p) => (p === 'object.brightness' ? 1 : 0.5) })
+	const { inst, host } = await newInstance(director, [
+		liveUpdateFeedback('t1', 'transportManager:default', 'object.brightness', 'myValue'),
+		liveUpdateFeedback('t2', 'transportManager:default', 'object.volume', 'myValue'),
+	])
+	await settle(50)
+	assert.equal(director.count('subscribe'), 1, 'the colliding second feedback never subscribes')
+	assert.equal(director.subs[0].propertyPath, 'object.brightness')
+	assert.equal(host.variables.get('myValue'), 1, 'the first feedback keeps the variable')
+	assert.ok(
+		host.logs.some((l) => l.level === 'warn' && l.message.includes('is already watching')),
+		'the collision is reported',
+	)
+	await inst.destroy()
+})
+
+test('a shared subscription keeps the variable name of the feedback that created it', async () => {
+	const director = new FakeDirector({ refCount: true, valueFor: () => 240 })
+	const { inst, host } = await newInstance(director, [
+		liveUpdateFeedback('first', TRACK, 'object.lengthInBeats', 'lenA'),
+		liveUpdateFeedback('second', TRACK, 'object.lengthInBeats', 'lenB'),
+	])
+	await settle(50)
+	assert.equal(director.count('subscribe'), 1)
+	assert.equal(host.variables.get('lenA'), 240, 'the first name still receives values')
+	assert.equal(inst.getSubscriptionByVariableName('lenA')?.propertyPath, 'object.lengthInBeats')
+	assert.ok(
+		host.logs.some((l) => l.level === 'warn' && l.message.includes("'lenA' will receive the values")),
+		'the second feedback is told which name wins',
+	)
+	await inst.destroy()
+})

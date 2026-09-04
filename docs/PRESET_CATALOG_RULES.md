@@ -154,7 +154,7 @@ Designer version notes, a live-test priority, and the number of subscriptions it
 
 ## 9. Property path constraints
 
-- Python 2.7 expression only (no f-strings, no statements); comprehensions allowed but only in Experimental rows; no mutating calls.
+- Python 2.7 expression only (no f-strings, no statements); no mutating calls. Comprehensions were originally restricted to Experimental rows; after the 2026-09-04 live run the ones that returned a value were promoted with their category, so default-tier rows may contain a comprehension when the exact expression is live-verified.
 - Only members present in `d3.pyi` r34.0 and cited in `PHASE0_CANDIDATES.md`; no new paths may be introduced in Phase 1.
 - In the object part, logical operators are functions (`and(x, y)`), not keywords.
 

@@ -29,6 +29,15 @@ const PLACEHOLDER_TOKEN = /<[A-Z][A-Z0-9_]*>/
 const EMPTY_SLOT = /\(\s*,|,\s*\)|,\s*,|\[\s*\]/
 
 /**
+ * An empty name where a selection should have produced one: `track:""`, `findLayerByName("")`,
+ * `f(1, "")`, `["" ]`. A bare `""` elsewhere is a legitimate Python empty-string literal - the
+ * catalog uses it as the else-branch of conditionals such as
+ * `(object.timecode.statusString if object.timecode is not None else "")` - so only these
+ * positions count as unresolved.
+ */
+const EMPTY_NAME = /(?::|\(|,|\[)\s*(""|'')/
+
+/**
  * Paths that must not be sent to the Director: template placeholders, unresolved Companion
  * variable references ($NA or a raw $(...) reference), empty quoted names, empty argument slots
  * and the remote-monitor node form without a hostname.
@@ -39,7 +48,7 @@ export function isUnresolvedPath(path: string): boolean {
 	if (PLACEHOLDER_TOKEN.test(trimmed)) return true
 	if (trimmed.includes('$NA')) return true
 	if (/\$\([^)]*\)/.test(trimmed)) return true
-	if (trimmed.includes('""') || trimmed.includes("''")) return true
+	if (EMPTY_NAME.test(trimmed)) return true
 	if (EMPTY_SLOT.test(trimmed)) return true
 	if (/"\s*:d3"/.test(trimmed)) return true
 	return false
@@ -391,6 +400,24 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			return
 		}
 
+		// One variable name must not be bound to two different properties: the Set / Toggle actions
+		// look the subscription up by variable name, so the second button would write to the first
+		// button's property. This is the out-of-the-box case for two dragged Templates presets.
+		const conflicting =
+			[...this.subscriptions.values()].find(
+				(sub) => sub.variableName === variableName && pairKey(sub.objectPath, sub.propertyPath) !== key,
+			) ??
+			[...this.pendingSubscriptions.values()].find(
+				(sub) => sub.variableName === variableName && pairKey(sub.objectPath, sub.propertyPath) !== key,
+			)
+		if (conflicting) {
+			this.log(
+				'warn',
+				`Variable '${variableName}' is already watching ${conflicting.objectPath}.${conflicting.propertyPath}; give this feedback its own variable name before it can watch ${objectPath}.${propertyPath}`,
+			)
+			return
+		}
+
 		// Check if we already have a subscription for this object/property
 		for (const [subId, sub] of this.subscriptions.entries()) {
 			if (pairKey(sub.objectPath, sub.propertyPath) === key) {
@@ -398,12 +425,14 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				this.log('debug', `Reusing existing subscription ${subId} for feedback ${feedbackId}`)
 				this.feedbackIdToSubscriptionId.set(feedbackId, subId)
 
+				// Keep the name of the feedback that created the subscription, exactly as the pending
+				// branch above does: overwriting it would silently freeze the first feedback's variable
+				// and break every action bound to it.
 				if (sub.variableName !== variableName) {
 					this.log(
 						'warn',
-						`Feedbacks share ${objectPath}.${propertyPath} with different variable names ('${sub.variableName}' and '${variableName}'); '${variableName}' will receive the values`,
+						`Feedbacks share ${objectPath}.${propertyPath} with different variable names ('${sub.variableName}' and '${variableName}'); '${sub.variableName}' will receive the values`,
 					)
-					sub.variableName = variableName
 				}
 
 				return
