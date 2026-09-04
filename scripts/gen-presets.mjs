@@ -57,6 +57,12 @@ function convertRow(row) {
 		return { set: action.set, actionId: action.actionId, options: action.options }
 	})
 	if (row.tier === 'experimental' && actions.length) throw new Error(`${id}: experimental row with actions`)
+	// Expression-mode button text must be a template literal (`...${...}...`); a bare string with a
+	// newline does not parse in Companion's expression engine.
+	if (row.textExpression && !/^`[\s\S]*`$/.test(row.textTemplate ?? ''))
+		throw new Error(`${id}: textExpression is set but the text is not a template literal`)
+	if (/\$\((?!liveupdate:)[a-z]+:/.test(`${row.textTemplate} ${row.objectPath} ${row.propertyPath}`))
+		throw new Error(`${id}: references a variable of another connection; presets may only use $(liveupdate:...)`)
 
 	const entry = {
 		id,

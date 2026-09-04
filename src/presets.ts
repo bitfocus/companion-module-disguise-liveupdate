@@ -153,6 +153,7 @@ function buildButtonPreset(entry: PresetCatalogEntry, config: DisguiseConfig): C
 	if (entry.previewText) {
 		// Shown in the preset browser only; the placed button keeps the live expression
 		preset.previewStyle = { ...style, text: entry.previewText, textExpression: false }
+		if (entry.id === CONNECTION_STATUS_PRESET_ID) preset.previewStyle.bgcolor = combineRgb(0, 100, 0)
 	}
 
 	if (rotary) {

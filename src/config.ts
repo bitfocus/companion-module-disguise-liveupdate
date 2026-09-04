@@ -183,22 +183,19 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			id: 'usageInfo',
 			label: 'How to Use',
 			width: 12,
-			value: `<strong>This module uses Feedbacks to subscribe to Disguise properties.</strong><br><br>
-<strong>To monitor Disguise properties:</strong><br>
-1. Add the "LiveUpdate Variable" <strong>feedback</strong> to a button<br>
-2. Configure the feedback with a variable name and Disguise object/property paths<br>
-3. The module will create a variable (e.g. $(liveupdate:fps)) that updates continuously<br>
-4. Use Companion's expression variables to compare values and create visual feedback<br>
-5. Use the variable anywhere in Companion (buttons, text, triggers, other modules)<br><br>
+			value: `<strong>Quickest start:</strong> fill in the Selections above (at least the Track), then drag presets from the preset browser. Each preset subscribes through a "LiveUpdate Variable" <strong>feedback</strong> and colours itself with a "LiveUpdate Compare" feedback on the same Variable Name.<br><br>
+<strong>To monitor any other Disguise property:</strong><br>
+1. Add the "LiveUpdate Variable" feedback to a button<br>
+2. Give it a Variable Name and the Disguise object/property paths<br>
+3. The module creates a variable (e.g. $(liveupdate:fps)) that updates continuously<br>
+4. Use "LiveUpdate Compare" or Companion expressions for colours; use the variable anywhere in Companion<br><br>
 <strong>To set Disguise properties:</strong><br>
-Use the "Set to Disguise" <strong>actions</strong> to write variable values back to Disguise<br><br>
+Use the "Set to Disguise" / "Toggle Disguise Boolean" <strong>actions</strong>; they write through the subscription of the feedback with the same Variable Name<br><br>
 <strong>Example:</strong><br>
-• Add "LiveUpdate Variable" feedback to a button:<br>
-&nbsp;&nbsp;- Variable Name: <code>fps</code><br>
-&nbsp;&nbsp;- Object: <code>subsystem:MonitoringManager.findLocalMonitor("fps")</code><br>
-&nbsp;&nbsp;- Property: <code>object.seriesAverage("Actual", 1)</code><br>
-• Use expression variable <code>$(liveupdate:fps) &lt; 30</code> for visual feedback<br>
-• No comparison feedbacks needed - use Companion's expression system instead!`,
+• Variable Name: <code>fps</code><br>
+• Object: <code>subsystem:MonitoringManager.findLocalMonitor("fps")</code><br>
+• Property: <code>object.seriesAverage("Actual", 1)</code><br>
+• LiveUpdate Compare: <code>fps &lt; 50</code> → red background`,
 		},
 	]
 }

@@ -7,7 +7,7 @@ import {
 } from '@companion-module/base'
 import WebSocket from 'ws'
 import { getConfigFields, DisguiseConfig } from './config'
-import { isSelectionId, readSelections } from './selections'
+import { isReservedVariableName, isSelectionId, readSelections, UNSET_SELECTION, validateSelection } from './selections'
 import { getActionDefinitions } from './actions'
 import { getFeedbackDefinitions } from './feedbacks'
 import { getPresetDefinitions } from './presets'
@@ -25,19 +25,31 @@ const BACKOFF_MAX_MS = 60000
 /** Template placeholders such as <TRACK_NAME> or <OBJECT_PATH> */
 const PLACEHOLDER_TOKEN = /<[A-Z][A-Z0-9_]*>/
 
+/** Empty argument or index slots left by an unset selection: f(, 1), f(1, ), f(,), a[] */
+const EMPTY_SLOT = /\(\s*,|,\s*\)|,\s*,|\[\s*\]/
+
 /**
  * Paths that must not be sent to the Director: template placeholders, unresolved Companion
- * variable references ($NA or a raw $(...) reference) and, for object paths, empty quoted names
- * (an unset selection variable).
+ * variable references ($NA or a raw $(...) reference), empty quoted names, empty argument slots
+ * and the remote-monitor node form without a hostname.
  */
-export function isUnresolvedPath(path: string, isObjectPath: boolean): boolean {
+export function isUnresolvedPath(path: string): boolean {
 	const trimmed = path.trim()
 	if (!trimmed) return true
 	if (PLACEHOLDER_TOKEN.test(trimmed)) return true
 	if (trimmed.includes('$NA')) return true
 	if (/\$\([^)]*\)/.test(trimmed)) return true
-	if (isObjectPath && (trimmed.includes('""') || trimmed.includes("''"))) return true
+	if (trimmed.includes('""') || trimmed.includes("''")) return true
+	if (EMPTY_SLOT.test(trimmed)) return true
+	if (/"\s*:d3"/.test(trimmed)) return true
 	return false
+}
+
+/**
+ * Key of an (object path, property path) pair; the Director echoes both strings back verbatim
+ */
+function pairKey(objectPath: string, propertyPath: string): string {
+	return `${objectPath.trim()}\n${propertyPath.trim()}`
 }
 
 /**
@@ -56,12 +68,38 @@ export interface LiveUpdateSubscription {
 	id: number
 	objectPath: string
 	propertyPath: string
+	/** The feedback that created the subscription; other feedbacks may share it (see feedbackIdToSubscriptionId) */
 	feedbackId: string
 	variableName: string
 	value?: any
 	changeTimestamp?: number
 	messageTimestamp?: number
 	errorCount?: number
+}
+
+/**
+ * A subscribe request that the Director has not confirmed yet. All feedbacks that asked for the
+ * same pair while the request was in flight are collected here instead of sending it again.
+ */
+interface PendingSubscription {
+	objectPath: string
+	propertyPath: string
+	variableName: string
+	feedbackIds: Set<string>
+	timestamp: number
+}
+
+interface FeedbackOptionsCacheEntry {
+	objectPath: string
+	propertyPath: string
+	variableName: string
+	updateFrequency?: number
+}
+
+interface BackoffEntry {
+	attempts: number
+	notBefore: number
+	timer?: NodeJS.Timeout
 }
 
 /**
@@ -74,12 +112,11 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	private pendingCleanupTimer: NodeJS.Timeout | undefined
 	private subscriptions: Map<number, LiveUpdateSubscription> = new Map()
 	private feedbackIdToSubscriptionId: Map<string, number> = new Map()
-	private pendingSubscriptions: Map<string, { feedbackId: string; variableName: string; timestamp: number }> = new Map()
-	public feedbackOptionsCache: Map<string, { objectPath: string; propertyPath: string; variableName: string }> =
-		new Map()
+	private pendingSubscriptions: Map<string, PendingSubscription> = new Map()
+	public feedbackOptionsCache: Map<string, FeedbackOptionsCacheEntry> = new Map()
 	/** Per-feedback back-off after failed subscriptions (guards against subscribe storms) */
-	private subscriptionBackoff: Map<string, { attempts: number; notBefore: number }> = new Map()
-	/** Feedbacks already logged as "path not resolved yet" (avoid repeating the message) */
+	private subscriptionBackoff: Map<string, BackoffEntry> = new Map()
+	/** Feedbacks already logged as "path not resolved yet" / "reserved name" (avoid repeating the message) */
 	private unresolvedLogged: Set<string> = new Set()
 	private connectionReady = false
 	private shouldReconnect = false
@@ -115,6 +152,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		this.feedbackIdToSubscriptionId.clear()
 		this.pendingSubscriptions.clear()
 		this.feedbackOptionsCache.clear()
+		this.clearAllBackoff()
 	}
 
 	async configUpdated(config: DisguiseConfig): Promise<void> {
@@ -207,28 +245,32 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	): void {
 		const cached = this.feedbackOptionsCache.get(feedbackId)
 		const existingSubscription = this.getSubscriptionByFeedbackId(feedbackId)
+		const complete = !!variableName && !!objectPath && !!propertyPath
 
 		if (!cached) {
-			this.feedbackOptionsCache.set(feedbackId, { variableName, objectPath, propertyPath })
+			this.feedbackOptionsCache.set(feedbackId, { variableName, objectPath, propertyPath, updateFrequency })
 
-			if (!existingSubscription && this.isConnectionReady() && variableName && objectPath && propertyPath) {
+			if (!existingSubscription && this.isConnectionReady() && complete) {
 				this.subscribeToVariable(feedbackId, variableName, objectPath, propertyPath, updateFrequency)
 			}
 			return
 		}
 
 		const optionsChanged =
-			cached.variableName !== variableName || cached.objectPath !== objectPath || cached.propertyPath !== propertyPath
+			cached.variableName !== variableName ||
+			cached.objectPath !== objectPath ||
+			cached.propertyPath !== propertyPath ||
+			cached.updateFrequency !== updateFrequency
 
 		if (optionsChanged) {
 			this.log(
 				'info',
 				`Feedback options changed: ${cached.objectPath}.${cached.propertyPath} → ${objectPath}.${propertyPath}`,
 			)
-			this.feedbackOptionsCache.set(feedbackId, { variableName, objectPath, propertyPath })
+			this.feedbackOptionsCache.set(feedbackId, { variableName, objectPath, propertyPath, updateFrequency })
 			this.unsubscribeFromVariable(feedbackId)
 
-			if (variableName && objectPath && propertyPath) {
+			if (complete) {
 				this.subscribeToVariable(feedbackId, variableName, objectPath, propertyPath, updateFrequency)
 			}
 			return
@@ -236,8 +278,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 
 		// Options haven't changed, but check if subscription is missing (e.g., connection was lost)
 		// This handles presets added while disconnected, or subscriptions that were dropped
-		if (!existingSubscription && this.isConnectionReady() && variableName && objectPath && propertyPath) {
-			this.log('info', `Auto-subscribing feedback ${feedbackId} (subscription was missing)`)
+		if (!existingSubscription && this.isConnectionReady() && complete) {
 			this.subscribeToVariable(feedbackId, variableName, objectPath, propertyPath, updateFrequency)
 		}
 	}
@@ -261,7 +302,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		return undefined
 	}
 
-	private send(message: any): boolean {
+	private send(message: unknown): boolean {
 		if (this.ws && this.ws.readyState === WebSocket.OPEN) {
 			try {
 				this.ws.send(JSON.stringify(message))
@@ -270,6 +311,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				this.log('error', `Failed to send message: ${error instanceof Error ? error.message : String(error)}`)
 				// Connection might be closing or in a bad state, trigger reconnect
 				this.disconnect()
+				this.updateStatus(InstanceStatus.Disconnected, 'Send failed')
 				this.scheduleReconnect()
 				return false
 			}
@@ -277,6 +319,17 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			this.log('warn', 'Cannot send message - WebSocket not connected')
 			return false
 		}
+	}
+
+	/**
+	 * Feedbacks currently mapped to a subscription id
+	 */
+	private feedbacksOfSubscription(subscriptionId: number): string[] {
+		const result: string[] = []
+		for (const [feedbackId, subId] of this.feedbackIdToSubscriptionId.entries()) {
+			if (subId === subscriptionId) result.push(feedbackId)
+		}
+		return result
 	}
 
 	/**
@@ -294,8 +347,20 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			return
 		}
 
+		// The module's own variables (selections, connection_status) cannot be overwritten by Director data
+		if (isReservedVariableName(variableName)) {
+			if (!this.unresolvedLogged.has(feedbackId)) {
+				this.unresolvedLogged.add(feedbackId)
+				this.log(
+					'warn',
+					`Variable name '${variableName}' is reserved for the module (selections, connection status); choose another name for feedback ${feedbackId}`,
+				)
+			}
+			return
+		}
+
 		// Never send template placeholders, unresolved variables or empty names to the Director
-		if (isUnresolvedPath(objectPath, true) || isUnresolvedPath(propertyPath, false)) {
+		if (isUnresolvedPath(objectPath) || isUnresolvedPath(propertyPath)) {
 			if (!this.unresolvedLogged.has(feedbackId)) {
 				this.unresolvedLogged.add(feedbackId)
 				this.log(
@@ -313,15 +378,32 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			return
 		}
 
+		// A request for this pair is already on its way: join it instead of sending it again
+		const key = pairKey(objectPath, propertyPath)
+		const pending = this.pendingSubscriptions.get(key)
+		if (pending) {
+			pending.feedbackIds.add(feedbackId)
+			if (pending.variableName !== variableName) {
+				this.log(
+					'warn',
+					`Feedbacks share ${objectPath}.${propertyPath} with different variable names ('${pending.variableName}' and '${variableName}'); '${pending.variableName}' will receive the values`,
+				)
+			}
+			return
+		}
+
 		// Check if we already have a subscription for this object/property
 		for (const [subId, sub] of this.subscriptions.entries()) {
-			if (sub.objectPath === objectPath && sub.propertyPath === propertyPath) {
+			if (pairKey(sub.objectPath, sub.propertyPath) === key) {
 				// Reuse existing subscription, just update the feedback mapping
-				this.log('info', `Reusing existing subscription ${subId} for feedback ${feedbackId}`)
+				this.log('debug', `Reusing existing subscription ${subId} for feedback ${feedbackId}`)
 				this.feedbackIdToSubscriptionId.set(feedbackId, subId)
 
-				// Update subscription to also use this variable name (support multiple feedbacks)
 				if (sub.variableName !== variableName) {
+					this.log(
+						'warn',
+						`Feedbacks share ${objectPath}.${propertyPath} with different variable names ('${sub.variableName}' and '${variableName}'); '${variableName}' will receive the values`,
+					)
 					sub.variableName = variableName
 				}
 
@@ -329,7 +411,9 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			}
 		}
 
-		const message: any = {
+		const message: {
+			subscribe: { object: string; properties: string[]; configuration?: { updateFrequencyMs: number } }
+		} = {
 			subscribe: {
 				object: objectPath,
 				properties: [propertyPath],
@@ -346,52 +430,61 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			return
 		}
 
-		const key = `${objectPath}:${propertyPath}`
-		this.pendingSubscriptions.set(key, { feedbackId, variableName, timestamp: Date.now() })
+		this.pendingSubscriptions.set(key, {
+			objectPath,
+			propertyPath,
+			variableName,
+			feedbackIds: new Set([feedbackId]),
+			timestamp: Date.now(),
+		})
 
 		// Initialize the module variable as undefined until first value arrives
 		this.setVariableValues({ [variableName]: undefined })
 	}
 
 	/**
-	 * Unsubscribe from a LiveUpdate property by feedback ID
+	 * Unsubscribe from a LiveUpdate property by feedback ID. The Director subscription is only
+	 * released when no other feedback uses it.
 	 */
 	unsubscribeFromVariable(feedbackId: string): void {
 		const subscriptionId = this.feedbackIdToSubscriptionId.get(feedbackId)
 
 		// A removed or edited feedback starts over without back-off
-		this.subscriptionBackoff.delete(feedbackId)
+		this.clearBackoff(feedbackId)
 		this.unresolvedLogged.delete(feedbackId)
 
-		for (const [key, pending] of this.pendingSubscriptions.entries()) {
-			if (pending.feedbackId === feedbackId) {
-				this.pendingSubscriptions.delete(key)
-			}
+		// Leave in-flight requests in place (the Director will confirm them); when nobody is
+		// interested any more the confirmation is answered with an unsubscribe.
+		for (const pending of this.pendingSubscriptions.values()) {
+			pending.feedbackIds.delete(feedbackId)
 		}
 
 		if (subscriptionId === undefined) {
 			return
 		}
 
-		if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-			this.log('warn', 'Cannot unsubscribe - WebSocket not connected')
-			this.subscriptions.delete(subscriptionId)
-			this.feedbackIdToSubscriptionId.delete(feedbackId)
+		this.feedbackIdToSubscriptionId.delete(feedbackId)
+
+		const stillUsedBy = this.feedbacksOfSubscription(subscriptionId)
+		if (stillUsedBy.length > 0) {
+			this.log('debug', `Subscription ${subscriptionId} stays active for ${stillUsedBy.length} other feedback(s)`)
 			this.updateVariableDefinitions()
 			return
 		}
 
 		const subscription = this.subscriptions.get(subscriptionId)
 
-		const message = {
-			unsubscribe: { id: subscriptionId },
+		if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+			this.log('warn', 'Cannot unsubscribe - WebSocket not connected')
+			this.subscriptions.delete(subscriptionId)
+			this.updateVariableDefinitions()
+			return
 		}
 
 		this.log('info', `Unsubscribing from ${subscription?.objectPath}.${subscription?.propertyPath}`)
-		this.send(message)
+		this.send({ unsubscribe: { id: subscriptionId } })
 
 		this.subscriptions.delete(subscriptionId)
-		this.feedbackIdToSubscriptionId.delete(feedbackId)
 		this.updateVariableDefinitions()
 	}
 
@@ -421,7 +514,8 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	/**
 	 * Set a selection variable (selTrack, selScreen, ...) and persist it in the connection config.
 	 * Companion re-evaluates every feedback whose options reference the variable, which makes the
-	 * presets built on it re-subscribe to the newly selected object.
+	 * presets built on it re-subscribe to the newly selected object. Values are validated for the
+	 * kind of slot they are spliced into (name, host, integer, number, uid).
 	 */
 	setSelection(selectionId: string, value: string): void {
 		if (!isSelectionId(selectionId)) {
@@ -429,32 +523,66 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			return
 		}
 
-		this.config = { ...this.config, [selectionId]: value }
-		this.setVariableValues({ [selectionId]: value })
+		const trimmed = value.trim()
+		const problem = validateSelection(selectionId, trimmed)
+		if (problem) {
+			this.log('warn', `Selection rejected: ${problem}`)
+			return
+		}
+
+		this.config = { ...this.config, [selectionId]: trimmed }
+		this.setVariableValues({ [selectionId]: trimmed === '' ? UNSET_SELECTION : trimmed })
 		this.saveConfig(this.config, undefined)
-		this.log('info', `Selection ${selectionId} = '${value}'`)
+		this.log('info', `Selection ${selectionId} = '${trimmed}'`)
 	}
 
 	/**
 	 * Push the selection values stored in the config into the module variables
 	 */
 	private applySelections(): void {
-		this.setVariableValues(readSelections(this.config as unknown as Record<string, unknown>))
+		const values = readSelections(this.config as unknown as Record<string, unknown>, (_id, message) =>
+			this.log('warn', `Selection ignored: ${message}`),
+		)
+		this.setVariableValues(values)
 	}
 
 	/**
 	 * Remember a failed subscription attempt and delay the next retry (2 s, 4 s, ... up to 60 s)
 	 * so that a wrong path does not turn every incoming value update into a new subscribe request.
+	 * A timer re-evaluates the feedback when the delay has elapsed, so the retry does not depend on
+	 * other subscriptions producing traffic.
 	 */
 	private noteSubscriptionFailure(feedbackId: string, reason: string): void {
 		const previous = this.subscriptionBackoff.get(feedbackId)
+		if (previous?.timer) clearTimeout(previous.timer)
 		const attempts = (previous?.attempts ?? 0) + 1
 		const delay = Math.min(BACKOFF_MAX_MS, BACKOFF_BASE_MS * 2 ** (attempts - 1))
-		this.subscriptionBackoff.set(feedbackId, { attempts, notBefore: Date.now() + delay })
+		const timer = setTimeout(() => {
+			const entry = this.subscriptionBackoff.get(feedbackId)
+			if (entry) entry.timer = undefined
+			if (this.connectionReady && this.ws && this.ws.readyState === WebSocket.OPEN) {
+				this.checkFeedbacksById(feedbackId)
+			}
+		}, delay)
+		this.subscriptionBackoff.set(feedbackId, { attempts, notBefore: Date.now() + delay, timer })
 		this.log(
-			'warn',
+			attempts === 1 ? 'warn' : 'debug',
 			`Subscription for feedback ${feedbackId} failed (${reason}); next retry in ${Math.round(delay / 1000)} s`,
 		)
+	}
+
+	private clearBackoff(feedbackId: string): void {
+		const entry = this.subscriptionBackoff.get(feedbackId)
+		if (!entry) return
+		if (entry.timer) clearTimeout(entry.timer)
+		this.subscriptionBackoff.delete(feedbackId)
+	}
+
+	private clearAllBackoff(): void {
+		for (const entry of this.subscriptionBackoff.values()) {
+			if (entry.timer) clearTimeout(entry.timer)
+		}
+		this.subscriptionBackoff.clear()
 	}
 
 	private async applyConfig(config: DisguiseConfig): Promise<void> {
@@ -497,6 +625,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				this.setVariableValues({
 					connection_status: 'Connected',
 				})
+				this.checkFeedbacks('connectionState')
 
 				this.subscribeFeedbacks()
 				this.startPendingCleanupTimer()
@@ -520,11 +649,13 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				this.connectionReady = false
 				this.subscriptions.clear()
 				this.feedbackIdToSubscriptionId.clear()
+				this.pendingSubscriptions.clear()
 				this.feedbackOptionsCache.clear()
-				this.subscriptionBackoff.clear()
+				this.clearAllBackoff()
 				this.setVariableValues({
 					connection_status: 'Disconnected',
 				})
+				this.checkFeedbacks('connectionState')
 
 				if (this.pendingCleanupTimer) {
 					clearTimeout(this.pendingCleanupTimer)
@@ -556,6 +687,9 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			this.pendingCleanupTimer = undefined
 		}
 
+		const wasReady = this.connectionReady
+		this.connectionReady = false
+
 		if (this.ws) {
 			try {
 				this.ws.removeAllListeners()
@@ -571,7 +705,12 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		this.feedbackIdToSubscriptionId.clear()
 		this.pendingSubscriptions.clear()
 		this.feedbackOptionsCache.clear()
-		this.subscriptionBackoff.clear()
+		this.clearAllBackoff()
+
+		if (wasReady) {
+			this.setVariableValues({ connection_status: 'Disconnected' })
+			this.checkFeedbacks('connectionState')
+		}
 	}
 
 	private scheduleReconnect(): void {
@@ -598,27 +737,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			const message = JSON.parse(data)
 
 			if (message.error) {
-				this.log('error', `LiveUpdate error: ${message.error}`)
-
-				// Try to extract object/property paths from error message and clean up pending subscription
-				// Error format: "Unable to subscribe to OBJECT / PROPERTY - ..."
-				const match = message.error.match(/Unable to subscribe to (.+?) \/ (.+?) -/)
-				if (match && match[1] && match[2]) {
-					const objectPath = match[1].trim()
-					const propertyPath = match[2].trim()
-					const key = `${objectPath}:${propertyPath}`
-
-					if (this.pendingSubscriptions.has(key)) {
-						const pending = this.pendingSubscriptions.get(key)!
-						this.log('warn', `Removing failed pending subscription for variable '${pending.variableName}'`)
-						this.pendingSubscriptions.delete(key)
-						this.noteSubscriptionFailure(pending.feedbackId, String(message.error))
-
-						// Set error message in the variable so user knows it failed
-						this.setVariableValues({ [pending.variableName]: 'ERROR' })
-					}
-				}
-
+				this.handleErrorMessage(String(message.error))
 				return
 			}
 
@@ -634,8 +753,34 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		}
 	}
 
+	/**
+	 * A Director error such as "Unable to subscribe to OBJECT / PROPERTY - reason". The pending
+	 * request whose paths appear verbatim in the text has failed; every feedback waiting for it is
+	 * put into back-off and its variable shows ERROR.
+	 */
+	private handleErrorMessage(error: string): void {
+		this.log('error', `LiveUpdate error: ${error}`)
+
+		let matched = false
+		for (const [key, pending] of this.pendingSubscriptions.entries()) {
+			if (!error.includes(`${pending.objectPath} / ${pending.propertyPath}`)) continue
+			matched = true
+			this.log('warn', `Removing failed pending subscription for variable '${pending.variableName}'`)
+			this.pendingSubscriptions.delete(key)
+			for (const feedbackId of pending.feedbackIds) {
+				this.noteSubscriptionFailure(feedbackId, error)
+			}
+			// Set error message in the variable so user knows it failed
+			this.setVariableValues({ [pending.variableName]: 'ERROR' })
+		}
+
+		if (!matched && this.pendingSubscriptions.size > 0) {
+			this.log('debug', 'Error did not name a pending subscription; pending requests are kept until they time out')
+		}
+	}
+
 	private handleSubscriptionsUpdate(subscriptions: any[]): void {
-		this.log('info', `Subscriptions updated: ${subscriptions.length} active`)
+		this.log('debug', `Subscriptions updated: ${subscriptions.length} active`)
 
 		// Update our subscription map
 		const newSubscriptions = new Map<number, LiveUpdateSubscription>()
@@ -643,34 +788,46 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 
 		for (const sub of subscriptions) {
 			const existing = this.subscriptions.get(sub.id)
+			const key = pairKey(String(sub.objectPath ?? ''), String(sub.propertyPath ?? ''))
+			const pending = this.pendingSubscriptions.get(key)
 
-			// Check if this matches any pending subscription
-			const key = `${sub.objectPath}:${sub.propertyPath}`
-			if (this.pendingSubscriptions.has(key)) {
-				const pending = this.pendingSubscriptions.get(key)!
+			if (pending) {
+				this.pendingSubscriptions.delete(key)
 
+				if (pending.feedbackIds.size === 0) {
+					// Everybody lost interest while the request was in flight: release it again
+					this.log('debug', `Releasing subscription ${sub.id} nobody is waiting for any more`)
+					this.send({ unsubscribe: { id: sub.id } })
+					continue
+				}
+
+				const [firstFeedbackId] = pending.feedbackIds
 				newSubscriptions.set(sub.id, {
 					id: sub.id,
 					objectPath: sub.objectPath,
 					propertyPath: sub.propertyPath,
-					feedbackId: pending.feedbackId,
+					feedbackId: firstFeedbackId,
 					variableName: pending.variableName,
 					value: existing?.value,
 					changeTimestamp: existing?.changeTimestamp,
 					messageTimestamp: existing?.messageTimestamp,
 				})
 
-				newFeedbackMap.set(pending.feedbackId, sub.id)
-				this.subscriptionBackoff.delete(pending.feedbackId)
+				for (const feedbackId of pending.feedbackIds) {
+					newFeedbackMap.set(feedbackId, sub.id)
+				}
 				this.log(
 					'info',
 					`Subscription ${sub.id}: ${sub.objectPath}.${sub.propertyPath} -> variable: ${pending.variableName}`,
 				)
-				this.pendingSubscriptions.delete(key)
 			} else if (existing) {
-				// Preserve existing subscription
+				// Preserve existing subscription and every feedback mapped to it
 				newSubscriptions.set(sub.id, existing)
-				newFeedbackMap.set(existing.feedbackId, sub.id)
+				for (const feedbackId of this.feedbacksOfSubscription(sub.id)) {
+					newFeedbackMap.set(feedbackId, sub.id)
+				}
+			} else {
+				this.log('debug', `Director reports subscription ${sub.id} (${sub.objectPath}) that no feedback owns`)
 			}
 		}
 
@@ -678,25 +835,8 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		this.feedbackIdToSubscriptionId = newFeedbackMap
 
 		// Update feedbacks and variable definitions
-		this.checkFeedbacks()
 		this.updateVariableDefinitions()
-	}
-
-	private formatValue(value: any): string {
-		if (value === null || value === undefined) {
-			return ''
-		}
-
-		if (typeof value === 'number') {
-			// Show integers without decimals, floats with appropriate precision
-			return Number.isInteger(value) ? value.toString() : value.toFixed(2)
-		}
-
-		if (typeof value === 'object') {
-			return JSON.stringify(value)
-		}
-
-		return String(value)
+		this.checkFeedbacks()
 	}
 
 	/**
@@ -705,78 +845,77 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	 */
 	private handleValuesChanged(values: any[]): void {
 		const changedVars: Record<string, any> = {}
+		let definitionsChanged = false
 
 		for (const valueUpdate of values) {
 			const subscription = this.subscriptions.get(valueUpdate.id)
-			if (subscription) {
-				subscription.value = valueUpdate.value
-				subscription.changeTimestamp = valueUpdate.changeTimestamp
-				subscription.messageTimestamp = valueUpdate.messageTimestamp
+			if (!subscription) continue
 
-				// Check if the value is an error object from Disguise
-				if (valueUpdate.value && typeof valueUpdate.value === 'object' && valueUpdate.value.errorType) {
-					const errorMessage = valueUpdate.value.message || 'Unknown error'
+			subscription.value = valueUpdate.value
+			subscription.changeTimestamp = valueUpdate.changeTimestamp
+			subscription.messageTimestamp = valueUpdate.messageTimestamp
 
-					// Track consecutive errors
-					subscription.errorCount = (subscription.errorCount || 0) + 1
+			// Check if the value is an error object from Disguise
+			if (valueUpdate.value && typeof valueUpdate.value === 'object' && valueUpdate.value.errorType) {
+				const errorMessage = String(valueUpdate.value.message || 'Unknown error')
 
+				// Track consecutive errors
+				subscription.errorCount = (subscription.errorCount || 0) + 1
+
+				this.log(
+					subscription.errorCount === 1 ? 'error' : 'debug',
+					`Property path error for ${subscription.objectPath}.${subscription.propertyPath}: ${errorMessage} (error count: ${subscription.errorCount})`,
+				)
+
+				// If we've hit 3 consecutive errors, unsubscribe and retry later with back-off
+				if (subscription.errorCount >= 3) {
 					this.log(
-						'error',
-						`Property path error for ${subscription.objectPath}.${subscription.propertyPath}: ${errorMessage} (error count: ${subscription.errorCount})`,
+						'warn',
+						`Unsubscribing variable '${subscription.variableName}' after ${subscription.errorCount} consecutive errors; fix the property path in the feedback, the subscription is retried with a growing back-off`,
 					)
 
-					// If we've hit 3 consecutive errors, unsubscribe and let user fix it
-					if (subscription.errorCount >= 3) {
-						this.log(
-							'warn',
-							`Unsubscribing variable '${subscription.variableName}' after ${subscription.errorCount} consecutive errors`,
-						)
-						this.log(
-							'warn',
-							`Fix the property path in the feedback; the subscription is retried with a growing back-off`,
-						)
+					// Unsubscribe from Disguise (once, however many feedbacks share it)
+					this.send({ unsubscribe: { id: subscription.id } })
 
-						// Unsubscribe from Disguise
-						const message = { unsubscribe: { id: subscription.id } }
-						this.send(message)
-
-						// Clean up local state
-						this.subscriptions.delete(subscription.id)
-						this.feedbackIdToSubscriptionId.delete(subscription.feedbackId)
-						this.noteSubscriptionFailure(subscription.feedbackId, errorMessage)
-
-						// Set error indicator in variable
-						changedVars[subscription.variableName] = 'PATH_ERROR (unsubscribed)'
-
-						// Update variable definitions
-						this.updateVariableDefinitions()
-					} else {
-						this.log('warn', `Variable '${subscription.variableName}' has invalid property path`)
-						changedVars[subscription.variableName] = 'PATH_ERROR'
+					// Clean up local state for every feedback that shares the subscription
+					this.subscriptions.delete(subscription.id)
+					for (const feedbackId of this.feedbacksOfSubscription(subscription.id)) {
+						this.feedbackIdToSubscriptionId.delete(feedbackId)
+						this.noteSubscriptionFailure(feedbackId, errorMessage)
 					}
+					definitionsChanged = true
 
-					continue
+					// Set error indicator in variable
+					changedVars[subscription.variableName] = 'PATH_ERROR (unsubscribed)'
+				} else {
+					changedVars[subscription.variableName] = 'PATH_ERROR'
 				}
 
-				// Reset error count on successful value update
-				subscription.errorCount = 0
-
-				// Keep primitives (number, string, boolean) as-is for Companion expressions
-				// Convert complex objects (arrays, objects) to JSON strings for display
-				let displayValue = valueUpdate.value
-				if (valueUpdate.value !== null && valueUpdate.value !== undefined) {
-					const valueType = typeof valueUpdate.value
-					if (valueType === 'object') {
-						// Arrays and objects need to be stringified
-						displayValue = JSON.stringify(valueUpdate.value)
-					}
-					// else: number, string, boolean stay as-is
-				}
-
-				// Update the module variable
-				// This makes the value available as $(liveupdate:variable_name) throughout Companion
-				changedVars[subscription.variableName] = displayValue
+				continue
 			}
+
+			// Reset error count on successful value update; the subscription has proven itself
+			if (subscription.errorCount) subscription.errorCount = 0
+			for (const feedbackId of this.feedbacksOfSubscription(subscription.id)) {
+				this.clearBackoff(feedbackId)
+			}
+
+			// Keep primitives (number, string, boolean) as-is for Companion expressions
+			// Convert complex objects (arrays, objects) to JSON strings for display
+			let displayValue = valueUpdate.value
+			if (valueUpdate.value !== null && valueUpdate.value !== undefined && typeof valueUpdate.value === 'object') {
+				// Arrays and objects need to be stringified
+				displayValue = JSON.stringify(valueUpdate.value)
+			}
+
+			// Update the module variable
+			// This makes the value available as $(liveupdate:variable_name) throughout Companion
+			changedVars[subscription.variableName] = displayValue
+		}
+
+		// Definitions first, so an error indicator written below reaches a defined variable
+		if (definitionsChanged) {
+			this.updateVariableDefinitions()
 		}
 
 		// Push all updated variables to Companion's variable system in one batch
@@ -784,32 +923,38 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			this.setVariableValues(changedVars)
 		}
 
-		// Trigger feedback re-evaluation (for things like connectionState feedback)
+		// Trigger feedback re-evaluation (compare feedbacks, self-healing of missing subscriptions)
 		this.checkFeedbacks()
 	}
 
 	/**
 	 * Update Companion's list of available module variables.
-	 * This tells Companion what variables exist (e.g., $(liveupdate:fps))
-	 * The actual values are set via setVariableValues() when data arrives.
+	 * Every variable owned by a placed LiveUpdate Variable feedback stays defined, whether or not
+	 * its subscription is confirmed, so error indicators reach the button.
 	 */
 	private updateVariableDefinitions(): void {
 		const variableDefinitions = getVariableDefinitions()
+		const defined = new Set(variableDefinitions.map((definition) => definition.variableId))
 
-		// Add dynamic variable definitions for each active subscription
-		this.subscriptions.forEach((sub) => {
-			variableDefinitions.push({
-				variableId: sub.variableName,
-				name: `${sub.objectPath}.${sub.propertyPath}`,
-			})
-		})
+		const add = (variableId: string, name: string): void => {
+			if (!variableId || defined.has(variableId) || isReservedVariableName(variableId)) return
+			defined.add(variableId)
+			variableDefinitions.push({ variableId, name })
+		}
 
-		this.log('info', `Setting ${variableDefinitions.length} variable definitions`)
+		for (const sub of this.subscriptions.values()) {
+			add(sub.variableName, `${sub.objectPath}.${sub.propertyPath}`)
+		}
+		for (const cached of this.feedbackOptionsCache.values()) {
+			add(cached.variableName, `${cached.objectPath}.${cached.propertyPath}`)
+		}
+
+		this.log('debug', `Setting ${variableDefinitions.length} variable definitions`)
 		this.setVariableDefinitions(variableDefinitions)
 	}
 
 	/**
-	 * Clean up pending subscriptions that have timed out
+	 * Clean up pending subscriptions that have timed out; the feedbacks waiting for them back off
 	 */
 	private cleanupPendingSubscriptions(): void {
 		const now = Date.now()
@@ -817,9 +962,11 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 
 		for (const [key, pending] of this.pendingSubscriptions.entries()) {
 			if (now - pending.timestamp > timeout) {
-				this.log('warn', `Pending subscription timed out: ${key}`)
+				this.log('warn', `Pending subscription timed out: ${pending.objectPath}.${pending.propertyPath}`)
 				this.pendingSubscriptions.delete(key)
-				this.updateVariableDefinitions()
+				for (const feedbackId of pending.feedbackIds) {
+					this.noteSubscriptionFailure(feedbackId, 'no answer from the Director')
+				}
 			}
 		}
 	}
