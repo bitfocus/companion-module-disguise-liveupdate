@@ -4,6 +4,12 @@
 
 ### Added
 
+- Selection lists read from the Director: one action per selection ('Set selection: Track', 'Set
+  selection: Surface', ...) whose value is a dropdown of the names Designer actually has, so a
+  mistyped name can no longer be the reason a preset shows PATH_ERROR. The lists are read once per
+  connection (a setting turns that off) and on demand with the 'Refresh selection lists' action; a
+  name can still be typed by hand. A 'Set selection profile' action applies several selections with
+  one press, so a button re-points a whole page at another part of the show.
 - Command actions over Designer's Session REST API: transport play / stop / play section / loop
   section / return to start / next and previous section and track / go to section, track, timecode
   and time / brightness / volume / speed / engaged, RenderStream layer start, stop, restart and sync,

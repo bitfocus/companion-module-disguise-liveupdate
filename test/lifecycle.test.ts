@@ -368,3 +368,48 @@ test('setSelection treats an unresolved variable as a clear', async () => {
 	assert.equal(host.variables.get('selLayerIndex'), '$NA', 'the numeric selection is cleared, not kept')
 	await inst.destroy()
 })
+
+test('the selection lists are read from the Director and released again', async () => {
+	const director = new FakeDirector({
+		valueFor: (objectPath, propertyPath) => {
+			if (propertyPath.includes('allResources(Track)')) return ['demo', 'Show Track']
+			if (propertyPath.includes('allResources(Screen2)') && !propertyPath.includes('uid')) return ['surface 1']
+			return []
+		},
+	})
+	const { inst, host } = await newInstance(director)
+	await settle(50)
+	await inst.refreshDiscovery()
+	await settle(80)
+
+	assert.deepEqual(inst.discoveryChoices.get('selTrack'), ['demo', 'Show Track'])
+	assert.deepEqual(inst.discoveryChoices.get('selScreen'), ['surface 1'])
+	assert.equal(director.subs.length, 0, 'every probe released its subscription')
+
+	// the action now offers the real names
+	const actions = dist.getActionDefinitions(inst)
+	const option = actions.setSelection_selTrack.options[0]
+	assert.equal(option.type, 'dropdown')
+	assert.deepEqual(
+		option.choices.map((c: { id: string }) => c.id),
+		['demo', 'Show Track'],
+	)
+	assert.equal(option.allowCustom, true, 'a name can still be typed')
+	assert.ok(host.logs.some((l) => l.message.includes('Selection lists refreshed')))
+	await inst.destroy()
+})
+
+test('a selection profile applies several selections at once', async () => {
+	const director = new FakeDirector()
+	const { inst, host } = await newInstance(director)
+	const actions = dist.getActionDefinitions(inst)
+	const context = { parseVariablesInString: async (text: string) => text }
+	await actions.setSelectionProfile.callback(
+		{ options: { selTrack: 'demo', selScreen: 'surface 1', selLayer: '', selProjector: '' } },
+		context,
+	)
+	assert.equal(host.variables.get('selTrack'), 'demo')
+	assert.equal(host.variables.get('selScreen'), 'surface 1')
+	assert.equal(host.variables.get('selLayer'), '$NA', 'an empty field leaves the selection alone')
+	await inst.destroy()
+})

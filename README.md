@@ -44,7 +44,8 @@ See [companion/HELP.md](companion/HELP.md) for the user documentation and
 
 - **Set to Disguise (String / Number / Boolean / JSON)**: write a value through the subscription of a LiveUpdate Variable
 - **Toggle Disguise Boolean**: flip a boolean property
-- **Set selection**: change a selection variable (and therefore every preset built on it)
+- **Set selection** and one action per selection with the names read from the Director; **Set
+  selection profile** applies several at once, **Refresh selection lists** re-reads them
 - **Transport / RenderStream / Failover commands**: play, stop, section and track jumps, brightness,
   volume, speed, engage, RenderStream workload start / stop / restart / sync and machine failover,
   sent over Designer's Session REST API on the same host as the WebSocket. LiveUpdate itself cannot

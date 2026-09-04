@@ -16,6 +16,7 @@ import { getVariableDefinitions } from './variables'
 import { upgradeScripts } from './upgrades'
 import { RestClient, RestCommand, REST_ENDPOINTS } from './rest'
 import { getRestActionDefinitions } from './restActions'
+import { choicesFrom, DISCOVERY_SOURCES } from './discovery'
 
 /**
  * Config keys that require the WebSocket connection to be re-established when they change
@@ -161,6 +162,10 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	private rest: RestClient
 	/** Destructive commands are armed by the first press and fired by the second */
 	private armed: Map<string, { at: number; describe: string; timer: NodeJS.Timeout }> = new Map()
+	/** One-shot reads that no feedback owns, keyed by object/property pair */
+	private probes: Map<string, { resolve: (value: unknown) => void; timer: NodeJS.Timeout; id?: number }> = new Map()
+	/** The lists the Set selection action offers, read from the Director */
+	public discoveryChoices: Map<string, string[]> = new Map()
 
 	constructor(internal: unknown) {
 		super(internal)
@@ -593,6 +598,72 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		else this.log('error', `'${describe}' failed: ${result.message || `HTTP ${result.status}`}`)
 	}
 
+	/**
+	 * Read one property once, without a feedback owning it: subscribe, take the first value,
+	 * unsubscribe. Used to read the lists a selection can be chosen from.
+	 */
+	private async probeValue(objectPath: string, propertyPath: string, timeoutMs = 4000): Promise<unknown> {
+		const key = pairKey(objectPath, propertyPath)
+		if (
+			!this.isConnectionReady() ||
+			this.probes.has(key) ||
+			isUnresolvedPath(objectPath) ||
+			isUnresolvedPath(propertyPath)
+		) {
+			return Promise.resolve(undefined)
+		}
+		return new Promise((resolve) => {
+			const timer = setTimeout(() => {
+				const probe = this.probes.get(key)
+				this.probes.delete(key)
+				if (probe?.id !== undefined) {
+					this.send({ unsubscribe: { id: probe.id } })
+					this.releasedSubscriptionIds.set(probe.id, Date.now())
+				}
+				resolve(undefined)
+			}, timeoutMs)
+			if (typeof timer.unref === 'function') timer.unref()
+			this.probes.set(key, { resolve, timer })
+			this.send({
+				subscribe: { object: objectPath, properties: [propertyPath], configuration: { updateFrequencyMs: 1000 } },
+			})
+		})
+	}
+
+	/**
+	 * Ask the Director for the lists the selections can be chosen from, so the operator picks a real
+	 * name instead of typing one. Runs once per connection and on demand.
+	 */
+	async refreshDiscovery(): Promise<void> {
+		if (!this.isConnectionReady()) {
+			this.log('warn', 'Not connected, so the selection lists cannot be refreshed')
+			return
+		}
+		const selections = readSelections(this.config as unknown as Record<string, unknown>)
+		let found = 0
+		for (const source of DISCOVERY_SOURCES) {
+			if (source.needs?.some((id) => !selections[id] || selections[id] === UNSET_SELECTION)) continue
+			const objectPath = this.substituteSelections(source.objectPath, selections)
+			const propertyPath = this.substituteSelections(source.propertyPath, selections)
+			const value = await this.probeValue(objectPath, propertyPath)
+			const choices = value === undefined ? [] : choicesFrom(source, value)
+			if (choices.length) {
+				this.discoveryChoices.set(source.selection, choices)
+				found++
+			}
+		}
+		this.log('info', `Selection lists refreshed: ${found} of ${DISCOVERY_SOURCES.length} lists came back`)
+		this.setupActions()
+	}
+
+	/** Replace a selection reference in a discovery path with the selection's current value */
+	private substituteSelections(text: string, selections: Record<string, string>): string {
+		return text.replace(/\$\(liveupdate:(sel[A-Za-z0-9_]+)\)/g, (match, id: string) => {
+			const value = selections[id]
+			return value && value !== UNSET_SELECTION ? value : match
+		})
+	}
+
 	/** Forget which commands answered 404 so a Director that gained them is picked up */
 	rescanRestCommands(): void {
 		this.rest.forget()
@@ -869,6 +940,8 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 
 				this.subscribeFeedbacks()
 				this.startPendingCleanupTimer()
+				// the names the operator picks from, read once per connection
+				if (this.config?.discoverOnConnect !== false) void this.refreshDiscovery()
 			})
 
 			this.ws.on('message', (data: WebSocket.RawData) => {
@@ -892,6 +965,11 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				this.pendingSubscriptions.clear()
 				this.feedbackOptionsCache.clear()
 				this.releasedSubscriptionIds.clear()
+				for (const probe of this.probes.values()) {
+					clearTimeout(probe.timer)
+					probe.resolve(undefined)
+				}
+				this.probes.clear()
 				this.clearAllBackoff()
 				// The feedbacks are still on their buttons, so their variables stay defined (they are
 				// remembered in retainedVariables). Without this every readout would keep showing the
@@ -1077,7 +1155,11 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 					newFeedbackMap.set(feedbackId, sub.id)
 				}
 			} else {
-				if (this.releasedSubscriptionIds.has(sub.id)) {
+				const probe = this.probes.get(key)
+				if (probe) {
+					// a one-shot read: it keeps its subscription until the value arrives, then releases it
+					probe.id = sub.id
+				} else if (this.releasedSubscriptionIds.has(sub.id)) {
 					// The echo of a list the Director built before it processed our unsubscribe
 					this.log('debug', `Ignoring the echo of released subscription ${sub.id}`)
 				} else {
@@ -1109,6 +1191,16 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		let definitionsChanged = false
 
 		for (const valueUpdate of values) {
+			const probeEntry = [...this.probes.entries()].find(([, probe]) => probe.id === valueUpdate.id)
+			if (probeEntry) {
+				const [probeKey, probe] = probeEntry
+				this.probes.delete(probeKey)
+				clearTimeout(probe.timer)
+				this.send({ unsubscribe: { id: valueUpdate.id } })
+				this.releasedSubscriptionIds.set(valueUpdate.id, Date.now())
+				probe.resolve(valueUpdate.value)
+				continue
+			}
 			const subscription = this.subscriptions.get(valueUpdate.id)
 			if (!subscription) continue
 

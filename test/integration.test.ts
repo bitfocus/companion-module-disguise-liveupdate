@@ -30,7 +30,13 @@ after(async () => {
 
 async function connected(feedbacks = [] as ReturnType<typeof liveUpdateFeedback>[]) {
 	const inst = new dist.DisguiseInstance()
-	const initPromise = inst.init({ host: '127.0.0.1', port, reconnectInterval: 1000, pendingSubscriptionTimeout: 5000 })
+	const initPromise = inst.init({
+		host: '127.0.0.1',
+		port,
+		reconnectInterval: 1000,
+		pendingSubscriptionTimeout: 5000,
+		discoverOnConnect: false,
+	})
 	if (feedbacks.length) {
 		const update: Record<string, any> = {}
 		for (const feedback of feedbacks) update[feedback.id] = feedback
@@ -162,7 +168,13 @@ test('tearing down a socket that is still connecting does not crash the module',
 	process.on('uncaughtException', onUncaught)
 	try {
 		const inst = new dist.DisguiseInstance()
-		await inst.init({ host: '127.0.0.1', port: port1, reconnectInterval: 1000, pendingSubscriptionTimeout: 5000 })
+		await inst.init({
+			host: '127.0.0.1',
+			port: port1,
+			reconnectInterval: 1000,
+			pendingSubscriptionTimeout: 5000,
+			discoverOnConnect: false,
+		})
 		await tick(50)
 		assert.equal(inst.isConnectionReady(), false)
 		// connection settings change while the first socket is still connecting

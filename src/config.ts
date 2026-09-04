@@ -24,6 +24,8 @@ export interface DisguiseConfig {
 	/** Default update interval (ms) written into presets of the "static" class (names, lengths, lists, versions) */
 	presetIntervalStatic?: number
 	/** Command channel over the Session REST API (play, stop, section jumps, RenderStream, failover) */
+	/** Read the selection lists from the Director when the connection comes up */
+	discoverOnConnect?: boolean
 	restEnabled?: boolean
 	restAllowDestructive?: boolean
 	restArmSeconds?: number
@@ -164,6 +166,15 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			max: PRESET_INTERVAL_MAX,
 			step: 50,
 			tooltip: 'Names, lengths, lists, versions',
+		},
+		{
+			type: 'checkbox',
+			id: 'discoverOnConnect',
+			label: 'Read selection lists on connect',
+			width: 6,
+			default: true,
+			tooltip:
+				'Asks the Director once per connection for its tracks, layers, surfaces, projectors and machines so the "Set selection" actions offer the real names. Each list is one short-lived subscription.',
 		},
 		{
 			type: 'static-text',

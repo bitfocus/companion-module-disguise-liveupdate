@@ -403,6 +403,7 @@ export async function newInstance(
 		port: 80,
 		reconnectInterval: 5000,
 		pendingSubscriptionTimeout: 30000,
+		discoverOnConnect: false,
 		...config,
 	}
 	const initPromise = inst.init(fullConfig)

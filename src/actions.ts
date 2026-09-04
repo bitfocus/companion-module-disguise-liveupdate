@@ -124,8 +124,55 @@ async function processJSONValue(
 	}
 }
 
+/** The selections a profile button is most likely to switch together */
+const PROFILE_SELECTIONS = SELECTIONS.filter((selection) =>
+	['selTrack', 'selLayer', 'selScreen', 'selProjector', 'selMachine', 'selWorkload'].includes(selection.id),
+)
+
+/**
+ * One action per selection. When the Director has been asked for the list (see the "Refresh
+ * selection lists" action) the value is a dropdown of the real names, which is the difference
+ * between a working button and a PATH_ERROR from a typo; a name can still be typed by hand.
+ */
+function getSelectionActions(instance: DisguiseInstance): CompanionActionDefinitions {
+	const actions: CompanionActionDefinitions = {}
+	for (const selection of SELECTIONS) {
+		const choices = instance.discoveryChoices?.get(selection.id) ?? []
+		actions[`setSelection_${selection.id}`] = {
+			name: `Set selection: ${selection.label}`,
+			description: selection.description,
+			options: [
+				choices.length
+					? {
+							type: 'dropdown',
+							label: 'Value',
+							id: 'value',
+							default: choices[0],
+							choices: choices.map((value) => ({ id: value, label: value })),
+							allowCustom: true,
+							tooltip: `Read from the Director. Example: ${selection.example}`,
+						}
+					: {
+							type: 'textinput',
+							label: 'Value',
+							id: 'value',
+							default: '',
+							useVariables: true,
+							tooltip: `Example: ${selection.example}. Use "Refresh selection lists" to pick from the Director instead.`,
+						},
+			],
+			callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
+				const value = await context.parseVariablesInString(String(action.options.value ?? ''))
+				instance.setSelection(selection.id, value)
+			},
+		}
+	}
+	return actions
+}
+
 export function getActionDefinitions(instance: DisguiseInstance): DisguiseActionDefinitions {
 	return {
+		...getSelectionActions(instance),
 		setToDisguiseString: {
 			name: 'Set to Disguise (String)',
 			description: 'Set a Disguise property using an existing LiveUpdate Variable',
@@ -290,6 +337,36 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
 				}
 
 				instance.setProperty(subscription.id, !current)
+			},
+		},
+
+		refreshSelectionLists: {
+			name: 'Refresh selection lists',
+			description:
+				'Ask the Director for the tracks, layers, surfaces, projectors, machines and other names, so the per-selection actions offer the real ones. Runs once on connect; use this after the show file changes.',
+			options: [],
+			callback: async () => {
+				await instance.refreshDiscovery()
+			},
+		},
+
+		setSelectionProfile: {
+			name: 'Set selection profile',
+			description:
+				'Apply several selections with one press, so a button re-points a whole page at another part of the show. A field left empty leaves that selection unchanged.',
+			options: PROFILE_SELECTIONS.map((selection) => ({
+				type: 'textinput' as const,
+				label: selection.label,
+				id: selection.id,
+				default: '',
+				useVariables: true,
+			})),
+			callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
+				for (const selection of PROFILE_SELECTIONS) {
+					const raw = String(action.options[selection.id] ?? '')
+					if (!raw.trim()) continue
+					instance.setSelection(selection.id, await context.parseVariablesInString(raw))
+				}
 			},
 		},
 
