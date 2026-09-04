@@ -30,6 +30,57 @@ Note that the Director stores these values as 32-bit floats, so a written 0.9 re
 
 Requires Companion 4.1 or newer.
 
+## Commands
+
+LiveUpdate reads and writes properties; it cannot tell the Director to play, stop or jump. Those go
+over Designer's Session REST API, on the same host and port, and this module sends them for you:
+
+- **Transport**: play, stop, play to end of section, loop section, return to start, next and previous
+  section and track, go to section / track / timecode / time, brightness, volume, speed, engaged.
+- **RenderStream**: start, stop, restart and sync the layers of a workload.
+- **Failover**: fail over a machine, restore a machine, apply default routing.
+
+The RenderStream and failover commands change the shape of the session, so they are refused until
+*Allow destructive commands* is on in the connection settings, and then they arm on the first press
+and only fire on the second within the confirm window. The arm is tied to the target, so changing the
+machine between presses arms again instead of firing at the new one. Put the *Command armed* feedback
+on the button to see the state. `rest_last_command`, `rest_last_status` and `rest_last_message` report what
+happened; *Last command failed* colours the button when it did not work.
+
+A Designer that does not know a command answers 404; the module says so once and stops sending it
+until you use *Rescan the command API*.
+
+## Choosing selections from the Director
+
+Instead of typing a track or surface name, use the per-selection actions (*Set selection: Track*,
+*Set selection: Surface*, ...). Their value is a dropdown of the names Designer actually has, read
+from the Director when the connection comes up and refreshed by the *Refresh selection lists* action.
+A name can still be typed. *Set selection profile* applies several selections with one press, so one
+button re-points a whole page at another part of the show.
+
+## Seeing a trend
+
+The *LiveUpdate Sparkline* feedback draws the recent values of a variable as a line on the button.
+Put it on the same button as the LiveUpdate Variable feedback that owns the value; the number stays
+readable on top. It has a window length, automatic or fixed scale, a colour, an optional fill and an
+optional threshold rule such as a frame budget.
+
+## Checking the presets on your Director
+
+*Check presets against this Director* subscribes once to every preset property whose selections are
+filled in, records whether the Director accepted it and releases it again. The counts land in the
+`selfcheck_*` variables. Run it when you arrive on site: it tells you which presets work with this
+Designer build and this show file. It does not touch the subscriptions your buttons already hold.
+
+The Designer version is published as `$(liveupdate:designer_version)`, and the log says so when the
+Director runs a different major version from the one the preset catalog was verified against.
+
+## Behaviour when the Director goes away
+
+Every readout is set to OFFLINE rather than keeping the last value it had, because a stale number on
+a monitoring button is worse than no number. The variables stay defined, the connection status goes
+to Disconnected and the module reconnects on its own.
+
 ## Configuration
 
 ### Connection settings
