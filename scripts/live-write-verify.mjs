@@ -20,6 +20,7 @@
 //   node scripts/live-write-verify.mjs --host 192.0.2.10 [--port 80] [--group neutral|output|all]
 //        [--yes] [--force] [--track "Track 1"] [--layer "Video 1"] [--screen "surface 1"]
 //        [--projector "projector 1"] [--screen-uid 0x...] [--ev-uid 0x...] [--timeout 4000]
+//        [--only <substring of a property path or preset id>]
 //        [--out docs/research/live-write-verification.json]
 //
 // Without --yes nothing is written: the script discovers the targets, reads the current values and
@@ -409,6 +410,14 @@ function targets(sel) {
 			kind: 'number',
 			mutate: (v) => nudge01(v, 0.05),
 		},
+		{
+			group: 'output',
+			presets: ['tr_engaged', 'tr_engage', 'tr_disengage', 'tr_engaged_toggle'],
+			object: 'transportManager:default',
+			property: 'object.engaged',
+			kind: 'boolean',
+			mutate: (v) => !v,
+		},
 		screen && {
 			group: 'output',
 			presets: ['stg_screen_offset', 'stg_screen_offset_reset'],
@@ -510,7 +519,11 @@ function targets(sel) {
 			mutate: (v) => v + 1,
 		},
 	]
-	return list.filter(Boolean).filter((t) => group === 'all' || t.group === group)
+	const only = args.only ? String(args.only) : null
+	return list
+		.filter(Boolean)
+		.filter((t) => group === 'all' || t.group === group)
+		.filter((t) => !only || t.property.includes(only) || t.presets.some((p) => p.includes(only)))
 }
 
 // ---------- run ----------

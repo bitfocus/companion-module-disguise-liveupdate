@@ -18,10 +18,10 @@ not have (an Expression Variables device, a DMX screen, a timecode source, a sta
 layer, a running RenderStream instance). Every row carries its live result in
 `docs/PRESET_CATALOG.md` (column *live*).
 
-The write side was exercised on the same Director on 2026-09-04: 21 properties (layer enable, start,
+The write side was exercised on the same Director on 2026-09-04: 22 properties (layer enable, start,
 length, brightness / pos.x / pos.y / scale.x key 0, constant brightness, track TC adjust, master
-brightness and volume, surface offset / rotation / fade / hold / render layer, projector fade and
-hold, and the same surface addressed by UID) were read, changed, confirmed, written back and
+brightness, volume and engaged, surface offset / rotation / fade / hold / render layer, projector
+fade and hold, and the same surface addressed by UID) were read, changed, confirmed, written back and
 re-read; all of them came back to their original value. The module's own actions (Set Number with an
 expression, Toggle Boolean, Set JSON with a partial object) were driven the same way. Expression
 Variables writes are still untested: the test project has no Expression Variables device.

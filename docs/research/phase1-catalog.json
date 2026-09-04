@@ -3136,6 +3136,16 @@
     "value": "true",
     "objectPath": "transportManager:default",
     "propertyPath": "object.engaged"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output (--only engaged)",
+    "status": "write-accepted-and-restored",
+    "object": "transportManager:default",
+    "property": "object.engaged",
+    "before": true,
+    "wrote": false,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -3190,6 +3200,16 @@
     "value": "true",
     "objectPath": "transportManager:default",
     "propertyPath": "object.engaged"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output (--only engaged)",
+    "status": "write-accepted-and-restored",
+    "object": "transportManager:default",
+    "property": "object.engaged",
+    "before": true,
+    "wrote": false,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -3244,6 +3264,16 @@
     "value": "true",
     "objectPath": "transportManager:default",
     "propertyPath": "object.engaged"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output (--only engaged)",
+    "status": "write-accepted-and-restored",
+    "object": "transportManager:default",
+    "property": "object.engaged",
+    "before": true,
+    "wrote": false,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -3306,6 +3336,16 @@
     "value": "true",
     "objectPath": "transportManager:default",
     "propertyPath": "object.engaged"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output (--only engaged)",
+    "status": "write-accepted-and-restored",
+    "object": "transportManager:default",
+    "property": "object.engaged",
+    "before": true,
+    "wrote": false,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -19547,7 +19587,7 @@
  },
  "writeVerification": {
   "date": "2026-09-04",
-  "method": "Two protocol-level runs (scripts/live-write-verify.mjs, groups neutral and output) and one module-level run (test/live-write.e2e.ts) against Designer r34.0.3. Every target was read first, changed by a small amount, confirmed through its own subscription, written back to the original value, confirmed again, and re-read after the run. The layer targets used track \"demo\", which is not the transport current track; the transport was stopped.",
+  "method": "Three protocol-level runs (scripts/live-write-verify.mjs, groups neutral and output) and one module-level run (test/live-write.e2e.ts) against Designer r34.0.3. Every target was read first, changed by a small amount, confirmed through its own subscription, written back to the original value, confirmed again, and re-read after the run. The layer targets used track \"demo\", which is not the transport current track; the transport was stopped.",
   "environment": {
    "track": "demo",
    "layer": "Video 6",
@@ -19562,7 +19602,7 @@
     "write-accepted-and-restored": 9
    },
    "output": {
-    "write-accepted-and-restored": 12
+    "write-accepted-and-restored": 13
    },
    "e2e": {
     "brightness": {
@@ -19588,9 +19628,9 @@
    "docs/research/live-write-e2e.json"
   ],
   "notReached": [
-   "ev_uid_float / ev_uid_float_up / ev_uid_float_down: no Expression Variables device in the test project",
-   "Machine role / targets / hostname: never written, they reconfigure the session",
-   "stg_screen_alpha and the projector shutter / blend rows: not part of the target list (read-only verified only)"
+   "ev_uid_float / ev_uid_float_up / ev_uid_float_down: the test project has no Expression Variables device",
+   "fo_role, fo_targets, fo_hostname, fo_failover_timeout, fo_locked_to_director: failover topology, never written by this module (no write presets ship for them)",
+   "monr_fps_expired, tr_transport_status, tr_track_length_beats, rs_layer_framerate: the API member has a setter but the catalog ships them as readouts only, so no write button exists"
   ],
   "note": "The Director stores these properties as 32-bit floats: a written 0.9 reads back as 0.8999999761581421. The presets show the rounded value with toFixed()."
  }

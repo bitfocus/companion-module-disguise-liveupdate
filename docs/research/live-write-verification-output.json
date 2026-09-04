@@ -23,7 +23,7 @@
  ],
  "date": "2026-09-04T06:19:40.520Z",
  "summary": {
-  "write-accepted-and-restored": 12
+  "write-accepted-and-restored": 13
  },
  "directorErrors": [],
  "inFlight": null,
@@ -287,6 +287,25 @@
    "restoreValue": 1,
    "afterWrite": 0,
    "afterRestore": 1,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "tr_engaged",
+    "tr_engage",
+    "tr_disengage",
+    "tr_engaged_toggle"
+   ],
+   "group": "output",
+   "object": "transportManager:default",
+   "property": "object.engaged",
+   "kind": "boolean",
+   "before": true,
+   "write": false,
+   "restoreValue": true,
+   "afterWrite": false,
+   "afterRestore": true,
    "result": "write-accepted-and-restored",
    "finalCheck": "original value confirmed"
   }

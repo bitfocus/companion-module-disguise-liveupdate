@@ -40,7 +40,7 @@
   (`docs/PRESET_CATALOG.md`, column *live*). 103 experimental presets that returned a value
   were promoted to their home categories (ids and variable names unchanged); `selLedScreen`,
   `selStageUid` and `selRsLayer` are regular selections now.
-- Write verification on the same Director: 21 properties written and restored through the protocol
+- Write verification on the same Director: 22 properties written and restored through the protocol
   (`scripts/live-write-verify.mjs`, groups `neutral` and `output`) and three through the module's own
   actions (`test/live-write.e2e.ts`: Set Number with an expression, Toggle Boolean, Set JSON with a
   partial object). Every value came back to its original; the results are in
