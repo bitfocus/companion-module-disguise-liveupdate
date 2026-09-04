@@ -75,6 +75,19 @@ exercised, its write result. Three generators read it — `scripts/gen-presets.m
 `scripts/gen-help.mjs` refreshes the preset list in `companion/HELP.md`. `src/presets.ts` turns the
 generated catalog into Companion preset definitions at runtime, applying the connection settings.
 
+To run the module in Companion without a checkout, build a self-contained folder for the
+**Developer modules path**:
+
+```bash
+yarn build
+node scripts/build-dev-module.mjs --label InHouse --version 1.0.0
+```
+
+It writes `../InHouse-build/companion-module-disguise-liveupdate` containing only `companion/`,
+`dist/`, `package.json` and the production `node_modules` (about 5 MB). Copy that folder into the
+Developer modules path; Companion picks it up without a restart. The module id and the variable
+prefix stay the same, so existing connections keep working.
+
 Two scripts talk to a real Director and are not part of `yarn test`:
 
 ```bash
