@@ -808,5 +808,446 @@
     "message": "Workload: out of range error accessing workload instance"
    }
   }
+ ],
+ "probe5": [
+  {
+   "o": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "p": "object.findSequence(\"pos.x\").sequence.nKeys()",
+   "result": "confirmed-value",
+   "value": 1
+  },
+  {
+   "o": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "p": "[{\"t\": object.findSequence(\"pos.x\").sequence.key(i).localT, \"v\": object.findSequence(\"pos.x\").sequence.key(i).v} for i in range(object.findSequence(\"pos.x\").sequence.nKeys())]",
+   "result": "confirmed-value",
+   "value": [
+    {
+     "t": 944.6112995866902,
+     "v": 0
+    }
+   ]
+  },
+  {
+   "o": "getByUID(0x0123456789abcde0)",
+   "p": "(object.venue.description if object.venue is not None else \"\")",
+   "result": "confirmed-value",
+   "value": ""
+  },
+  {
+   "o": "getByUID(0x0123456789abcde0)",
+   "p": "object.venue is not None",
+   "result": "confirmed-value",
+   "value": false
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "object.cues.n()",
+   "result": "confirmed-value",
+   "value": 35
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "[object.cues.getT(i) for i in range(object.cues.n())]",
+   "result": "confirmed-value",
+   "value": [
+    0,
+    5,
+    15,
+    25,
+    28.962296292520207,
+    75.07507679512726,
+    80.08008191480242,
+    124.9582944878896,
+    125,
+    185,
+    245,
+    273,
+    305,
+    522.3333333333334,
+    624.5,
+    655,
+    936.0666666666666,
+    945,
+    1005,
+    1035,
+    1215.1833333333334,
+    1388.0166666666667,
+    1489.05,
+    1613.2333333333333,
+    1884.818194668066,
+    2545,
+    2567.75,
+    2576.5,
+    2580.5,
+    2620.366666666667,
+    2676.633333333333,
+    2726.8166666666666,
+    2873.4,
+    3210.8333333333335,
+    3390.590668272734
+   ]
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "[object.cues.getV(i).note for i in range(object.cues.n())]",
+   "result": "confirmed-value",
+   "value": [
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "",
+    "<redacted>",
+    "<redacted>",
+    "",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "",
+    "",
+    "",
+    "",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    ""
+   ]
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "[{\"beat\": object.cues.getT(i), \"note\": object.cues.getV(i).note, \"section\": object.cues.getV(i).section} for i in range(object.cues.n())]",
+   "result": "confirmed-value",
+   "value": [
+    {
+     "beat": 0,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 5,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 15,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 25,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 28.962296292520207,
+     "note": "",
+     "section": true
+    },
+    {
+     "beat": 75.07507679512726,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 80.08008191480242,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 124.9582944878896,
+     "note": "",
+     "section": true
+    },
+    {
+     "beat": 125,
+     "note": "<redacted>",
+     "section": false
+    },
+    {
+     "beat": 185,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 245,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 273,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 305,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 522.3333333333334,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 624.5,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 655,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 936.0666666666666,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 945,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 1005,
+     "note": "",
+     "section": true
+    },
+    {
+     "beat": 1035,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 1215.1833333333334,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 1388.0166666666667,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 1489.05,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 1613.2333333333333,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 1884.818194668066,
+     "note": "",
+     "section": true
+    },
+    {
+     "beat": 2545,
+     "note": "",
+     "section": true
+    },
+    {
+     "beat": 2567.75,
+     "note": "",
+     "section": true
+    },
+    {
+     "beat": 2576.5,
+     "note": "",
+     "section": true
+    },
+    {
+     "beat": 2580.5,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 2620.366666666667,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 2676.633333333333,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 2726.8166666666666,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 2873.4,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 3210.8333333333335,
+     "note": "<redacted>",
+     "section": true
+    },
+    {
+     "beat": 3390.590668272734,
+     "note": "",
+     "section": true
+    }
+   ]
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "[[{\"type\": t.type, \"text\": t.text} for t in object.cues.getV(i).getTags()] for i in range(object.cues.n())]",
+   "result": "confirmed-value",
+   "value": [
+    [
+     {
+      "text": "1",
+      "type": 1
+     }
+    ],
+    [],
+    [
+     {
+      "text": "2",
+      "type": 1
+     }
+    ],
+    [
+     {
+      "text": "3",
+      "type": 1
+     }
+    ],
+    [],
+    [
+     {
+      "text": "16",
+      "type": 1
+     }
+    ],
+    [
+     {
+      "text": "17",
+      "type": 1
+     }
+    ],
+    [],
+    [
+     {
+      "text": "4",
+      "type": 1
+     }
+    ],
+    [
+     {
+      "text": "5",
+      "type": 1
+     }
+    ],
+    [],
+    [],
+    [
+     {
+      "text": "7",
+      "type": 1
+     }
+    ],
+    [
+     {
+      "text": "13",
+      "type": 1
+     }
+    ],
+    [
+     {
+      "text": "6",
+      "type": 1
+     }
+    ],
+    [
+     {
+      "text": "14",
+      "type": 1
+     }
+    ],
+    [
+     {
+      "text": "15",
+      "type": 1
+     }
+    ],
+    [],
+    [],
+    [],
+    [
+     {
+      "text": "11",
+      "type": 1
+     }
+    ],
+    [
+     {
+      "text": "8",
+      "type": 1
+     }
+    ],
+    [
+     {
+      "text": "12",
+      "type": 1
+     }
+    ],
+    [
+     {
+      "text": "10",
+      "type": 1
+     }
+    ],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+     {
+      "text": "9",
+      "type": 1
+     }
+    ],
+    [],
+    [],
+    [],
+    [
+     {
+      "text": "20",
+      "type": 1
+     }
+    ],
+    []
+   ]
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "len(object.getWorkloadLayers())",
+   "result": "confirmed-value",
+   "value": 5
+  }
  ]
 }

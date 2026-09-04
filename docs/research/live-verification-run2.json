@@ -1,0 +1,3243 @@
+{
+ "host": "192.0.2.10",
+ "port": 80,
+ "date": "2026-09-04T04:39:55.508Z",
+ "selections": {
+  "selTrack": "Show Track",
+  "selLayer": "Video 26",
+  "selLayerIndex": "2",
+  "selHost": "ACTOR01",
+  "selMachine": "DIRECTOR01",
+  "selScreen": "surface 1",
+  "selProjector": "projector 1",
+  "selScreenUid": "0x0123456789abcdef",
+  "selLedScreen": "LED Screen 1",
+  "selStageUid": "0x0123456789abcde0",
+  "selWorkload": "1000000000000000001",
+  "selSection": "0",
+  "selBeat": "0",
+  "selInstance": "0",
+  "selEvIndex": "0",
+  "selRsLayer": "0"
+ },
+ "discovery": [
+  {
+   "selection": "selTrack",
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.track.description",
+   "result": "confirmed-value",
+   "value": "Show Track",
+   "picked": "Show Track"
+  },
+  {
+   "selection": "selLayer",
+   "objectPath": "track:\"Show Track\"",
+   "propertyPath": "[l.name for l in object.getLeafLayers(VariableVideoModule)]",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>",
+   "picked": "Video 26"
+  },
+  {
+   "selection": "selLayerIndex",
+   "objectPath": "track:\"Show Track\"",
+   "propertyPath": "[l.name for l in object.layers].index(\"Video 26\")",
+   "result": "confirmed-value",
+   "value": "2",
+   "picked": "2"
+  },
+  {
+   "selection": "selHost",
+   "objectPath": "subsystem:MonitoringManager",
+   "propertyPath": "object.remoteNodes()",
+   "result": "confirmed-value",
+   "value": "[\"ACTOR01:d3\"]",
+   "picked": "ACTOR01"
+  },
+  {
+   "selection": "selMachine",
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "object.d3NetManager.localMachine.name",
+   "result": "confirmed-value",
+   "value": "DIRECTOR01",
+   "picked": "DIRECTOR01"
+  },
+  {
+   "selection": "selScreen",
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "[s.description for s in resourceManager.allResources(Screen2)]",
+   "result": "confirmed-value",
+   "value": "[\"surface 1\"]",
+   "picked": "surface 1"
+  },
+  {
+   "selection": "selProjector",
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "[p.description for p in resourceManager.allResources(Projector)]",
+   "result": "confirmed-value",
+   "value": "[\"projector 1\"]",
+   "picked": "projector 1"
+  },
+  {
+   "selection": "selEvUid",
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "[\"0x%x\" % d.uid for d in resourceManager.allResources(ExpressionVariablesDevice)]",
+   "result": "confirmed-value",
+   "value": "[]"
+  },
+  {
+   "selection": "selEvDevice",
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "[d.description for d in resourceManager.allResources(ExpressionVariablesDevice)]",
+   "result": "confirmed-value",
+   "value": "[]"
+  },
+  {
+   "selection": "selEvName",
+   "result": "skipped (needs selEvDevice)"
+  },
+  {
+   "selection": "selEvLayer",
+   "objectPath": "track:\"Show Track\"",
+   "propertyPath": "[l.name for l in object.getLeafLayers(ExpressionVariablesModule)]",
+   "result": "confirmed-value",
+   "value": "[]"
+  },
+  {
+   "selection": "selScreenUid",
+   "objectPath": "screen2:\"surface 1\"",
+   "propertyPath": "\"0x%x\" % object.uid",
+   "result": "confirmed-value",
+   "value": "0x0123456789abcdef",
+   "picked": "0x0123456789abcdef"
+  },
+  {
+   "selection": "selLedScreen",
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "[d.description for d in resourceManager.allResources(LedScreen)]",
+   "result": "confirmed-value",
+   "value": "[\"LED Screen 1\",\"LED Screen 3\",\"LED Screen 4\",\"<redacted>\",\"<redacted>\",\"LED Screen 5\",\"<redacted>\",\"LED Screen 6\",\"LED Screen 7\",\"LED Screen 2\",\"<redacted>\",\"<redacted>\"]",
+   "picked": "LED Screen 1"
+  },
+  {
+   "selection": "selDmxScreen",
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "[d.description for d in resourceManager.allResources(DmxScreen)]",
+   "result": "confirmed-value",
+   "value": "[]"
+  },
+  {
+   "selection": "selTransport",
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "[d.description for d in resourceManager.allResources(TransportManager)]",
+   "result": "confirmed-value",
+   "value": "[\"default\"]"
+  },
+  {
+   "selection": "selStageUid",
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "[\"0x%x\" % s.uid for s in resourceManager.allResources(Stage)]",
+   "result": "confirmed-value",
+   "value": "[\"0x0123456789abcde0\"]",
+   "picked": "0x0123456789abcde0"
+  },
+  {
+   "selection": "selWorkload",
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "[str(k) for k in object.getWorkloadLayers()]",
+   "result": "confirmed-path-error",
+   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"long too big to convert\"}"
+  },
+  {
+   "selection": "selWorkload",
+   "objectPath": "track:\"Show Track\"",
+   "propertyPath": "[str(l.moduleConfig.workloadId) for l in object.getLeafLayers(RenderStreamModule)]",
+   "result": "confirmed-value",
+   "value": "[\"1000000000000000001\",\"1000000000000000002\",\"1000000000000000003\"]",
+   "picked": "1000000000000000001"
+  }
+ ],
+ "summary": {
+  "confirmed-value": 213,
+  "skipped-unset-selection": 25,
+  "confirmed-path-error": 14,
+  "confirmed-no-value": 1
+ },
+ "results": [
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"fps\")",
+   "propertyPath": "object.seriesAverage(\"Actual\", 1)",
+   "tier": "normal",
+   "presets": [
+    "monl_fps"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"fps\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Actual\", 1)",
+   "result": "confirmed-value",
+   "value": "59.942335473106986"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"fps\")",
+   "propertyPath": "object.seriesAverage(\"Actual\", 10)",
+   "tier": "normal",
+   "presets": [
+    "monl_fps_avg10"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"fps\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Actual\", 10)",
+   "result": "confirmed-value",
+   "value": "59.94226361205417"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"fps\")",
+   "propertyPath": "object.seriesAverage(\"Actual\", 60)",
+   "tier": "normal",
+   "presets": [
+    "monl_fps_avg60"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"fps\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Actual\", 60)",
+   "result": "confirmed-value",
+   "value": "59.942257624317"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
+   "propertyPath": "object.seriesAverage(\"Total\", 1)",
+   "tier": "normal",
+   "presets": [
+    "monl_gpu_total"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Total\", 1)",
+   "result": "confirmed-value",
+   "value": "3.5403200000000004"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
+   "propertyPath": "object.seriesAverage(\"Compositor\", 1)",
+   "tier": "normal",
+   "presets": [
+    "monl_gpu_compositor"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Compositor\", 1)",
+   "result": "confirmed-value",
+   "value": "2.04592"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
+   "propertyPath": "object.seriesAverage(\"GUI\", 1)",
+   "tier": "normal",
+   "presets": [
+    "monl_gpu_gui"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"GUI\", 1)",
+   "result": "confirmed-value",
+   "value": "0.03792"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
+   "propertyPath": "object.seriesAverage(\"Render Everything\", 1)",
+   "tier": "normal",
+   "presets": [
+    "monl_gpu_render_everything"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Render Everything\", 1)",
+   "result": "confirmed-value",
+   "value": "1.46416"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
+   "propertyPath": "object.seriesAverage(\"DMX\", 1)",
+   "tier": "normal",
+   "presets": [
+    "monl_gpu_dmx"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"DMX\", 1)",
+   "result": "confirmed-value",
+   "value": "0.0007999999999999999"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
+   "propertyPath": "object.seriesAverage(\"Video Upload\", 1)",
+   "tier": "normal",
+   "presets": [
+    "monl_gpu_video_upload"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Video Upload\", 1)",
+   "result": "confirmed-value",
+   "value": "0.0007999999999999999"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
+   "propertyPath": "object.seriesAverage(\"Capture Upload\", 1)",
+   "tier": "normal",
+   "presets": [
+    "monl_gpu_capture_upload"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Capture Upload\", 1)",
+   "result": "confirmed-value",
+   "value": "0.0007999999999999999"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"CPU\")",
+   "propertyPath": "object.seriesAverage(\"Total\", 1)",
+   "tier": "normal",
+   "presets": [
+    "monl_cpu_total"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"CPU\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Total\", 1)",
+   "result": "confirmed-value",
+   "value": "11.220099999945887"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUMemory\")",
+   "propertyPath": "object.seriesAverage(\"Usage(MB)\", 1)",
+   "tier": "normal",
+   "presets": [
+    "monl_gpu_mem"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUMemory\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Usage(MB)\", 1)",
+   "result": "confirmed-value",
+   "value": "823"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"ProcessMemory\")",
+   "propertyPath": "object.seriesAverage(\"Usage (MB)\", 1)",
+   "tier": "normal",
+   "presets": [
+    "monl_proc_mem"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"ProcessMemory\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Usage (MB)\", 1)",
+   "result": "confirmed-value",
+   "value": "1835.70703125"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"Machine\")",
+   "propertyPath": "object.seriesAverage(\"CPU Time\", 1)",
+   "tier": "normal",
+   "presets": [
+    "monl_machine_cpu_time"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"Machine\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"CPU Time\", 1)",
+   "result": "confirmed-value",
+   "value": "53.803229331970215"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"Machine\")",
+   "propertyPath": "object.seriesAverage(\"GPU Time\", 1)",
+   "tier": "normal",
+   "presets": [
+    "monl_machine_gpu_time"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"Machine\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"GPU Time\", 1)",
+   "result": "confirmed-value",
+   "value": "30.03171157836914"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"Machine\")",
+   "propertyPath": "object.seriesAverage(\"CPU Memory\", 1)",
+   "tier": "normal",
+   "presets": [
+    "monl_machine_cpu_mem"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"Machine\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"CPU Memory\", 1)",
+   "result": "confirmed-value",
+   "value": "4"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"Machine\")",
+   "propertyPath": "object.seriesAverage(\"GPU Memory\", 1)",
+   "tier": "normal",
+   "presets": [
+    "monl_machine_gpu_mem"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"Machine\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"GPU Memory\", 1)",
+   "result": "confirmed-value",
+   "value": "0.16877987425978758"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"Machine\")",
+   "propertyPath": "object.seriesAverage(\"Disk\", 1)",
+   "tier": "normal",
+   "presets": [
+    "monl_machine_disk"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"Machine\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Disk\", 1)",
+   "result": "confirmed-value",
+   "value": "1.1262888607415e-310"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"Disk\")",
+   "propertyPath": "object.seriesAverage(\"Read (MB/s)\", 1)",
+   "tier": "experimental",
+   "presets": [
+    "monl_disk_read"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"Disk\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Read (MB/s)\", 1)",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"Disk\")",
+   "propertyPath": "object.seriesAverage(\"Write (MB/s)\", 1)",
+   "tier": "experimental",
+   "presets": [
+    "monl_disk_write"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"Disk\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Write (MB/s)\", 1)",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"$(liveupdate:selHost):d3\", \"fps\")",
+   "propertyPath": "object.seriesAverage(\"Actual\", 1)",
+   "tier": "normal",
+   "presets": [
+    "monr_fps"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"ACTOR01:d3\", \"fps\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Actual\", 1)",
+   "result": "confirmed-value",
+   "value": "59.94053898536761"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"$(liveupdate:selHost):d3\", \"fps\")",
+   "propertyPath": "object.seriesAverage(\"Actual\", 10)",
+   "tier": "normal",
+   "presets": [
+    "monr_fps_avg10"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"ACTOR01:d3\", \"fps\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Actual\", 10)",
+   "result": "confirmed-value",
+   "value": "59.940790488465986"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"$(liveupdate:selHost):d3\", \"fps\")",
+   "propertyPath": "object.expired",
+   "tier": "normal",
+   "presets": [
+    "monr_fps_expired"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"ACTOR01:d3\", \"fps\")",
+   "resolvedPropertyPath": "object.expired",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager",
+   "propertyPath": "object.remoteNodes()",
+   "tier": "normal",
+   "presets": [
+    "monr_remote_nodes"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager",
+   "resolvedPropertyPath": "object.remoteNodes()",
+   "result": "confirmed-value",
+   "value": "[\"ACTOR01:d3\"]"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager",
+   "propertyPath": "[m.name for m in object.localMonitors().all()]",
+   "tier": "experimental",
+   "presets": [
+    "monl_monitor_names"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager",
+   "resolvedPropertyPath": "[m.name for m in object.localMonitors().all()]",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"CPU\")",
+   "propertyPath": "[s.name for s in object.graphDescriptor(False).dataSeries]",
+   "tier": "experimental",
+   "presets": [
+    "monl_cpu_series_names"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"CPU\")",
+   "resolvedPropertyPath": "[s.name for s in object.graphDescriptor(False).dataSeries]",
+   "result": "confirmed-value",
+   "value": "[\"Update\",\"Render\",\"Total\"]"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"CPU\")",
+   "propertyPath": "object.graphDescriptor(False).yUnits",
+   "tier": "experimental",
+   "presets": [
+    "monl_cpu_units"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"CPU\")",
+   "resolvedPropertyPath": "object.graphDescriptor(False).yUnits",
+   "result": "confirmed-value",
+   "value": "Units"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUMemory\")",
+   "propertyPath": "object.graphDescriptor(False).yUnits",
+   "tier": "experimental",
+   "presets": [
+    "monl_gpu_mem_units"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUMemory\")",
+   "resolvedPropertyPath": "object.graphDescriptor(False).yUnits",
+   "result": "confirmed-value",
+   "value": "Units"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
+   "propertyPath": "[{\"label\": t.label, \"value\": t.value} for t in object.graphDescriptor(False).thresholds]",
+   "tier": "experimental",
+   "presets": [
+    "monl_gpu_thresholds"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
+   "resolvedPropertyPath": "[{\"label\": t.label, \"value\": t.value} for t in object.graphDescriptor(False).thresholds]",
+   "result": "confirmed-value",
+   "value": "[{\"value\":16.683332443237305,\"label\":\"Critical\"},{\"value\":13.34666633605957,\"label\":\"Warning\"}]"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"fps\")",
+   "propertyPath": "{s.name: {\"latest\": s.samples()[-1], \"min\": min(s.samples()), \"max\": max(s.samples())} for s in object.graphDescriptor(False).dataSeries if s.samples()}",
+   "tier": "experimental",
+   "presets": [
+    "monl_fps_minmax"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findLocalMonitor(\"fps\")",
+   "resolvedPropertyPath": "{s.name: {\"latest\": s.samples()[-1], \"min\": min(s.samples()), \"max\": max(s.samples())} for s in object.graphDescriptor(False).dataSeries if s.samples()}",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager",
+   "propertyPath": "MetricGraphCategories.categories()",
+   "tier": "experimental",
+   "presets": [
+    "monl_graph_categories"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager",
+   "resolvedPropertyPath": "MetricGraphCategories.categories()",
+   "result": "confirmed-value",
+   "value": "[\"renderstream\"]"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager",
+   "propertyPath": "[m.name for m in object.remoteMetricMonitorsForNode(\"$(liveupdate:selHost):d3\").all()]",
+   "tier": "experimental",
+   "presets": [
+    "monr_node_monitor_names"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager",
+   "resolvedPropertyPath": "[m.name for m in object.remoteMetricMonitorsForNode(\"ACTOR01:d3\").all()]",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"$(liveupdate:selHost):d3\", \"Machine\")",
+   "propertyPath": "object.seriesAverage(\"CPU Time\", 1)",
+   "tier": "experimental",
+   "presets": [
+    "monr_machine_cpu_time"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"ACTOR01:d3\", \"Machine\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"CPU Time\", 1)",
+   "result": "confirmed-value",
+   "value": "13.732996582984924"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"$(liveupdate:selHost):d3\", \"Machine\")",
+   "propertyPath": "object.seriesAverage(\"GPU Time\", 1)",
+   "tier": "experimental",
+   "presets": [
+    "monr_machine_gpu_time"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"ACTOR01:d3\", \"Machine\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"GPU Time\", 1)",
+   "result": "confirmed-value",
+   "value": "13.350950241088867"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"$(liveupdate:selHost):d3\", \"GPUProfiler\")",
+   "propertyPath": "object.seriesAverage(\"Total\", 1)",
+   "tier": "experimental",
+   "presets": [
+    "monr_gpu_total"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"ACTOR01:d3\", \"GPUProfiler\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Total\", 1)",
+   "result": "confirmed-value",
+   "value": "2.23232"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"$(liveupdate:selHost):d3\", \"CPU\")",
+   "propertyPath": "object.seriesAverage(\"Total\", 1)",
+   "tier": "experimental",
+   "presets": [
+    "monr_cpu_total"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"ACTOR01:d3\", \"CPU\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Total\", 1)",
+   "result": "confirmed-value",
+   "value": "2.2289000000910164"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"$(liveupdate:selHost):d3\", \"GPUMemory\")",
+   "propertyPath": "object.seriesAverage(\"Usage(MB)\", 1)",
+   "tier": "experimental",
+   "presets": [
+    "monr_gpu_mem"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"ACTOR01:d3\", \"GPUMemory\")",
+   "resolvedPropertyPath": "object.seriesAverage(\"Usage(MB)\", 1)",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.player.tRender",
+   "tier": "normal",
+   "presets": [
+    "tr_playhead_beats"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.player.tRender",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.player.playMode.__str__()",
+   "tier": "normal",
+   "presets": [
+    "tr_playmode"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.player.playMode.__str__()",
+   "result": "confirmed-value",
+   "value": "Stop"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.player.playMode.state",
+   "tier": "normal",
+   "presets": [
+    "tr_playmode_state"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.player.playMode.state",
+   "result": "confirmed-value",
+   "value": "3"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.player.playing",
+   "tier": "normal",
+   "presets": [
+    "tr_playing"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.player.playing",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.player.stopped",
+   "tier": "normal",
+   "presets": [
+    "tr_stopped"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.player.stopped",
+   "result": "confirmed-value",
+   "value": "true"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.player.holding",
+   "tier": "normal",
+   "presets": [
+    "tr_holding"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.player.holding",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.player.sectionPlayMode",
+   "tier": "normal",
+   "presets": [
+    "tr_section_play_mode"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.player.sectionPlayMode",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.player.loopSectionMode",
+   "tier": "normal",
+   "presets": [
+    "tr_loop_section_mode"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.player.loopSectionMode",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.player.hasTrack",
+   "tier": "normal",
+   "presets": [
+    "tr_has_track"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.player.hasTrack",
+   "result": "confirmed-value",
+   "value": "true"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.player.speed",
+   "tier": "normal",
+   "presets": [
+    "tr_speed"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.player.speed",
+   "result": "confirmed-value",
+   "value": "1"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.brightness",
+   "tier": "normal",
+   "presets": [
+    "tr_brightness",
+    "tr_brightness_up",
+    "tr_brightness_down",
+    "tr_brightness_full",
+    "tr_brightness_zero"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.brightness",
+   "result": "confirmed-value",
+   "value": "1"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.volume",
+   "tier": "normal",
+   "presets": [
+    "tr_volume",
+    "tr_volume_up",
+    "tr_volume_down",
+    "tr_volume_full",
+    "tr_volume_mute"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.volume",
+   "result": "confirmed-value",
+   "value": "1"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.engaged",
+   "tier": "normal",
+   "presets": [
+    "tr_engaged",
+    "tr_engage",
+    "tr_disengage",
+    "tr_engaged_toggle"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.engaged",
+   "result": "confirmed-value",
+   "value": "true"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.track.description",
+   "tier": "normal",
+   "presets": [
+    "tr_trackname"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.track.description",
+   "result": "confirmed-value",
+   "value": "Show Track"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.track.nSections()",
+   "tier": "normal",
+   "presets": [
+    "tr_section_count"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.track.nSections()",
+   "result": "confirmed-value",
+   "value": "34"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.statusString",
+   "tier": "normal",
+   "presets": [
+    "tr_transport_status"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.statusString",
+   "result": "confirmed-value",
+   "value": ""
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.tcStatusString",
+   "tier": "normal",
+   "presets": [
+    "tr_tc_status"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.tcStatusString",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.preRollMatch",
+   "tier": "normal",
+   "presets": [
+    "tr_preroll"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.preRollMatch",
+   "result": "confirmed-value",
+   "value": "-1"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "(object.timecode.current.__str__() if object.timecode is not None else \"\")",
+   "tier": "normal",
+   "presets": [
+    "tr_tc_incoming"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "(object.timecode.current.__str__() if object.timecode is not None else \"\")",
+   "result": "confirmed-value",
+   "value": ""
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "(object.timecode.statusString if object.timecode is not None else \"\")",
+   "tier": "normal",
+   "presets": [
+    "tr_tc_source_status"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "(object.timecode.statusString if object.timecode is not None else \"\")",
+   "result": "confirmed-value",
+   "value": ""
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.track.beatToTime(object.player.tRender)",
+   "tier": "experimental",
+   "presets": [
+    "tr_trackposition"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.track.beatToTime(object.player.tRender)",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.beatToTimecode(object.player.tRender).__str__()",
+   "tier": "experimental",
+   "presets": [
+    "tr_timecodeposition"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.beatToTimecode(object.player.tRender).__str__()",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.player.isFreeRunning",
+   "tier": "experimental",
+   "presets": [
+    "tr_free_running"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.player.isFreeRunning",
+   "result": "confirmed-value",
+   "value": "true"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.track.bpmAt(object.player.tRender)",
+   "tier": "experimental",
+   "presets": [
+    "tr_bpm"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.track.bpmAt(object.player.tRender)",
+   "result": "confirmed-value",
+   "value": "60"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.track.beatToSection(object.player.tRender)",
+   "tier": "experimental",
+   "presets": [
+    "tr_section_index"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.track.beatToSection(object.player.tRender)",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.track.noteAtBeat(object.track.sectionToBeat(object.track.beatToSection(object.player.tRender)))",
+   "tier": "experimental",
+   "presets": [
+    "tr_current_section_name"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.track.noteAtBeat(object.track.sectionToBeat(object.track.beatToSection(object.player.tRender)))",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.track.noteAtBeat(object.track.sectionToBeat(object.track.beatToSection(object.player.tRender) + 1))",
+   "tier": "experimental",
+   "presets": [
+    "tr_next_section_name"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.track.noteAtBeat(object.track.sectionToBeat(object.track.beatToSection(object.player.tRender) + 1))",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.track.tLastBeatInSection(object.player.tRender) - object.player.tRender",
+   "tier": "experimental",
+   "presets": [
+    "tr_section_remaining"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.track.tLastBeatInSection(object.player.tRender) - object.player.tRender",
+   "result": "confirmed-value",
+   "value": "5"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.player.tRender - object.track.sectionToBeat(object.track.beatToSection(object.player.tRender))",
+   "tier": "experimental",
+   "presets": [
+    "tr_section_elapsed"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.player.tRender - object.track.sectionToBeat(object.track.beatToSection(object.player.tRender))",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "(object.timecode.description if object.timecode is not None else \"\")",
+   "tier": "experimental",
+   "presets": [
+    "tr_tc_source_name"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "(object.timecode.description if object.timecode is not None else \"\")",
+   "result": "confirmed-value",
+   "value": ""
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "[t.description for t in object.setList.tracks]",
+   "tier": "experimental",
+   "presets": [
+    "tr_setlist_tracks"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "[t.description for t in object.setList.tracks]",
+   "result": "confirmed-value",
+   "value": "[\"Show Track\"]"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "len(object.player.activeLayers)",
+   "tier": "experimental",
+   "presets": [
+    "tr_active_layer_count"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "len(object.player.activeLayers)",
+   "result": "confirmed-value",
+   "value": "7"
+  },
+  {
+   "objectPath": "subsystem:GuiSystem",
+   "propertyPath": "object.player.tRender",
+   "tier": "experimental",
+   "presets": [
+    "tr_gui_playhead_beats"
+   ],
+   "resolvedObjectPath": "subsystem:GuiSystem",
+   "resolvedPropertyPath": "object.player.tRender",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "transportManager:\"$(liveupdate:selTransport)\"",
+   "propertyPath": "object.player.tRender",
+   "tier": "experimental",
+   "presets": [
+    "tr_named_playhead_beats"
+   ],
+   "resolvedObjectPath": "transportManager:\"$(liveupdate:selTransport)\"",
+   "resolvedPropertyPath": "object.player.tRender",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.description",
+   "tier": "normal",
+   "presets": [
+    "trk_track_name"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.description",
+   "result": "confirmed-value",
+   "value": "Show Track"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.lengthInBeats",
+   "tier": "normal",
+   "presets": [
+    "trk_length_beats"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.lengthInBeats",
+   "result": "confirmed-value",
+   "value": "4500"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.lengthInSec",
+   "tier": "normal",
+   "presets": [
+    "trk_length_sec"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.lengthInSec",
+   "result": "confirmed-value",
+   "value": "4500"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.bpm",
+   "tier": "normal",
+   "presets": [
+    "trk_bpm"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.bpm",
+   "result": "confirmed-value",
+   "value": "60"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.nSections()",
+   "tier": "normal",
+   "presets": [
+    "trk_nsections"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.nSections()",
+   "result": "confirmed-value",
+   "value": "34"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.nLayers()",
+   "tier": "normal",
+   "presets": [
+    "trk_nlayers"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.nLayers()",
+   "result": "confirmed-value",
+   "value": "58"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.sectionInfo($(liveupdate:selSection)).tStart",
+   "tier": "normal",
+   "presets": [
+    "trk_section_start"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.sectionInfo(0).tStart",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.sectionInfo($(liveupdate:selSection)).tEnd",
+   "tier": "normal",
+   "presets": [
+    "trk_section_end"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.sectionInfo(0).tEnd",
+   "result": "confirmed-value",
+   "value": "5"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.noteAtBeat($(liveupdate:selBeat))",
+   "tier": "normal",
+   "presets": [
+    "trk_note_at_beat"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.noteAtBeat(0)",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.beatToTime($(liveupdate:selBeat))",
+   "tier": "normal",
+   "presets": [
+    "trk_beat_to_sec"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.beatToTime(0)",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.tc_adjust",
+   "tier": "normal",
+   "presets": [
+    "trk_tc_adjust",
+    "trk_tc_adjust_plus",
+    "trk_tc_adjust_minus",
+    "trk_tc_adjust_reset"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.tc_adjust",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.name",
+   "tier": "normal",
+   "presets": [
+    "trk_layer_name"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.name",
+   "result": "confirmed-value",
+   "value": "Video 26"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.enabled",
+   "tier": "normal",
+   "presets": [
+    "trk_layer_enabled",
+    "lay_enable_on",
+    "lay_enable_off",
+    "lay_enable_toggle"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.enabled",
+   "result": "confirmed-value",
+   "value": "true"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.enabledIncludingParents",
+   "tier": "normal",
+   "presets": [
+    "trk_layer_live"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.enabledIncludingParents",
+   "result": "confirmed-value",
+   "value": "true"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.tStart",
+   "tier": "normal",
+   "presets": [
+    "trk_layer_tstart",
+    "lay_tstart_plus",
+    "lay_tstart_minus"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.tStart",
+   "result": "confirmed-value",
+   "value": "944.6112995866902"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.tEnd",
+   "tier": "normal",
+   "presets": [
+    "trk_layer_tend"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.tEnd",
+   "result": "confirmed-value",
+   "value": "948.6153036824303"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.tLength",
+   "tier": "normal",
+   "presets": [
+    "trk_layer_tlength",
+    "lay_tlength_plus",
+    "lay_tlength_minus"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.tLength",
+   "result": "confirmed-value",
+   "value": "4.004004095740129"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.anchored",
+   "tier": "normal",
+   "presets": [
+    "trk_layer_anchored"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.anchored",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.findSequence(\"pos.x\").sequence.key(0).v",
+   "tier": "normal",
+   "presets": [
+    "trk_key_posx",
+    "lay_posx_plus",
+    "lay_posx_minus",
+    "lay_posx_zero"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.findSequence(\"pos.x\").sequence.key(0).v",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.findSequence(\"pos.y\").sequence.key(0).v",
+   "tier": "normal",
+   "presets": [
+    "trk_key_posy",
+    "lay_posy_plus",
+    "lay_posy_minus",
+    "lay_posy_zero"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.findSequence(\"pos.y\").sequence.key(0).v",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.findSequence(\"scale\").sequence.key(0).v",
+   "tier": "normal",
+   "presets": [
+    "trk_key_scale",
+    "lay_scale_plus",
+    "lay_scale_minus",
+    "lay_scale_one"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.findSequence(\"scale\").sequence.key(0).v",
+   "result": "confirmed-path-error",
+   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"'NoneType' object has no attribute 'sequence'\"}"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.findSequence(\"brightness\").sequence.key(0).v",
+   "tier": "normal",
+   "presets": [
+    "trk_key_brightness",
+    "lay_bright_plus",
+    "lay_bright_minus",
+    "lay_bright_full",
+    "lay_bright_zero"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.findSequence(\"brightness\").sequence.key(0).v",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.findSequence(\"brightness\").disableSequencing",
+   "tier": "normal",
+   "presets": [
+    "trk_brightness_const",
+    "lay_bright_const_on",
+    "lay_bright_const_off"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.findSequence(\"brightness\").disableSequencing",
+   "result": "confirmed-value",
+   "value": "true"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".layers[$(liveupdate:selLayerIndex)]",
+   "propertyPath": "object.name",
+   "tier": "normal",
+   "presets": [
+    "trk_layer_name_idx"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".layers[2]",
+   "resolvedPropertyPath": "object.name",
+   "result": "confirmed-value",
+   "value": "Video 26"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".layers[$(liveupdate:selLayerIndex)]",
+   "propertyPath": "object.findSequence(\"pos.x\").sequence.key(0).v",
+   "tier": "normal",
+   "presets": [
+    "trk_key_posx_idx"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".layers[2]",
+   "resolvedPropertyPath": "object.findSequence(\"pos.x\").sequence.key(0).v",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "[l.name for l in object.layers]",
+   "tier": "experimental",
+   "presets": [
+    "trk_layer_names"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "[l.name for l in object.layers]",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "[l for l in object.layers if l.name == \"$(liveupdate:selLayer)\"][0].tStart",
+   "tier": "experimental",
+   "presets": [
+    "trk_layer_tstart_bycomp"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "[l for l in object.layers if l.name == \"Video 26\"][0].tStart",
+   "result": "confirmed-value",
+   "value": "944.6112995866902"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "[{\"i\": i, \"start\": object.sectionInfo(i).tStart, \"end\": object.sectionInfo(i).tEnd, \"lengthBeats\": object.sectionLengthBeats(i), \"note\": object.noteAtBeat(object.sectionInfo(i).tStart), \"startSec\": object.beatToTime(object.sectionInfo(i).tStart)} for i in range(object.nSections())]",
+   "tier": "experimental",
+   "presets": [
+    "trk_section_table"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "[{\"i\": i, \"start\": object.sectionInfo(i).tStart, \"end\": object.sectionInfo(i).tEnd, \"lengthBeats\": object.sectionLengthBeats(i), \"note\": object.noteAtBeat(object.sectionInfo(i).tStart), \"startSec\": object.beatToTime(object.sectionInfo(i).tStart)} for i in range(object.nSections())]",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.noteAtBeat(object.sectionInfo($(liveupdate:selSection)).tStart)",
+   "tier": "experimental",
+   "presets": [
+    "trk_section_note"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.noteAtBeat(object.sectionInfo(0).tStart)",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.sectionLengthBeats($(liveupdate:selSection))",
+   "tier": "experimental",
+   "presets": [
+    "trk_section_length"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.sectionLengthBeats(0)",
+   "result": "confirmed-value",
+   "value": "5"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.beatToTime(object.sectionInfo($(liveupdate:selSection)).tStart)",
+   "tier": "experimental",
+   "presets": [
+    "trk_section_start_sec"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.beatToTime(object.sectionInfo(0).tStart)",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.beatToSection($(liveupdate:selBeat))",
+   "tier": "experimental",
+   "presets": [
+    "trk_section_of_beat"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.beatToSection(0)",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "(object.tagAtBeat($(liveupdate:selBeat), 1).text if object.tagAtBeat($(liveupdate:selBeat), 1) else \"\")",
+   "tier": "experimental",
+   "presets": [
+    "trk_cue_tag_at_beat"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "(object.tagAtBeat(0, 1).text if object.tagAtBeat(0, 1) else \"\")",
+   "result": "confirmed-value",
+   "value": "1"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "[{\"type\": t.type, \"text\": t.text} for t in object.tagsAtBeat($(liveupdate:selBeat))]",
+   "tier": "experimental",
+   "presets": [
+    "trk_tags_at_beat"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "[{\"type\": t.type, \"text\": t.text} for t in object.tagsAtBeat(0)]",
+   "result": "confirmed-value",
+   "value": "[{\"text\":\"1\",\"type\":1}]"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "[{\"beat\": object.cues.getT(i), \"note\": object.cues.getV(i).note, \"section\": object.cues.getV(i).section, \"tags\": [{\"type\": t.type, \"text\": t.text} for t in object.cues.getV(i).getTags()]} for i in range(object.cues.n())]",
+   "tier": "experimental",
+   "presets": [
+    "trk_cue_table"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "[{\"beat\": object.cues.getT(i), \"note\": object.cues.getV(i).note, \"section\": object.cues.getV(i).section, \"tags\": [{\"type\": t.type, \"text\": t.text} for t in object.cues.getV(i).getTags()]} for i in range(object.cues.n())]",
+   "result": "confirmed-no-value"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "{\"name\": object.name, \"start\": object.tStart, \"end\": object.tEnd, \"length\": object.tLength, \"enabled\": object.enabledIncludingParents}",
+   "tier": "experimental",
+   "presets": [
+    "trk_layer_extents"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "{\"name\": object.name, \"start\": object.tStart, \"end\": object.tEnd, \"length\": object.tLength, \"enabled\": object.enabledIncludingParents}",
+   "result": "confirmed-value",
+   "value": "{\"start\":944.6112995866902,\"length\":4.004004095740129,\"end\":948.6153036824303,\"name\":\"Video 26\",\"enabled\":true}"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.crashed",
+   "tier": "experimental",
+   "presets": [
+    "trk_layer_crashed"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.crashed",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.isDormant",
+   "tier": "experimental",
+   "presets": [
+    "trk_layer_dormant"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.isDormant",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "[{\"name\": f.name, \"user\": f.userName, \"type\": f.typeName, \"sequenced\": not f.disableSequencing, \"patched\": f.isPatched} for f in object.fields]",
+   "tier": "experimental",
+   "presets": [
+    "trk_layer_fields"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "[{\"name\": f.name, \"user\": f.userName, \"type\": f.typeName, \"sequenced\": not f.disableSequencing, \"patched\": f.isPatched} for f in object.fields]",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.keyTimes()",
+   "tier": "experimental",
+   "presets": [
+    "trk_layer_keytimes"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.keyTimes()",
+   "result": "confirmed-value",
+   "value": "[]"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "[{\"t\": object.findSequence(\"pos.x\").sequence.key(i).localT, \"v\": object.findSequence(\"pos.x\").sequence.key(i).v} for i in range(object.findSequence(\"pos.x\").sequence.nKeys)]",
+   "tier": "experimental",
+   "presets": [
+    "trk_key_posx_all"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "[{\"t\": object.findSequence(\"pos.x\").sequence.key(i).localT, \"v\": object.findSequence(\"pos.x\").sequence.key(i).v} for i in range(object.findSequence(\"pos.x\").sequence.nKeys)]",
+   "result": "confirmed-path-error",
+   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"range() integer end argument expected, got instancemethod.\"}"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.findSequence(\"brightness\").isPatched",
+   "tier": "experimental",
+   "presets": [
+    "trk_brightness_patched"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.findSequence(\"brightness\").isPatched",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.findSequence(\"brightness\").sequence.evalString($(liveupdate:selBeat))",
+   "tier": "experimental",
+   "presets": [
+    "trk_brightness_at_beat"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.findSequence(\"brightness\").sequence.evalString(0)",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.findSequence(\"text\").sequence.key(0).s",
+   "tier": "experimental",
+   "presets": [
+    "trk_key_text"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.findSequence(\"text\").sequence.key(0).s",
+   "result": "confirmed-path-error",
+   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"'NoneType' object has no attribute 'sequence'\"}"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.findSequence(\"video\").sequence.key(0).r",
+   "tier": "experimental",
+   "presets": [
+    "trk_key_video"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "resolvedPropertyPath": "object.findSequence(\"video\").sequence.key(0).r",
+   "result": "confirmed-value",
+   "value": "{\"uid\":\"0x0123456789abcde1\",\"path\":\"objects/videoclip/test patterns/grey 10steps 1024x1024.png.apx\",\"type\":\"<redacted>\"}"
+  },
+  {
+   "objectPath": "screen2:\"$(liveupdate:selScreen)\"",
+   "propertyPath": "object.description",
+   "tier": "normal",
+   "presets": [
+    "stg_screen_name"
+   ],
+   "resolvedObjectPath": "screen2:\"surface 1\"",
+   "resolvedPropertyPath": "object.description",
+   "result": "confirmed-value",
+   "value": "surface 1"
+  },
+  {
+   "objectPath": "screen2:\"$(liveupdate:selScreen)\"",
+   "propertyPath": "object.isInError",
+   "tier": "normal",
+   "presets": [
+    "stg_screen_in_error"
+   ],
+   "resolvedObjectPath": "screen2:\"surface 1\"",
+   "resolvedPropertyPath": "object.isInError",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "screen2:\"$(liveupdate:selScreen)\"",
+   "propertyPath": "object.isInActiveStage()",
+   "tier": "normal",
+   "presets": [
+    "stg_screen_active_stage"
+   ],
+   "resolvedObjectPath": "screen2:\"surface 1\"",
+   "resolvedPropertyPath": "object.isInActiveStage()",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "screen2:\"$(liveupdate:selScreen)\"",
+   "propertyPath": "object.offset",
+   "tier": "normal",
+   "presets": [
+    "stg_screen_offset",
+    "stg_screen_offset_reset"
+   ],
+   "resolvedObjectPath": "screen2:\"surface 1\"",
+   "resolvedPropertyPath": "object.offset",
+   "result": "confirmed-value",
+   "value": "{\"x\":0,\"y\":3,\"z\":0}"
+  },
+  {
+   "objectPath": "screen2:\"$(liveupdate:selScreen)\"",
+   "propertyPath": "object.offset.x",
+   "tier": "normal",
+   "presets": [
+    "stg_screen_offset_x",
+    "stg_screen_offset_x_up",
+    "stg_screen_offset_x_down"
+   ],
+   "resolvedObjectPath": "screen2:\"surface 1\"",
+   "resolvedPropertyPath": "object.offset.x",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "screen2:\"$(liveupdate:selScreen)\"",
+   "propertyPath": "object.rotation",
+   "tier": "normal",
+   "presets": [
+    "stg_screen_rotation"
+   ],
+   "resolvedObjectPath": "screen2:\"surface 1\"",
+   "resolvedPropertyPath": "object.rotation",
+   "result": "confirmed-value",
+   "value": "{\"x\":0,\"y\":0,\"z\":0}"
+  },
+  {
+   "objectPath": "screen2:\"$(liveupdate:selScreen)\"",
+   "propertyPath": "object.master_fade",
+   "tier": "normal",
+   "presets": [
+    "stg_screen_fade",
+    "stg_screen_fade_up",
+    "stg_screen_fade_down",
+    "stg_screen_fade_full",
+    "stg_screen_fade_zero"
+   ],
+   "resolvedObjectPath": "screen2:\"surface 1\"",
+   "resolvedPropertyPath": "object.master_fade",
+   "result": "confirmed-value",
+   "value": "1"
+  },
+  {
+   "objectPath": "screen2:\"$(liveupdate:selScreen)\"",
+   "propertyPath": "object.holdOutput",
+   "tier": "normal",
+   "presets": [
+    "stg_screen_hold",
+    "stg_screen_hold_on",
+    "stg_screen_hold_off",
+    "stg_screen_hold_toggle"
+   ],
+   "resolvedObjectPath": "screen2:\"surface 1\"",
+   "resolvedPropertyPath": "object.holdOutput",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "screen2:\"$(liveupdate:selScreen)\"",
+   "propertyPath": "object.renderLayer",
+   "tier": "normal",
+   "presets": [
+    "stg_screen_render_layer",
+    "stg_screen_on_stage",
+    "stg_screen_off_stage"
+   ],
+   "resolvedObjectPath": "screen2:\"surface 1\"",
+   "resolvedPropertyPath": "object.renderLayer",
+   "result": "confirmed-value",
+   "value": "1"
+  },
+  {
+   "objectPath": "screen2:\"$(liveupdate:selScreen)\"",
+   "propertyPath": "object.isReceivingFromTrackingSource",
+   "tier": "normal",
+   "presets": [
+    "stg_screen_tracking_live"
+   ],
+   "resolvedObjectPath": "screen2:\"surface 1\"",
+   "resolvedPropertyPath": "object.isReceivingFromTrackingSource",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "projector:\"$(liveupdate:selProjector)\"",
+   "propertyPath": "object.description",
+   "tier": "normal",
+   "presets": [
+    "stg_proj_name"
+   ],
+   "resolvedObjectPath": "projector:\"projector 1\"",
+   "resolvedPropertyPath": "object.description",
+   "result": "confirmed-value",
+   "value": "projector 1"
+  },
+  {
+   "objectPath": "projector:\"$(liveupdate:selProjector)\"",
+   "propertyPath": "object.isInError",
+   "tier": "normal",
+   "presets": [
+    "stg_proj_in_error"
+   ],
+   "resolvedObjectPath": "projector:\"projector 1\"",
+   "resolvedPropertyPath": "object.isInError",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "projector:\"$(liveupdate:selProjector)\"",
+   "propertyPath": "object.hasFeedAssigned()",
+   "tier": "normal",
+   "presets": [
+    "stg_proj_has_feed"
+   ],
+   "resolvedObjectPath": "projector:\"projector 1\"",
+   "resolvedPropertyPath": "object.hasFeedAssigned()",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "projector:\"$(liveupdate:selProjector)\"",
+   "propertyPath": "object.master_fade",
+   "tier": "normal",
+   "presets": [
+    "stg_proj_fade",
+    "stg_proj_fade_up",
+    "stg_proj_fade_down",
+    "stg_proj_fade_full",
+    "stg_proj_fade_zero"
+   ],
+   "resolvedObjectPath": "projector:\"projector 1\"",
+   "resolvedPropertyPath": "object.master_fade",
+   "result": "confirmed-value",
+   "value": "1"
+  },
+  {
+   "objectPath": "projector:\"$(liveupdate:selProjector)\"",
+   "propertyPath": "object.holdOutput",
+   "tier": "normal",
+   "presets": [
+    "stg_proj_hold",
+    "stg_proj_hold_on",
+    "stg_proj_hold_off",
+    "stg_proj_hold_toggle"
+   ],
+   "resolvedObjectPath": "projector:\"projector 1\"",
+   "resolvedPropertyPath": "object.holdOutput",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "getByUID($(liveupdate:selScreenUid))",
+   "propertyPath": "object.description",
+   "tier": "normal",
+   "presets": [
+    "stg_uid_name"
+   ],
+   "resolvedObjectPath": "getByUID(0x0123456789abcdef)",
+   "resolvedPropertyPath": "object.description",
+   "result": "confirmed-value",
+   "value": "surface 1"
+  },
+  {
+   "objectPath": "getByUID($(liveupdate:selScreenUid))",
+   "propertyPath": "object.master_fade",
+   "tier": "normal",
+   "presets": [
+    "stg_uid_fade",
+    "stg_uid_fade_up",
+    "stg_uid_fade_down",
+    "stg_uid_fade_full",
+    "stg_uid_fade_zero"
+   ],
+   "resolvedObjectPath": "getByUID(0x0123456789abcdef)",
+   "resolvedPropertyPath": "object.master_fade",
+   "result": "confirmed-value",
+   "value": "1"
+  },
+  {
+   "objectPath": "getByUID($(liveupdate:selScreenUid))",
+   "propertyPath": "object.holdOutput",
+   "tier": "normal",
+   "presets": [
+    "stg_uid_hold",
+    "stg_uid_hold_on",
+    "stg_uid_hold_off",
+    "stg_uid_hold_toggle"
+   ],
+   "resolvedObjectPath": "getByUID(0x0123456789abcdef)",
+   "resolvedPropertyPath": "object.holdOutput",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "screen2:\"$(liveupdate:selScreen)\"",
+   "propertyPath": "[p.description for p in object.projectors]",
+   "tier": "experimental",
+   "presets": [
+    "stg_screen_projectors"
+   ],
+   "resolvedObjectPath": "screen2:\"surface 1\"",
+   "resolvedPropertyPath": "[p.description for p in object.projectors]",
+   "result": "confirmed-value",
+   "value": "[\"projector 1\"]"
+  },
+  {
+   "objectPath": "projector:\"$(liveupdate:selProjector)\"",
+   "propertyPath": "[s.description for s in object.screens]",
+   "tier": "experimental",
+   "presets": [
+    "stg_proj_screens"
+   ],
+   "resolvedObjectPath": "projector:\"projector 1\"",
+   "resolvedPropertyPath": "[s.description for s in object.screens]",
+   "result": "confirmed-value",
+   "value": "[\"surface 1\"]"
+  },
+  {
+   "objectPath": "ledscreen:\"$(liveupdate:selLedScreen)\"",
+   "propertyPath": "object.description",
+   "tier": "experimental",
+   "presets": [
+    "stg_led_name"
+   ],
+   "resolvedObjectPath": "ledscreen:\"LED Screen 1\"",
+   "resolvedPropertyPath": "object.description",
+   "result": "confirmed-value",
+   "value": "LED Screen 1"
+  },
+  {
+   "objectPath": "ledscreen:\"$(liveupdate:selLedScreen)\"",
+   "propertyPath": "object.master_fade",
+   "tier": "experimental",
+   "presets": [
+    "stg_led_fade"
+   ],
+   "resolvedObjectPath": "ledscreen:\"LED Screen 1\"",
+   "resolvedPropertyPath": "object.master_fade",
+   "result": "confirmed-value",
+   "value": "1"
+  },
+  {
+   "objectPath": "ledscreen:\"$(liveupdate:selLedScreen)\"",
+   "propertyPath": "object.holdOutput",
+   "tier": "experimental",
+   "presets": [
+    "stg_led_hold"
+   ],
+   "resolvedObjectPath": "ledscreen:\"LED Screen 1\"",
+   "resolvedPropertyPath": "object.holdOutput",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "ledscreen:\"$(liveupdate:selLedScreen)\"",
+   "propertyPath": "object.offset",
+   "tier": "experimental",
+   "presets": [
+    "stg_led_offset"
+   ],
+   "resolvedObjectPath": "ledscreen:\"LED Screen 1\"",
+   "resolvedPropertyPath": "object.offset",
+   "result": "confirmed-value",
+   "value": "{\"x\":0,\"y\":3.619999885559082,\"z\":2.450000047683716}"
+  },
+  {
+   "objectPath": "dmxscreen:\"$(liveupdate:selDmxScreen)\"",
+   "propertyPath": "object.description",
+   "tier": "experimental",
+   "presets": [
+    "stg_dmx_name"
+   ],
+   "resolvedObjectPath": "dmxscreen:\"$(liveupdate:selDmxScreen)\"",
+   "resolvedPropertyPath": "object.description",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "dmxscreen:\"$(liveupdate:selDmxScreen)\"",
+   "propertyPath": "object.status__",
+   "tier": "experimental",
+   "presets": [
+    "stg_dmx_status"
+   ],
+   "resolvedObjectPath": "dmxscreen:\"$(liveupdate:selDmxScreen)\"",
+   "resolvedPropertyPath": "object.status__",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "dmxscreen:\"$(liveupdate:selDmxScreen)\"",
+   "propertyPath": "object.universe",
+   "tier": "experimental",
+   "presets": [
+    "stg_dmx_universe"
+   ],
+   "resolvedObjectPath": "dmxscreen:\"$(liveupdate:selDmxScreen)\"",
+   "resolvedPropertyPath": "object.universe",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "dmxscreen:\"$(liveupdate:selDmxScreen)\"",
+   "propertyPath": "object.fixtureType.description",
+   "tier": "experimental",
+   "presets": [
+    "stg_dmx_fixture"
+   ],
+   "resolvedObjectPath": "dmxscreen:\"$(liveupdate:selDmxScreen)\"",
+   "resolvedPropertyPath": "object.fixtureType.description",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "dmxscreen:\"$(liveupdate:selDmxScreen)\"",
+   "propertyPath": "object.isTableMalformed()",
+   "tier": "experimental",
+   "presets": [
+    "stg_dmx_table_bad"
+   ],
+   "resolvedObjectPath": "dmxscreen:\"$(liveupdate:selDmxScreen)\"",
+   "resolvedPropertyPath": "object.isTableMalformed()",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "getByUID($(liveupdate:selStageUid))",
+   "propertyPath": "object.nDisplays()",
+   "tier": "experimental",
+   "presets": [
+    "stg_stage_displays"
+   ],
+   "resolvedObjectPath": "getByUID(0x0123456789abcde0)",
+   "resolvedPropertyPath": "object.nDisplays()",
+   "result": "confirmed-value",
+   "value": "24"
+  },
+  {
+   "objectPath": "getByUID($(liveupdate:selStageUid))",
+   "propertyPath": "object.autoSoftEdge",
+   "tier": "experimental",
+   "presets": [
+    "stg_stage_dyn_blend"
+   ],
+   "resolvedObjectPath": "getByUID(0x0123456789abcde0)",
+   "resolvedPropertyPath": "object.autoSoftEdge",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "getByUID($(liveupdate:selStageUid))",
+   "propertyPath": "object.venue.description",
+   "tier": "experimental",
+   "presets": [
+    "stg_stage_venue"
+   ],
+   "resolvedObjectPath": "getByUID(0x0123456789abcde0)",
+   "resolvedPropertyPath": "object.venue.description",
+   "result": "confirmed-path-error",
+   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"'NoneType' object has no attribute 'description'\"}"
+  },
+  {
+   "objectPath": "getByUID($(liveupdate:selEvUid))",
+   "propertyPath": "object.container.variables[$(liveupdate:selEvIndex)].defaultFloat",
+   "tier": "normal",
+   "presets": [
+    "ev_uid_float",
+    "ev_uid_float_up",
+    "ev_uid_float_down"
+   ],
+   "resolvedObjectPath": "getByUID($(liveupdate:selEvUid))",
+   "resolvedPropertyPath": "object.container.variables[0].defaultFloat",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "getByUID($(liveupdate:selEvUid))",
+   "propertyPath": "object.container.variables[$(liveupdate:selEvIndex)].defaultString",
+   "tier": "normal",
+   "presets": [
+    "ev_uid_string"
+   ],
+   "resolvedObjectPath": "getByUID($(liveupdate:selEvUid))",
+   "resolvedPropertyPath": "object.container.variables[0].defaultString",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "getByUID($(liveupdate:selEvUid))",
+   "propertyPath": "object.container.variables[$(liveupdate:selEvIndex)].name",
+   "tier": "normal",
+   "presets": [
+    "ev_uid_name"
+   ],
+   "resolvedObjectPath": "getByUID($(liveupdate:selEvUid))",
+   "resolvedPropertyPath": "object.container.variables[0].name",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "getByUID($(liveupdate:selEvUid))",
+   "propertyPath": "object.container.variables[$(liveupdate:selEvIndex)].type",
+   "tier": "normal",
+   "presets": [
+    "ev_uid_type"
+   ],
+   "resolvedObjectPath": "getByUID($(liveupdate:selEvUid))",
+   "resolvedPropertyPath": "object.container.variables[0].type",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "propertyPath": "object.description",
+   "tier": "experimental",
+   "presets": [
+    "ev_dev_description"
+   ],
+   "resolvedObjectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "resolvedPropertyPath": "object.description",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "propertyPath": "object.started",
+   "tier": "experimental",
+   "presets": [
+    "ev_dev_started"
+   ],
+   "resolvedObjectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "resolvedPropertyPath": "object.started",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "propertyPath": "len(object.container.variables)",
+   "tier": "experimental",
+   "presets": [
+    "ev_dev_count"
+   ],
+   "resolvedObjectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "resolvedPropertyPath": "len(object.container.variables)",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "propertyPath": "object.container.variables[$(liveupdate:selEvIndex)].defaultFloat",
+   "tier": "experimental",
+   "presets": [
+    "ev_dev_float"
+   ],
+   "resolvedObjectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "resolvedPropertyPath": "object.container.variables[0].defaultFloat",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "propertyPath": "object.container.variables[$(liveupdate:selEvIndex)].defaultString",
+   "tier": "experimental",
+   "presets": [
+    "ev_dev_string"
+   ],
+   "resolvedObjectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "resolvedPropertyPath": "object.container.variables[0].defaultString",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "propertyPath": "object.container.variables[$(liveupdate:selEvIndex)].name",
+   "tier": "experimental",
+   "presets": [
+    "ev_dev_name"
+   ],
+   "resolvedObjectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "resolvedPropertyPath": "object.container.variables[0].name",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "propertyPath": "object.container.variables[$(liveupdate:selEvIndex)].type",
+   "tier": "experimental",
+   "presets": [
+    "ev_dev_type"
+   ],
+   "resolvedObjectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "resolvedPropertyPath": "object.container.variables[0].type",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "propertyPath": "object.container.variables[$(liveupdate:selEvIndex)].errorText",
+   "tier": "experimental",
+   "presets": [
+    "ev_dev_error"
+   ],
+   "resolvedObjectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "resolvedPropertyPath": "object.container.variables[0].errorText",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "propertyPath": "object.container.variables[$(liveupdate:selEvIndex)].makeExpression()",
+   "tier": "experimental",
+   "presets": [
+    "ev_dev_expression"
+   ],
+   "resolvedObjectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "resolvedPropertyPath": "object.container.variables[0].makeExpression()",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "propertyPath": "[v.defaultFloat for v in object.container.variables if v.name == \"$(liveupdate:selEvName)\"][0]",
+   "tier": "experimental",
+   "presets": [
+    "ev_dev_float_by_name"
+   ],
+   "resolvedObjectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "resolvedPropertyPath": "[v.defaultFloat for v in object.container.variables if v.name == \"$(liveupdate:selEvName)\"][0]",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "propertyPath": "[(v.defaultFloat if v.type == 0 else v.defaultString) for v in object.container.variables if v.name == \"$(liveupdate:selEvName)\"][0]",
+   "tier": "experimental",
+   "presets": [
+    "ev_dev_value_by_name"
+   ],
+   "resolvedObjectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "resolvedPropertyPath": "[(v.defaultFloat if v.type == 0 else v.defaultString) for v in object.container.variables if v.name == \"$(liveupdate:selEvName)\"][0]",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "propertyPath": "{v.name: (v.defaultFloat if v.type == 0 else v.defaultString) for v in object.container.variables}",
+   "tier": "experimental",
+   "presets": [
+    "ev_dev_all_dict"
+   ],
+   "resolvedObjectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "resolvedPropertyPath": "{v.name: (v.defaultFloat if v.type == 0 else v.defaultString) for v in object.container.variables}",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "propertyPath": "[{\"name\": v.name, \"type\": v.type, \"float\": v.defaultFloat, \"string\": v.defaultString, \"error\": v.errorText} for v in object.container.variables]",
+   "tier": "experimental",
+   "presets": [
+    "ev_dev_all_list"
+   ],
+   "resolvedObjectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
+   "resolvedPropertyPath": "[{\"name\": v.name, \"type\": v.type, \"float\": v.defaultFloat, \"string\": v.defaultString, \"error\": v.errorText} for v in object.container.variables]",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "module:\"$(liveupdate:selEvLayer)\"",
+   "propertyPath": "[{\"name\": f.variable.name, \"type\": f.variable.type, \"value\": f.value} for f in object.fields]",
+   "tier": "experimental",
+   "presets": [
+    "ev_layer_vars"
+   ],
+   "resolvedObjectPath": "module:\"$(liveupdate:selEvLayer)\"",
+   "resolvedPropertyPath": "[{\"name\": f.variable.name, \"type\": f.variable.type, \"value\": f.value} for f in object.fields]",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "object.isEnabled",
+   "tier": "normal",
+   "presets": [
+    "rs_enabled"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "object.isEnabled",
+   "result": "confirmed-value",
+   "value": "true"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "object.getLicensingState()",
+   "tier": "normal",
+   "presets": [
+    "rs_licensing"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "object.getLicensingState()",
+   "result": "confirmed-value",
+   "value": "2"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "object.activeLatency()",
+   "tier": "normal",
+   "presets": [
+    "rs_active_latency"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "object.activeLatency()",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "object.getWorkloadLayers()",
+   "tier": "normal",
+   "presets": [
+    "rs_workload_layers"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "object.getWorkloadLayers()",
+   "result": "confirmed-value",
+   "value": "{}"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "object.getWorkloadInstances($(liveupdate:selWorkload))",
+   "tier": "normal",
+   "presets": [
+    "rs_workload_instances"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "object.getWorkloadInstances(1000000000000000001)",
+   "result": "confirmed-value",
+   "value": "[]"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "object.getWorkloadReceiveStatuses($(liveupdate:selWorkload))",
+   "tier": "normal",
+   "presets": [
+    "rs_workload_receive"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "object.getWorkloadReceiveStatuses(1000000000000000001)",
+   "result": "confirmed-value",
+   "value": "[]"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "object.getStreamReceiveStatuses($(liveupdate:selWorkload), \"$(liveupdate:selMachine)\")",
+   "tier": "normal",
+   "presets": [
+    "rs_stream_receive"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "object.getStreamReceiveStatuses(1000000000000000001, \"DIRECTOR01\")",
+   "result": "confirmed-value",
+   "value": "[]"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "object.getWorkloadInstance($(liveupdate:selWorkload), $(liveupdate:selInstance)).machineName",
+   "tier": "normal",
+   "presets": [
+    "rs_inst_machine"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "object.getWorkloadInstance(1000000000000000001, 0).machineName",
+   "result": "confirmed-path-error",
+   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"Workload: out of range error accessing workload instance\"}"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "object.getWorkloadInstance($(liveupdate:selWorkload), $(liveupdate:selInstance)).isProcessRunning",
+   "tier": "normal",
+   "presets": [
+    "rs_inst_running"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "object.getWorkloadInstance(1000000000000000001, 0).isProcessRunning",
+   "result": "confirmed-path-error",
+   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"Workload: out of range error accessing workload instance\"}"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "object.getWorkloadInstance($(liveupdate:selWorkload), $(liveupdate:selInstance)).isDroppingFrames",
+   "tier": "normal",
+   "presets": [
+    "rs_inst_dropping"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "object.getWorkloadInstance(1000000000000000001, 0).isDroppingFrames",
+   "result": "confirmed-path-error",
+   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"Workload: out of range error accessing workload instance\"}"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "object.getWorkloadInstance($(liveupdate:selWorkload), $(liveupdate:selInstance)).isDroppingInputFrames",
+   "tier": "normal",
+   "presets": [
+    "rs_inst_dropping_input"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "object.getWorkloadInstance(1000000000000000001, 0).isDroppingInputFrames",
+   "result": "confirmed-path-error",
+   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"Workload: out of range error accessing workload instance\"}"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "object.getWorkloadInstance($(liveupdate:selWorkload), $(liveupdate:selInstance)).isHighActiveLatencyDetected",
+   "tier": "normal",
+   "presets": [
+    "rs_inst_high_latency"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "object.getWorkloadInstance(1000000000000000001, 0).isHighActiveLatencyDetected",
+   "result": "confirmed-path-error",
+   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"Workload: out of range error accessing workload instance\"}"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "object.getWorkloadInstance($(liveupdate:selWorkload), $(liveupdate:selInstance)).unrecoverableError",
+   "tier": "normal",
+   "presets": [
+    "rs_inst_error"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "object.getWorkloadInstance(1000000000000000001, 0).unrecoverableError",
+   "result": "confirmed-path-error",
+   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"Workload: out of range error accessing workload instance\"}"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "object.getWorkloadInstance($(liveupdate:selWorkload), $(liveupdate:selInstance)).status",
+   "tier": "normal",
+   "presets": [
+    "rs_inst_status"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "object.getWorkloadInstance(1000000000000000001, 0).status",
+   "result": "confirmed-path-error",
+   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"Workload: out of range error accessing workload instance\"}"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "object.getWorkloadInstance($(liveupdate:selWorkload), $(liveupdate:selInstance)).health().message",
+   "tier": "normal",
+   "presets": [
+    "rs_inst_health_msg"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "object.getWorkloadInstance(1000000000000000001, 0).health().message",
+   "result": "confirmed-path-error",
+   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"Workload: out of range error accessing workload instance\"}"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "object.getWorkloadInstance($(liveupdate:selWorkload), $(liveupdate:selInstance)).health().status",
+   "tier": "normal",
+   "presets": [
+    "rs_inst_health_status"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "object.getWorkloadInstance(1000000000000000001, 0).health().status",
+   "result": "confirmed-path-error",
+   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"Workload: out of range error accessing workload instance\"}"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "\" | \".join([i.machineName + (\":ERR\" if i.unrecoverableError else (\":RUN\" if i.isProcessRunning else \":OFF\")) for i in object.getWorkloadInstances($(liveupdate:selWorkload))])",
+   "tier": "experimental",
+   "presets": [
+    "rs_nodes_summary"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "\" | \".join([i.machineName + (\":ERR\" if i.unrecoverableError else (\":RUN\" if i.isProcessRunning else \":OFF\")) for i in object.getWorkloadInstances(1000000000000000001)])",
+   "result": "confirmed-value",
+   "value": ""
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "\"%d/%d\" % (len([i for i in object.getWorkloadInstances($(liveupdate:selWorkload)) if i.isProcessRunning]), len(object.getWorkloadInstances($(liveupdate:selWorkload))))",
+   "tier": "experimental",
+   "presets": [
+    "rs_running_count"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "\"%d/%d\" % (len([i for i in object.getWorkloadInstances(1000000000000000001) if i.isProcessRunning]), len(object.getWorkloadInstances(1000000000000000001)))",
+   "result": "confirmed-value",
+   "value": "0/0"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "any([i.isDroppingFrames or i.isDroppingInputFrames for i in object.getWorkloadInstances($(liveupdate:selWorkload))])",
+   "tier": "experimental",
+   "presets": [
+    "rs_any_dropping"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "any([i.isDroppingFrames or i.isDroppingInputFrames for i in object.getWorkloadInstances(1000000000000000001)])",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "any([i.unrecoverableError or not i.isProcessRunning for i in object.getWorkloadInstances($(liveupdate:selWorkload))])",
+   "tier": "experimental",
+   "presets": [
+    "rs_any_down"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "any([i.unrecoverableError or not i.isProcessRunning for i in object.getWorkloadInstances(1000000000000000001)])",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "[{\"machine\": i.machineName, \"health\": i.health().message, \"status\": i.health().status} for i in object.getWorkloadInstances($(liveupdate:selWorkload))]",
+   "tier": "experimental",
+   "presets": [
+    "rs_health_list"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "[{\"machine\": i.machineName, \"health\": i.health().message, \"status\": i.health().status} for i in object.getWorkloadInstances(1000000000000000001)]",
+   "result": "confirmed-value",
+   "value": "[]"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "min([s.recentReceivedFPS() for s in object.getWorkloadReceiveStatuses($(liveupdate:selWorkload))] or [0.0])",
+   "tier": "experimental",
+   "presets": [
+    "rs_min_fps"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "min([s.recentReceivedFPS() for s in object.getWorkloadReceiveStatuses(1000000000000000001)] or [0.0])",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "max([s.activeLatency for s in object.getWorkloadReceiveStatuses($(liveupdate:selWorkload))] or [0.0])",
+   "tier": "experimental",
+   "presets": [
+    "rs_max_latency"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "max([s.activeLatency for s in object.getWorkloadReceiveStatuses(1000000000000000001)] or [0.0])",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "sum([s.totalDroppedPackets for s in object.getWorkloadReceiveStatuses($(liveupdate:selWorkload))])",
+   "tier": "experimental",
+   "presets": [
+    "rs_dropped_total"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "sum([s.totalDroppedPackets for s in object.getWorkloadReceiveStatuses(1000000000000000001)])",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "all([s.subscribeSuccessful for s in object.getWorkloadReceiveStatuses($(liveupdate:selWorkload)) if s.subscriptionWanted])",
+   "tier": "experimental",
+   "presets": [
+    "rs_all_subscribed"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "all([s.subscribeSuccessful for s in object.getWorkloadReceiveStatuses(1000000000000000001) if s.subscriptionWanted])",
+   "result": "confirmed-value",
+   "value": "true"
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "\"; \".join([s.streamIdentifier.streamName + \": \" + s.tLastErrorMessage for s in object.getWorkloadReceiveStatuses($(liveupdate:selWorkload)) if s.tLastErrorMessage])",
+   "tier": "experimental",
+   "presets": [
+    "rs_last_errors"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "\"; \".join([s.streamIdentifier.streamName + \": \" + s.tLastErrorMessage for s in object.getWorkloadReceiveStatuses(1000000000000000001) if s.tLastErrorMessage])",
+   "result": "confirmed-value",
+   "value": ""
+  },
+  {
+   "objectPath": "subsystem:RenderStreamSystem",
+   "propertyPath": "[s.generateStreamStatusMsg(False).message for s in object.getWorkloadReceiveStatuses($(liveupdate:selWorkload))]",
+   "tier": "experimental",
+   "presets": [
+    "rs_status_msgs"
+   ],
+   "resolvedObjectPath": "subsystem:RenderStreamSystem",
+   "resolvedPropertyPath": "[s.generateStreamStatusMsg(False).message for s in object.getWorkloadReceiveStatuses(1000000000000000001)]",
+   "result": "confirmed-value",
+   "value": "[]"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "str(object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.workloadId)",
+   "tier": "experimental",
+   "presets": [
+    "rs_layer_workload_id"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "str(object.getLeafLayers(RenderStreamModule)[0].moduleConfig.workloadId)",
+   "result": "confirmed-value",
+   "value": "1000000000000000001"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.cluster.workloadHealth",
+   "tier": "experimental",
+   "presets": [
+    "rs_layer_health"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.cluster.workloadHealth",
+   "result": "confirmed-value",
+   "value": "{\"status\":0,\"priority\":0,\"message\":\"Not started\",\"details\":\"\"}"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.cluster.anyInstanceIsRunning",
+   "tier": "experimental",
+   "presets": [
+    "rs_layer_any_running"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.cluster.anyInstanceIsRunning",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.cluster.nInstances",
+   "tier": "experimental",
+   "presets": [
+    "rs_layer_n_instances"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.cluster.nInstances",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.cluster.instanceHealth($(liveupdate:selInstance)).message",
+   "tier": "experimental",
+   "presets": [
+    "rs_layer_inst_health"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.cluster.instanceHealth(0).message",
+   "result": "confirmed-value",
+   "value": "Instance not found"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.cluster.instanceMachine($(liveupdate:selInstance)).statusString",
+   "tier": "experimental",
+   "presets": [
+    "rs_layer_inst_machine"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.cluster.instanceMachine(0).statusString",
+   "result": "confirmed-path-error",
+   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"'NoneType' object has no attribute 'statusString'\"}"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "\"%d/%d online\" % (len(object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.pool.getOnlineRenderMachines()), len(object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.pool.machines))",
+   "tier": "experimental",
+   "presets": [
+    "rs_layer_pool_online"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "\"%d/%d online\" % (len(object.getLeafLayers(RenderStreamModule)[0].moduleConfig.pool.getOnlineRenderMachines()), len(object.getLeafLayers(RenderStreamModule)[0].moduleConfig.pool.machines))",
+   "result": "confirmed-value",
+   "value": "0/3 online"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.pool.assetErrors(object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.asset)",
+   "tier": "experimental",
+   "presets": [
+    "rs_layer_asset_errors"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.pool.assetErrors(object.getLeafLayers(RenderStreamModule)[0].moduleConfig.asset)",
+   "result": "confirmed-value",
+   "value": "[\"No machines are online\",\"The following machines are offline: RENDER01, RENDER02, RENDER03\"]"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.asset.available",
+   "tier": "experimental",
+   "presets": [
+    "rs_layer_asset_available"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.asset.available",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "track:\"$(liveupdate:selTrack)\"",
+   "propertyPath": "object.getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)].moduleConfig.framerateFraction",
+   "tier": "experimental",
+   "presets": [
+    "rs_layer_framerate"
+   ],
+   "resolvedObjectPath": "track:\"Show Track\"",
+   "resolvedPropertyPath": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.framerateFraction",
+   "result": "confirmed-value",
+   "value": "1"
+  },
+  {
+   "objectPath": "Machine:\"$(liveupdate:selMachine)\"",
+   "propertyPath": "object.hasTakenOverFailedMachine()",
+   "tier": "normal",
+   "presets": [
+    "fo_taken_over"
+   ],
+   "resolvedObjectPath": "Machine:\"DIRECTOR01\"",
+   "resolvedPropertyPath": "object.hasTakenOverFailedMachine()",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "Machine:\"$(liveupdate:selMachine)\"",
+   "propertyPath": "object.failed",
+   "tier": "normal",
+   "presets": [
+    "fo_failed"
+   ],
+   "resolvedObjectPath": "Machine:\"DIRECTOR01\"",
+   "resolvedPropertyPath": "object.failed",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "Machine:\"$(liveupdate:selMachine)\"",
+   "propertyPath": "object.failoverDisabled",
+   "tier": "normal",
+   "presets": [
+    "fo_failover_disabled"
+   ],
+   "resolvedObjectPath": "Machine:\"DIRECTOR01\"",
+   "resolvedPropertyPath": "object.failoverDisabled",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "Machine:\"$(liveupdate:selMachine)\"",
+   "propertyPath": "object.networkConnected",
+   "tier": "normal",
+   "presets": [
+    "fo_network_connected"
+   ],
+   "resolvedObjectPath": "Machine:\"DIRECTOR01\"",
+   "resolvedPropertyPath": "object.networkConnected",
+   "result": "confirmed-value",
+   "value": "true"
+  },
+  {
+   "objectPath": "Machine:\"$(liveupdate:selMachine)\"",
+   "propertyPath": "object.networkStatus",
+   "tier": "normal",
+   "presets": [
+    "fo_network_status"
+   ],
+   "resolvedObjectPath": "Machine:\"DIRECTOR01\"",
+   "resolvedPropertyPath": "object.networkStatus",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "Machine:\"$(liveupdate:selMachine)\"",
+   "propertyPath": "object.active",
+   "tier": "normal",
+   "presets": [
+    "fo_active"
+   ],
+   "resolvedObjectPath": "Machine:\"DIRECTOR01\"",
+   "resolvedPropertyPath": "object.active",
+   "result": "confirmed-value",
+   "value": "true"
+  },
+  {
+   "objectPath": "Machine:\"$(liveupdate:selMachine)\"",
+   "propertyPath": "object.role",
+   "tier": "normal",
+   "presets": [
+    "fo_role"
+   ],
+   "resolvedObjectPath": "Machine:\"DIRECTOR01\"",
+   "resolvedPropertyPath": "object.role",
+   "result": "confirmed-value",
+   "value": "2"
+  },
+  {
+   "objectPath": "Machine:\"$(liveupdate:selMachine)\"",
+   "propertyPath": "object.runningAs.name",
+   "tier": "normal",
+   "presets": [
+    "fo_running_as"
+   ],
+   "resolvedObjectPath": "Machine:\"DIRECTOR01\"",
+   "resolvedPropertyPath": "object.runningAs.name",
+   "result": "confirmed-value",
+   "value": "DIRECTOR01"
+  },
+  {
+   "objectPath": "Machine:\"$(liveupdate:selMachine)\"",
+   "propertyPath": "object.targets",
+   "tier": "normal",
+   "presets": [
+    "fo_targets"
+   ],
+   "resolvedObjectPath": "Machine:\"DIRECTOR01\"",
+   "resolvedPropertyPath": "object.targets",
+   "result": "confirmed-value",
+   "value": "[]"
+  },
+  {
+   "objectPath": "Machine:\"$(liveupdate:selMachine)\"",
+   "propertyPath": "object.hostname",
+   "tier": "normal",
+   "presets": [
+    "fo_hostname"
+   ],
+   "resolvedObjectPath": "Machine:\"DIRECTOR01\"",
+   "resolvedPropertyPath": "object.hostname",
+   "result": "confirmed-value",
+   "value": "DIRECTOR01"
+  },
+  {
+   "objectPath": "Machine:\"$(liveupdate:selMachine)\"",
+   "propertyPath": "object.IP_address",
+   "tier": "normal",
+   "presets": [
+    "fo_ip"
+   ],
+   "resolvedObjectPath": "Machine:\"DIRECTOR01\"",
+   "resolvedPropertyPath": "object.IP_address",
+   "result": "confirmed-value",
+   "value": "192.0.2.41"
+  },
+  {
+   "objectPath": "Machine:\"$(liveupdate:selMachine)\"",
+   "propertyPath": "object.name",
+   "tier": "normal",
+   "presets": [
+    "fo_name"
+   ],
+   "resolvedObjectPath": "Machine:\"DIRECTOR01\"",
+   "resolvedPropertyPath": "object.name",
+   "result": "confirmed-value",
+   "value": "DIRECTOR01"
+  },
+  {
+   "objectPath": "Machine:\"$(liveupdate:selMachine)\"",
+   "propertyPath": "object.typeName",
+   "tier": "normal",
+   "presets": [
+    "fo_type"
+   ],
+   "resolvedObjectPath": "Machine:\"DIRECTOR01\"",
+   "resolvedPropertyPath": "object.typeName",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "objectPath": "Machine:\"$(liveupdate:selMachine)\"",
+   "propertyPath": "object.isGuiVisible",
+   "tier": "normal",
+   "presets": [
+    "fo_gui_visible"
+   ],
+   "resolvedObjectPath": "Machine:\"DIRECTOR01\"",
+   "resolvedPropertyPath": "object.isGuiVisible",
+   "result": "confirmed-value",
+   "value": "true"
+  },
+  {
+   "objectPath": "Machine:\"$(liveupdate:selMachine)\"",
+   "propertyPath": "object.status()",
+   "tier": "normal",
+   "presets": [
+    "fo_status"
+   ],
+   "resolvedObjectPath": "Machine:\"DIRECTOR01\"",
+   "resolvedPropertyPath": "object.status()",
+   "result": "confirmed-value",
+   "value": ""
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "object.d3NetManager.localMachine.name",
+   "tier": "experimental",
+   "presets": [
+    "fo_local_name"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "object.d3NetManager.localMachine.name",
+   "result": "confirmed-value",
+   "value": "DIRECTOR01"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager",
+   "propertyPath": "d3NetManager.localMachine.name",
+   "tier": "experimental",
+   "presets": [
+    "fo_local_name_alt"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager",
+   "resolvedPropertyPath": "d3NetManager.localMachine.name",
+   "result": "confirmed-value",
+   "value": "DIRECTOR01"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "object.d3NetManager.director.name",
+   "tier": "experimental",
+   "presets": [
+    "fo_director_name"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "object.d3NetManager.director.name",
+   "result": "confirmed-value",
+   "value": "DIRECTOR01"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "object.d3NetManager.director == object.d3NetManager.localMachine",
+   "tier": "experimental",
+   "presets": [
+    "fo_is_director"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "object.d3NetManager.director == object.d3NetManager.localMachine",
+   "result": "confirmed-value",
+   "value": "true"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "object.d3NetManager.directorMode",
+   "tier": "experimental",
+   "presets": [
+    "fo_director_mode"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "object.d3NetManager.directorMode",
+   "result": "confirmed-value",
+   "value": "true"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "object.d3NetManager.understudy",
+   "tier": "experimental",
+   "presets": [
+    "fo_understudy_mode"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "object.d3NetManager.understudy",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "object.d3NetManager.soloMode",
+   "tier": "experimental",
+   "presets": [
+    "fo_solo_mode"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "object.d3NetManager.soloMode",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "object.d3NetManager.hasValidDirector",
+   "tier": "experimental",
+   "presets": [
+    "fo_has_valid_director"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "object.d3NetManager.hasValidDirector",
+   "result": "confirmed-value",
+   "value": "true"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "object.d3NetManager.localMachine.hasTakenOverFailedMachine()",
+   "tier": "experimental",
+   "presets": [
+    "fo_local_taken_over"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "object.d3NetManager.localMachine.hasTakenOverFailedMachine()",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "object.d3NetManager.localMachine.runningAs.name",
+   "tier": "experimental",
+   "presets": [
+    "fo_local_running_as"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "object.d3NetManager.localMachine.runningAs.name",
+   "result": "confirmed-value",
+   "value": "DIRECTOR01"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "len(object.d3NetManager.machines)",
+   "tier": "experimental",
+   "presets": [
+    "fo_machine_count"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "len(object.d3NetManager.machines)",
+   "result": "confirmed-value",
+   "value": "2"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "[m.name for m in object.d3NetManager.machines if not m.networkConnected]",
+   "tier": "experimental",
+   "presets": [
+    "fo_offline_machines"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "[m.name for m in object.d3NetManager.machines if not m.networkConnected]",
+   "result": "confirmed-value",
+   "value": "[]"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "[m.name for m in object.d3NetManager.machines if m.failed]",
+   "tier": "experimental",
+   "presets": [
+    "fo_failed_machines"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "[m.name for m in object.d3NetManager.machines if m.failed]",
+   "result": "confirmed-value",
+   "value": "[]"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "[m.name for m in object.d3NetManager.machines if m.hasTakenOverFailedMachine()]",
+   "tier": "experimental",
+   "presets": [
+    "fo_takenover_machines"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "[m.name for m in object.d3NetManager.machines if m.hasTakenOverFailedMachine()]",
+   "result": "confirmed-value",
+   "value": "[]"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "[{\"name\": m.name, \"hostname\": m.hostname, \"role\": m.role, \"connected\": m.networkConnected, \"active\": m.active, \"failed\": m.failed, \"takenOver\": m.hasTakenOverFailedMachine()} for m in object.d3NetManager.machines]",
+   "tier": "experimental",
+   "presets": [
+    "fo_machines_table"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "[{\"name\": m.name, \"hostname\": m.hostname, \"role\": m.role, \"connected\": m.networkConnected, \"active\": m.active, \"failed\": m.failed, \"takenOver\": m.hasTakenOverFailedMachine()} for m in object.d3NetManager.machines]",
+   "result": "confirmed-value",
+   "value": "[{\"name\":\"DIRECTOR01\",\"takenOver\":false,\"hostname\":\"DIRECTOR01\",\"failed\":false,\"connected\":true,\"active\":true,\"role\":2},{\"name\":\"actor 1\",\"takenOver\":false,\"hostname\":\"ACTOR01\",\"failed\":false,\"connected\":true,\"active\":true,\"role\":3}]"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "[m.name for m in object.d3NetManager.actors]",
+   "tier": "experimental",
+   "presets": [
+    "fo_actor_names"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "[m.name for m in object.d3NetManager.actors]",
+   "result": "confirmed-value",
+   "value": "[\"actor 1\"]"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "[m.name for m in object.d3NetManager.understudies]",
+   "tier": "experimental",
+   "presets": [
+    "fo_understudy_names"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "[m.name for m in object.d3NetManager.understudies]",
+   "result": "confirmed-value",
+   "value": "[]"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "[{\"understudy\": u.name, \"targets\": [t.name for t in u.targets], \"configStatus\": object.d3NetManager.getUnderstudyConfigStatus(u), \"takenOver\": u.hasTakenOverFailedMachine(), \"runningAs\": (u.runningAs.name if u.hasTakenOverFailedMachine() else \"\")} for u in object.d3NetManager.understudies]",
+   "tier": "experimental",
+   "presets": [
+    "fo_understudy_table"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "[{\"understudy\": u.name, \"targets\": [t.name for t in u.targets], \"configStatus\": object.d3NetManager.getUnderstudyConfigStatus(u), \"takenOver\": u.hasTakenOverFailedMachine(), \"runningAs\": (u.runningAs.name if u.hasTakenOverFailedMachine() else \"\")} for u in object.d3NetManager.understudies]",
+   "result": "confirmed-value",
+   "value": "[]"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "(object.d3NetManager.getDirectorUnderstudy().name if object.d3NetManager.getDirectorUnderstudy() is not None else \"\")",
+   "tier": "experimental",
+   "presets": [
+    "fo_director_understudy"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "(object.d3NetManager.getDirectorUnderstudy().name if object.d3NetManager.getDirectorUnderstudy() is not None else \"\")",
+   "result": "confirmed-value",
+   "value": ""
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "object.d3NetManager.timeout",
+   "tier": "experimental",
+   "presets": [
+    "fo_failover_timeout"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "object.d3NetManager.timeout",
+   "result": "confirmed-value",
+   "value": "0"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "object.d3NetManager.findMachineByHostname(\"$(liveupdate:selHost)\").hasTakenOverFailedMachine()",
+   "tier": "experimental",
+   "presets": [
+    "fo_host_taken_over"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "object.d3NetManager.findMachineByHostname(\"ACTOR01\").hasTakenOverFailedMachine()",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "subsystem:D3NetManagerSystem",
+   "propertyPath": "object.d3NetManager",
+   "tier": "experimental",
+   "presets": [
+    "fo_d3net_ref"
+   ],
+   "resolvedObjectPath": "subsystem:D3NetManagerSystem",
+   "resolvedPropertyPath": "object.d3NetManager",
+   "result": "confirmed-value",
+   "value": "{\"uid\":\"0x0123456789abcde2\",\"path\":\"objects/d3netmanager/d3net.apx\",\"type\":\"<redacted>\"}"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager",
+   "propertyPath": "state.lockedToDirector",
+   "tier": "experimental",
+   "presets": [
+    "fo_locked_to_director"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager",
+   "resolvedPropertyPath": "state.lockedToDirector",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "subsystem:SessionSystem",
+   "propertyPath": "object.sessionName",
+   "tier": "experimental",
+   "presets": [
+    "conn_session_name"
+   ],
+   "resolvedObjectPath": "subsystem:SessionSystem",
+   "resolvedPropertyPath": "object.sessionName",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager",
+   "propertyPath": "state.projectName",
+   "tier": "experimental",
+   "presets": [
+    "conn_project_name"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager",
+   "resolvedPropertyPath": "state.projectName",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager",
+   "propertyPath": "ReleaseVersion.versionString()",
+   "tier": "experimental",
+   "presets": [
+    "conn_designer_version"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager",
+   "resolvedPropertyPath": "ReleaseVersion.versionString()",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager",
+   "propertyPath": "ReleaseVersion.versionName()",
+   "tier": "experimental",
+   "presets": [
+    "conn_designer_version_name"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager",
+   "resolvedPropertyPath": "ReleaseVersion.versionName()",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager",
+   "propertyPath": "state.getDaysLeftDesigner()",
+   "tier": "experimental",
+   "presets": [
+    "conn_licence_days"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager",
+   "resolvedPropertyPath": "state.getDaysLeftDesigner()",
+   "result": "confirmed-value",
+   "value": "-1"
+  },
+  {
+   "objectPath": "subsystem:MonitoringManager",
+   "propertyPath": "state.isInShow",
+   "tier": "experimental",
+   "presets": [
+    "conn_in_show"
+   ],
+   "resolvedObjectPath": "subsystem:MonitoringManager",
+   "resolvedPropertyPath": "state.isInShow",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "transportManager:default",
+   "propertyPath": "object.track.lengthInBeats",
+   "tier": "normal",
+   "presets": [
+    "tr_track_length_beats"
+   ],
+   "resolvedObjectPath": "transportManager:default",
+   "resolvedPropertyPath": "object.track.lengthInBeats",
+   "result": "confirmed-value",
+   "value": "4500"
+  },
+  {
+   "objectPath": "getByUID($(liveupdate:selScreenUid))",
+   "propertyPath": "object.renderLayer",
+   "tier": "normal",
+   "presets": [
+    "stg_uid_render_layer",
+    "stg_uid_on_stage",
+    "stg_uid_off_stage"
+   ],
+   "resolvedObjectPath": "getByUID(0x0123456789abcdef)",
+   "resolvedPropertyPath": "object.renderLayer",
+   "result": "confirmed-value",
+   "value": "1"
+  },
+  {
+   "objectPath": "getByUID($(liveupdate:selScreenUid))",
+   "propertyPath": "object.isInError",
+   "tier": "normal",
+   "presets": [
+    "stg_uid_in_error"
+   ],
+   "resolvedObjectPath": "getByUID(0x0123456789abcdef)",
+   "resolvedPropertyPath": "object.isInError",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "projector:\"$(liveupdate:selProjector)\"",
+   "propertyPath": "object.isInActiveStage()",
+   "tier": "normal",
+   "presets": [
+    "stg_proj_active_stage"
+   ],
+   "resolvedObjectPath": "projector:\"projector 1\"",
+   "resolvedPropertyPath": "object.isInActiveStage()",
+   "result": "confirmed-value",
+   "value": "false"
+  },
+  {
+   "objectPath": "getByUID($(liveupdate:selEvUid))",
+   "propertyPath": "object.description",
+   "tier": "normal",
+   "presets": [
+    "ev_uid_description"
+   ],
+   "resolvedObjectPath": "getByUID($(liveupdate:selEvUid))",
+   "resolvedPropertyPath": "object.description",
+   "result": "skipped-unset-selection"
+  },
+  {
+   "objectPath": "Machine:\"$(liveupdate:selMachine)\"",
+   "propertyPath": "[{\"name\": a.adaptorName, \"ip\": a.ipAddressStr, \"up\": a.isUp, \"rx\": a.receiveLinkSpeed, \"tx\": a.transmitLinkSpeed} for a in object.getNetworkAdaptors()]",
+   "tier": "experimental",
+   "presets": [
+    "fo_network_adaptors"
+   ],
+   "resolvedObjectPath": "Machine:\"DIRECTOR01\"",
+   "resolvedPropertyPath": "[{\"name\": a.adaptorName, \"ip\": a.ipAddressStr, \"up\": a.isUp, \"rx\": a.receiveLinkSpeed, \"tx\": a.transmitLinkSpeed} for a in object.getNetworkAdaptors()]",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  }
+ ]
+}

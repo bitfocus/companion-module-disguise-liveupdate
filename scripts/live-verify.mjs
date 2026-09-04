@@ -141,6 +141,7 @@ const truncate = (v, n = 300) => {
 }
 
 // ---------- discovery ----------
+const first = (v) => (Array.isArray(v) && v.length ? v[0] : undefined)
 const DISCOVERY = [
 	{
 		sel: 'selTrack',
@@ -149,11 +150,27 @@ const DISCOVERY = [
 		pick: (v) => (typeof v === 'string' && v ? v : undefined),
 	},
 	{
+		// prefer a Video layer: it has pos.x/pos.y/scale/brightness, a ColourAdjust layer does not
+		sel: 'selLayer',
+		object: (s) => `track:"${s.selTrack}"`,
+		property: '[l.name for l in object.getLeafLayers(VariableVideoModule)]',
+		pick: first,
+		needs: ['selTrack'],
+	},
+	{
+		// fallback when the track has no Video layer
 		sel: 'selLayer',
 		object: (s) => `track:"${s.selTrack}"`,
 		property: '[l.name for l in object.layers]',
-		pick: (v) => (Array.isArray(v) && v.length ? v[0] : undefined),
+		pick: first,
 		needs: ['selTrack'],
+	},
+	{
+		sel: 'selLayerIndex',
+		object: (s) => `track:"${s.selTrack}"`,
+		property: (s) => `[l.name for l in object.layers].index("${s.selLayer}")`,
+		pick: (v) => (typeof v === 'number' && v >= 0 ? String(v) : undefined),
+		needs: ['selTrack', 'selLayer'],
 	},
 	{
 		sel: 'selHost',
@@ -171,19 +188,39 @@ const DISCOVERY = [
 		sel: 'selScreen',
 		object: 'subsystem:D3NetManagerSystem',
 		property: '[s.description for s in resourceManager.allResources(Screen2)]',
-		pick: (v) => (Array.isArray(v) && v.length ? v[0] : undefined),
+		pick: first,
 	},
 	{
 		sel: 'selProjector',
 		object: 'subsystem:D3NetManagerSystem',
 		property: '[p.description for p in resourceManager.allResources(Projector)]',
-		pick: (v) => (Array.isArray(v) && v.length ? v[0] : undefined),
+		pick: first,
 	},
 	{
 		sel: 'selEvUid',
 		object: 'subsystem:D3NetManagerSystem',
 		property: '["0x%x" % d.uid for d in resourceManager.allResources(ExpressionVariablesDevice)]',
-		pick: (v) => (Array.isArray(v) && v.length ? v[0] : undefined),
+		pick: first,
+	},
+	{
+		sel: 'selEvDevice',
+		object: 'subsystem:D3NetManagerSystem',
+		property: '[d.description for d in resourceManager.allResources(ExpressionVariablesDevice)]',
+		pick: first,
+	},
+	{
+		sel: 'selEvName',
+		object: (s) => `expressionvariablesdevice:"${s.selEvDevice}"`,
+		property: '[v.name for v in object.container.variables]',
+		pick: first,
+		needs: ['selEvDevice'],
+	},
+	{
+		sel: 'selEvLayer',
+		object: (s) => `track:"${s.selTrack}"`,
+		property: '[l.name for l in object.getLeafLayers(ExpressionVariablesModule)]',
+		pick: first,
+		needs: ['selTrack'],
 	},
 	{
 		sel: 'selScreenUid',
@@ -191,6 +228,44 @@ const DISCOVERY = [
 		property: '"0x%x" % object.uid',
 		pick: (v) => (typeof v === 'string' ? v : undefined),
 		needs: ['selScreen'],
+	},
+	{
+		sel: 'selLedScreen',
+		object: 'subsystem:D3NetManagerSystem',
+		property: '[d.description for d in resourceManager.allResources(LedScreen)]',
+		pick: first,
+	},
+	{
+		sel: 'selDmxScreen',
+		object: 'subsystem:D3NetManagerSystem',
+		property: '[d.description for d in resourceManager.allResources(DmxScreen)]',
+		pick: first,
+	},
+	{
+		sel: 'selTransport',
+		object: 'subsystem:D3NetManagerSystem',
+		property: '[d.description for d in resourceManager.allResources(TransportManager)]',
+		pick: (v) => (Array.isArray(v) ? v.find((n) => n !== 'default') : undefined),
+	},
+	{
+		sel: 'selStageUid',
+		object: 'subsystem:D3NetManagerSystem',
+		property: '["0x%x" % s.uid for s in resourceManager.allResources(Stage)]',
+		pick: first,
+	},
+	{
+		// running workloads first, then the ids configured on the track's RenderStream layers
+		sel: 'selWorkload',
+		object: 'subsystem:RenderStreamSystem',
+		property: '[str(k) for k in object.getWorkloadLayers()]',
+		pick: first,
+	},
+	{
+		sel: 'selWorkload',
+		object: (s) => `track:"${s.selTrack}"`,
+		property: '[str(l.moduleConfig.workloadId) for l in object.getLeafLayers(RenderStreamModule)]',
+		pick: first,
+		needs: ['selTrack'],
 	},
 ]
 
@@ -206,6 +281,31 @@ async function main() {
 	await client.connect()
 	console.log('connected')
 
+	const discovery = []
+	for (const d of DISCOVERY) {
+		if (selections[d.sel]) continue
+		if (d.needs && d.needs.some((n) => !selections[n])) {
+			discovery.push({ selection: d.sel, result: 'skipped (needs ' + d.needs.join(', ') + ')' })
+			continue
+		}
+		const objectPath = typeof d.object === 'function' ? d.object(selections) : d.object
+		const property = typeof d.property === 'function' ? d.property(selections) : d.property
+		const r = await client.probe(objectPath, property, 200)
+		const picked = r.result === 'confirmed-value' ? d.pick(r.value) : undefined
+		discovery.push({
+			selection: d.sel,
+			objectPath,
+			propertyPath: property,
+			result: r.result,
+			value: truncate(r.value, 200),
+			error: r.error,
+			picked,
+		})
+		if (picked !== undefined) selections[d.sel] = picked
+		console.log(
+			`discovery ${d.sel}: ${r.result} ${picked !== undefined ? '-> ' + picked : r.error ? r.error.slice(0, 120) : (truncate(r.value, 160) ?? '')}`,
+		)
+	}
 	const defaults = {
 		selLayerIndex: '0',
 		selSection: '0',
@@ -215,31 +315,6 @@ async function main() {
 		selRsLayer: '0',
 	}
 	for (const [k, v] of Object.entries(defaults)) if (selections[k] === undefined) selections[k] = v
-
-	const discovery = []
-	for (const d of DISCOVERY) {
-		if (selections[d.sel]) continue
-		if (d.needs && d.needs.some((n) => !selections[n])) {
-			discovery.push({ selection: d.sel, result: 'skipped (needs ' + d.needs.join(', ') + ')' })
-			continue
-		}
-		const objectPath = typeof d.object === 'function' ? d.object(selections) : d.object
-		const r = await client.probe(objectPath, d.property, 200)
-		const picked = r.result === 'confirmed-value' ? d.pick(r.value) : undefined
-		discovery.push({
-			selection: d.sel,
-			objectPath,
-			propertyPath: d.property,
-			result: r.result,
-			value: truncate(r.value, 200),
-			error: r.error,
-			picked,
-		})
-		if (picked !== undefined) selections[d.sel] = picked
-		console.log(
-			`discovery ${d.sel}: ${r.result} ${picked !== undefined ? '-> ' + picked : r.error ? r.error.slice(0, 120) : ''}`,
-		)
-	}
 	console.log('selections:', selections)
 
 	// unique pairs
