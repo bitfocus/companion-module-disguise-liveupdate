@@ -24,7 +24,7 @@ See [companion/HELP.md](companion/HELP.md) for the user documentation and
 
 ## Supported Devices
 
-- disguise Designer with the LiveUpdate API (documented paths verified against the r34 API stubs)
+- disguise Designer with the LiveUpdate API (documented paths verified against the r34 API stubs and read-checked live on r34.0.3)
 - Companion 4.1 or newer (module API 1.13)
 
 ## Configuration

@@ -7,7 +7,7 @@
 - Preset library: 203 presets in 11 categories (connection, local and remote monitoring, transport
   state, track and layer inspection, layer control, stage and screen, expression variables,
   RenderStream, failover/d3Net, templates) generated from `docs/PRESET_CATALOG.md`, where every row
-  is traced to a documented Designer API member. 130 read-only experimental presets
+  is traced to a documented Designer API member. 128 read-only experimental presets
   (`99 Experimental`) are available behind the new *Show experimental presets* setting.
 - Selection variables (`selTrack`, `selScreen`, `selMachine`, ...) with a *Selections* block in the
   connection settings and a *Set selection* action; the presets address show objects through them
@@ -29,10 +29,28 @@
   disconnect; editing a feedback's Update Frequency re-subscribes with the new interval.
 - `scripts/gen-presets.mjs` and `scripts/gen-help.mjs` to regenerate the preset table and the HELP
   preset list from the catalog JSON.
+- Test suite (`yarn test`, node:test + tsx): path-guard unit tests, catalog-to-implementation
+  consistency, subscription lifecycle against an in-process fake Director (shared subscriptions,
+  back-off, error strikes, config updates, selections) and an end-to-end run over a real WebSocket
+  mock Director (subscribe, set, toggle, JSON merge, reconnect).
+- `scripts/live-verify.mjs`: read-only live verification of every catalog pair against a Director;
+  results and follow-up probes are kept in `docs/research/live-verification*.json`.
+- Live verification on Designer r34.0.3 (2026-09-04): 164 default and 94 experimental presets
+  confirmed with a value; every catalog row carries its live result (`docs/PRESET_CATALOG.md`,
+  column *live*).
 
 ### Changed
 
 - Config updates that only touch presets or selections keep the WebSocket connection.
+- Catalog corrections from the live run: the "(by index)" layer presets use `track.layers[i]` (the
+  documented `getLeafLayers()[i]` object path is rejected by r34.0.3), the RenderStream layer-route
+  presets evaluate `getLeafLayers(RenderStreamModule)[i]` inside the property expression (class names
+  do not resolve in object paths) and the workload id preset returns the 64-bit id as text, timecode
+  and Director-understudy presets show an empty string instead of an error while the transport has
+  no timecode source or no understudy is assigned. Two experimental machine-health presets were
+  removed (`fo_health_worst`, `fo_health_states`: API conversion error on r34.0.3).
+- Variables owned by a placed LiveUpdate Variable feedback are defined as soon as the feedback is
+  cached, so an `ERROR` answer that arrives before the connection is ready still reaches the button.
 - HELP rewritten: selections, preset list, OSC-module pairing, object path reference, limits.
 - Tooling aligned with the Bitfocus module template: ESLint 9 flat config, prettier, TypeScript
   strict lint; `@companion-module/base` pinned to `~1.13.2`; manifest `apiVersion` left at `0.0.0`

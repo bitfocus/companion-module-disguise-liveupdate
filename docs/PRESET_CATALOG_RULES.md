@@ -9,13 +9,22 @@ must stay compatible with a future pairing with `companion-module-disguise-osc`.
 
 | tier | source status (PHASE0_CANDIDATES) | catalog status | category | name prefix | writes |
 |---|---|---|---|---|---|
-| normal | doc-verified | `doc-verified` (→ `live-verified` after Phase 3) | 01–11 | none | allowed when the member has a setter or the doc shows a set |
-| experimental | inferred | `unverified` | `99 Experimental` | `[EXP] ` | **never** (read-only rows only) |
+| normal | doc-verified | `doc-verified`, or `live-verified` when the exact pair returned a value on r34.0.3 (Phase 3) | 01–11 | none | allowed when the member has a setter or the doc shows a set |
+| experimental | inferred | `unverified`, or `live-verified` when confirmed live (kept experimental until promoted) | `99 Experimental` | `[EXP] ` | **never** (read-only rows only) |
 | excluded | unverified, reject, inferred writes | — | — | — | — |
 
 Experimental presets are generated only when the connection setting `showExperimentalPresets` is
 on (default off). Their preset ids and variable names are identical to what they would be after
 promotion, so promotion changes only the category and the name prefix.
+
+Phase 3 (2026-09-04) checked the catalog read-only against a Designer r34.0.3 Director
+(`scripts/live-verify.mjs`, evidence in `docs/research/live-verification*.json`); every row carries a
+`live` result rendered in the *live* column of PRESET_CATALOG.md. Rows whose subscription the Director
+rejects are corrected or removed before release, never shipped as they are. Rows that fail only because
+the test project lacks a feature (timecode source, Expression Variables device, running RenderStream
+workload, LED/DMX screens) keep their tier with the Director's message as a note. Live-confirmed
+experimental rows are promotion candidates; promotion is decided per row with the user and, by the
+rule above, changes only category and name prefix.
 
 ## 2. Categories
 
