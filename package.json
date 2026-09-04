@@ -14,7 +14,8 @@
     "watch": "tsc --project tsconfig.json --watch",
     "lint:raw": "eslint",
     "lint": "eslint .",
-    "format": "prettier -w src eslint.config.mjs",
+    "format": "prettier -w src scripts eslint.config.mjs",
+    "presets:generate": "node scripts/gen-presets.mjs && prettier -w src/presetCatalog.ts",
     "package": "npm pack"
   },
   "prettier": "@companion-module/tools/.prettierrc.json",
