@@ -205,9 +205,14 @@ export class RestClient {
 			try {
 				const text = await response.text()
 				try {
-					const parsed = JSON.parse(text) as { status?: { message?: string; code?: number } }
+					const parsed = JSON.parse(text) as {
+						status?: { message?: string; code?: number; details?: { message?: string }[] }
+					}
 					message = parsed.status?.message ?? ''
-					// the Director reports a refused command with a non-zero code and HTTP 200
+					// A refused command answers HTTP 200 with a non-zero status code; the reason is in
+					// status.message, or - when that is empty - in the first detail. Live example:
+					// POST /transport/speed -> 200 code 1000 "Transport speed control is disabled."
+					if (!message) message = parsed.status?.details?.find((d) => d.message)?.message ?? ''
 					if (!message && parsed.status?.code) message = `status code ${parsed.status.code}`
 				} catch {
 					message = text.slice(0, 200)

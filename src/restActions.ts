@@ -138,7 +138,17 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 			'gotoSection',
 			[
 				TRANSPORT_OPTION,
-				{ type: 'textinput', label: 'Section (uid or index)', id: 'section', default: '0', useVariables: true },
+				{
+					type: 'textinput',
+					label: 'Section number',
+					id: 'section',
+					default: '0',
+					useVariables: true,
+					tooltip:
+						'The section index, counted from 0. Designer parses this field as a number even though the ' +
+						'published API describes it as a string: a section name is refused. To jump by name, use ' +
+						'"Transport: Go to note".',
+				},
 				PLAYMODE_OPTION,
 			],
 			async (action, context) => {
@@ -149,6 +159,72 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 				return {
 					body: transportsWith(transport, { section, playmode: String(action.options.playmode ?? 'NotSet') }),
 					describe: `go to section ${section}`,
+				}
+			},
+		),
+
+		restGotoNote: command(
+			'Transport: Go to note',
+			'gotoNote',
+			[
+				TRANSPORT_OPTION,
+				{
+					type: 'textinput',
+					label: 'Note (section or cue name)',
+					id: 'note',
+					default: '',
+					useVariables: true,
+					tooltip: 'The name shown on the section or cue in the timeline, matched exactly.',
+				},
+				PLAYMODE_OPTION,
+			],
+			async (action, context) => {
+				const transport = await target(instance, action, context)
+				if (!transport) return null
+				const note = (await context.parseVariablesInString(String(action.options.note ?? ''))).trim()
+				if (!note) return null
+				return {
+					body: transportsWith(transport, { note, playmode: String(action.options.playmode ?? 'NotSet') }),
+					describe: `go to note ${note}`,
+				}
+			},
+		),
+
+		restGotoTag: command(
+			'Transport: Go to tag',
+			'gotoTag',
+			[
+				TRANSPORT_OPTION,
+				{
+					type: 'dropdown',
+					label: 'Tag type',
+					id: 'tagType',
+					default: 'CUE',
+					choices: (['TagType_Unknown', 'TC', 'MIDI', 'CUE'] as const).map((id) => ({ id, label: id })),
+				},
+				{ type: 'textinput', label: 'Tag value', id: 'value', default: '', useVariables: true },
+				{
+					type: 'checkbox',
+					label: 'Search every track',
+					id: 'allowGlobalJump',
+					default: false,
+					tooltip: 'Off: only the current track is searched. The Director refuses the jump if no tag matches.',
+				},
+				PLAYMODE_OPTION,
+			],
+			async (action, context) => {
+				const transport = await target(instance, action, context)
+				if (!transport) return null
+				const value = (await context.parseVariablesInString(String(action.options.value ?? ''))).trim()
+				if (!value) return null
+				return {
+					body: transportsWith(transport, {
+						type: String(action.options.tagType ?? 'CUE'),
+						value,
+						allowGlobalJump: Boolean(action.options.allowGlobalJump),
+						playmode: String(action.options.playmode ?? 'NotSet'),
+					}),
+					describe: `go to ${String(action.options.tagType ?? 'CUE')} tag ${value}`,
 				}
 			},
 		),
@@ -184,6 +260,9 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 					id: 'timecode',
 					default: '00:00:00:00',
 					useVariables: true,
+					tooltip:
+						'hh:mm:ss:ff. The dotted form hh:mm:ss.ff that the timecode variables report is accepted too, ' +
+						'so a variable can be pasted in as it stands.',
 				},
 				{ type: 'checkbox', label: 'Ignore tags', id: 'ignoreTags', default: false },
 				PLAYMODE_OPTION,
@@ -207,6 +286,8 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 		restGotoTime: withNumber('Transport: Go to time (seconds)', 'gotoTime', 'time', 'Time in seconds', '0'),
 		restBrightness: withNumber('Transport: Set brightness', 'brightness', 'brightness', 'Brightness 0..1', '1'),
 		restVolume: withNumber('Transport: Set volume', 'volume', 'volume', 'Volume 0..1', '1'),
+		// Designer refuses this one unless "enableTransportSpeedControl" is on; the Director's own
+		// message is surfaced on $(…:rest_message) when it does.
 		restSpeed: withNumber('Transport: Set speed', 'speed', 'speed', 'Speed (1 = normal)', '1'),
 
 		restEngaged: command(

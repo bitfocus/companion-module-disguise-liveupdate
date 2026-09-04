@@ -21,6 +21,8 @@ const received: Received[] = []
 const missing = new Set<string>(['/api/session/renderstream/synclayers'])
 /** Paths that answer with a Director-level failure */
 const refuses = new Set<string>()
+/** Paths that fail with the reason only in status.details, the shape r34.0.3 uses for some refusals */
+const refusesQuietly = new Set<string>()
 
 let server: Server
 let port = 0
@@ -44,10 +46,15 @@ before(async () => {
 			}
 			received.push({ path, body })
 			const failure = refuses.has(path)
+			const quiet = refusesQuietly.has(path)
 			res.writeHead(200, { 'content-type': 'application/json' })
 			res.end(
 				JSON.stringify({
-					status: { code: failure ? 4000 : 0, message: failure ? 'refused by the Director' : '', details: [] },
+					status: {
+						code: failure || quiet ? (quiet ? 1000 : 4000) : 0,
+						message: failure ? 'refused by the Director' : '',
+						details: quiet ? [{ message: 'Transport speed control is disabled.' }] : [],
+					},
 				}),
 			)
 		})
@@ -63,6 +70,7 @@ after(async () => {
 async function connected(overrides: Record<string, unknown> = {}) {
 	received.length = 0
 	refuses.clear()
+	refusesQuietly.clear()
 	const inst = new dist.DisguiseInstance()
 	await inst.init({ host: '127.0.0.1', port, reconnectInterval: 1000, pendingSubscriptionTimeout: 5000, ...overrides })
 	return inst
@@ -185,5 +193,59 @@ test('commands can be switched off entirely', async () => {
 	await actions.restPlay.callback({ options: { transport: 'default' }, controlId: 'b' }, context)
 	assert.equal(received.length, 0)
 	assert.ok(inst.host.logs.some((l: { message: string }) => l.message.includes('Command channel is off')))
+	await inst.destroy()
+})
+
+test('a refusal whose reason is only in the details is still reported with that reason', async () => {
+	// r34.0.3 answers POST /transport/speed with HTTP 200, status code 1000 and, depending on the
+	// build, the reason in status.details rather than status.message.
+	const inst = await connected()
+	refusesQuietly.add('/api/session/transport/speed')
+	const actions = dist.getActionDefinitions(inst)
+	await actions.restSpeed.callback({ options: { transport: 'default', speed: '0.5' }, controlId: 'b' }, context)
+	assert.equal(inst.host.variables.get('rest_last_status'), 'FAILED')
+	assert.equal(inst.host.variables.get('rest_last_message'), 'Transport speed control is disabled.')
+	await inst.destroy()
+})
+
+test('go to note sends the name, go to section sends the number', async () => {
+	// The Director parses 'section' as a uint64 and refuses a section name, so the two are separate
+	// actions: the number goes to gotosection, the name to gotonote.
+	const inst = await connected()
+	const actions = dist.getActionDefinitions(inst)
+	await actions.restGotoNote.callback(
+		{ options: { transport: 'default', note: 'Opening', playmode: 'Stop' }, controlId: 'b' },
+		context,
+	)
+	assert.equal(received[0].path, '/api/session/transport/gotonote')
+	assert.deepEqual(received[0].body, {
+		transports: [{ transport: { name: 'default' }, note: 'Opening', playmode: 'Stop' }],
+	})
+
+	await actions.restGotoSection.callback(
+		{ options: { transport: 'default', section: '2', playmode: 'NotSet' }, controlId: 'b' },
+		context,
+	)
+	assert.equal(received[1].path, '/api/session/transport/gotosection')
+	assert.deepEqual(received[1].body, {
+		transports: [{ transport: { name: 'default' }, section: '2', playmode: 'NotSet' }],
+	})
+	await inst.destroy()
+})
+
+test('go to tag carries the tag type and the global-jump flag', async () => {
+	const inst = await connected()
+	const actions = dist.getActionDefinitions(inst)
+	await actions.restGotoTag.callback(
+		{
+			options: { transport: 'default', tagType: 'CUE', value: '12', allowGlobalJump: true, playmode: 'Play' },
+			controlId: 'b',
+		},
+		context,
+	)
+	assert.equal(received[0].path, '/api/session/transport/gototag')
+	assert.deepEqual(received[0].body, {
+		transports: [{ transport: { name: 'default' }, type: 'CUE', value: '12', allowGlobalJump: true, playmode: 'Play' }],
+	})
 	await inst.destroy()
 })

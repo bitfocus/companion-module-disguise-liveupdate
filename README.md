@@ -48,8 +48,8 @@ See [companion/HELP.md](companion/HELP.md) for the user documentation and
 - **Toggle Disguise Boolean**: flip a boolean property
 - **Set selection** and one action per selection with the names read from the Director; **Set
   selection profile** applies several at once, **Refresh selection lists** re-reads them
-- **Transport / RenderStream / Failover commands**: play, stop, section and track jumps, brightness,
-  volume, speed, engage, RenderStream workload start / stop / restart / sync and machine failover,
+- **Transport / RenderStream / Failover commands**: play, stop, section, note, tag and track jumps,
+  brightness, volume, speed, engage, RenderStream workload start / stop / restart / sync and failover,
   sent over Designer's Session REST API on the same host as the WebSocket. LiveUpdate itself cannot
   carry commands. Commands that change what the audience sees are off by default and, once enabled,
   need two presses of the same button.
@@ -103,7 +103,15 @@ node scripts/rest-discover.mjs --host <director>            # read-only: read th
 node scripts/live-verify.mjs --host <director>              # read-only: subscribe to every pair once
 node scripts/live-write-verify.mjs --host <director>        # dry run: print the write plan
 node scripts/live-write-verify.mjs --host <director> --yes  # write and restore each target
+node scripts/rest-command-verify.mjs --host <director>      # dry run: print the command plan
+node scripts/rest-command-verify.mjs --host <director> --yes --group all
 ```
+
+`rest-command-verify.mjs` sends the REST commands to the Director. Every step reads the state first,
+proves the command took effect and puts it back, and a step that is interrupted still restores. It
+never sends a failover command, and of the RenderStream commands only `synclayers`: starting or
+stopping a workload is not undone by a second command. `docs/research/rest-verification.json` holds
+the result of the last run.
 
 `live-write-verify.mjs` changes values on the Director. It reads the original value first, restores
 it afterwards, re-reads everything at the end, stops on a failed restore and restores the value in

@@ -1,0 +1,140 @@
+{
+  "host": "192.0.2.10",
+  "designer": "r34.0.3",
+  "group": "all",
+  "at": "2026-09-04T22:35:35.239Z",
+  "results": [
+    {
+      "id": "transport/brightness",
+      "summary": "set brightness to 0.9",
+      "status": "ok",
+      "detail": "1 -> 0.9 -> 1"
+    },
+    {
+      "id": "transport/volume",
+      "summary": "set volume to 0.9",
+      "status": "ok",
+      "detail": "1 -> 0.9 -> 1"
+    },
+    {
+      "id": "transport/speed",
+      "summary": "set speed to 0.9",
+      "status": "refused",
+      "detail": "/transport/speed refused (1000): Transport speed control is disabled. Enable the 'enableTransportSpeedControl' option to use it."
+    },
+    {
+      "id": "transport/engaged",
+      "summary": "disengage and re-engage the transport",
+      "status": "ok",
+      "detail": "true -> false -> true"
+    },
+    {
+      "id": "transport/gototime",
+      "summary": "jump 10 seconds forward",
+      "status": "ok",
+      "detail": "0s -> 10s"
+    },
+    {
+      "id": "transport/gototimecode",
+      "summary": "jump back to timecode 00:00:00.00",
+      "status": "ok",
+      "detail": "-> 0s"
+    },
+    {
+      "id": "transport/returntostart",
+      "summary": "return to the start of the track",
+      "status": "ok",
+      "detail": "-> 0s"
+    },
+    {
+      "id": "transport/gotonextsection",
+      "summary": "step to the next section",
+      "status": "ok",
+      "detail": "beat 10 -> 5"
+    },
+    {
+      "id": "transport/gotoprevsection",
+      "summary": "step to the previous section",
+      "status": "ok",
+      "detail": "beat 5 -> 0"
+    },
+    {
+      "id": "transport/gotosection",
+      "summary": "jump to section 1 by number",
+      "status": "ok",
+      "detail": "section 1 -> beat 5"
+    },
+    {
+      "id": "transport/gotosection (name)",
+      "summary": "reject a section name",
+      "status": "ok",
+      "detail": "rejected as uint64, as expected"
+    },
+    {
+      "id": "transport/gotonote",
+      "summary": "jump to a section by its name",
+      "status": "ok",
+      "detail": "note (name withheld) -> beat 5"
+    },
+    {
+      "id": "transport/gototrack",
+      "summary": "select the track that is already current",
+      "status": "ok",
+      "detail": "track unchanged"
+    },
+    {
+      "id": "transport/gotonexttrack",
+      "summary": "step to the next track",
+      "status": "ok",
+      "detail": "accepted, single-track setlist so the track did not change"
+    },
+    {
+      "id": "transport/gotoprevtrack",
+      "summary": "step to the previous track",
+      "status": "ok",
+      "detail": "accepted, single-track setlist so the track did not change"
+    },
+    {
+      "id": "transport/stop",
+      "summary": "stop a transport that is already stopped",
+      "status": "ok",
+      "detail": "playmode Stop"
+    },
+    {
+      "id": "transport/play",
+      "summary": "start with play and stop again",
+      "status": "ok",
+      "detail": "Play -> Stop"
+    },
+    {
+      "id": "transport/playsection",
+      "summary": "start with playsection and stop again",
+      "status": "ok",
+      "detail": "PlaySection -> Stop"
+    },
+    {
+      "id": "transport/playloopsection",
+      "summary": "start with playloopsection and stop again",
+      "status": "ok",
+      "detail": "Loop -> Stop"
+    },
+    {
+      "id": "renderstream/synclayers",
+      "summary": "sync the RenderStream layers",
+      "status": "ok",
+      "detail": "accepted for 5 layer(s)"
+    },
+    {
+      "id": "renderstream/startlayers, stoplayers, restartlayers",
+      "summary": "start / stop / restart a RenderStream workload",
+      "status": "not-exercised",
+      "detail": "starts or stops render processes on the workload machines; not restorable by a second command"
+    },
+    {
+      "id": "renderstream/failover, failoverpool, failover/*",
+      "summary": "machine and pool failover",
+      "status": "not-exercised",
+      "detail": "reroutes video to an understudy machine; deliberately left to a human operator"
+    }
+  ]
+}

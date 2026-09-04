@@ -36,7 +36,8 @@ LiveUpdate reads and writes properties; it cannot tell the Director to play, sto
 over Designer's Session REST API, on the same host and port, and this module sends them for you:
 
 - **Transport**: play, stop, play to end of section, loop section, return to start, next and previous
-  section and track, go to section / track / timecode / time, brightness, volume, speed, engaged.
+  section and track, go to section / note / tag / track / timecode / time, brightness, volume, speed,
+  engaged.
 - **RenderStream**: start, stop, restart and sync the layers of a workload.
 - **Failover**: fail over a machine, restore a machine, apply default routing.
 
@@ -48,7 +49,20 @@ on the button to see the state. `rest_last_command`, `rest_last_status` and `res
 happened; *Last command failed* colours the button when it did not work.
 
 A Designer that does not know a command answers 404; the module says so once and stops sending it
-until you use *Rescan the command API*.
+until you use *Rescan the command API*. A command it does know but will not carry out answers HTTP
+200 with a reason in the body; the module treats that as a failure too and puts the Director's own
+words in `rest_last_message`.
+
+Three things about the transport commands were established on an r34.0.3 Director and are worth
+knowing before you build the buttons:
+
+- *Go to section* takes the section **number**, counting from 0. The published API describes the
+  field as a string, but Designer parses it as an integer and refuses a section name. To jump by the
+  name written on the section, use *Go to note*.
+- *Go to timecode* accepts both `hh:mm:ss:ff` and the dotted `hh:mm:ss.ff` that the timecode
+  variables of this module report, so a variable can be dropped straight into the field.
+- *Set speed* is refused unless **enableTransportSpeedControl** is enabled in Designer. The button
+  will show *Last command failed* and `rest_last_message` will say so.
 
 ## Choosing selections from the Director
 
