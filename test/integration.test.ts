@@ -5,6 +5,7 @@ import { test, before, after } from 'node:test'
 import assert from 'node:assert/strict'
 import { installHarness, liveUpdateFeedback, loadDist, settle, tick } from './harness'
 import { MockDirector } from './mock-director'
+import { createServer, type AddressInfo, type Socket } from 'node:net'
 
 installHarness({ fakeSocket: false })
 const dist = loadDist()
@@ -137,4 +138,44 @@ test('connection loss is reported and reconnection is scheduled', async () => {
 	)
 	await inst.destroy()
 	await settle()
+})
+
+test('tearing down a socket that is still connecting does not crash the module', async () => {
+	// a TCP server that accepts the connection but never answers the WebSocket handshake
+	const sockets = new Set<Socket>()
+	const stall = createServer((socket) => {
+		sockets.add(socket)
+		socket.on('error', () => {})
+	})
+	await new Promise<void>((resolve) => stall.listen(0, '127.0.0.1', resolve))
+	const stall2 = createServer((socket) => {
+		sockets.add(socket)
+		socket.on('error', () => {})
+	})
+	await new Promise<void>((resolve) => stall2.listen(0, '127.0.0.1', resolve))
+	const port1 = (stall.address() as AddressInfo).port
+	const port2 = (stall2.address() as AddressInfo).port
+	let uncaught: unknown
+	const onUncaught = (e: unknown) => {
+		uncaught = e
+	}
+	process.on('uncaughtException', onUncaught)
+	try {
+		const inst = new dist.DisguiseInstance()
+		await inst.init({ host: '127.0.0.1', port: port1, reconnectInterval: 1000, pendingSubscriptionTimeout: 5000 })
+		await tick(50)
+		assert.equal(inst.isConnectionReady(), false)
+		// connection settings change while the first socket is still connecting
+		await inst.configUpdated({ ...inst.config, port: port2 })
+		await tick(50)
+		// destroy while the second socket is still connecting
+		await inst.destroy()
+		await tick(50)
+	} finally {
+		process.off('uncaughtException', onUncaught)
+		for (const socket of sockets) socket.destroy()
+		stall.close()
+		stall2.close()
+	}
+	assert.equal(uncaught, undefined, `uncaught exception: ${String(uncaught)}`)
 })

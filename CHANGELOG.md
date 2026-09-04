@@ -49,6 +49,8 @@
   and Director-understudy presets show an empty string instead of an error while the transport has
   no timecode source or no understudy is assigned. Two experimental machine-health presets were
   removed (`fo_health_worst`, `fo_health_states`: API conversion error on r34.0.3).
+- Closing a socket that is still connecting (connection restart or module shutdown while the
+  Director is slow to answer) no longer crashes the module process.
 - Variables owned by a placed LiveUpdate Variable feedback are defined as soon as the feedback is
   cached, so an `ERROR` answer that arrives before the connection is ready still reaches the button.
 - HELP rewritten: selections, preset list, OSC-module pairing, object path reference, limits.

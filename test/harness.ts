@@ -155,6 +155,9 @@ export class FakeWebSocket extends EventEmitter {
 	send(data: string): void {
 		currentDirector?.handle(data)
 	}
+	terminate(): void {
+		this.close()
+	}
 	close(): void {
 		this.readyState = FakeWebSocket.CLOSED
 		setImmediate(() => this.emit('close', 1000, Buffer.from('')))

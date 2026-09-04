@@ -142,11 +142,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			this.pendingCleanupTimer = undefined
 		}
 
-		if (this.ws) {
-			this.ws.removeAllListeners()
-			this.ws.close()
-			this.ws = null
-		}
+		this.closeSocket()
 
 		this.subscriptions.clear()
 		this.feedbackIdToSubscriptionId.clear()
@@ -606,6 +602,26 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		this.connect()
 	}
 
+	/**
+	 * Drop the socket without letting ws raise an error at nobody: closing a socket that is still
+	 * connecting makes ws emit 'error' on the next tick, and with the listeners removed that
+	 * would crash the module process (seen in Companion when a connection is restarted while the
+	 * Director is slow to answer the handshake).
+	 */
+	private closeSocket(): void {
+		const ws = this.ws
+		if (!ws) return
+		this.ws = null
+		ws.removeAllListeners()
+		ws.on('error', () => {})
+		try {
+			if (ws.readyState === WebSocket.CONNECTING) ws.terminate()
+			else if (ws.readyState === WebSocket.OPEN) ws.close()
+		} catch {
+			// the socket is gone either way
+		}
+	}
+
 	private connect(): void {
 		if (this.ws) {
 			this.disconnect()
@@ -693,17 +709,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		const wasReady = this.connectionReady
 		this.connectionReady = false
 
-		if (this.ws) {
-			try {
-				this.ws.removeAllListeners()
-				if (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING) {
-					this.ws.close()
-				}
-			} catch {
-				// Ignore close errors
-			}
-			this.ws = null
-		}
+		this.closeSocket()
 		this.subscriptions.clear()
 		this.feedbackIdToSubscriptionId.clear()
 		this.pendingSubscriptions.clear()
