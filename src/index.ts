@@ -19,6 +19,27 @@ import { upgradeScripts } from './upgrades'
  */
 const CONNECTION_CONFIG_KEYS = ['host', 'port', 'reconnectInterval', 'pendingSubscriptionTimeout'] as const
 
+const BACKOFF_BASE_MS = 2000
+const BACKOFF_MAX_MS = 60000
+
+/** Template placeholders such as <TRACK_NAME> or <OBJECT_PATH> */
+const PLACEHOLDER_TOKEN = /<[A-Z][A-Z0-9_]*>/
+
+/**
+ * Paths that must not be sent to the Director: template placeholders, unresolved Companion
+ * variable references ($NA or a raw $(...) reference) and, for object paths, empty quoted names
+ * (an unset selection variable).
+ */
+export function isUnresolvedPath(path: string, isObjectPath: boolean): boolean {
+	const trimmed = path.trim()
+	if (!trimmed) return true
+	if (PLACEHOLDER_TOKEN.test(trimmed)) return true
+	if (trimmed.includes('$NA')) return true
+	if (/\$\([^)]*\)/.test(trimmed)) return true
+	if (isObjectPath && (trimmed.includes('""') || trimmed.includes("''"))) return true
+	return false
+}
+
 /**
  * Convert a ws message payload to a UTF-8 string
  */
@@ -56,6 +77,10 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	private pendingSubscriptions: Map<string, { feedbackId: string; variableName: string; timestamp: number }> = new Map()
 	public feedbackOptionsCache: Map<string, { objectPath: string; propertyPath: string; variableName: string }> =
 		new Map()
+	/** Per-feedback back-off after failed subscriptions (guards against subscribe storms) */
+	private subscriptionBackoff: Map<string, { attempts: number; notBefore: number }> = new Map()
+	/** Feedbacks already logged as "path not resolved yet" (avoid repeating the message) */
+	private unresolvedLogged: Set<string> = new Set()
 	private connectionReady = false
 	private shouldReconnect = false
 	private hasLoggedConnectionError = false
@@ -269,6 +294,25 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			return
 		}
 
+		// Never send template placeholders, unresolved variables or empty names to the Director
+		if (isUnresolvedPath(objectPath, true) || isUnresolvedPath(propertyPath, false)) {
+			if (!this.unresolvedLogged.has(feedbackId)) {
+				this.unresolvedLogged.add(feedbackId)
+				this.log(
+					'debug',
+					`Not subscribing feedback ${feedbackId}: path not resolved yet (${objectPath} / ${propertyPath})`,
+				)
+			}
+			return
+		}
+		this.unresolvedLogged.delete(feedbackId)
+
+		// Wait out the back-off after a failed attempt instead of retrying on every value update
+		const backoff = this.subscriptionBackoff.get(feedbackId)
+		if (backoff && Date.now() < backoff.notBefore) {
+			return
+		}
+
 		// Check if we already have a subscription for this object/property
 		for (const [subId, sub] of this.subscriptions.entries()) {
 			if (sub.objectPath === objectPath && sub.propertyPath === propertyPath) {
@@ -314,6 +358,10 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	 */
 	unsubscribeFromVariable(feedbackId: string): void {
 		const subscriptionId = this.feedbackIdToSubscriptionId.get(feedbackId)
+
+		// A removed or edited feedback starts over without back-off
+		this.subscriptionBackoff.delete(feedbackId)
+		this.unresolvedLogged.delete(feedbackId)
 
 		for (const [key, pending] of this.pendingSubscriptions.entries()) {
 			if (pending.feedbackId === feedbackId) {
@@ -394,6 +442,21 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		this.setVariableValues(readSelections(this.config as unknown as Record<string, unknown>))
 	}
 
+	/**
+	 * Remember a failed subscription attempt and delay the next retry (2 s, 4 s, ... up to 60 s)
+	 * so that a wrong path does not turn every incoming value update into a new subscribe request.
+	 */
+	private noteSubscriptionFailure(feedbackId: string, reason: string): void {
+		const previous = this.subscriptionBackoff.get(feedbackId)
+		const attempts = (previous?.attempts ?? 0) + 1
+		const delay = Math.min(BACKOFF_MAX_MS, BACKOFF_BASE_MS * 2 ** (attempts - 1))
+		this.subscriptionBackoff.set(feedbackId, { attempts, notBefore: Date.now() + delay })
+		this.log(
+			'warn',
+			`Subscription for feedback ${feedbackId} failed (${reason}); next retry in ${Math.round(delay / 1000)} s`,
+		)
+	}
+
 	private async applyConfig(config: DisguiseConfig): Promise<void> {
 		this.config = config
 
@@ -458,6 +521,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				this.subscriptions.clear()
 				this.feedbackIdToSubscriptionId.clear()
 				this.feedbackOptionsCache.clear()
+				this.subscriptionBackoff.clear()
 				this.setVariableValues({
 					connection_status: 'Disconnected',
 				})
@@ -507,6 +571,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		this.feedbackIdToSubscriptionId.clear()
 		this.pendingSubscriptions.clear()
 		this.feedbackOptionsCache.clear()
+		this.subscriptionBackoff.clear()
 	}
 
 	private scheduleReconnect(): void {
@@ -547,6 +612,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 						const pending = this.pendingSubscriptions.get(key)!
 						this.log('warn', `Removing failed pending subscription for variable '${pending.variableName}'`)
 						this.pendingSubscriptions.delete(key)
+						this.noteSubscriptionFailure(pending.feedbackId, String(message.error))
 
 						// Set error message in the variable so user knows it failed
 						this.setVariableValues({ [pending.variableName]: 'ERROR' })
@@ -595,6 +661,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				})
 
 				newFeedbackMap.set(pending.feedbackId, sub.id)
+				this.subscriptionBackoff.delete(pending.feedbackId)
 				this.log(
 					'info',
 					`Subscription ${sub.id}: ${sub.objectPath}.${sub.propertyPath} -> variable: ${pending.variableName}`,
@@ -664,7 +731,10 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 							'warn',
 							`Unsubscribing variable '${subscription.variableName}' after ${subscription.errorCount} consecutive errors`,
 						)
-						this.log('warn', `Fix the property path in the feedback and use "Refresh Subscriptions" action to retry`)
+						this.log(
+							'warn',
+							`Fix the property path in the feedback; the subscription is retried with a growing back-off`,
+						)
 
 						// Unsubscribe from Disguise
 						const message = { unsubscribe: { id: subscription.id } }
@@ -673,6 +743,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 						// Clean up local state
 						this.subscriptions.delete(subscription.id)
 						this.feedbackIdToSubscriptionId.delete(subscription.feedbackId)
+						this.noteSubscriptionFailure(subscription.feedbackId, errorMessage)
 
 						// Set error indicator in variable
 						changedVars[subscription.variableName] = 'PATH_ERROR (unsubscribed)'
