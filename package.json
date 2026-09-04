@@ -12,9 +12,12 @@
   "scripts": {
     "build": "rimraf dist && tsc --project tsconfig.json",
     "watch": "tsc --project tsconfig.json --watch",
-    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "lint:raw": "eslint",
+    "lint": "eslint .",
+    "format": "prettier -w src eslint.config.mjs",
     "package": "npm pack"
   },
+  "prettier": "@companion-module/tools/.prettierrc.json",
   "keywords": [
     "bitfocus",
     "companion",
@@ -33,14 +36,15 @@
     "ws": "^8.21.0"
   },
   "devDependencies": {
+    "@companion-module/tools": "^2.8.0",
+    "@types/node": "^22.19.17",
     "@types/ws": "^8.5.10",
-    "@typescript-eslint/eslint-plugin": "^6.14.0",
-    "@typescript-eslint/parser": "^6.14.0",
-    "eslint": "^8.56.0",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.3",
     "rimraf": "^5.0.5",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3",
-    "@companion-module/tools": "^2.8.0"
+    "typescript-eslint": "^8.59.0"
   },
   "publishConfig": {
     "access": "public"

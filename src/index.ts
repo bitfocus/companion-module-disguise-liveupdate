@@ -1,9 +1,9 @@
 import {
-  InstanceBase,
-  InstanceStatus,
-  Regex,
-  runEntrypoint,
-  CompanionActionContext,
+	InstanceBase,
+	InstanceStatus,
+	runEntrypoint,
+	SomeCompanionConfigField,
+	CompanionStaticUpgradeScript,
 } from '@companion-module/base'
 import WebSocket from 'ws'
 import { getConfigFields, DisguiseConfig } from './config'
@@ -14,701 +14,718 @@ import { getVariableDefinitions } from './variables'
 import { upgradeScripts } from './upgrades'
 
 /**
+ * Convert a ws message payload to a UTF-8 string
+ */
+function rawDataToString(data: WebSocket.RawData): string {
+	if (Buffer.isBuffer(data)) return data.toString('utf8')
+	if (Array.isArray(data)) return Buffer.concat(data).toString('utf8')
+	return Buffer.from(data).toString('utf8')
+}
+
+/**
  * Represents a subscription in the LiveUpdate API
  */
 export interface LiveUpdateSubscription {
-  id: number
-  objectPath: string
-  propertyPath: string
-  feedbackId: string
-  variableName: string
-  value?: any
-  changeTimestamp?: number
-  messageTimestamp?: number
-  errorCount?: number
+	id: number
+	objectPath: string
+	propertyPath: string
+	feedbackId: string
+	variableName: string
+	value?: any
+	changeTimestamp?: number
+	messageTimestamp?: number
+	errorCount?: number
 }
 
 /**
  * Disguise Designer module instance with LiveUpdate API support
  */
 export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
-  public config!: DisguiseConfig
-  private ws: WebSocket | null = null
-  private reconnectTimer: NodeJS.Timeout | undefined
-  private pendingCleanupTimer: NodeJS.Timeout | undefined
-  private subscriptions: Map<number, LiveUpdateSubscription> = new Map()
-  private feedbackIdToSubscriptionId: Map<string, number> = new Map()
-  private pendingSubscriptions: Map<string, { feedbackId: string; variableName: string; timestamp: number }> = new Map()
-  public feedbackOptionsCache: Map<string, { objectPath: string; propertyPath: string; variableName: string }> = new Map()
-  private connectionReady = false
-  private shouldReconnect = false
-  private hasLoggedConnectionError = false
+	public config!: DisguiseConfig
+	private ws: WebSocket | null = null
+	private reconnectTimer: NodeJS.Timeout | undefined
+	private pendingCleanupTimer: NodeJS.Timeout | undefined
+	private subscriptions: Map<number, LiveUpdateSubscription> = new Map()
+	private feedbackIdToSubscriptionId: Map<string, number> = new Map()
+	private pendingSubscriptions: Map<string, { feedbackId: string; variableName: string; timestamp: number }> = new Map()
+	public feedbackOptionsCache: Map<string, { objectPath: string; propertyPath: string; variableName: string }> =
+		new Map()
+	private connectionReady = false
+	private shouldReconnect = false
+	private hasLoggedConnectionError = false
 
-  async init(config: DisguiseConfig): Promise<void> {
-    this.log('debug', 'Initializing Disguise Designer LiveUpdate module')
-    this.updateStatus(InstanceStatus.Disconnected)
-    await this.applyConfig(config)
-  }
+	async init(config: DisguiseConfig): Promise<void> {
+		this.log('debug', 'Initializing Disguise Designer LiveUpdate module')
+		this.updateStatus(InstanceStatus.Disconnected)
+		await this.applyConfig(config)
+	}
 
-  async destroy(): Promise<void> {
-    this.shouldReconnect = false
-    this.connectionReady = false
-    
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer)
-      this.reconnectTimer = undefined
-    }
-    
-    if (this.pendingCleanupTimer) {
-      clearTimeout(this.pendingCleanupTimer)
-      this.pendingCleanupTimer = undefined
-    }
-    
-    if (this.ws) {
-      this.ws.removeAllListeners()
-      this.ws.close()
-      this.ws = null
-    }
-    
-    this.subscriptions.clear()
-    this.feedbackIdToSubscriptionId.clear()
-    this.pendingSubscriptions.clear()
-    this.feedbackOptionsCache.clear()
-  }
+	async destroy(): Promise<void> {
+		this.shouldReconnect = false
+		this.connectionReady = false
 
-  async configUpdated(config: DisguiseConfig): Promise<void> {
-    this.shouldReconnect = false
-    this.disconnect()
-    await this.applyConfig(config)
-  }
+		if (this.reconnectTimer) {
+			clearTimeout(this.reconnectTimer)
+			this.reconnectTimer = undefined
+		}
 
-  getConfigFields() {
-    return getConfigFields()
-  }
+		if (this.pendingCleanupTimer) {
+			clearTimeout(this.pendingCleanupTimer)
+			this.pendingCleanupTimer = undefined
+		}
 
-  getUpgradeScripts() {
-    return upgradeScripts
-  }
+		if (this.ws) {
+			this.ws.removeAllListeners()
+			this.ws.close()
+			this.ws = null
+		}
 
-  setupActions(): void {
-    this.setActionDefinitions(getActionDefinitions(this))
-  }
+		this.subscriptions.clear()
+		this.feedbackIdToSubscriptionId.clear()
+		this.pendingSubscriptions.clear()
+		this.feedbackOptionsCache.clear()
+	}
 
-  setupFeedbacks(): void {
-    this.setFeedbackDefinitions(getFeedbackDefinitions(this))
-  }
+	async configUpdated(config: DisguiseConfig): Promise<void> {
+		this.shouldReconnect = false
+		this.disconnect()
+		await this.applyConfig(config)
+	}
 
-  setupVariables(): void {
-    this.setVariableDefinitions(getVariableDefinitions())
-  }
+	getConfigFields(): SomeCompanionConfigField[] {
+		return getConfigFields()
+	}
 
-  setupPresets(): void {
-    this.setPresetDefinitions(getPresetDefinitions(this))
-  }
+	getUpgradeScripts(): CompanionStaticUpgradeScript<DisguiseConfig>[] {
+		return upgradeScripts
+	}
 
-  isConnectionReady(): boolean {
-    return this.connectionReady
-  }
+	setupActions(): void {
+		this.setActionDefinitions(getActionDefinitions(this))
+	}
 
-  /**
-   * Get the current value of a subscription by ID
-   */
-  getSubscriptionValue(id: number): any {
-    return this.subscriptions.get(id)?.value
-  }
+	setupFeedbacks(): void {
+		this.setFeedbackDefinitions(getFeedbackDefinitions(this))
+	}
 
-  /**
-   * Get the current value of a subscription by feedback ID
-   */
-  getSubscriptionValueByFeedbackId(feedbackId: string): any {
-    const subId = this.feedbackIdToSubscriptionId.get(feedbackId)
-    if (subId !== undefined) {
-      return this.subscriptions.get(subId)?.value
-    }
-    return undefined
-  }
+	setupVariables(): void {
+		this.setVariableDefinitions(getVariableDefinitions())
+	}
 
-  /**
-   * Get a subscription by feedback ID
-   */
-  getSubscriptionByFeedbackId(feedbackId: string): LiveUpdateSubscription | undefined {
-    const subId = this.feedbackIdToSubscriptionId.get(feedbackId)
-    if (subId !== undefined) {
-      return this.subscriptions.get(subId)
-    }
-    return undefined
-  }
+	setupPresets(): void {
+		this.setPresetDefinitions(getPresetDefinitions(this))
+	}
 
-  /**
-   * Check if feedback options have changed and update subscription if needed.
-   * Also ensures subscription is active (self-healing).
-   */
-  checkAndUpdateSubscription(
-    feedbackId: string,
-    variableName: string,
-    objectPath: string,
-    propertyPath: string,
-    updateFrequency?: number
-  ): void {
-    const cached = this.feedbackOptionsCache.get(feedbackId)
-    const existingSubscription = this.getSubscriptionByFeedbackId(feedbackId)
-    
-    if (!cached) {
-      this.feedbackOptionsCache.set(feedbackId, { variableName, objectPath, propertyPath })
-      
-      if (!existingSubscription && this.isConnectionReady() && variableName && objectPath && propertyPath) {
-        this.subscribeToVariable(feedbackId, variableName, objectPath, propertyPath, updateFrequency)
-      }
-      return
-    }
-    
-    const optionsChanged = 
-      cached.variableName !== variableName ||
-      cached.objectPath !== objectPath ||
-      cached.propertyPath !== propertyPath
-    
-    if (optionsChanged) {
-      this.log('info', `Feedback options changed: ${cached.objectPath}.${cached.propertyPath} → ${objectPath}.${propertyPath}`)
-      this.feedbackOptionsCache.set(feedbackId, { variableName, objectPath, propertyPath })
-      this.unsubscribeFromVariable(feedbackId)
-      
-      if (variableName && objectPath && propertyPath) {
-        this.subscribeToVariable(feedbackId, variableName, objectPath, propertyPath, updateFrequency)
-      }
-      return
-    }
-    
-    // Options haven't changed, but check if subscription is missing (e.g., connection was lost)
-    // This handles presets added while disconnected, or subscriptions that were dropped
-    if (!existingSubscription && this.isConnectionReady() && variableName && objectPath && propertyPath) {
-      this.log('info', `Auto-subscribing feedback ${feedbackId} (subscription was missing)`)
-      this.subscribeToVariable(feedbackId, variableName, objectPath, propertyPath, updateFrequency)
-    }
-  }
+	isConnectionReady(): boolean {
+		return this.connectionReady
+	}
 
-  /**
-   * Get all current subscriptions
-   */
-  getSubscriptions(): Map<number, LiveUpdateSubscription> {
-    return this.subscriptions
-  }
+	/**
+	 * Get the current value of a subscription by ID
+	 */
+	getSubscriptionValue(id: number): any {
+		return this.subscriptions.get(id)?.value
+	}
 
-  /**
-   * Get a subscription by variable name
-   */
-  getSubscriptionByVariableName(variableName: string): LiveUpdateSubscription | undefined {
-    for (const subscription of this.subscriptions.values()) {
-      if (subscription.variableName === variableName) {
-        return subscription
-      }
-    }
-    return undefined
-  }
+	/**
+	 * Get the current value of a subscription by feedback ID
+	 */
+	getSubscriptionValueByFeedbackId(feedbackId: string): any {
+		const subId = this.feedbackIdToSubscriptionId.get(feedbackId)
+		if (subId !== undefined) {
+			return this.subscriptions.get(subId)?.value
+		}
+		return undefined
+	}
 
-  private send(message: any): boolean {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      try {
-        this.ws.send(JSON.stringify(message))
-        return true
-      } catch (error) {
-        this.log('error', `Failed to send message: ${error instanceof Error ? error.message : String(error)}`)
-        // Connection might be closing or in a bad state, trigger reconnect
-        this.disconnect()
-        this.scheduleReconnect()
-        return false
-      }
-    } else {
-      this.log('warn', 'Cannot send message - WebSocket not connected')
-      return false
-    }
-  }
+	/**
+	 * Get a subscription by feedback ID
+	 */
+	getSubscriptionByFeedbackId(feedbackId: string): LiveUpdateSubscription | undefined {
+		const subId = this.feedbackIdToSubscriptionId.get(feedbackId)
+		if (subId !== undefined) {
+			return this.subscriptions.get(subId)
+		}
+		return undefined
+	}
 
-  /**
-   * Subscribe to a LiveUpdate property and bind it to a module variable
-   */
-  subscribeToVariable(
-    feedbackId: string,
-    variableName: string,
-    objectPath: string,
-    propertyPath: string,
-    updateFrequencyMs: number | undefined
-  ): void {
-    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      this.log('warn', 'Cannot subscribe - WebSocket not connected')
-      return
-    }
+	/**
+	 * Check if feedback options have changed and update subscription if needed.
+	 * Also ensures subscription is active (self-healing).
+	 */
+	checkAndUpdateSubscription(
+		feedbackId: string,
+		variableName: string,
+		objectPath: string,
+		propertyPath: string,
+		updateFrequency?: number,
+	): void {
+		const cached = this.feedbackOptionsCache.get(feedbackId)
+		const existingSubscription = this.getSubscriptionByFeedbackId(feedbackId)
 
-    // Check if we already have a subscription for this object/property
-    for (const [subId, sub] of this.subscriptions.entries()) {
-      if (sub.objectPath === objectPath && sub.propertyPath === propertyPath) {
-        // Reuse existing subscription, just update the feedback mapping
-        this.log('info', `Reusing existing subscription ${subId} for feedback ${feedbackId}`)
-        this.feedbackIdToSubscriptionId.set(feedbackId, subId)
-        
-        // Update subscription to also use this variable name (support multiple feedbacks)
-        if (sub.variableName !== variableName) {
-          sub.variableName = variableName
-        }
-        
-        return
-      }
-    }
+		if (!cached) {
+			this.feedbackOptionsCache.set(feedbackId, { variableName, objectPath, propertyPath })
 
-    const message: any = {
-      subscribe: {
-        object: objectPath,
-        properties: [propertyPath],
-      },
-    }
+			if (!existingSubscription && this.isConnectionReady() && variableName && objectPath && propertyPath) {
+				this.subscribeToVariable(feedbackId, variableName, objectPath, propertyPath, updateFrequency)
+			}
+			return
+		}
 
-    if (updateFrequencyMs !== undefined && updateFrequencyMs > 0) {
-      message.subscribe.configuration = { updateFrequencyMs }
-    }
+		const optionsChanged =
+			cached.variableName !== variableName || cached.objectPath !== objectPath || cached.propertyPath !== propertyPath
 
-    this.log('info', `Subscribing to ${objectPath}.${propertyPath} as variable '${variableName}'`)
-    
-    if (!this.send(message)) {
-      return
-    }
-    
-    const key = `${objectPath}:${propertyPath}`
-    this.pendingSubscriptions.set(key, { feedbackId, variableName, timestamp: Date.now() })
-    
-    // Initialize the module variable as undefined until first value arrives
-    this.setVariableValues({ [variableName]: undefined })
-  }
+		if (optionsChanged) {
+			this.log(
+				'info',
+				`Feedback options changed: ${cached.objectPath}.${cached.propertyPath} → ${objectPath}.${propertyPath}`,
+			)
+			this.feedbackOptionsCache.set(feedbackId, { variableName, objectPath, propertyPath })
+			this.unsubscribeFromVariable(feedbackId)
 
-  /**
-   * Unsubscribe from a LiveUpdate property by feedback ID
-   */
-  unsubscribeFromVariable(feedbackId: string): void {
-    const subscriptionId = this.feedbackIdToSubscriptionId.get(feedbackId)
-    
-    for (const [key, pending] of this.pendingSubscriptions.entries()) {
-      if (pending.feedbackId === feedbackId) {
-        this.pendingSubscriptions.delete(key)
-      }
-    }
-    
-    if (subscriptionId === undefined) {
-      return
-    }
+			if (variableName && objectPath && propertyPath) {
+				this.subscribeToVariable(feedbackId, variableName, objectPath, propertyPath, updateFrequency)
+			}
+			return
+		}
 
-    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      this.log('warn', 'Cannot unsubscribe - WebSocket not connected')
-      this.subscriptions.delete(subscriptionId)
-      this.feedbackIdToSubscriptionId.delete(feedbackId)
-      this.updateVariableDefinitions()
-      return
-    }
+		// Options haven't changed, but check if subscription is missing (e.g., connection was lost)
+		// This handles presets added while disconnected, or subscriptions that were dropped
+		if (!existingSubscription && this.isConnectionReady() && variableName && objectPath && propertyPath) {
+			this.log('info', `Auto-subscribing feedback ${feedbackId} (subscription was missing)`)
+			this.subscribeToVariable(feedbackId, variableName, objectPath, propertyPath, updateFrequency)
+		}
+	}
 
-    const subscription = this.subscriptions.get(subscriptionId)
-    
-    const message = {
-      unsubscribe: { id: subscriptionId },
-    }
+	/**
+	 * Get all current subscriptions
+	 */
+	getSubscriptions(): Map<number, LiveUpdateSubscription> {
+		return this.subscriptions
+	}
 
-    this.log('info', `Unsubscribing from ${subscription?.objectPath}.${subscription?.propertyPath}`)
-    this.send(message)
-    
-    this.subscriptions.delete(subscriptionId)
-    this.feedbackIdToSubscriptionId.delete(feedbackId)
-    this.updateVariableDefinitions()
-  }
+	/**
+	 * Get a subscription by variable name
+	 */
+	getSubscriptionByVariableName(variableName: string): LiveUpdateSubscription | undefined {
+		for (const subscription of this.subscriptions.values()) {
+			if (subscription.variableName === variableName) {
+				return subscription
+			}
+		}
+		return undefined
+	}
 
-  /**
-   * Set a LiveUpdate property value by subscription ID
-   */
-  setProperty(id: number, value: any): void {
-    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      this.log('warn', 'Cannot set property - WebSocket not connected')
-      return
-    }
+	private send(message: any): boolean {
+		if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+			try {
+				this.ws.send(JSON.stringify(message))
+				return true
+			} catch (error) {
+				this.log('error', `Failed to send message: ${error instanceof Error ? error.message : String(error)}`)
+				// Connection might be closing or in a bad state, trigger reconnect
+				this.disconnect()
+				this.scheduleReconnect()
+				return false
+			}
+		} else {
+			this.log('warn', 'Cannot send message - WebSocket not connected')
+			return false
+		}
+	}
 
-    if (!this.subscriptions.has(id)) {
-      this.log('warn', `Subscription ID ${id} does not exist`)
-      return
-    }
+	/**
+	 * Subscribe to a LiveUpdate property and bind it to a module variable
+	 */
+	subscribeToVariable(
+		feedbackId: string,
+		variableName: string,
+		objectPath: string,
+		propertyPath: string,
+		updateFrequencyMs: number | undefined,
+	): void {
+		if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+			this.log('warn', 'Cannot subscribe - WebSocket not connected')
+			return
+		}
 
-    const message = {
-      set: [{ id, value }],
-    }
+		// Check if we already have a subscription for this object/property
+		for (const [subId, sub] of this.subscriptions.entries()) {
+			if (sub.objectPath === objectPath && sub.propertyPath === propertyPath) {
+				// Reuse existing subscription, just update the feedback mapping
+				this.log('info', `Reusing existing subscription ${subId} for feedback ${feedbackId}`)
+				this.feedbackIdToSubscriptionId.set(feedbackId, subId)
 
-    this.log('debug', `Setting property ID ${id} to: ${JSON.stringify(value)}`)
-    
-    this.send(message)
-  }
+				// Update subscription to also use this variable name (support multiple feedbacks)
+				if (sub.variableName !== variableName) {
+					sub.variableName = variableName
+				}
 
+				return
+			}
+		}
 
-  private async applyConfig(config: DisguiseConfig): Promise<void> {
-    this.config = config
+		const message: any = {
+			subscribe: {
+				object: objectPath,
+				properties: [propertyPath],
+			},
+		}
 
-    if (!config.host) {
-      this.updateStatus(InstanceStatus.BadConfig, 'Host or IP required')
-      return
-    }
+		if (updateFrequencyMs !== undefined && updateFrequencyMs > 0) {
+			message.subscribe.configuration = { updateFrequencyMs }
+		}
 
-    this.setupActions()
-    this.setupFeedbacks()
-    this.setupVariables()
-    this.setupPresets()
-    
-    this.shouldReconnect = true
-    this.connect()
-  }
+		this.log('info', `Subscribing to ${objectPath}.${propertyPath} as variable '${variableName}'`)
 
-  private connect(): void {
-    if (this.ws) {
-      this.disconnect()
-    }
+		if (!this.send(message)) {
+			return
+		}
 
-    const url = `ws://${this.config.host}:${this.config.port}/api/session/liveupdate`
-    this.log('debug', `Connecting to Disguise Designer at ${url}`)
-    this.updateStatus(InstanceStatus.Connecting)
-    this.hasLoggedConnectionError = false // Reset before each connection attempt
+		const key = `${objectPath}:${propertyPath}`
+		this.pendingSubscriptions.set(key, { feedbackId, variableName, timestamp: Date.now() })
 
-    try {
-      this.ws = new WebSocket(url)
+		// Initialize the module variable as undefined until first value arrives
+		this.setVariableValues({ [variableName]: undefined })
+	}
 
-      this.ws.on('open', () => {
-        this.log('info', 'Connected to Disguise Designer LiveUpdate API')
-        this.updateStatus(InstanceStatus.Ok)
-        this.connectionReady = true
-        this.hasLoggedConnectionError = false // Reset on successful connection
-        this.stopReconnectTimer()
-        this.setVariableValues({
-          connection_status: 'Connected',
-        })
-        
-        this.subscribeFeedbacks()
-        this.startPendingCleanupTimer()
-      })
+	/**
+	 * Unsubscribe from a LiveUpdate property by feedback ID
+	 */
+	unsubscribeFromVariable(feedbackId: string): void {
+		const subscriptionId = this.feedbackIdToSubscriptionId.get(feedbackId)
 
-      this.ws.on('message', (data: WebSocket.Data) => {
-        this.handleMessage(data.toString())
-      })
+		for (const [key, pending] of this.pendingSubscriptions.entries()) {
+			if (pending.feedbackId === feedbackId) {
+				this.pendingSubscriptions.delete(key)
+			}
+		}
 
-      this.ws.on('error', (error: Error) => {
-        if (!this.hasLoggedConnectionError) {
-          this.log('error', `WebSocket error: ${error.message}`)
-          this.hasLoggedConnectionError = true
-        }
-        this.updateStatus(InstanceStatus.ConnectionFailure, error.message)
-      })
+		if (subscriptionId === undefined) {
+			return
+		}
 
-      this.ws.on('close', (code: number, reason: Buffer) => {
-        const reasonStr = reason ? reason.toString() : ''
-        this.log('warn', `WebSocket closed: ${code} ${reasonStr}`)
-        this.connectionReady = false
-        this.subscriptions.clear()
-        this.feedbackIdToSubscriptionId.clear()
-        this.feedbackOptionsCache.clear()
-        this.setVariableValues({
-          connection_status: 'Disconnected',
-        })
-        
-        if (this.pendingCleanupTimer) {
-          clearTimeout(this.pendingCleanupTimer)
-          this.pendingCleanupTimer = undefined
-        }
-        
-        if (this.shouldReconnect) {
-          this.updateStatus(InstanceStatus.Disconnected, 'Connection lost')
-          this.scheduleReconnect()
-        } else {
-          this.updateStatus(InstanceStatus.Disconnected)
-        }
-      })
-    } catch (error) {
-      if (!this.hasLoggedConnectionError) {
-        this.log('error', `Failed to create WebSocket: ${error}`)
-        this.hasLoggedConnectionError = true
-      }
-      this.updateStatus(InstanceStatus.ConnectionFailure)
-      this.scheduleReconnect()
-    }
-  }
+		if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+			this.log('warn', 'Cannot unsubscribe - WebSocket not connected')
+			this.subscriptions.delete(subscriptionId)
+			this.feedbackIdToSubscriptionId.delete(feedbackId)
+			this.updateVariableDefinitions()
+			return
+		}
 
-  private disconnect(): void {
-    this.stopReconnectTimer() // This will clear reconnectTimer
-    
-    if (this.pendingCleanupTimer) {
-      clearTimeout(this.pendingCleanupTimer)
-      this.pendingCleanupTimer = undefined
-    }
-    
-    if (this.ws) {
-      try {
-        this.ws.removeAllListeners()
-        if (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING) {
-          this.ws.close()
-        }
-      } catch (error) {
-        // Ignore close errors
-      }
-      this.ws = null
-    }
-    this.subscriptions.clear()
-    this.feedbackIdToSubscriptionId.clear()
-    this.pendingSubscriptions.clear()
-    this.feedbackOptionsCache.clear()
-  }
+		const subscription = this.subscriptions.get(subscriptionId)
 
-  private scheduleReconnect(): void {
-    if (!this.shouldReconnect) return
-    
-    this.stopReconnectTimer()
-    const interval = this.config.reconnectInterval ?? 5000
-    this.log('info', `Reconnecting in ${interval}ms`)
-    
-    this.reconnectTimer = setTimeout(() => {
-      this.connect()
-    }, interval)
-  }
+		const message = {
+			unsubscribe: { id: subscriptionId },
+		}
 
-  private stopReconnectTimer(): void {
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer)
-      this.reconnectTimer = undefined
-    }
-  }
+		this.log('info', `Unsubscribing from ${subscription?.objectPath}.${subscription?.propertyPath}`)
+		this.send(message)
 
-  private handleMessage(data: string): void {
-    try {
-      const message = JSON.parse(data)
+		this.subscriptions.delete(subscriptionId)
+		this.feedbackIdToSubscriptionId.delete(feedbackId)
+		this.updateVariableDefinitions()
+	}
 
-      if (message.error) {
-        this.log('error', `LiveUpdate error: ${message.error}`)
-        
-        // Try to extract object/property paths from error message and clean up pending subscription
-        // Error format: "Unable to subscribe to OBJECT / PROPERTY - ..."
-        const match = message.error.match(/Unable to subscribe to (.+?) \/ (.+?) -/)
-        if (match && match[1] && match[2]) {
-          const objectPath = match[1].trim()
-          const propertyPath = match[2].trim()
-          const key = `${objectPath}:${propertyPath}`
-          
-          if (this.pendingSubscriptions.has(key)) {
-            const pending = this.pendingSubscriptions.get(key)!
-            this.log('warn', `Removing failed pending subscription for variable '${pending.variableName}'`)
-            this.pendingSubscriptions.delete(key)
-            
-            // Set error message in the variable so user knows it failed
-            this.setVariableValues({ [pending.variableName]: 'ERROR' })
-          }
-        }
-        
-        return
-      }
+	/**
+	 * Set a LiveUpdate property value by subscription ID
+	 */
+	setProperty(id: number, value: unknown): void {
+		if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+			this.log('warn', 'Cannot set property - WebSocket not connected')
+			return
+		}
 
-      if (message.subscriptions) {
-        this.handleSubscriptionsUpdate(message.subscriptions)
-      }
+		if (!this.subscriptions.has(id)) {
+			this.log('warn', `Subscription ID ${id} does not exist`)
+			return
+		}
 
-      if (message.valuesChanged) {
-        this.handleValuesChanged(message.valuesChanged)
-      }
-    } catch (error) {
-      this.log('error', `Failed to parse message: ${error instanceof Error ? error.message : String(error)}`)
-    }
-  }
+		const message = {
+			set: [{ id, value }],
+		}
 
-  private handleSubscriptionsUpdate(subscriptions: any[]): void {
-    this.log('info', `Subscriptions updated: ${subscriptions.length} active`)
-    
-    // Update our subscription map
-    const newSubscriptions = new Map<number, LiveUpdateSubscription>()
-    const newFeedbackMap = new Map<string, number>()
-    
-    for (const sub of subscriptions) {
-      const existing = this.subscriptions.get(sub.id)
-      
-      // Check if this matches any pending subscription
-      const key = `${sub.objectPath}:${sub.propertyPath}`
-      if (this.pendingSubscriptions.has(key)) {
-        const pending = this.pendingSubscriptions.get(key)!
-        
-        newSubscriptions.set(sub.id, {
-          id: sub.id,
-          objectPath: sub.objectPath,
-          propertyPath: sub.propertyPath,
-          feedbackId: pending.feedbackId,
-          variableName: pending.variableName,
-          value: existing?.value,
-          changeTimestamp: existing?.changeTimestamp,
-          messageTimestamp: existing?.messageTimestamp,
-        })
-        
-        newFeedbackMap.set(pending.feedbackId, sub.id)
-        this.log('info', `Subscription ${sub.id}: ${sub.objectPath}.${sub.propertyPath} -> variable: ${pending.variableName}`)
-        this.pendingSubscriptions.delete(key)
-      } else if (existing) {
-        // Preserve existing subscription
-        newSubscriptions.set(sub.id, existing)
-        newFeedbackMap.set(existing.feedbackId, sub.id)
-      }
-    }
-    
-    this.subscriptions = newSubscriptions
-    this.feedbackIdToSubscriptionId = newFeedbackMap
+		this.log('debug', `Setting property ID ${id} to: ${JSON.stringify(value)}`)
 
-    // Update feedbacks and variable definitions
-    this.checkFeedbacks()
-    this.updateVariableDefinitions()
-  }
+		this.send(message)
+	}
 
-  private formatValue(value: any): string {
-    if (value === null || value === undefined) {
-      return ''
-    }
-    
-    if (typeof value === 'number') {
-      // Show integers without decimals, floats with appropriate precision
-      return Number.isInteger(value) ? value.toString() : value.toFixed(2)
-    }
-    
-    if (typeof value === 'object') {
-      return JSON.stringify(value)
-    }
-    
-    return String(value)
-  }
+	private async applyConfig(config: DisguiseConfig): Promise<void> {
+		this.config = config
 
-  /**
-   * Handle value updates from Disguise LiveUpdate API.
-   * Updates module variables that Companion exposes as $(liveupdate:variable_name)
-   */
-  private handleValuesChanged(values: any[]): void {
-    const changedVars: Record<string, any> = {}
-    
-    for (const valueUpdate of values) {
-      const subscription = this.subscriptions.get(valueUpdate.id)
-      if (subscription) {
-        subscription.value = valueUpdate.value
-        subscription.changeTimestamp = valueUpdate.changeTimestamp
-        subscription.messageTimestamp = valueUpdate.messageTimestamp
+		if (!config.host) {
+			this.updateStatus(InstanceStatus.BadConfig, 'Host or IP required')
+			return
+		}
 
-        // Check if the value is an error object from Disguise
-        if (valueUpdate.value && typeof valueUpdate.value === 'object' && valueUpdate.value.errorType) {
-          const errorType = valueUpdate.value.errorType
-          const errorMessage = valueUpdate.value.message || 'Unknown error'
-          
-          // Track consecutive errors
-          subscription.errorCount = (subscription.errorCount || 0) + 1
-          
-          this.log('error', `Property path error for ${subscription.objectPath}.${subscription.propertyPath}: ${errorMessage} (error count: ${subscription.errorCount})`)
-          
-          // If we've hit 3 consecutive errors, unsubscribe and let user fix it
-          if (subscription.errorCount >= 3) {
-            this.log('warn', `Unsubscribing variable '${subscription.variableName}' after ${subscription.errorCount} consecutive errors`)
-            this.log('warn', `Fix the property path in the feedback and use "Refresh Subscriptions" action to retry`)
-            
-            // Unsubscribe from Disguise
-            const message = { unsubscribe: { id: subscription.id } }
-            this.send(message)
-            
-            // Clean up local state
-            this.subscriptions.delete(subscription.id)
-            this.feedbackIdToSubscriptionId.delete(subscription.feedbackId)
-            
-            // Set error indicator in variable
-            changedVars[subscription.variableName] = 'PATH_ERROR (unsubscribed)'
-            
-            // Update variable definitions
-            this.updateVariableDefinitions()
-          } else {
-            this.log('warn', `Variable '${subscription.variableName}' has invalid property path`)
-            changedVars[subscription.variableName] = 'PATH_ERROR'
-          }
-          
-          continue
-        }
-        
-        // Reset error count on successful value update
-        subscription.errorCount = 0
+		this.setupActions()
+		this.setupFeedbacks()
+		this.setupVariables()
+		this.setupPresets()
 
-        // Keep primitives (number, string, boolean) as-is for Companion expressions
-        // Convert complex objects (arrays, objects) to JSON strings for display
-        let displayValue = valueUpdate.value
-        if (valueUpdate.value !== null && valueUpdate.value !== undefined) {
-          const valueType = typeof valueUpdate.value
-          if (valueType === 'object') {
-            // Arrays and objects need to be stringified
-            displayValue = JSON.stringify(valueUpdate.value)
-          }
-          // else: number, string, boolean stay as-is
-        }
-        
-        // Update the module variable
-        // This makes the value available as $(liveupdate:variable_name) throughout Companion
-        changedVars[subscription.variableName] = displayValue
-      }
-    }
+		this.shouldReconnect = true
+		this.connect()
+	}
 
-    // Push all updated variables to Companion's variable system in one batch
-    if (Object.keys(changedVars).length > 0) {
-      this.setVariableValues(changedVars)
-    }
+	private connect(): void {
+		if (this.ws) {
+			this.disconnect()
+		}
 
-    // Trigger feedback re-evaluation (for things like connectionState feedback)
-    this.checkFeedbacks()
-  }
+		const url = `ws://${this.config.host}:${this.config.port}/api/session/liveupdate`
+		this.log('debug', `Connecting to Disguise Designer at ${url}`)
+		this.updateStatus(InstanceStatus.Connecting)
+		this.hasLoggedConnectionError = false // Reset before each connection attempt
 
-  /**
-   * Update Companion's list of available module variables.
-   * This tells Companion what variables exist (e.g., $(liveupdate:fps))
-   * The actual values are set via setVariableValues() when data arrives.
-   */
-  private updateVariableDefinitions(): void {
-    const variableDefinitions = getVariableDefinitions()
-    
-    // Add dynamic variable definitions for each active subscription
-    this.subscriptions.forEach((sub) => {
-      variableDefinitions.push({
-        variableId: sub.variableName,
-        name: `${sub.objectPath}.${sub.propertyPath}`,
-      })
-    })
-    
-    this.log('info', `Setting ${variableDefinitions.length} variable definitions`)
-    this.setVariableDefinitions(variableDefinitions)
-  }
+		try {
+			this.ws = new WebSocket(url)
 
-  /**
-   * Clean up pending subscriptions that have timed out
-   */
-  private cleanupPendingSubscriptions(): void {
-    const now = Date.now()
-    const timeout = this.config.pendingSubscriptionTimeout ?? 30000
-    
-    for (const [key, pending] of this.pendingSubscriptions.entries()) {
-      if (now - pending.timestamp > timeout) {
-        this.log('warn', `Pending subscription timed out: ${key}`)
-        this.pendingSubscriptions.delete(key)
-        this.updateVariableDefinitions()
-      }
-    }
-  }
+			this.ws.on('open', () => {
+				this.log('info', 'Connected to Disguise Designer LiveUpdate API')
+				this.updateStatus(InstanceStatus.Ok)
+				this.connectionReady = true
+				this.hasLoggedConnectionError = false // Reset on successful connection
+				this.stopReconnectTimer()
+				this.setVariableValues({
+					connection_status: 'Connected',
+				})
 
-  /**
-   * Start periodic cleanup timer for pending subscriptions
-   */
-  private startPendingCleanupTimer(): void {
-    if (this.pendingCleanupTimer) {
-      clearTimeout(this.pendingCleanupTimer)
-    }
-    
-    this.pendingCleanupTimer = setTimeout(() => {
-      this.cleanupPendingSubscriptions()
-      // Reschedule if still connected
-      if (this.connectionReady) {
-        this.startPendingCleanupTimer()
-      }
-    }, this.config.pendingSubscriptionTimeout ?? 30000)
-  }
+				this.subscribeFeedbacks()
+				this.startPendingCleanupTimer()
+			})
+
+			this.ws.on('message', (data: WebSocket.RawData) => {
+				this.handleMessage(rawDataToString(data))
+			})
+
+			this.ws.on('error', (error: Error) => {
+				if (!this.hasLoggedConnectionError) {
+					this.log('error', `WebSocket error: ${error.message}`)
+					this.hasLoggedConnectionError = true
+				}
+				this.updateStatus(InstanceStatus.ConnectionFailure, error.message)
+			})
+
+			this.ws.on('close', (code: number, reason: Buffer) => {
+				const reasonStr = reason ? reason.toString() : ''
+				this.log('warn', `WebSocket closed: ${code} ${reasonStr}`)
+				this.connectionReady = false
+				this.subscriptions.clear()
+				this.feedbackIdToSubscriptionId.clear()
+				this.feedbackOptionsCache.clear()
+				this.setVariableValues({
+					connection_status: 'Disconnected',
+				})
+
+				if (this.pendingCleanupTimer) {
+					clearTimeout(this.pendingCleanupTimer)
+					this.pendingCleanupTimer = undefined
+				}
+
+				if (this.shouldReconnect) {
+					this.updateStatus(InstanceStatus.Disconnected, 'Connection lost')
+					this.scheduleReconnect()
+				} else {
+					this.updateStatus(InstanceStatus.Disconnected)
+				}
+			})
+		} catch (error) {
+			if (!this.hasLoggedConnectionError) {
+				this.log('error', `Failed to create WebSocket: ${error}`)
+				this.hasLoggedConnectionError = true
+			}
+			this.updateStatus(InstanceStatus.ConnectionFailure)
+			this.scheduleReconnect()
+		}
+	}
+
+	private disconnect(): void {
+		this.stopReconnectTimer() // This will clear reconnectTimer
+
+		if (this.pendingCleanupTimer) {
+			clearTimeout(this.pendingCleanupTimer)
+			this.pendingCleanupTimer = undefined
+		}
+
+		if (this.ws) {
+			try {
+				this.ws.removeAllListeners()
+				if (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING) {
+					this.ws.close()
+				}
+			} catch {
+				// Ignore close errors
+			}
+			this.ws = null
+		}
+		this.subscriptions.clear()
+		this.feedbackIdToSubscriptionId.clear()
+		this.pendingSubscriptions.clear()
+		this.feedbackOptionsCache.clear()
+	}
+
+	private scheduleReconnect(): void {
+		if (!this.shouldReconnect) return
+
+		this.stopReconnectTimer()
+		const interval = this.config.reconnectInterval ?? 5000
+		this.log('info', `Reconnecting in ${interval}ms`)
+
+		this.reconnectTimer = setTimeout(() => {
+			this.connect()
+		}, interval)
+	}
+
+	private stopReconnectTimer(): void {
+		if (this.reconnectTimer) {
+			clearTimeout(this.reconnectTimer)
+			this.reconnectTimer = undefined
+		}
+	}
+
+	private handleMessage(data: string): void {
+		try {
+			const message = JSON.parse(data)
+
+			if (message.error) {
+				this.log('error', `LiveUpdate error: ${message.error}`)
+
+				// Try to extract object/property paths from error message and clean up pending subscription
+				// Error format: "Unable to subscribe to OBJECT / PROPERTY - ..."
+				const match = message.error.match(/Unable to subscribe to (.+?) \/ (.+?) -/)
+				if (match && match[1] && match[2]) {
+					const objectPath = match[1].trim()
+					const propertyPath = match[2].trim()
+					const key = `${objectPath}:${propertyPath}`
+
+					if (this.pendingSubscriptions.has(key)) {
+						const pending = this.pendingSubscriptions.get(key)!
+						this.log('warn', `Removing failed pending subscription for variable '${pending.variableName}'`)
+						this.pendingSubscriptions.delete(key)
+
+						// Set error message in the variable so user knows it failed
+						this.setVariableValues({ [pending.variableName]: 'ERROR' })
+					}
+				}
+
+				return
+			}
+
+			if (message.subscriptions) {
+				this.handleSubscriptionsUpdate(message.subscriptions)
+			}
+
+			if (message.valuesChanged) {
+				this.handleValuesChanged(message.valuesChanged)
+			}
+		} catch (error) {
+			this.log('error', `Failed to parse message: ${error instanceof Error ? error.message : String(error)}`)
+		}
+	}
+
+	private handleSubscriptionsUpdate(subscriptions: any[]): void {
+		this.log('info', `Subscriptions updated: ${subscriptions.length} active`)
+
+		// Update our subscription map
+		const newSubscriptions = new Map<number, LiveUpdateSubscription>()
+		const newFeedbackMap = new Map<string, number>()
+
+		for (const sub of subscriptions) {
+			const existing = this.subscriptions.get(sub.id)
+
+			// Check if this matches any pending subscription
+			const key = `${sub.objectPath}:${sub.propertyPath}`
+			if (this.pendingSubscriptions.has(key)) {
+				const pending = this.pendingSubscriptions.get(key)!
+
+				newSubscriptions.set(sub.id, {
+					id: sub.id,
+					objectPath: sub.objectPath,
+					propertyPath: sub.propertyPath,
+					feedbackId: pending.feedbackId,
+					variableName: pending.variableName,
+					value: existing?.value,
+					changeTimestamp: existing?.changeTimestamp,
+					messageTimestamp: existing?.messageTimestamp,
+				})
+
+				newFeedbackMap.set(pending.feedbackId, sub.id)
+				this.log(
+					'info',
+					`Subscription ${sub.id}: ${sub.objectPath}.${sub.propertyPath} -> variable: ${pending.variableName}`,
+				)
+				this.pendingSubscriptions.delete(key)
+			} else if (existing) {
+				// Preserve existing subscription
+				newSubscriptions.set(sub.id, existing)
+				newFeedbackMap.set(existing.feedbackId, sub.id)
+			}
+		}
+
+		this.subscriptions = newSubscriptions
+		this.feedbackIdToSubscriptionId = newFeedbackMap
+
+		// Update feedbacks and variable definitions
+		this.checkFeedbacks()
+		this.updateVariableDefinitions()
+	}
+
+	private formatValue(value: any): string {
+		if (value === null || value === undefined) {
+			return ''
+		}
+
+		if (typeof value === 'number') {
+			// Show integers without decimals, floats with appropriate precision
+			return Number.isInteger(value) ? value.toString() : value.toFixed(2)
+		}
+
+		if (typeof value === 'object') {
+			return JSON.stringify(value)
+		}
+
+		return String(value)
+	}
+
+	/**
+	 * Handle value updates from Disguise LiveUpdate API.
+	 * Updates module variables that Companion exposes as $(liveupdate:variable_name)
+	 */
+	private handleValuesChanged(values: any[]): void {
+		const changedVars: Record<string, any> = {}
+
+		for (const valueUpdate of values) {
+			const subscription = this.subscriptions.get(valueUpdate.id)
+			if (subscription) {
+				subscription.value = valueUpdate.value
+				subscription.changeTimestamp = valueUpdate.changeTimestamp
+				subscription.messageTimestamp = valueUpdate.messageTimestamp
+
+				// Check if the value is an error object from Disguise
+				if (valueUpdate.value && typeof valueUpdate.value === 'object' && valueUpdate.value.errorType) {
+					const errorMessage = valueUpdate.value.message || 'Unknown error'
+
+					// Track consecutive errors
+					subscription.errorCount = (subscription.errorCount || 0) + 1
+
+					this.log(
+						'error',
+						`Property path error for ${subscription.objectPath}.${subscription.propertyPath}: ${errorMessage} (error count: ${subscription.errorCount})`,
+					)
+
+					// If we've hit 3 consecutive errors, unsubscribe and let user fix it
+					if (subscription.errorCount >= 3) {
+						this.log(
+							'warn',
+							`Unsubscribing variable '${subscription.variableName}' after ${subscription.errorCount} consecutive errors`,
+						)
+						this.log('warn', `Fix the property path in the feedback and use "Refresh Subscriptions" action to retry`)
+
+						// Unsubscribe from Disguise
+						const message = { unsubscribe: { id: subscription.id } }
+						this.send(message)
+
+						// Clean up local state
+						this.subscriptions.delete(subscription.id)
+						this.feedbackIdToSubscriptionId.delete(subscription.feedbackId)
+
+						// Set error indicator in variable
+						changedVars[subscription.variableName] = 'PATH_ERROR (unsubscribed)'
+
+						// Update variable definitions
+						this.updateVariableDefinitions()
+					} else {
+						this.log('warn', `Variable '${subscription.variableName}' has invalid property path`)
+						changedVars[subscription.variableName] = 'PATH_ERROR'
+					}
+
+					continue
+				}
+
+				// Reset error count on successful value update
+				subscription.errorCount = 0
+
+				// Keep primitives (number, string, boolean) as-is for Companion expressions
+				// Convert complex objects (arrays, objects) to JSON strings for display
+				let displayValue = valueUpdate.value
+				if (valueUpdate.value !== null && valueUpdate.value !== undefined) {
+					const valueType = typeof valueUpdate.value
+					if (valueType === 'object') {
+						// Arrays and objects need to be stringified
+						displayValue = JSON.stringify(valueUpdate.value)
+					}
+					// else: number, string, boolean stay as-is
+				}
+
+				// Update the module variable
+				// This makes the value available as $(liveupdate:variable_name) throughout Companion
+				changedVars[subscription.variableName] = displayValue
+			}
+		}
+
+		// Push all updated variables to Companion's variable system in one batch
+		if (Object.keys(changedVars).length > 0) {
+			this.setVariableValues(changedVars)
+		}
+
+		// Trigger feedback re-evaluation (for things like connectionState feedback)
+		this.checkFeedbacks()
+	}
+
+	/**
+	 * Update Companion's list of available module variables.
+	 * This tells Companion what variables exist (e.g., $(liveupdate:fps))
+	 * The actual values are set via setVariableValues() when data arrives.
+	 */
+	private updateVariableDefinitions(): void {
+		const variableDefinitions = getVariableDefinitions()
+
+		// Add dynamic variable definitions for each active subscription
+		this.subscriptions.forEach((sub) => {
+			variableDefinitions.push({
+				variableId: sub.variableName,
+				name: `${sub.objectPath}.${sub.propertyPath}`,
+			})
+		})
+
+		this.log('info', `Setting ${variableDefinitions.length} variable definitions`)
+		this.setVariableDefinitions(variableDefinitions)
+	}
+
+	/**
+	 * Clean up pending subscriptions that have timed out
+	 */
+	private cleanupPendingSubscriptions(): void {
+		const now = Date.now()
+		const timeout = this.config.pendingSubscriptionTimeout ?? 30000
+
+		for (const [key, pending] of this.pendingSubscriptions.entries()) {
+			if (now - pending.timestamp > timeout) {
+				this.log('warn', `Pending subscription timed out: ${key}`)
+				this.pendingSubscriptions.delete(key)
+				this.updateVariableDefinitions()
+			}
+		}
+	}
+
+	/**
+	 * Start periodic cleanup timer for pending subscriptions
+	 */
+	private startPendingCleanupTimer(): void {
+		if (this.pendingCleanupTimer) {
+			clearTimeout(this.pendingCleanupTimer)
+		}
+
+		this.pendingCleanupTimer = setTimeout(() => {
+			this.cleanupPendingSubscriptions()
+			// Reschedule if still connected
+			if (this.connectionReady) {
+				this.startPendingCleanupTimer()
+			}
+		}, this.config.pendingSubscriptionTimeout ?? 30000)
+	}
 }
 
 runEntrypoint(DisguiseInstance, upgradeScripts)
 
 export type { DisguiseConfig }
-
