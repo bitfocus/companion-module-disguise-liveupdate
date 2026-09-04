@@ -10,8 +10,12 @@
     "HELP.md"
   ],
   "scripts": {
-    "build": "rimraf dist && tsc --project tsconfig.json",
-    "watch": "tsc --project tsconfig.json --watch",
+    "build": "rimraf dist && tsc --project tsconfig.build.json",
+    "watch": "tsc --project tsconfig.build.json --watch",
+    "typecheck": "tsc --project tsconfig.json",
+    "test": "yarn build && tsx --test test/*.test.ts",
+    "test:only": "tsx --test test/*.test.ts",
+    "live:verify": "node scripts/live-verify.mjs",
     "lint:raw": "eslint",
     "lint": "eslint .",
     "format": "prettier -w src scripts eslint.config.mjs",
@@ -46,6 +50,7 @@
     "prettier": "^3.8.3",
     "rimraf": "^5.0.5",
     "tslib": "^2.6.2",
+    "tsx": "^4",
     "typescript": "^5.3.3",
     "typescript-eslint": "^8.59.0"
   },
