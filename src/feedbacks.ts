@@ -3,6 +3,73 @@ import type { DisguiseInstance } from './index'
 
 type DisguiseFeedbackDefinitions = CompanionFeedbackDefinitions
 
+export type CompareOperator = 'eq' | 'ne' | 'lt' | 'le' | 'gt' | 'ge' | 'truthy' | 'contains'
+
+const FALSY_STRINGS = new Set(['', 'false', 'False', '0', 'None', 'null', 'undefined'])
+
+function toNumber(value: unknown): number | undefined {
+	if (typeof value === 'number') return Number.isFinite(value) ? value : undefined
+	if (typeof value === 'boolean') return value ? 1 : 0
+	if (typeof value === 'string' && value.trim() !== '') {
+		const n = Number(value)
+		return Number.isFinite(n) ? n : undefined
+	}
+	return undefined
+}
+
+function toText(value: unknown): string {
+	if (value === null || value === undefined) return ''
+	if (typeof value === 'string') return value
+	if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') return String(value)
+	return JSON.stringify(value) ?? ''
+}
+
+function isTruthy(value: unknown): boolean {
+	if (value === null || value === undefined) return false
+	if (typeof value === 'boolean') return value
+	if (typeof value === 'number') return value !== 0
+	if (typeof value === 'string') return !FALSY_STRINGS.has(value.trim())
+	if (Array.isArray(value)) return value.length > 0
+	return true
+}
+
+/**
+ * Compare a LiveUpdate value against the text the user entered.
+ * Numbers are compared numerically when both sides are numeric, booleans against true/false,
+ * everything else as text (objects and arrays as their JSON form).
+ */
+export function compareValues(actual: unknown, operator: CompareOperator, expected: string): boolean {
+	if (operator === 'truthy') return isTruthy(actual)
+	if (actual === null || actual === undefined) return false
+
+	const actualNumber = toNumber(actual)
+	const expectedNumber = toNumber(expected)
+	const numeric = actualNumber !== undefined && expectedNumber !== undefined
+
+	switch (operator) {
+		case 'eq':
+		case 'ne': {
+			let equal: boolean
+			if (numeric) equal = actualNumber === expectedNumber
+			else if (typeof actual === 'boolean') equal = actual === (expected.trim().toLowerCase() === 'true')
+			else equal = toText(actual) === expected
+			return operator === 'eq' ? equal : !equal
+		}
+		case 'lt':
+			return numeric && actualNumber < expectedNumber
+		case 'le':
+			return numeric && actualNumber <= expectedNumber
+		case 'gt':
+			return numeric && actualNumber > expectedNumber
+		case 'ge':
+			return numeric && actualNumber >= expectedNumber
+		case 'contains':
+			return toText(actual).includes(expected)
+		default:
+			return false
+	}
+}
+
 export function getFeedbackDefinitions(instance: DisguiseInstance): DisguiseFeedbackDefinitions {
 	return {
 		connectionState: {
@@ -118,6 +185,59 @@ export function getFeedbackDefinitions(instance: DisguiseInstance): DisguiseFeed
 			unsubscribe: async (feedback) => {
 				instance.feedbackOptionsCache.delete(feedback.id)
 				instance.unsubscribeFromVariable(feedback.id)
+			},
+		},
+
+		liveUpdateCompare: {
+			type: 'boolean',
+			name: 'LiveUpdate Compare',
+			description:
+				'True when the current value of a LiveUpdate Variable satisfies the comparison. Used by the presets for state colours; add a LiveUpdate Variable feedback with the same Variable Name on the button (or anywhere) to create the subscription.',
+			defaultStyle: {
+				bgcolor: combineRgb(0, 100, 0),
+				color: combineRgb(220, 220, 220),
+			},
+			options: [
+				{
+					type: 'textinput',
+					label: 'Variable Name',
+					id: 'variableName',
+					default: '',
+					useVariables: false,
+					tooltip: 'The variable name of a LiveUpdate Variable feedback (e.g., "fps")',
+				},
+				{
+					type: 'dropdown',
+					label: 'Comparison',
+					id: 'operator',
+					default: 'eq',
+					choices: [
+						{ id: 'eq', label: '= equals' },
+						{ id: 'ne', label: '≠ not equal' },
+						{ id: 'lt', label: '< less than' },
+						{ id: 'le', label: '≤ less or equal' },
+						{ id: 'gt', label: '> greater than' },
+						{ id: 'ge', label: '≥ greater or equal' },
+						{ id: 'truthy', label: 'is true / non-zero / non-empty' },
+						{ id: 'contains', label: 'contains text' },
+					],
+				},
+				{
+					type: 'textinput',
+					label: 'Value',
+					id: 'value',
+					default: '',
+					useVariables: true,
+					tooltip: 'Number, true/false or text to compare with',
+					isVisible: (options) => options.operator !== 'truthy',
+				},
+			],
+			callback: (feedback) => {
+				const variableName = String(feedback.options.variableName || '')
+				const operator = String(feedback.options.operator || 'eq') as CompareOperator
+				const expected = String(feedback.options.value ?? '')
+				const subscription = instance.getSubscriptionByVariableName(variableName)
+				return compareValues(subscription?.value, operator, expected)
 			},
 		},
 	}
