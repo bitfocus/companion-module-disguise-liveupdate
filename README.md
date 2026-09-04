@@ -45,6 +45,11 @@ See [companion/HELP.md](companion/HELP.md) for the user documentation and
 - **Set to Disguise (String / Number / Boolean / JSON)**: write a value through the subscription of a LiveUpdate Variable
 - **Toggle Disguise Boolean**: flip a boolean property
 - **Set selection**: change a selection variable (and therefore every preset built on it)
+- **Transport / RenderStream / Failover commands**: play, stop, section and track jumps, brightness,
+  volume, speed, engage, RenderStream workload start / stop / restart / sync and machine failover,
+  sent over Designer's Session REST API on the same host as the WebSocket. LiveUpdate itself cannot
+  carry commands. Commands that change what the audience sees are off by default and, once enabled,
+  need two presses of the same button.
 
 ## Variables
 
@@ -91,6 +96,7 @@ prefix stay the same, so existing connections keep working.
 Two scripts talk to a real Director and are not part of `yarn test`:
 
 ```bash
+node scripts/rest-discover.mjs --host <director>            # read-only: read the Director's own OpenAPI document
 node scripts/live-verify.mjs --host <director>              # read-only: subscribe to every pair once
 node scripts/live-write-verify.mjs --host <director>        # dry run: print the write plan
 node scripts/live-write-verify.mjs --host <director> --yes  # write and restore each target

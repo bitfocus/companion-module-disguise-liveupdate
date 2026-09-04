@@ -188,6 +188,28 @@ export function getFeedbackDefinitions(instance: DisguiseInstance): DisguiseFeed
 			},
 		},
 
+		restArmed: {
+			type: 'boolean',
+			name: 'Command armed',
+			description:
+				'True while a destructive command is waiting for its confirming press. Put it on the same button as the command so the operator can see the button is armed.',
+			defaultStyle: { bgcolor: combineRgb(200, 120, 0), color: combineRgb(0, 0, 0) },
+			options: [],
+			callback: () => instance.isRestArmed(),
+		},
+
+		restLastResult: {
+			type: 'boolean',
+			name: 'Last command failed',
+			description: 'True when the last command this connection sent did not succeed.',
+			defaultStyle: { bgcolor: combineRgb(178, 34, 34), color: combineRgb(255, 255, 255) },
+			options: [],
+			callback: () => {
+				const status = instance.getVariableValue('rest_last_status')
+				return status === 'FAILED' || status === 'UNSUPPORTED'
+			},
+		},
+
 		liveUpdateCompare: {
 			type: 'boolean',
 			name: 'LiveUpdate Compare',

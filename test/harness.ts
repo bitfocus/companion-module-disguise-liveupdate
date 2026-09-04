@@ -336,6 +336,7 @@ export function loadDist(): {
 	SELECTIONS: any[]
 	getPresetDefinitions: (instance: any) => Record<string, any>
 	getActionDefinitions: (instance: any) => Record<string, any>
+	getRestActionDefinitions: (instance: any) => Record<string, any>
 	getFeedbackDefinitions: (instance: any) => Record<string, any>
 	PRESET_CATALOG: any[]
 	PRESET_TEXTS: any[]
@@ -350,6 +351,7 @@ export function loadDist(): {
 	const presets = require(path.join(ROOT, 'dist/presets.js'))
 	const catalog = require(path.join(ROOT, 'dist/presetCatalog.js'))
 	const config = require(path.join(ROOT, 'dist/config.js'))
+	const restActions = require(path.join(ROOT, 'dist/restActions.js'))
 	/* eslint-enable @typescript-eslint/no-require-imports */
 	return {
 		DisguiseInstance: index.DisguiseInstance,
@@ -360,7 +362,11 @@ export function loadDist(): {
 		readSelections: selections.readSelections,
 		SELECTIONS: selections.SELECTIONS,
 		getPresetDefinitions: presets.getPresetDefinitions,
-		getActionDefinitions: actions.getActionDefinitions,
+		getActionDefinitions: (instance: any) => ({
+			...actions.getActionDefinitions(instance),
+			...restActions.getRestActionDefinitions(instance),
+		}),
+		getRestActionDefinitions: restActions.getRestActionDefinitions,
 		getFeedbackDefinitions: feedbacks.getFeedbackDefinitions,
 		PRESET_CATALOG: catalog.PRESET_CATALOG,
 		PRESET_TEXTS: catalog.PRESET_TEXTS,

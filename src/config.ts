@@ -23,6 +23,11 @@ export interface DisguiseConfig {
 	presetIntervalState?: number
 	/** Default update interval (ms) written into presets of the "static" class (names, lengths, lists, versions) */
 	presetIntervalStatic?: number
+	/** Command channel over the Session REST API (play, stop, section jumps, RenderStream, failover) */
+	restEnabled?: boolean
+	restAllowDestructive?: boolean
+	restArmSeconds?: number
+	restTimeout?: number
 }
 
 /**
@@ -159,6 +164,50 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			max: PRESET_INTERVAL_MAX,
 			step: 50,
 			tooltip: 'Names, lengths, lists, versions',
+		},
+		{
+			type: 'static-text',
+			id: 'commandInfo',
+			label: 'Commands',
+			width: 12,
+			value:
+				'LiveUpdate cannot carry transport commands, so play, stop, section and track jumps, RenderStream workload control and failover are sent over the Designer Session REST API on the same host and port. Commands that change what the audience sees or the shape of the session are refused unless you allow them below, and then need two presses of the same button.',
+		},
+		{
+			type: 'checkbox',
+			id: 'restEnabled',
+			label: 'Enable commands',
+			width: 4,
+			default: true,
+		},
+		{
+			type: 'checkbox',
+			id: 'restAllowDestructive',
+			label: 'Allow destructive commands',
+			width: 4,
+			default: false,
+			tooltip: 'RenderStream start / stop / restart / sync and the failover commands',
+		},
+		{
+			type: 'number',
+			id: 'restArmSeconds',
+			label: 'Confirm within (s)',
+			width: 4,
+			default: 5,
+			min: 1,
+			max: 60,
+			isVisible: (options) => !!options.restAllowDestructive,
+		},
+		{
+			type: 'number',
+			id: 'restTimeout',
+			label: 'Command timeout (ms)',
+			width: 4,
+			default: 5000,
+			min: 1000,
+			max: 30000,
+			step: 500,
+			isVisible: (options) => options.restEnabled !== false,
 		},
 		{
 			type: 'static-text',

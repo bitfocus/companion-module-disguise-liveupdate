@@ -1,0 +1,263 @@
+{
+ "host": "192.0.2.10",
+ "specPath": "/docs/session/d3api.swagger.json",
+ "title": "d3 API",
+ "version": "2.0.3",
+ "commands": [
+  {
+   "path": "/colour/cdl",
+   "summary": "Sets a CDL",
+   "body": "{cdl:{uid:string, name:string, slope:{x:number, y:number, z:number}, offset:{x:number, y:number, z:number}, power:{x:number, y:number, z:number}, saturation:number}}"
+  },
+  {
+   "path": "/failover/applydefaultrouting",
+   "summary": "Apply default matrix feed routing, to restore it back to normal state after restoring a machine",
+   "body": "none"
+  },
+  {
+   "path": "/failover/failovermachine",
+   "summary": "Fail over a single actor machine",
+   "body": "{machine:{uid:string, name:string}}"
+  },
+  {
+   "path": "/failover/restoremachine",
+   "summary": "Restore a single previously-failed actor machine",
+   "body": "{machine:{uid:string, name:string}}"
+  },
+  {
+   "path": "/mixedreality/captureobservation",
+   "summary": "Capture an observation on the given camera",
+   "body": "{camera:{uid:string, name:string}, spatialCalibration:{uid:string, name:string}}"
+  },
+  {
+   "path": "/mixedreality/deleteallobservations",
+   "summary": "Delete all observations for a given spatial calibration",
+   "body": "{spatialCalibration:{uid:string, name:string}}"
+  },
+  {
+   "path": "/mixedreality/deleteobservations",
+   "summary": "Pass a list of observation identifiers to delete",
+   "body": "{observations:[string]}"
+  },
+  {
+   "path": "/mixedreality/enableobservations",
+   "summary": "Pass a list of observation identifiers to enable/disable",
+   "body": "{observations:[{uid:string, enable:boolean}]}"
+  },
+  {
+   "path": "/mixedreality/selectcamera",
+   "summary": "Sets the current camera of an MR Set",
+   "body": "{mrSet:{uid:string, name:string}, cameraOverride:{uid:string, name:string}}"
+  },
+  {
+   "path": "/mixedreality/selectspatialcalibration",
+   "summary": "Sets the spatial calibration currently in use by a camera",
+   "body": "{camera:{uid:string, name:string}, spatialCalibration:{uid:string, name:string}}"
+  },
+  {
+   "path": "/note",
+   "summary": "Create/Update a Note",
+   "body": "{note:{uid:string, name:string}, text:string}"
+  },
+  {
+   "path": "/omnical/cameradiscovery",
+   "summary": "Request OmniCal camera discovery to be enabled or disabled.",
+   "body": "{enabled:boolean}"
+  },
+  {
+   "path": "/omnical/rigcheck/acceptresult",
+   "summary": "Accept the current OmniCal RigCheck Result as the new Fallback Result, if possible.",
+   "body": "object"
+  },
+  {
+   "path": "/omnical/rigcheck/deleteoldresults",
+   "summary": "Delete unused old OmniCal RigCheck Results to clean up disk space.",
+   "body": "object"
+  },
+  {
+   "path": "/omnical/rigcheck/executeplan",
+   "summary": "Run a new RigCheck capture, calibration and alignment based on current OmniCal Plan settings and save the data in a Result.",
+   "body": "object"
+  },
+  {
+   "path": "/omnical/rigcheck/revertresult",
+   "summary": "Revert current OmniCal RigCheck Result and switch to the current Fallback Result, if possible.",
+   "body": "object"
+  },
+  {
+   "path": "/python/execute",
+   "summary": "Execute script",
+   "body": "{moduleName:string, script:string}"
+  },
+  {
+   "path": "/python/registermodule",
+   "summary": "Register python",
+   "body": "{moduleName:string, contents:string}"
+  },
+  {
+   "path": "/quickcal/lineupcurrentpose",
+   "summary": "Lineup the current pose for the selected projector according to the selected reference points",
+   "body": "{projector:{uid:string, name:string}, referencePoint:{uid:string, name:string}, position:{x:number, y:number}}"
+  },
+  {
+   "path": "/quickcal/overwritemanualcalibration",
+   "summary": "Copies projector parameters from current calibration to manual fields",
+   "body": "{projector:{uid:string, name:string}}"
+  },
+  {
+   "path": "/quickcal/resetlineup",
+   "summary": "Resets the lineup of the selected projector",
+   "body": "{projector:{uid:string, name:string}}"
+  },
+  {
+   "path": "/renderstream/failover",
+   "summary": "Fail over a single machine",
+   "body": "{machine:{uid:string, name:string}}"
+  },
+  {
+   "path": "/renderstream/failoverpool",
+   "summary": "Update the current cluster pool and restart the workload",
+   "body": "{layer:{uid:string, name:string}}"
+  },
+  {
+   "path": "/renderstream/restartlayers",
+   "summary": "Restarts a workload for the selected layer",
+   "body": "{layers:[{uid:string, name:string}]}"
+  },
+  {
+   "path": "/renderstream/startlayers",
+   "summary": "Starts a workload for the selected layer",
+   "body": "{layers:[{uid:string, name:string}]}"
+  },
+  {
+   "path": "/renderstream/stoplayers",
+   "summary": "Stops a workload for the selected layer",
+   "body": "{layers:[{uid:string, name:string}]}"
+  },
+  {
+   "path": "/renderstream/synclayers",
+   "summary": "Syncs a workload for the selected layer",
+   "body": "{layers:[{uid:string, name:string}]}"
+  },
+  {
+   "path": "/sequencing/changeindirections",
+   "summary": "Trigger a change to one or more indirections",
+   "body": "{changes:[{indirection:{uid:string, name:string}, resource:{uid:string, name:string}}]}"
+  },
+  {
+   "path": "/shotrecorder/record",
+   "summary": "Start or stop recording",
+   "body": "{engage:boolean, name:string, slate:string, take:integer}"
+  },
+  {
+   "path": "/sockpuppet/live",
+   "summary": "Send live changes to HTTP sockpuppet",
+   "body": "{patches:[{address:string, changes:[{field:string, resourceValue:{uid:string, name:string}, floatValue:{value:number, duration:number, easingFunction:string, startValue:number, currentValue:number}, stringValue:string}], uid:string}]}"
+  },
+  {
+   "path": "/status/setguimode",
+   "summary": "",
+   "body": "{machine:{uid:string, name:string}, mode:string [\"OffWhenActor\",\"AlwaysOn\",\"AlwaysOff\"]}"
+  },
+  {
+   "path": "/transport/brightness",
+   "summary": "Set the brightness of the specified transport manager's current transport",
+   "body": "{transports:[{transport:{uid:string, name:string}, brightness:number}]}"
+  },
+  {
+   "path": "/transport/engaged",
+   "summary": "Set the engaged status of the current transport",
+   "body": "{transports:[{transport:{uid:string, name:string}, engaged:boolean}]}"
+  },
+  {
+   "path": "/transport/gotoframe",
+   "summary": "Jump to the specific frame",
+   "body": "{transports:[{transport:{uid:string, name:string}, frame:integer, playmode:string [\"NotSet\",\"Play\",\"PlaySection\",\"Loop\",\"Stop\",\"Unknown\"]}]}"
+  },
+  {
+   "path": "/transport/gotonextsection",
+   "summary": "Jump to the next section of the current track",
+   "body": "{transports:[{transport:{uid:string, name:string}, playmode:string [\"NotSet\",\"Play\",\"PlaySection\",\"Loop\",\"Stop\",\"Unknown\"]}]}"
+  },
+  {
+   "path": "/transport/gotonexttrack",
+   "summary": "Jump to the start of the next track",
+   "body": "{transports:[{transport:{uid:string, name:string}, playmode:string [\"NotSet\",\"Play\",\"PlaySection\",\"Loop\",\"Stop\",\"Unknown\"]}]}"
+  },
+  {
+   "path": "/transport/gotonote",
+   "summary": "Jump to a given note on a given transport",
+   "body": "{transports:[{transport:{uid:string, name:string}, note:string, playmode:string [\"NotSet\",\"Play\",\"PlaySection\",\"Loop\",\"Stop\",\"Unknown\"]}]}"
+  },
+  {
+   "path": "/transport/gotoprevsection",
+   "summary": "Jump to the previous section of the current track",
+   "body": "{transports:[{transport:{uid:string, name:string}, playmode:string [\"NotSet\",\"Play\",\"PlaySection\",\"Loop\",\"Stop\",\"Unknown\"]}]}"
+  },
+  {
+   "path": "/transport/gotoprevtrack",
+   "summary": "Jump to the start of the previous track",
+   "body": "{transports:[{transport:{uid:string, name:string}, playmode:string [\"NotSet\",\"Play\",\"PlaySection\",\"Loop\",\"Stop\",\"Unknown\"]}]}"
+  },
+  {
+   "path": "/transport/gotosection",
+   "summary": "Jump to a given section on a given transport",
+   "body": "{transports:[{transport:{uid:string, name:string}, section:string, playmode:string [\"NotSet\",\"Play\",\"PlaySection\",\"Loop\",\"Stop\",\"Unknown\"]}]}"
+  },
+  {
+   "path": "/transport/gototag",
+   "summary": "Jump to a given tag on a given transport",
+   "body": "{transports:[{transport:{uid:string, name:string}, type:string [\"TagType_Unknown\",\"TC\",\"MIDI\",\"CUE\"], value:string, allowGlobalJump:boolean, playmode:string [\"NotSet\",\"Play\",\"PlaySection\",\"Loop\",\"Stop\",\"Unknown\"]}]}"
+  },
+  {
+   "path": "/transport/gototime",
+   "summary": "Jump to the specific time",
+   "body": "{transports:[{transport:{uid:string, name:string}, time:number, playmode:string [\"NotSet\",\"Play\",\"PlaySection\",\"Loop\",\"Stop\",\"Unknown\"]}]}"
+  },
+  {
+   "path": "/transport/gototimecode",
+   "summary": "Jump to a given time on a given transport",
+   "body": "{transports:[{transport:{uid:string, name:string}, timecode:string, ignoreTags:boolean, playmode:string [\"NotSet\",\"Play\",\"PlaySection\",\"Loop\",\"Stop\",\"Unknown\"]}]}"
+  },
+  {
+   "path": "/transport/gototrack",
+   "summary": "Jump to the start of the given track",
+   "body": "{transports:[{transport:{uid:string, name:string}, track:{uid:string, name:string}, playmode:string [\"NotSet\",\"Play\",\"PlaySection\",\"Loop\",\"Stop\",\"Unknown\"]}]}"
+  },
+  {
+   "path": "/transport/play",
+   "summary": "Play a transport (sets playmode to 'play')",
+   "body": "{transports:[{uid:string, name:string}]}"
+  },
+  {
+   "path": "/transport/playloopsection",
+   "summary": "Loop a section on a transport (sets playmode to 'loop section')",
+   "body": "{transports:[{uid:string, name:string}]}"
+  },
+  {
+   "path": "/transport/playsection",
+   "summary": "Play a section on a transport (sets playmode to 'play to end of section')",
+   "body": "{transports:[{uid:string, name:string}]}"
+  },
+  {
+   "path": "/transport/returntostart",
+   "summary": "Return to start of a transport",
+   "body": "{transports:[{uid:string, name:string}]}"
+  },
+  {
+   "path": "/transport/speed",
+   "summary": "Set the speed of the track player of the specified transport manager's current transport",
+   "body": "{transports:[{transport:{uid:string, name:string}, speed:number}]}"
+  },
+  {
+   "path": "/transport/stop",
+   "summary": "Stop a transport",
+   "body": "{transports:[{uid:string, name:string}]}"
+  },
+  {
+   "path": "/transport/volume",
+   "summary": "Set the volume of the current transport",
+   "body": "{transports:[{transport:{uid:string, name:string}, volume:number}]}"
+  }
+ ]
+}

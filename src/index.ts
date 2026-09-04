@@ -14,6 +14,8 @@ import { getFeedbackDefinitions } from './feedbacks'
 import { getPresetDefinitions } from './presets'
 import { getVariableDefinitions } from './variables'
 import { upgradeScripts } from './upgrades'
+import { RestClient, RestCommand, REST_ENDPOINTS } from './rest'
+import { getRestActionDefinitions } from './restActions'
 
 /**
  * Config keys that require the WebSocket connection to be re-established when they change
@@ -155,6 +157,20 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	private connectionReady = false
 	private shouldReconnect = false
 	private hasLoggedConnectionError = false
+	/** Command channel: LiveUpdate cannot carry commands, the Session REST API can */
+	private rest: RestClient
+	/** Destructive commands are armed by the first press and fired by the second */
+	private armed: Map<string, { at: number; describe: string; timer: NodeJS.Timeout }> = new Map()
+
+	constructor(internal: unknown) {
+		super(internal)
+		this.rest = new RestClient({
+			host: '127.0.0.1',
+			port: 80,
+			timeoutMs: 5000,
+			log: (level, message) => this.log(level, message),
+		})
+	}
 
 	async init(config: DisguiseConfig): Promise<void> {
 		this.log('debug', 'Initializing Disguise Designer LiveUpdate module')
@@ -183,6 +199,8 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		this.pendingSubscriptions.clear()
 		this.feedbackOptionsCache.clear()
 		this.retainedVariables.clear()
+		for (const armed of this.armed.values()) clearTimeout(armed.timer)
+		this.armed.clear()
 		this.clearAllBackoff()
 	}
 
@@ -193,6 +211,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			// Only preset settings or selections changed: refresh definitions and variables
 			// without dropping the socket (and the subscriptions) for nothing.
 			this.config = config
+			this.rest.update({ timeoutMs: Math.max(1000, Number(config.restTimeout ?? 5000)) })
 			this.setupActions()
 			this.setupFeedbacks()
 			this.updateVariableDefinitions()
@@ -215,7 +234,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	}
 
 	setupActions(): void {
-		this.setActionDefinitions(getActionDefinitions(this))
+		this.setActionDefinitions({ ...getActionDefinitions(this), ...getRestActionDefinitions(this) })
 	}
 
 	setupFeedbacks(): void {
@@ -521,6 +540,70 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		this.setVariableValues({ [variableName]: undefined })
 	}
 
+	/**
+	 * Send one REST command. A destructive command needs the connection setting and two presses of
+	 * the same button within the arm window; the arm is bound to the target so a changed selection
+	 * re-arms instead of firing at something the operator did not see.
+	 */
+	async runRestCommand(command: RestCommand, body: unknown, describe: string, controlId: string): Promise<void> {
+		const endpoint = REST_ENDPOINTS[command]
+		if (this.config?.restEnabled === false) {
+			this.log('warn', `Command channel is off in the connection settings; '${describe}' was not sent`)
+			return
+		}
+		if (endpoint.destructive) {
+			if (!this.config?.restAllowDestructive) {
+				this.log(
+					'warn',
+					`'${describe}' is a destructive command; enable "Allow destructive commands" in the connection settings first`,
+				)
+				return
+			}
+			const key = `${controlId}:${command}:${describe}`
+			const armed = this.armed.get(key)
+			if (!armed) {
+				const seconds = Math.max(1, Number(this.config?.restArmSeconds ?? 5))
+				const timer = setTimeout(() => {
+					this.armed.delete(key)
+					this.setVariableValues({ rest_armed: '' })
+					this.checkFeedbacks('restArmed')
+				}, seconds * 1000)
+				if (typeof timer.unref === 'function') timer.unref()
+				this.armed.set(key, { at: Date.now(), describe, timer })
+				this.setVariableValues({ rest_armed: describe })
+				this.checkFeedbacks('restArmed')
+				this.log('info', `Armed '${describe}'. Press again within ${seconds} s to send it.`)
+				return
+			}
+			clearTimeout(armed.timer)
+			this.armed.delete(key)
+			this.setVariableValues({ rest_armed: '' })
+			this.checkFeedbacks('restArmed')
+		}
+
+		const result = await this.rest.post(command, body)
+		this.setVariableValues({
+			rest_last_command: describe,
+			rest_last_status: result.ok ? 'OK' : result.absent ? 'UNSUPPORTED' : 'FAILED',
+			rest_last_message: result.message,
+		})
+		this.checkFeedbacks('restLastResult')
+		if (result.ok) this.log('info', `Sent '${describe}'`)
+		else if (result.absent) this.log('warn', `This Designer build has no '${endpoint.path}' command`)
+		else this.log('error', `'${describe}' failed: ${result.message || `HTTP ${result.status}`}`)
+	}
+
+	/** Forget which commands answered 404 so a Director that gained them is picked up */
+	rescanRestCommands(): void {
+		this.rest.forget()
+		this.log('info', 'Command API rescanned; every command will be tried again')
+	}
+
+	/** True while a destructive command is waiting for its confirming press */
+	isRestArmed(): boolean {
+		return this.armed.size > 0
+	}
+
 	/** Remember which variable a Compare feedback watches (undefined removes it) */
 	registerCompareFeedback(feedbackId: string, variableName: string | undefined): void {
 		if (variableName) this.compareFeedbacks.set(feedbackId, variableName)
@@ -718,6 +801,12 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 
 	private async applyConfig(config: DisguiseConfig): Promise<void> {
 		this.config = config
+		// the command channel talks to the same Director as the socket
+		this.rest.update({
+			host: config.host,
+			port: Number(config.port) || 80,
+			timeoutMs: Math.max(1000, Number(config.restTimeout ?? 5000)),
+		})
 
 		if (!config.host) {
 			this.updateStatus(InstanceStatus.BadConfig, 'Host or IP required')

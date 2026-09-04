@@ -4,6 +4,16 @@
 
 ### Added
 
+- Command actions over Designer's Session REST API: transport play / stop / play section / loop
+  section / return to start / next and previous section and track / go to section, track, timecode
+  and time / brightness / volume / speed / engaged, RenderStream layer start, stop, restart and sync,
+  and failover machine, restore machine and apply default routing. LiveUpdate cannot carry commands,
+  so this replaces the OSC module for the common cases. Every path and body comes from the
+  Director's own OpenAPI document (`scripts/rest-discover.mjs` reads it back). Commands are enabled
+  by default; the ones that change what the audience sees or the shape of the session are refused
+  unless *Allow destructive commands* is on and then need two presses of the same button, with the
+  arm bound to the resolved target. Variables report the last command, its result and what is armed,
+  and two feedbacks colour the button.
 - Preset library: 310 presets in 11 categories (connection, local and remote monitoring, transport
   state, track and layer inspection, layer control, stage and screen, expression variables,
   RenderStream, failover/d3Net, templates) generated from `docs/research/phase1-catalog.json`, where
