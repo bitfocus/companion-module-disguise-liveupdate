@@ -443,3 +443,18 @@ test('the preset check reads every resolvable pair and releases it again', async
 	assert.ok(host.logs.some((l) => l.message.includes('Preset check:')))
 	await inst.destroy()
 })
+
+test('properties of one object asked for together leave as one frame', async () => {
+	const director = new FakeDirector({ valueFor: () => 1 })
+	const { inst } = await newInstance(director, [
+		liveUpdateFeedback('a', 'transportManager:default', 'object.brightness', 'brightness'),
+		liveUpdateFeedback('b', 'transportManager:default', 'object.volume', 'volume'),
+		liveUpdateFeedback('c', 'transportManager:default', 'object.engaged', 'engaged'),
+		liveUpdateFeedback('d', TRACK, 'object.lengthInBeats', 'len'),
+	])
+	await settle(80)
+	assert.equal(director.count('subscribe'), 2, 'one frame per object, not one per property')
+	assert.equal(director.subscribedProperties(), 4, 'and every property was still asked for')
+	assert.equal(director.subs.length, 4, 'the Director holds one subscription per property')
+	await inst.destroy()
+})

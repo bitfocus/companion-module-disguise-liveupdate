@@ -82,6 +82,9 @@
 
 ### Changed
 
+- Subscribe requests for the properties of one object are sent as one frame per object instead of
+  one per property. Placing a page of transport presets used to send a message per button; it now
+  sends one. The Director still holds one subscription per property, so nothing else changes.
 - A burst of writes to the same property is collapsed: the first goes out at once so a single
   press stays instant, and a fast rotary spin becomes one write per 40 ms window carrying the value
   the operator stopped on, instead of one write per detent.

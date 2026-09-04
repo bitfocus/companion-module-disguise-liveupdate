@@ -180,6 +180,12 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	private pendingWrites: Map<number, { value: unknown; timer: NodeJS.Timeout }> = new Map()
 	/** The preset check walks the whole catalog, so only one may run at a time */
 	private selfCheckRunning = false
+	/** Subscribe requests waiting for the end of the tick, one entry per object and interval */
+	private subscribeQueue: Map<
+		string,
+		{ objectPath: string; updateFrequencyMs: number | undefined; properties: string[] }
+	> = new Map()
+	private subscribeFlushScheduled = false
 	/** The lists the Set selection action offers, read from the Director */
 	public discoveryChoices: Map<string, string[]> = new Map()
 	/** Value history per variable, kept only while a Sparkline feedback asks for it */
@@ -536,22 +542,12 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			}
 		}
 
-		const message: {
-			subscribe: { object: string; properties: string[]; configuration?: { updateFrequencyMs: number } }
-		} = {
-			subscribe: {
-				object: objectPath,
-				properties: [propertyPath],
-			},
-		}
-
-		if (updateFrequencyMs !== undefined && updateFrequencyMs > 0) {
-			message.subscribe.configuration = { updateFrequencyMs }
-		}
-
 		this.log('info', `Subscribing to ${objectPath}.${propertyPath} as variable '${variableName}'`)
 
-		if (!this.send(message)) {
+		// The request is queued rather than sent: several properties of one object asked for in the
+		// same tick, which is what placing a page of presets does, leave as a single frame. The
+		// pending map stays keyed per pair, so confirmations and errors match exactly as before.
+		if (!this.queueSubscribe(objectPath, propertyPath, updateFrequencyMs)) {
 			return
 		}
 
@@ -755,6 +751,52 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			`Preset check: ${value} of ${pairs.size} properties answered with a value, ${failed} did not; ${skipped} rows were skipped because a selection is empty`,
 		)
 		this.selfCheckRunning = false
+	}
+
+	/**
+	 * Hold a subscribe request until the end of the tick so the properties of one object leave
+	 * together. The Director answers a batched frame with one entry per property, exactly as it does
+	 * for separate frames, so nothing downstream changes.
+	 *
+	 * Returns false when the socket is gone, matching what the immediate send used to report.
+	 */
+	private queueSubscribe(objectPath: string, propertyPath: string, updateFrequencyMs: number | undefined): boolean {
+		if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+			this.log('warn', 'Cannot subscribe - WebSocket not connected')
+			return false
+		}
+		// one batch per object and interval: the interval is part of the frame, not of the property
+		const batchKey = `${objectPath}\n${updateFrequencyMs ?? 0}`
+		const existing = this.subscribeQueue.get(batchKey)
+		if (existing) {
+			if (!existing.properties.includes(propertyPath)) existing.properties.push(propertyPath)
+			return true
+		}
+		this.subscribeQueue.set(batchKey, { objectPath, updateFrequencyMs, properties: [propertyPath] })
+		if (!this.subscribeFlushScheduled) {
+			this.subscribeFlushScheduled = true
+			setImmediate(() => this.flushSubscribeQueue())
+		}
+		return true
+	}
+
+	/** Send every queued subscribe, one frame per object and interval */
+	private flushSubscribeQueue(): void {
+		this.subscribeFlushScheduled = false
+		const batches = [...this.subscribeQueue.values()]
+		this.subscribeQueue.clear()
+		for (const batch of batches) {
+			const message: {
+				subscribe: { object: string; properties: string[]; configuration?: { updateFrequencyMs: number } }
+			} = { subscribe: { object: batch.objectPath, properties: batch.properties } }
+			if (batch.updateFrequencyMs !== undefined && batch.updateFrequencyMs > 0) {
+				message.subscribe.configuration = { updateFrequencyMs: batch.updateFrequencyMs }
+			}
+			if (batch.properties.length > 1) {
+				this.log('debug', `Subscribing to ${batch.properties.length} properties of ${batch.objectPath} in one frame`)
+			}
+			this.send(message)
+		}
 	}
 
 	/** Forget which commands answered 404 so a Director that gained them is picked up */
@@ -1117,6 +1159,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 					probe.resolve(undefined)
 				}
 				this.probes.clear()
+				this.subscribeQueue.clear()
 				this.clearAllBackoff()
 				// The feedbacks are still on their buttons, so their variables stay defined (they are
 				// remembered in retainedVariables). Without this every readout would keep showing the

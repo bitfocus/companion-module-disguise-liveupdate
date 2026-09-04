@@ -72,7 +72,11 @@ test('subscribes over ws, receives values, sets and toggles properties', async (
 	assert.equal(host.variables.get('engaged'), true)
 	assert.equal(host.variables.get('screenOffset'), '{"x":0,"y":3,"z":0}')
 	assert.equal(director.subscriptions.length, 4)
-	assert.equal(director.received.filter((m) => m.subscribe).length, 4)
+	// the module batches the properties of one object into a single frame
+	assert.equal(
+		director.received.filter((m) => m.subscribe).reduce((total, m) => total + m.subscribe.properties.length, 0),
+		4,
+	)
 
 	// value pushed by the Director
 	director.publish(TRACK, 'object.lengthInBeats', 300)

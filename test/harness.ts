@@ -84,32 +84,35 @@ export class FakeDirector {
 		if (this.opts.silent) return
 		if (m.subscribe) {
 			const objectPath = String(m.subscribe.object)
-			const propertyPath = String(m.subscribe.properties[0])
-			const error = this.opts.errorFor?.(objectPath, propertyPath)
-			if (error) {
-				this.reply({ error })
-				return
-			}
-			let sub = this.opts.refCount
-				? this.subs.find((s) => s.objectPath === objectPath && s.propertyPath === propertyPath)
-				: undefined
-			if (sub) sub.ref++
-			else {
-				sub = {
-					id: this.nextId++,
-					objectPath,
-					propertyPath,
-					ref: 1,
-					updateFrequencyMs: m.subscribe.configuration?.updateFrequencyMs,
+			// the Director answers a frame with several properties with one subscription each
+			for (const property of m.subscribe.properties as string[]) {
+				const propertyPath = String(property)
+				const error = this.opts.errorFor?.(objectPath, propertyPath)
+				if (error) {
+					this.reply({ error })
+					continue
 				}
-				this.subs.push(sub)
-			}
-			this.reply(this.subscriptionsMessage())
-			const errorValue = this.opts.errorValueFor?.(objectPath, propertyPath)
-			if (errorValue !== undefined) this.pushValue(sub.id, errorValue)
-			else {
-				const value = this.opts.valueFor?.(objectPath, propertyPath)
-				if (value !== undefined) this.pushValue(sub.id, value)
+				let sub = this.opts.refCount
+					? this.subs.find((s) => s.objectPath === objectPath && s.propertyPath === propertyPath)
+					: undefined
+				if (sub) sub.ref++
+				else {
+					sub = {
+						id: this.nextId++,
+						objectPath,
+						propertyPath,
+						ref: 1,
+						updateFrequencyMs: m.subscribe.configuration?.updateFrequencyMs,
+					}
+					this.subs.push(sub)
+				}
+				this.reply(this.subscriptionsMessage())
+				const errorValue = this.opts.errorValueFor?.(objectPath, propertyPath)
+				if (errorValue !== undefined) this.pushValue(sub.id, errorValue)
+				else {
+					const value = this.opts.valueFor?.(objectPath, propertyPath)
+					if (value !== undefined) this.pushValue(sub.id, value)
+				}
 			}
 		} else if (m.unsubscribe) {
 			const ids: number[] = m.unsubscribe.ids ?? [m.unsubscribe.id]
@@ -136,6 +139,11 @@ export class FakeDirector {
 		const sub = this.subs.find((s) => s.objectPath === objectPath && s.propertyPath === propertyPath)
 		if (!sub) throw new Error(`no subscription for ${objectPath} / ${propertyPath}`)
 		this.pushValue(sub.id, value)
+	}
+
+	/** Properties asked for across every subscribe frame: the module may batch them per object */
+	subscribedProperties(): number {
+		return this.received.filter((m) => m.subscribe).reduce((total, m) => total + m.subscribe.properties.length, 0)
 	}
 
 	count(kind: 'subscribe' | 'unsubscribe' | 'set'): number {
