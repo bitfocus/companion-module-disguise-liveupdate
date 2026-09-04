@@ -5,7 +5,7 @@
 // data, no TypeScript sources) is copied.
 //
 // Usage:
-//   yarn build && node scripts/build-dev-module.mjs [--out <dir>] [--label InHouse] [--version 1.0.0]
+//   yarn build && node scripts/build-dev-module.mjs [--out <dir>] [--label <name>] [--version 1.0.0]
 //
 // The manifest of the copy gets the custom label and version; the repository keeps its own.
 // The module id and shortname are never changed: the id keeps existing connections working and the
@@ -25,9 +25,9 @@ for (let i = 2; i < process.argv.length; i++) {
 	args[a.slice(2)] = next && !next.startsWith('--') ? (i++, next) : true
 }
 
-const label = args.label === undefined ? 'InHouse' : args.label === true ? '' : String(args.label)
+const label = args.label === undefined || args.label === true ? '' : String(args.label)
 const version = String(args.version ?? '1.0.0')
-const outRoot = resolve(root, String(args.out ?? '../InHouse-build'))
+const outRoot = resolve(root, String(args.out ?? '../dev-module-build'))
 const outDir = join(outRoot, 'companion-module-disguise-liveupdate')
 
 if (!existsSync(join(root, 'dist', 'index.js'))) {

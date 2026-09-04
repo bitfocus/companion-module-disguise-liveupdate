@@ -8226,7 +8226,7 @@
    "subscriptions": 1,
    "sources": [
     "d3.pyi:664 TimeSequence.getT, d3.pyi:667 getV, d3.pyi:670 n; d3.pyi:9882 Cue.note, d3.pyi:9889 Cue.section, d3.pyi:9908 Cue.getTags; d3.pyi:48435-48437 Tag.CUE/MIDI/TC, d3.pyi:48440 Tag.text, d3.pyi:48447 Tag.type; dict comprehension serialisation documented in liveupdate.txt",
-    "live probe 5 (r34.0.3, 2026-09-04): a list of {beat, note, section} objects"
+    "live probe 5 (r34.0.3, 2026-09-04): 35 cues returned as a list of {beat, note, section} objects"
    ],
    "category": "05 Track & Layer",
    "homeCategory": "05 Track & Layer",

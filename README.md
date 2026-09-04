@@ -83,7 +83,7 @@ yarn build
 node scripts/build-dev-module.mjs --label InHouse --version 1.0.0
 ```
 
-It writes `../InHouse-build/companion-module-disguise-liveupdate` containing only `companion/`,
+It writes `../dev-module-build/companion-module-disguise-liveupdate` containing only `companion/`,
 `dist/`, `package.json` and the production `node_modules` (about 5 MB). Copy that folder into the
 Developer modules path; Companion picks it up without a restart. The module id and the variable
 prefix stay the same, so existing connections keep working.

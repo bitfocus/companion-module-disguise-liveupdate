@@ -3858,7 +3858,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				actionId: 'setToDisguiseJSON',
 				options: {
 					variableName: 'screenOffset',
-					value: '{"x": 0.0, "y": 0.0, "z": 0.0}',
+					value: '{"x":0,"y":0,"z":0}',
 				},
 			},
 		],
@@ -7471,7 +7471,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				actionId: 'setToDisguiseString',
 				options: {
 					variableName: 'tplSetString',
-					value: 'text',
+					value: '<redacted: project content>',
 				},
 			},
 		],
@@ -7582,7 +7582,7 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 				actionId: 'setToDisguiseJSON',
 				options: {
 					variableName: 'tplSetJson',
-					value: '{"x": 0.0}',
+					value: '{"x":0}',
 				},
 			},
 		],

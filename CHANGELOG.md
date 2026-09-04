@@ -54,6 +54,11 @@
 
 ### Changed
 
+- The live-verification evidence carries no identity of the rig it was recorded on: the project,
+  track, layer, screen, cue and machine names the Director returned are replaced by neutral
+  placeholders, addresses by RFC 5737 documentation addresses, and any value that is not part of
+  Designer's own vocabulary is redacted.
+
 - Config updates that only touch presets or selections keep the WebSocket connection.
 - The layer scale presets use `findSequence("scale.x")`: the plain name `scale` returns None on
   r34.0.3 for every layer type tested, and the second axis got its own presets.
