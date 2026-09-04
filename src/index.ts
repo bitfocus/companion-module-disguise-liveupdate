@@ -17,6 +17,7 @@ import { upgradeScripts } from './upgrades'
 import { RestClient, RestCommand, REST_ENDPOINTS } from './rest'
 import { getRestActionDefinitions } from './restActions'
 import { choicesFrom, DISCOVERY_SOURCES } from './discovery'
+import { ValueHistory } from './sparkline'
 
 /**
  * Config keys that require the WebSocket connection to be re-established when they change
@@ -166,6 +167,10 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	private probes: Map<string, { resolve: (value: unknown) => void; timer: NodeJS.Timeout; id?: number }> = new Map()
 	/** The lists the Set selection action offers, read from the Director */
 	public discoveryChoices: Map<string, string[]> = new Map()
+	/** Value history per variable, kept only while a Sparkline feedback asks for it */
+	private histories: Map<string, ValueHistory> = new Map()
+	/** Which variable each Sparkline feedback watches, and how much history it wants */
+	private sparklines: Map<string, { variableName: string; window: number }> = new Map()
 
 	constructor(internal: unknown) {
 		super(internal)
@@ -675,6 +680,39 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		return this.armed.size > 0
 	}
 
+	/** Remember what a Sparkline feedback watches (undefined removes it) */
+	registerSparkline(feedbackId: string, variableName: string | undefined, window: number): void {
+		if (!variableName) {
+			this.sparklines.delete(feedbackId)
+		} else {
+			this.sparklines.set(feedbackId, { variableName, window: Math.max(4, Math.min(300, window || 60)) })
+		}
+		// keep only the histories something still watches
+		const wanted = new Set([...this.sparklines.values()].map((entry) => entry.variableName))
+		for (const name of [...this.histories.keys()]) if (!wanted.has(name)) this.histories.delete(name)
+	}
+
+	/** The recent values of one variable, oldest first */
+	getSparklineSamples(variableName: string): (number | undefined)[] {
+		return this.histories.get(variableName)?.samples ?? []
+	}
+
+	/** Record a value for every Sparkline feedback that watches this variable */
+	private recordHistory(variableName: string, value: unknown): void {
+		let window = 0
+		for (const entry of this.sparklines.values())
+			if (entry.variableName === variableName) window = Math.max(window, entry.window)
+		if (!window) return
+		let history = this.histories.get(variableName)
+		if (!history) {
+			history = new ValueHistory(window)
+			this.histories.set(variableName, history)
+		} else {
+			history.resize(window)
+		}
+		history.push(value)
+	}
+
 	/** Remember which variable a Compare feedback watches (undefined removes it) */
 	registerCompareFeedback(feedbackId: string, variableName: string | undefined): void {
 		if (variableName) this.compareFeedbacks.set(feedbackId, variableName)
@@ -688,6 +726,8 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			if (variableNames.has(entry.variableName)) ids.push(feedbackId)
 		for (const [feedbackId, variableName] of this.compareFeedbacks.entries())
 			if (variableNames.has(variableName)) ids.push(feedbackId)
+		for (const [feedbackId, entry] of this.sparklines.entries())
+			if (variableNames.has(entry.variableName)) ids.push(feedbackId)
 		return ids
 	}
 
@@ -1265,6 +1305,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			// Update the module variable
 			// This makes the value available as $(liveupdate:variable_name) throughout Companion
 			changedVars[subscription.variableName] = displayValue
+			this.recordHistory(subscription.variableName, valueUpdate.value)
 			affected.add(subscription.variableName)
 		}
 

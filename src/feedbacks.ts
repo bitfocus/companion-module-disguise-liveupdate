@@ -1,5 +1,6 @@
-import { CompanionFeedbackDefinitions, combineRgb } from '@companion-module/base'
+import { CompanionFeedbackDefinitions, combineRgb, splitRgb } from '@companion-module/base'
 import type { DisguiseInstance } from './index'
+import { drawSparkline } from './sparkline'
 
 type DisguiseFeedbackDefinitions = CompanionFeedbackDefinitions
 
@@ -185,6 +186,120 @@ export function getFeedbackDefinitions(instance: DisguiseInstance): DisguiseFeed
 			unsubscribe: async (feedback) => {
 				instance.feedbackOptionsCache.delete(feedback.id)
 				instance.unsubscribeFromVariable(feedback.id)
+			},
+		},
+
+		liveUpdateSparkline: {
+			type: 'advanced',
+			name: 'LiveUpdate Sparkline',
+			description:
+				'Draws the recent values of a LiveUpdate Variable as a line on the button. Put it on the same button as the LiveUpdate Variable feedback that owns the value; the number stays readable on top of it.',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Variable Name',
+					id: 'variableName',
+					default: '',
+					useVariables: false,
+					tooltip: 'The variable name of a LiveUpdate Variable feedback (for example "fps")',
+				},
+				{
+					type: 'number',
+					label: 'Samples to keep',
+					id: 'window',
+					default: 60,
+					min: 4,
+					max: 300,
+					tooltip: 'At the feedback\x27s update rate: 60 samples of a 1 s monitor is one minute',
+				},
+				{
+					type: 'checkbox',
+					label: 'Scale to the values seen',
+					id: 'autoScale',
+					default: true,
+				},
+				{
+					type: 'number',
+					label: 'Minimum',
+					id: 'min',
+					default: 0,
+					min: -1000000,
+					max: 1000000,
+					isVisible: (options) => !options.autoScale,
+				},
+				{
+					type: 'number',
+					label: 'Maximum',
+					id: 'max',
+					default: 60,
+					min: -1000000,
+					max: 1000000,
+					isVisible: (options) => !options.autoScale,
+				},
+				{
+					type: 'colorpicker',
+					label: 'Line colour',
+					id: 'lineColour',
+					default: combineRgb(120, 255, 220),
+				},
+				{
+					type: 'checkbox',
+					label: 'Fill under the line',
+					id: 'fill',
+					default: true,
+				},
+				{
+					type: 'checkbox',
+					label: 'Draw a threshold line',
+					id: 'useThreshold',
+					default: false,
+				},
+				{
+					type: 'number',
+					label: 'Threshold',
+					id: 'threshold',
+					default: 0,
+					min: -1000000,
+					max: 1000000,
+					isVisible: (options) => !!options.useThreshold,
+				},
+			],
+			subscribe: (feedback) => {
+				instance.registerSparkline(
+					feedback.id,
+					String(feedback.options.variableName || ''),
+					Number(feedback.options.window ?? 60),
+				)
+			},
+			unsubscribe: (feedback) => {
+				instance.registerSparkline(feedback.id, undefined, 0)
+			},
+			callback: (feedback) => {
+				const variableName = String(feedback.options.variableName || '')
+				instance.registerSparkline(feedback.id, variableName, Number(feedback.options.window ?? 60))
+				const size = feedback.image
+				if (!size || !size.width || !size.height) return {}
+				const samples = instance.getSparklineSamples(variableName)
+				if (!samples.length) return {}
+				const autoScale = feedback.options.autoScale !== false
+				const rgb = splitRgb(Number(feedback.options.lineColour ?? combineRgb(120, 255, 220)))
+				const line: [number, number, number] = [rgb.r, rgb.g, rgb.b]
+				const buffer = drawSparkline({
+					width: size.width,
+					height: size.height,
+					samples,
+					min: autoScale ? undefined : Number(feedback.options.min ?? 0),
+					max: autoScale ? undefined : Number(feedback.options.max ?? 1),
+					line,
+					fill: feedback.options.fill === false ? undefined : line,
+					threshold: feedback.options.useThreshold ? Number(feedback.options.threshold ?? 0) : undefined,
+					thresholdColour: [200, 80, 80],
+				})
+				return {
+					imageBuffer: buffer,
+					imageBufferEncoding: { pixelFormat: 'RGBA' },
+					imageBufferPosition: { x: 0, y: 0, width: size.width, height: size.height },
+				}
 			},
 		},
 

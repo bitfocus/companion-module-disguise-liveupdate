@@ -4,6 +4,11 @@
 
 ### Added
 
+- *LiveUpdate Sparkline* feedback: draws the recent values of a LiveUpdate Variable as a line on
+  the button, so a frame rate or a latency shows its trend and not only its current number. The
+  module renders the pixels itself, with no drawing dependency; the history is bounded and kept only
+  while a sparkline asks for it. Options: window length, automatic or fixed scale, line colour,
+  fill, and a threshold rule such as a frame budget.
 - Selection lists read from the Director: one action per selection ('Set selection: Track', 'Set
   selection: Surface', ...) whose value is a dropdown of the names Designer actually has, so a
   mistyped name can no longer be the reason a preset shows PATH_ERROR. The lists are read once per

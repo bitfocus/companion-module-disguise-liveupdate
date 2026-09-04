@@ -38,6 +38,8 @@ See [companion/HELP.md](companion/HELP.md) for the user documentation and
 
 - **LiveUpdate Variable**: subscribes to an object path / property path and exposes the value as a variable
 - **LiveUpdate Compare**: boolean comparison of a LiveUpdate Variable (=, ≠, <, ≤, >, ≥, truthy, contains)
+- **LiveUpdate Sparkline**: draws the recent values of a variable as a trend line on the button
+- **Command armed** / **Last command failed**: state of the REST command channel
 - **Connection OK**: true while connected
 
 ## Actions
