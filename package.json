@@ -1,6 +1,6 @@
 {
   "name": "@companion-module/liveupdate",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Companion module for disguise LiveUpdate API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -16,6 +16,7 @@
     "lint": "eslint .",
     "format": "prettier -w src scripts eslint.config.mjs",
     "presets:generate": "node scripts/gen-presets.mjs && prettier -w src/presetCatalog.ts",
+    "help:generate": "node scripts/gen-help.mjs",
     "package": "npm pack"
   },
   "prettier": "@companion-module/tools/.prettierrc.json",

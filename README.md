@@ -1,143 +1,87 @@
-# companion-module-liveupdate
+# companion-module-disguise-liveupdate
 
-Bitfocus Companion module for Disguise LiveUpdate API.
+Bitfocus Companion module for the disguise Designer **LiveUpdate API**.
 
 ## Description
 
-This module provides real-time integration with Disguise Designer through the WebSocket-based LiveUpdate API. It allows you to:
+The module connects to the WebSocket LiveUpdate API of a Designer Director and lets you:
 
-- Monitor Designer properties in real-time using **feedbacks** that create dynamic variables
-- Set property values remotely (strings, numbers, booleans, and complex JSON objects)
-- Use Companion's expression system for visual feedback based on property values
-- Automatically handle connection recovery and subscription healing
+- Monitor any Designer property in real time through **feedbacks** that create live Companion
+  variables (`$(liveupdate:fps)`, `$(liveupdate:playheadBeats)`, ...)
+- Set property values (strings, numbers, booleans, JSON objects) and toggle booleans
+- Colour buttons from a value with the **LiveUpdate Compare** feedback
+- Drop ready-made buttons from a **preset library** of 203 presets (monitoring, transport state,
+  track and layer, layer control, stage and screen, expression variables, RenderStream,
+  failover) plus 130 experimental presets; the presets address the show through **selection
+  variables** (`selTrack`, `selScreen`, `selMachine`, ...) set once in the connection settings
+- Recover automatically from connection loss and subscription errors
 
-## Key Features
+LiveUpdate does not carry transport commands (play, stop, cue); pair this module with
+[companion-module-disguise-osc](https://github.com/bitfocus/companion-module-disguise-osc) for those.
 
-- **Feedback-Based Subscriptions**: Add "LiveUpdate Variable" feedbacks to buttons to create live-updating module variables
-- **Self-Healing**: Automatic reconnection and subscription recovery after errors or connection loss
-- **Auto-Update Detection**: Subscriptions automatically update when you change feedback options
-- **Type-Safe Actions**: Separate actions for String, Number, Boolean, and JSON property types
-- **No Manual Management**: No subscription IDs or manual refresh needed - everything happens automatically
+See [companion/HELP.md](companion/HELP.md) for the user documentation and
+[docs/PRESET_CATALOG.md](docs/PRESET_CATALOG.md) for the source of every preset.
 
 ## Supported Devices
 
-- Disguise Designer (all versions with LiveUpdate API support)
+- disguise Designer with the LiveUpdate API (documented paths verified against the r34 API stubs)
+- Companion 4.1 or newer (module API 1.13)
 
 ## Configuration
 
-- **Director IP Address**: The IP address of the Disguise Designer Director machine (default: 127.0.0.1)
-- **Port**: The port number for the LiveUpdate API (default: 80)
-- **Reconnect Interval**: Time to wait before reconnecting after connection loss (default: 5000ms)
-- **Pending Subscription Timeout**: Maximum time to wait for subscription confirmation (default: 30000ms)
-
-## Quick Start
-
-### 1. Monitor a Property
-
-1. Add **"LiveUpdate Variable"** feedback to a button
-2. Configure:
-   - Variable Name: `fps`
-   - Object Path: `subsystem:MonitoringManager.findLocalMonitor("fps")`
-   - Property Path: `object.seriesAverage("Actual", 1)`
-3. Use `$(liveupdate:fps)` anywhere in Companion
-
-### 2. Set a Property
-
-1. Add **"Set to Disguise (Number)"** action to a button
-2. Configure:
-   - Value: `10.5`
-   - Object Path: `screen2:surface_1`
-   - Property Path: `object.offset.x`
+- **Director IP Address / Port**: the Designer Director (default 127.0.0.1:80)
+- **Reconnect Interval / Pending Subscription Timeout**: connection housekeeping
+- **Preset settings**: show experimental presets; default update intervals per value class
+- **Selections**: the object names the presets use (track, layer, surface, projector, machine, ...)
 
 ## Feedbacks
 
-### LiveUpdate Variable
-Creates a live-updating variable that tracks a Designer property in real-time.
-
-**Options:**
-- Variable Name
-- Object Path (Designer expression)
-- Property Path (Python expression)
-- Update Frequency (ms)
-
-### Connection OK
-Visual indicator showing connection status to Disguise Designer.
+- **LiveUpdate Variable**: subscribes to an object path / property path and exposes the value as a variable
+- **LiveUpdate Compare**: boolean comparison of a LiveUpdate Variable (=, ≠, <, ≤, >, ≥, truthy, contains)
+- **Connection OK**: true while connected
 
 ## Actions
 
-### Set to Disguise (String)
-Set text properties (e.g., `object.description`)
-
-### Set to Disguise (Number)
-Set numeric properties (e.g., `object.offset.x`)
-
-### Set to Disguise (Boolean)
-Set boolean properties (e.g., `object.enabled`)
-
-### Set to Disguise (JSON)
-Set complex properties (e.g., `object.offset` as `{"x": 1, "y": 2, "z": 0}`)
+- **Set to Disguise (String / Number / Boolean / JSON)**: write a value through the subscription of a LiveUpdate Variable
+- **Toggle Disguise Boolean**: flip a boolean property
+- **Set selection**: change a selection variable (and therefore every preset built on it)
 
 ## Variables
 
-### connection_status
-Current connection status (`Connected` / `Disconnected`)
-
-### Dynamic Module Variables
-Variables are automatically created for each active subscription using the variable name you specify in the feedback.
-
-**Example:** Variable name `fps` creates `$(liveupdate:fps)`
-
-## Use With Expressions
-
-Companion's expression variables work with module variables for powerful visual feedback:
-
-```javascript
-// Button background based on FPS
-$(liveupdate:fps) < 30 ? rgb(200,0,0) : rgb(0,150,0)
-
-// Formatted text
-FPS: ${toFixed($(liveupdate:fps), 1)}
-
-// Timecode display
-${secondsToTimestamp($(liveupdate:playhead))}
-```
+- `connection_status`: `Connected` / `Disconnected`
+- `sel...`: selection variables
+- one variable per LiveUpdate Variable feedback
 
 ## Development
 
-### Setup
 ```bash
 yarn install
+yarn build          # tsc
+yarn lint           # eslint (flat config from @companion-module/tools)
+yarn format         # prettier
+yarn presets:generate   # docs/research/phase1-catalog.json -> src/presetCatalog.ts
+yarn help:generate      # refresh the preset list in companion/HELP.md
 ```
 
-### Building
-```bash
-yarn build
-```
-
-### Development Mode
-```bash
-yarn watch
-```
-
-### Linting
-```bash
-yarn lint
-```
+The preset library is data: `docs/PRESET_CATALOG.md` (design, sources, verification status) and its
+JSON twin `docs/research/phase1-catalog.json` are the input of `scripts/gen-presets.mjs`, which
+writes `src/presetCatalog.ts`; `src/presets.ts` turns it into Companion preset definitions at
+runtime using the connection settings.
 
 ## Architecture
 
-This module uses Companion's feedback lifecycle to manage LiveUpdate subscriptions:
-- **subscribe**: Creates LiveUpdate subscription when feedback is added
-- **unsubscribe**: Removes subscription when feedback is removed
-- **callback**: Monitors for option changes and handles self-healing
-
-Module variables are dynamically created and updated as subscriptions receive data from Disguise.
+- **subscribe / callback / unsubscribe** of the LiveUpdate Variable feedback manage the Director
+  subscriptions; identical object/property pairs share one subscription
+- values arrive as `valuesChanged` messages and are pushed to Companion variables
+- unresolved paths (empty selections, template placeholders) are never sent; failed subscriptions
+  are retried with an exponential back-off
+- the Set actions and the Compare feedback look up the subscription by variable name
 
 ## API Documentation
 
-For detailed information about the Disguise Designer LiveUpdate API:
-- [LiveUpdate API Documentation](https://developer.disguise.one/api/session/liveupdate/)
-- [Designer Scripting Reference](https://developer.disguise.one/scripting/)
+- [LiveUpdate API](https://developer.disguise.one/api/session/liveupdate/)
+- [Monitoring machine health](https://developer.disguise.one/api/guides/monitoring)
+- [Designer expressions](https://help.disguise.one/designer/configuration/expressions/accessing-resources)
 
 ## License
 
@@ -145,9 +89,5 @@ MIT
 
 ## Support
 
-For questions about Disguise Designer integration:
-- integrations@disguise.one
-
-For general Disguise support:
-- support@disguise.one
-- help.disguise.one
+- integrations@disguise.one for questions about the Designer integration
+- support@disguise.one / help.disguise.one for general disguise support
