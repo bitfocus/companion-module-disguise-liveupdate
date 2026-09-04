@@ -56,17 +56,37 @@ See [companion/HELP.md](companion/HELP.md) for the user documentation and
 
 ```bash
 yarn install
-yarn build          # tsc
-yarn lint           # eslint (flat config from @companion-module/tools)
-yarn format         # prettier
+yarn build              # tsc, emits dist/ from src/
+yarn typecheck          # tsc over src/ and test/
+yarn lint               # eslint (flat config from @companion-module/tools)
+yarn format             # prettier
+yarn test               # build, then node:test via tsx (needs Node 20 or newer)
 yarn presets:generate   # docs/research/phase1-catalog.json -> src/presetCatalog.ts
+yarn catalog:render     # docs/research/phase1-catalog.json -> docs/PRESET_CATALOG.md
 yarn help:generate      # refresh the preset list in companion/HELP.md
 ```
 
-The preset library is data: `docs/PRESET_CATALOG.md` (design, sources, verification status) and its
-JSON twin `docs/research/phase1-catalog.json` are the input of `scripts/gen-presets.mjs`, which
-writes `src/presetCatalog.ts`; `src/presets.ts` turns it into Companion preset definitions at
-runtime using the connection settings.
+The module itself targets Node 18 (Companion's runtime); only the test suite needs Node 20 or newer.
+
+The preset library is data. `docs/research/phase1-catalog.json` is the single source of truth: every
+row carries its object path, property path, sources, live-verification result and, where it was
+exercised, its write result. Three generators read it — `scripts/gen-presets.mjs` writes
+`src/presetCatalog.ts`, `scripts/render-catalog.mjs` writes `docs/PRESET_CATALOG.md` and
+`scripts/gen-help.mjs` refreshes the preset list in `companion/HELP.md`. `src/presets.ts` turns the
+generated catalog into Companion preset definitions at runtime, applying the connection settings.
+
+Two scripts talk to a real Director and are not part of `yarn test`:
+
+```bash
+node scripts/live-verify.mjs --host <director>              # read-only: subscribe to every pair once
+node scripts/live-write-verify.mjs --host <director>        # dry run: print the write plan
+node scripts/live-write-verify.mjs --host <director> --yes  # write and restore each target
+```
+
+`live-write-verify.mjs` changes values on the Director. It reads the original value first, restores
+it afterwards, re-reads everything at the end, stops on a failed restore and restores the value in
+flight if it is interrupted. Its default target group only touches a track that is not on air; the
+`--group output` targets change the live output and are refused while the transport is playing.
 
 ## Architecture
 
