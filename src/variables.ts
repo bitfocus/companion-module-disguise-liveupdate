@@ -1,18 +1,19 @@
 import { CompanionVariableDefinition } from '@companion-module/base'
+import { SELECTIONS } from './selections'
 
+/**
+ * Static variable definitions. Dynamic variables for LiveUpdate subscriptions are appended
+ * by the instance (one per active subscription, named after the feedback's Variable Name).
+ */
 export function getVariableDefinitions(): CompanionVariableDefinition[] {
 	return [
 		{
 			variableId: 'connection_status',
 			name: 'Connection Status',
 		},
+		...SELECTIONS.map((selection): CompanionVariableDefinition => ({
+			variableId: selection.id,
+			name: `Selection: ${selection.label}`,
+		})),
 	]
 }
-
-/**
- * Note: Dynamic variables for subscription values are created automatically
- * when subscriptions are made. They follow the format: sub_<id>
- * where <id> is the subscription ID from the LiveUpdate API.
- *
- * Example: sub_123 would contain the value for subscription ID 123
- */

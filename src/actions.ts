@@ -6,12 +6,14 @@ import {
 } from '@companion-module/base'
 import type { DisguiseInstance } from './index'
 import type { LiveUpdateSubscription } from './index'
+import { SELECTIONS } from './selections'
 
 export interface DisguiseActionDefinitions extends CompanionActionDefinitions {
 	setToDisguiseString: CompanionActionDefinition
 	setToDisguiseNumber: CompanionActionDefinition
 	setToDisguiseBoolean: CompanionActionDefinition
 	setToDisguiseJSON: CompanionActionDefinition
+	setSelection: CompanionActionDefinition
 }
 
 /**
@@ -221,6 +223,34 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
 				if (value === null) return
 
 				instance.setProperty(subscription.id, value)
+			},
+		},
+
+		setSelection: {
+			name: 'Set selection',
+			description:
+				'Set one of the selection variables (selTrack, selScreen, ...) that the presets embed in their object paths. Every preset built on the selection re-subscribes to the new object.',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Selection',
+					id: 'selection',
+					default: SELECTIONS[0].id,
+					choices: SELECTIONS.map((selection) => ({ id: selection.id, label: selection.label })),
+				},
+				{
+					type: 'textinput',
+					label: 'Value',
+					id: 'value',
+					default: '',
+					useVariables: true,
+					tooltip: 'New value, used verbatim in the object paths (can use variables such as $(custom:show_track))',
+				},
+			],
+			callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
+				const selection = String(action.options.selection || '')
+				const value = await context.parseVariablesInString(String(action.options.value ?? ''))
+				instance.setSelection(selection, value)
 			},
 		},
 	}

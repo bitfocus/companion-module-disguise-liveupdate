@@ -7,11 +7,17 @@ import {
 } from '@companion-module/base'
 import WebSocket from 'ws'
 import { getConfigFields, DisguiseConfig } from './config'
+import { isSelectionId, readSelections } from './selections'
 import { getActionDefinitions } from './actions'
 import { getFeedbackDefinitions } from './feedbacks'
 import { getPresetDefinitions } from './presets'
 import { getVariableDefinitions } from './variables'
 import { upgradeScripts } from './upgrades'
+
+/**
+ * Config keys that require the WebSocket connection to be re-established when they change
+ */
+const CONNECTION_CONFIG_KEYS = ['host', 'port', 'reconnectInterval', 'pendingSubscriptionTimeout'] as const
 
 /**
  * Convert a ws message payload to a UTF-8 string
@@ -87,6 +93,20 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	}
 
 	async configUpdated(config: DisguiseConfig): Promise<void> {
+		const connectionChanged = CONNECTION_CONFIG_KEYS.some((key) => this.config?.[key] !== config[key])
+
+		if (!connectionChanged && this.connectionReady) {
+			// Only preset settings or selections changed: refresh definitions and variables
+			// without dropping the socket (and the subscriptions) for nothing.
+			this.config = config
+			this.setupActions()
+			this.setupFeedbacks()
+			this.updateVariableDefinitions()
+			this.applySelections()
+			this.setupPresets()
+			return
+		}
+
 		this.shouldReconnect = false
 		this.disconnect()
 		await this.applyConfig(config)
@@ -350,6 +370,30 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		this.send(message)
 	}
 
+	/**
+	 * Set a selection variable (selTrack, selScreen, ...) and persist it in the connection config.
+	 * Companion re-evaluates every feedback whose options reference the variable, which makes the
+	 * presets built on it re-subscribe to the newly selected object.
+	 */
+	setSelection(selectionId: string, value: string): void {
+		if (!isSelectionId(selectionId)) {
+			this.log('warn', `Unknown selection '${selectionId}'`)
+			return
+		}
+
+		this.config = { ...this.config, [selectionId]: value }
+		this.setVariableValues({ [selectionId]: value })
+		this.saveConfig(this.config, undefined)
+		this.log('info', `Selection ${selectionId} = '${value}'`)
+	}
+
+	/**
+	 * Push the selection values stored in the config into the module variables
+	 */
+	private applySelections(): void {
+		this.setVariableValues(readSelections(this.config as unknown as Record<string, unknown>))
+	}
+
 	private async applyConfig(config: DisguiseConfig): Promise<void> {
 		this.config = config
 
@@ -361,6 +405,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		this.setupActions()
 		this.setupFeedbacks()
 		this.setupVariables()
+		this.applySelections()
 		this.setupPresets()
 
 		this.shouldReconnect = true

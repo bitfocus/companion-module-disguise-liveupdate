@@ -1,4 +1,5 @@
 import { SomeCompanionConfigField, Regex } from '@companion-module/base'
+import { SELECTIONS } from './selections'
 
 /**
  * Value classes used by the preset library to pick a default update interval
@@ -10,6 +11,8 @@ export interface DisguiseConfig {
 	port: number
 	reconnectInterval?: number
 	pendingSubscriptionTimeout?: number
+	/** Selection variables (selTrack, selScreen, ...) persisted with the connection, see selections.ts */
+	[selection: `sel${string}`]: string | undefined
 	/** Show the read-only experimental presets (object paths that are not documented for LiveUpdate) */
 	showExperimentalPresets?: boolean
 	/** Default update interval (ms) written into presets of the "monitoring" class (fps, GPU, CPU, memory, RenderStream counters) */
@@ -157,6 +160,24 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			step: 50,
 			tooltip: 'Names, lengths, lists, versions',
 		},
+		{
+			type: 'static-text',
+			id: 'selectionInfo',
+			label: 'Selections',
+			width: 12,
+			value:
+				'The presets address show objects through the module variables below (for example track:"$(liveupdate:selTrack)"). Fill them in here or change them live with the "Set selection" action; every preset built on a selection re-subscribes when it changes. Names are used verbatim (case-sensitive) inside quotes; indices and ids are unquoted numbers.',
+		},
+		...SELECTIONS.map((selection): SomeCompanionConfigField => ({
+			type: 'textinput',
+			id: selection.id,
+			label: selection.label,
+			width: 6,
+			default: '',
+			tooltip: selection.description,
+			description: `e.g. ${selection.example}`,
+			isVisible: selection.experimental ? (options) => !!options.showExperimentalPresets : undefined,
+		})),
 		{
 			type: 'static-text',
 			id: 'usageInfo',
