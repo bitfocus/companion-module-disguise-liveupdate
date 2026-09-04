@@ -1,0 +1,294 @@
+{
+ "host": "192.0.2.10",
+ "port": 80,
+ "group": "output",
+ "mode": "write",
+ "selections": {
+  "track": "demo",
+  "layer": "Video 6",
+  "screen": "surface 1",
+  "projector": "projector 1",
+  "screenUid": "0x0123456789abcdef"
+ },
+ "currentTrack": "Show Track",
+ "playing": false,
+ "tracks": [
+  "demo",
+  "track 1",
+  "track 2",
+  "Show Track"
+ ],
+ "notes": [
+  "layer tests use track \"demo\", which is not the transport's current track \"Show Track\""
+ ],
+ "date": "2026-09-04T06:19:40.520Z",
+ "summary": {
+  "write-accepted-and-restored": 12
+ },
+ "directorErrors": [],
+ "inFlight": null,
+ "results": [
+  {
+   "presets": [
+    "tr_brightness",
+    "tr_brightness_up",
+    "tr_brightness_down",
+    "tr_brightness_full",
+    "tr_brightness_zero"
+   ],
+   "group": "output",
+   "object": "transportManager:default",
+   "property": "object.brightness",
+   "kind": "number",
+   "before": 1,
+   "write": 0.95,
+   "restoreValue": 1,
+   "afterWrite": 0.949999988079071,
+   "afterRestore": 1,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "tr_volume",
+    "tr_volume_up",
+    "tr_volume_down",
+    "tr_volume_full",
+    "tr_volume_mute"
+   ],
+   "group": "output",
+   "object": "transportManager:default",
+   "property": "object.volume",
+   "kind": "number",
+   "before": 1,
+   "write": 0.95,
+   "restoreValue": 1,
+   "afterWrite": 0.949999988079071,
+   "afterRestore": 1,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "stg_screen_offset",
+    "stg_screen_offset_reset"
+   ],
+   "group": "output",
+   "object": "screen2:\"surface 1\"",
+   "property": "object.offset",
+   "kind": "json",
+   "before": {
+    "x": 0,
+    "y": 3,
+    "z": 0
+   },
+   "write": {
+    "x": 0.01
+   },
+   "restoreValue": {
+    "x": 0,
+    "y": 3,
+    "z": 0
+   },
+   "afterWrite": {
+    "x": 0.009999999776482582,
+    "y": 3,
+    "z": 0
+   },
+   "afterRestore": {
+    "x": 0,
+    "y": 3,
+    "z": 0
+   },
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "stg_screen_rotation"
+   ],
+   "group": "output",
+   "object": "screen2:\"surface 1\"",
+   "property": "object.rotation",
+   "kind": "json",
+   "before": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+   },
+   "write": {
+    "x": 0.5
+   },
+   "restoreValue": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+   },
+   "afterWrite": {
+    "x": 0.5,
+    "y": 0,
+    "z": 0
+   },
+   "afterRestore": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+   },
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "stg_screen_fade",
+    "stg_screen_fade_up",
+    "stg_screen_fade_down",
+    "stg_screen_fade_full",
+    "stg_screen_fade_zero"
+   ],
+   "group": "output",
+   "object": "screen2:\"surface 1\"",
+   "property": "object.master_fade",
+   "kind": "number",
+   "before": 1,
+   "write": 0.9,
+   "restoreValue": 1,
+   "afterWrite": 0.8999999761581421,
+   "afterRestore": 1,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "stg_screen_hold",
+    "stg_screen_hold_on",
+    "stg_screen_hold_off",
+    "stg_screen_hold_toggle"
+   ],
+   "group": "output",
+   "object": "screen2:\"surface 1\"",
+   "property": "object.holdOutput",
+   "kind": "boolean",
+   "before": false,
+   "write": true,
+   "restoreValue": false,
+   "afterWrite": true,
+   "afterRestore": false,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "stg_screen_render_layer",
+    "stg_screen_on_stage",
+    "stg_screen_off_stage"
+   ],
+   "group": "output",
+   "object": "screen2:\"surface 1\"",
+   "property": "object.renderLayer",
+   "kind": "number",
+   "before": 1,
+   "write": 0,
+   "restoreValue": 1,
+   "afterWrite": 0,
+   "afterRestore": 1,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "stg_proj_fade",
+    "stg_proj_fade_up",
+    "stg_proj_fade_down",
+    "stg_proj_fade_full",
+    "stg_proj_fade_zero"
+   ],
+   "group": "output",
+   "object": "projector:\"projector 1\"",
+   "property": "object.master_fade",
+   "kind": "number",
+   "before": 1,
+   "write": 0.9,
+   "restoreValue": 1,
+   "afterWrite": 0.8999999761581421,
+   "afterRestore": 1,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "stg_proj_hold",
+    "stg_proj_hold_on",
+    "stg_proj_hold_off",
+    "stg_proj_hold_toggle"
+   ],
+   "group": "output",
+   "object": "projector:\"projector 1\"",
+   "property": "object.holdOutput",
+   "kind": "boolean",
+   "before": false,
+   "write": true,
+   "restoreValue": false,
+   "afterWrite": true,
+   "afterRestore": false,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "stg_uid_fade",
+    "stg_uid_fade_up",
+    "stg_uid_fade_down",
+    "stg_uid_fade_full",
+    "stg_uid_fade_zero"
+   ],
+   "group": "output",
+   "object": "getByUID(0x0123456789abcdef)",
+   "property": "object.master_fade",
+   "kind": "number",
+   "before": 1,
+   "write": 0.9,
+   "restoreValue": 1,
+   "afterWrite": 0.8999999761581421,
+   "afterRestore": 1,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "stg_uid_hold",
+    "stg_uid_hold_on",
+    "stg_uid_hold_off",
+    "stg_uid_hold_toggle"
+   ],
+   "group": "output",
+   "object": "getByUID(0x0123456789abcdef)",
+   "property": "object.holdOutput",
+   "kind": "boolean",
+   "before": false,
+   "write": true,
+   "restoreValue": false,
+   "afterWrite": true,
+   "afterRestore": false,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "stg_uid_render_layer",
+    "stg_uid_on_stage",
+    "stg_uid_off_stage"
+   ],
+   "group": "output",
+   "object": "getByUID(0x0123456789abcdef)",
+   "property": "object.renderLayer",
+   "kind": "number",
+   "before": 1,
+   "write": 0,
+   "restoreValue": 1,
+   "afterWrite": 0,
+   "afterRestore": 1,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  }
+ ]
+}

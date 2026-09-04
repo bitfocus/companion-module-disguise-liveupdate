@@ -1,0 +1,54 @@
+{
+ "host": "192.0.2.10",
+ "port": 80,
+ "mode": "write",
+ "track": "demo",
+ "layer": "Video 6",
+ "screen": "surface 1",
+ "steps": {
+  "brightness": {
+   "written": true,
+   "restored": true,
+   "after": 1
+  },
+  "layerEnabled": {
+   "written": true,
+   "restored": true,
+   "after": true
+  },
+  "screenOffset": {
+   "written": true,
+   "restored": true,
+   "after": "{\"x\":0,\"y\":3,\"z\":0}"
+  }
+ },
+ "plan": {
+  "brightness": {
+   "before": 1,
+   "write": "$(liveupdate:brightness)-0.05",
+   "restore": 1
+  },
+  "layerEnabled": {
+   "before": true,
+   "write": "Toggle Disguise Boolean",
+   "restore": "Set Boolean true"
+  },
+  "screenOffset": {
+   "before": {
+    "x": 0,
+    "y": 3,
+    "z": 0
+   },
+   "write": {
+    "x": 0.01
+   },
+   "restore": {
+    "x": 0,
+    "y": 3,
+    "z": 0
+   }
+  }
+ },
+ "log": [],
+ "date": "2026-09-04T06:19:48.996Z"
+}

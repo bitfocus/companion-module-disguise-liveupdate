@@ -1,0 +1,202 @@
+{
+ "host": "192.0.2.10",
+ "port": 80,
+ "group": "neutral",
+ "mode": "write",
+ "selections": {
+  "track": "demo",
+  "layer": "Video 6",
+  "screen": "surface 1",
+  "projector": "projector 1",
+  "screenUid": "0x0123456789abcdef"
+ },
+ "currentTrack": "Show Track",
+ "playing": false,
+ "tracks": [
+  "demo",
+  "track 1",
+  "track 2",
+  "Show Track"
+ ],
+ "notes": [
+  "layer tests use track \"demo\", which is not the transport's current track \"Show Track\""
+ ],
+ "date": "2026-09-04T06:19:19.245Z",
+ "summary": {
+  "write-accepted-and-restored": 9
+ },
+ "directorErrors": [],
+ "inFlight": null,
+ "results": [
+  {
+   "presets": [
+    "trk_tc_adjust",
+    "trk_tc_adjust_plus",
+    "trk_tc_adjust_minus",
+    "trk_tc_adjust_reset"
+   ],
+   "group": "neutral",
+   "object": "track:\"demo\"",
+   "property": "object.tc_adjust",
+   "kind": "number",
+   "before": 0,
+   "write": 0.5,
+   "restoreValue": 0,
+   "afterWrite": 0.5,
+   "afterRestore": 0,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "trk_layer_enabled",
+    "lay_enable_on",
+    "lay_enable_off",
+    "lay_enable_toggle"
+   ],
+   "group": "neutral",
+   "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+   "property": "object.enabled",
+   "kind": "boolean",
+   "before": true,
+   "write": false,
+   "restoreValue": true,
+   "afterWrite": false,
+   "afterRestore": true,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "trk_layer_tstart",
+    "lay_tstart_plus",
+    "lay_tstart_minus"
+   ],
+   "group": "neutral",
+   "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+   "property": "object.tStart",
+   "kind": "number",
+   "before": 60.06006143610181,
+   "write": 61.06006143610181,
+   "restoreValue": 60.06006143610181,
+   "afterWrite": 61.06006143610181,
+   "afterRestore": 60.06006143610181,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "trk_layer_tlength",
+    "lay_tlength_plus",
+    "lay_tlength_minus"
+   ],
+   "group": "neutral",
+   "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+   "property": "object.tLength",
+   "kind": "number",
+   "before": 30.030030718050902,
+   "write": 31.030030718050902,
+   "restoreValue": 30.030030718050902,
+   "afterWrite": 31.030030718050902,
+   "afterRestore": 30.030030718050902,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "trk_key_brightness",
+    "lay_bright_plus",
+    "lay_bright_minus",
+    "lay_bright_full",
+    "lay_bright_zero"
+   ],
+   "group": "neutral",
+   "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+   "property": "object.findSequence(\"brightness\").sequence.key(0).v",
+   "kind": "number",
+   "before": 1,
+   "write": 0.9,
+   "restoreValue": 1,
+   "afterWrite": 0.8999999761581421,
+   "afterRestore": 1,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "trk_key_posx",
+    "lay_posx_plus",
+    "lay_posx_minus",
+    "lay_posx_zero",
+    "trk_key_posx_idx"
+   ],
+   "group": "neutral",
+   "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+   "property": "object.findSequence(\"pos.x\").sequence.key(0).v",
+   "kind": "number",
+   "before": 0,
+   "write": 0.01,
+   "restoreValue": 0,
+   "afterWrite": 0.009999999776482582,
+   "afterRestore": 0,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "trk_key_posy",
+    "lay_posy_plus",
+    "lay_posy_minus",
+    "lay_posy_zero"
+   ],
+   "group": "neutral",
+   "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+   "property": "object.findSequence(\"pos.y\").sequence.key(0).v",
+   "kind": "number",
+   "before": 0,
+   "write": 0.01,
+   "restoreValue": 0,
+   "afterWrite": 0.009999999776482582,
+   "afterRestore": 0,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "trk_key_scale",
+    "lay_scale_plus",
+    "lay_scale_minus",
+    "lay_scale_one"
+   ],
+   "group": "neutral",
+   "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+   "property": "object.findSequence(\"scale.x\").sequence.key(0).v",
+   "kind": "number",
+   "before": 1,
+   "write": 1.01,
+   "restoreValue": 1,
+   "afterWrite": 1.0099999904632568,
+   "afterRestore": 1,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  },
+  {
+   "presets": [
+    "trk_brightness_const",
+    "lay_bright_const_on",
+    "lay_bright_const_off"
+   ],
+   "group": "neutral",
+   "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+   "property": "object.findSequence(\"brightness\").disableSequencing",
+   "kind": "boolean",
+   "before": true,
+   "write": false,
+   "restoreValue": true,
+   "afterWrite": false,
+   "afterRestore": true,
+   "result": "write-accepted-and-restored",
+   "finalCheck": "original value confirmed"
+  }
+ ]
+}
