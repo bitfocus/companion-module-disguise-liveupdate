@@ -35,6 +35,15 @@ const liveCell = (x) =>
 						? ' (' + code(x.live.value) + ')'
 						: '')
 		: 'not run'
+const writeCell = (x) => {
+	if (!x.write) return x.writable === 'yes' ? 'not written' : 'read-only'
+	const e2e = x.write.e2e
+		? `; module action ${x.write.e2e.written ? 'applied' : 'NOT applied'}/${x.write.e2e.restored ? 'restored' : 'NOT restored'}`
+		: ''
+	return esc(
+		`${x.write.status} (${JSON.stringify(x.write.before)} → ${JSON.stringify(x.write.wrote)} → restored)${e2e}`,
+	)
+}
 const FREQ = { monitoring: 1000, playhead: 250, state: 500, static: 5000 }
 const FREQ_WHY = {
 	monitoring: 'Director pushes every frame when unthrottled; a button needs ≤ 1–2 Hz',
@@ -151,6 +160,28 @@ if ((catalog.issues || []).length) {
 }
 md.push('')
 
+if (catalog.writeVerification) {
+	const wv = catalog.writeVerification
+	md.push('## Write verification (Phase 3)')
+	md.push('')
+	md.push(esc(wv.method))
+	md.push('')
+	md.push(
+		`Date: ${wv.date}. Environment: ${esc(JSON.stringify(wv.environment))}. Evidence: ${wv.files.map((f) => '`' + f + '`').join(', ')}.`,
+	)
+	md.push('')
+	md.push('| run | result |')
+	md.push('|---|---|')
+	for (const [k, v] of Object.entries(wv.results)) md.push(`| ${k} | ${esc(JSON.stringify(v))} |`)
+	md.push('')
+	md.push(esc(wv.note))
+	md.push('')
+	md.push('Writable rows that were NOT exercised:')
+	md.push('')
+	for (const x of wv.notReached) md.push('- ' + esc(x))
+	md.push('')
+}
+
 if (catalog.liveVerification) {
 	const lv = catalog.liveVerification
 	md.push('## Live verification (Phase 3)')
@@ -194,9 +225,9 @@ for (const catName of CAT_ORDER) {
 			md.push('')
 		}
 		md.push(
-			'| preset id | name | purpose | kind / actions | object path | property path | variable | value type / range | writable | update freq (class → default ms) and rationale | source | status | live (r34.0.3, 2026-09-04) |',
+			'| preset id | name | purpose | kind / actions | object path | property path | variable | value type / range | writable | update freq (class → default ms) and rationale | source | status | live (r34.0.3, 2026-09-04) | write |',
 		)
-		md.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|')
+		md.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|')
 		for (const x of grows) {
 			const acts = (x.actions || [])
 				.map((a) => `${a.set}: \`${a.actionId}\` ${code(JSON.stringify(a.options))}`)
@@ -214,7 +245,7 @@ for (const catName of CAT_ORDER) {
 			const typ = [x.valueType, x.range].filter(Boolean).map(esc).join('; ')
 			const nm = (x.tier === 'experimental' ? '[EXP] ' : '') + x.name
 			md.push(
-				`| \`${x.presetId}\`${flag} | ${esc(nm)} | ${esc(x.purpose)} | ${kind} | ${code(x.objectPath)} | ${code(x.propertyPath)} | \`${esc(x.variableName)}\` | ${typ} | ${esc(x.writable)} | ${freq} | ${src} | ${esc(x.status)}${x.designerVersion ? ' (' + esc(x.designerVersion) + ')' : ''} | ${liveCell(x)} |`,
+				`| \`${x.presetId}\`${flag} | ${esc(nm)} | ${esc(x.purpose)} | ${kind} | ${code(x.objectPath)} | ${code(x.propertyPath)} | \`${esc(x.variableName)}\` | ${typ} | ${esc(x.writable)} | ${freq} | ${src} | ${esc(x.status)}${x.designerVersion ? ' (' + esc(x.designerVersion) + ')' : ''} | ${liveCell(x)} | ${writeCell(x)} |`,
 			)
 		}
 		md.push('')

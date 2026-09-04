@@ -12,11 +12,23 @@ module* below).
 
 Object paths are verified against the Designer r34 LiveUpdate documentation and Python API stubs
 (d3.pyi r34.0). On 2026-09-04 the catalog was checked read-only against a Designer r34.0.3 Director:
-272 of the 306 default presets returned a live value (103 of them started as experimental rows and were
+280 of the 310 default presets returned a live value (103 of them started as experimental rows and were
 promoted after the run); the 25 presets that stay experimental need something the test project did
 not have (an Expression Variables device, a DMX screen, a timecode source, a stage venue, a Text
 layer, a running RenderStream instance). Every row carries its live result in
-`docs/PRESET_CATALOG.md` (column *live*). Requires Companion 4.1 or newer.
+`docs/PRESET_CATALOG.md` (column *live*).
+
+The write side was exercised on the same Director on 2026-09-04: 21 properties (layer enable, start,
+length, brightness / pos.x / pos.y / scale.x key 0, constant brightness, track TC adjust, master
+brightness and volume, surface offset / rotation / fade / hold / render layer, projector fade and
+hold, and the same surface addressed by UID) were read, changed, confirmed, written back and
+re-read; all of them came back to their original value. The module's own actions (Set Number with an
+expression, Toggle Boolean, Set JSON with a partial object) were driven the same way. Expression
+Variables writes are still untested: the test project has no Expression Variables device.
+Note that the Director stores these values as 32-bit floats, so a written 0.9 reads back as
+0.899999976; the presets display the rounded value.
+
+Requires Companion 4.1 or newer.
 
 ## Configuration
 
@@ -120,7 +132,7 @@ their home category in a later release without changing their ids or variable na
 
 <!-- PRESETS:START -->
 
-_306 presets ship by default; 25 experimental presets appear when "Show experimental presets" is enabled. Object paths use the selection variables described above._
+_310 presets ship by default; 25 experimental presets appear when "Show experimental presets" is enabled. Object paths use the selection variables described above._
 
 ### 01 Connection
 
@@ -267,7 +279,8 @@ _306 presets ship by default; 25 experimental presets appear when "Show experime
 | Layer anchored | Whether the layer is anchored (anchored layers reject tStart/tLength sets). | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.anchored` | `layerAnchored` | readout |
 | Layer pos.x (key 0) | First X-position keyframe value of the layer. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("pos.x").sequence.key(0).v` | `keyPosX` | readout |
 | Layer pos.y (key 0) | First Y-position keyframe value of the layer. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("pos.y").sequence.key(0).v` | `keyPosY` | readout |
-| Layer scale (key 0) | First scale keyframe value of the layer. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale").sequence.key(0).v` | `keyScale` | readout |
+| Layer scale.x (key 0) | First scale.x keyframe value of the layer. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale.x").sequence.key(0).v` | `keyScale` | readout |
+| Layer scale.y (key 0) | First scale.y keyframe value of the layer. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale.y").sequence.key(0).v` | `keyScaleY` | readout |
 | Layer brightness (key 0) | First brightness keyframe value: the most useful per-layer knob readback. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("brightness").sequence.key(0).v` | `keyBrightness` | readout |
 | Brightness is constant | True when brightness is a single constant (not keyframe-animated). | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("brightness").disableSequencing` | `brightnessConstant` | readout |
 | Layer name (by index) | Name of layer number $(liveupdate:selLayerIndex) (0-based position in the track layer list). | `track:"$(liveupdate:selTrack)".layers[$(liveupdate:selLayerIndex)]` | `object.name` | `idxLayerName` | readout |
@@ -311,9 +324,12 @@ _306 presets ship by default; 25 experimental presets appear when "Show experime
 | Layer Pos Y +1 (knob) | Nudge pos.y key 0 up by 1; rotary right/left = +/-1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("pos.y").sequence.key(0).v` | `keyPosY` | nudge (Set to Disguise Number) |
 | Layer Pos Y -1 | Nudge pos.y key 0 down by 1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("pos.y").sequence.key(0).v` | `keyPosY` | nudge (Set to Disguise Number) |
 | Layer Pos Y = 0 | Set pos.y key 0 to 0 (setToDisguiseNumber literal). | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("pos.y").sequence.key(0).v` | `keyPosY` | set value |
-| Layer Scale +0.1 (knob) | Nudge scale key 0 up by 0.1; rotary right/left = +/-0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale").sequence.key(0).v` | `keyScale` | nudge (Set to Disguise Number) |
-| Layer Scale -0.1 | Nudge scale key 0 down by 0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale").sequence.key(0).v` | `keyScale` | nudge (Set to Disguise Number) |
-| Layer Scale = 1 | Set scale key 0 to 1 (setToDisguiseNumber literal). | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale").sequence.key(0).v` | `keyScale` | set value |
+| Layer Scale X +0.1 (knob) | Nudge scale.x key 0 up by 0.1; rotary right/left = +/-0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale.x").sequence.key(0).v` | `keyScale` | nudge (Set to Disguise Number) |
+| Layer Scale Y +0.1 (knob) | Nudge scale.y key 0 up by 0.1; rotary right/left = +/-0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale.y").sequence.key(0).v` | `keyScaleY` | nudge (Set to Disguise Number) |
+| Layer Scale X -0.1 | Nudge scale.x key 0 down by 0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale.x").sequence.key(0).v` | `keyScale` | nudge (Set to Disguise Number) |
+| Layer Scale Y -0.1 | Nudge scale.y key 0 down by 0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale.y").sequence.key(0).v` | `keyScaleY` | nudge (Set to Disguise Number) |
+| Layer Scale X = 1 | Set scale.x key 0 to 1 (setToDisguiseNumber literal). | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale.x").sequence.key(0).v` | `keyScale` | set value |
+| Layer Scale Y = 1 | Set scale.y key 0 to 1 (setToDisguiseNumber literal). | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale.y").sequence.key(0).v` | `keyScaleY` | set value |
 | Layer Bright +0.1 (knob) | Nudge brightness key 0 up by 0.1; rotary right/left = +/-0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("brightness").sequence.key(0).v` | `keyBrightness` | nudge (Set to Disguise Number) |
 | Layer Bright -0.1 | Nudge brightness key 0 down by 0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("brightness").sequence.key(0).v` | `keyBrightness` | nudge (Set to Disguise Number) |
 | Layer Bright = 1 | Set brightness key 0 to 1 (setToDisguiseNumber literal). | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("brightness").sequence.key(0).v` | `keyBrightness` | set value |

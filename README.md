@@ -10,7 +10,7 @@ The module connects to the WebSocket LiveUpdate API of a Designer Director and l
   variables (`$(liveupdate:fps)`, `$(liveupdate:playheadBeats)`, ...)
 - Set property values (strings, numbers, booleans, JSON objects) and toggle booleans
 - Colour buttons from a value with the **LiveUpdate Compare** feedback
-- Drop ready-made buttons from a **preset library** of 306 presets (monitoring, transport state,
+- Drop ready-made buttons from a **preset library** of 310 presets (monitoring, transport state,
   track and layer, layer control, stage and screen, expression variables, RenderStream,
   failover) plus 25 experimental presets; the presets address the show through **selection
   variables** (`selTrack`, `selScreen`, `selMachine`, ...) set once in the connection settings
@@ -24,7 +24,7 @@ See [companion/HELP.md](companion/HELP.md) for the user documentation and
 
 ## Supported Devices
 
-- disguise Designer with the LiveUpdate API (documented paths verified against the r34 API stubs and read-checked live on r34.0.3)
+- disguise Designer with the LiveUpdate API (documented paths verified against the r34 API stubs, read- and write-checked live on r34.0.3)
 - Companion 4.1 or newer (module API 1.13)
 
 ## Configuration

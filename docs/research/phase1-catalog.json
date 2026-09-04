@@ -2388,6 +2388,24 @@
     "value": "1",
     "objectPath": "transportManager:default",
     "propertyPath": "object.brightness"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "transportManager:default",
+    "property": "object.brightness",
+    "before": 1,
+    "wrote": 0.95,
+    "afterWrite": 0.949999988079071,
+    "restored": "original value confirmed",
+    "e2e": {
+     "date": "2026-09-04",
+     "step": "brightness",
+     "written": true,
+     "restored": true,
+     "action": "$(liveupdate:brightness)-0.05"
+    }
    }
   },
   {
@@ -2459,6 +2477,24 @@
     "value": "1",
     "objectPath": "transportManager:default",
     "propertyPath": "object.brightness"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "transportManager:default",
+    "property": "object.brightness",
+    "before": 1,
+    "wrote": 0.95,
+    "afterWrite": 0.949999988079071,
+    "restored": "original value confirmed",
+    "e2e": {
+     "date": "2026-09-04",
+     "step": "brightness",
+     "written": true,
+     "restored": true,
+     "action": "$(liveupdate:brightness)-0.05"
+    }
    }
   },
   {
@@ -2530,6 +2566,24 @@
     "value": "1",
     "objectPath": "transportManager:default",
     "propertyPath": "object.brightness"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "transportManager:default",
+    "property": "object.brightness",
+    "before": 1,
+    "wrote": 0.95,
+    "afterWrite": 0.949999988079071,
+    "restored": "original value confirmed",
+    "e2e": {
+     "date": "2026-09-04",
+     "step": "brightness",
+     "written": true,
+     "restored": true,
+     "action": "$(liveupdate:brightness)-0.05"
+    }
    }
   },
   {
@@ -2585,6 +2639,24 @@
     "value": "1",
     "objectPath": "transportManager:default",
     "propertyPath": "object.brightness"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "transportManager:default",
+    "property": "object.brightness",
+    "before": 1,
+    "wrote": 0.95,
+    "afterWrite": 0.949999988079071,
+    "restored": "original value confirmed",
+    "e2e": {
+     "date": "2026-09-04",
+     "step": "brightness",
+     "written": true,
+     "restored": true,
+     "action": "$(liveupdate:brightness)-0.05"
+    }
    }
   },
   {
@@ -2640,6 +2712,24 @@
     "value": "1",
     "objectPath": "transportManager:default",
     "propertyPath": "object.brightness"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "transportManager:default",
+    "property": "object.brightness",
+    "before": 1,
+    "wrote": 0.95,
+    "afterWrite": 0.949999988079071,
+    "restored": "original value confirmed",
+    "e2e": {
+     "date": "2026-09-04",
+     "step": "brightness",
+     "written": true,
+     "restored": true,
+     "action": "$(liveupdate:brightness)-0.05"
+    }
    }
   },
   {
@@ -2690,6 +2780,17 @@
     "value": "1",
     "objectPath": "transportManager:default",
     "propertyPath": "object.volume"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "transportManager:default",
+    "property": "object.volume",
+    "before": 1,
+    "wrote": 0.95,
+    "afterWrite": 0.949999988079071,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -2761,6 +2862,17 @@
     "value": "1",
     "objectPath": "transportManager:default",
     "propertyPath": "object.volume"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "transportManager:default",
+    "property": "object.volume",
+    "before": 1,
+    "wrote": 0.95,
+    "afterWrite": 0.949999988079071,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -2832,6 +2944,17 @@
     "value": "1",
     "objectPath": "transportManager:default",
     "propertyPath": "object.volume"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "transportManager:default",
+    "property": "object.volume",
+    "before": 1,
+    "wrote": 0.95,
+    "afterWrite": 0.949999988079071,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -2887,6 +3010,17 @@
     "value": "1",
     "objectPath": "transportManager:default",
     "propertyPath": "object.volume"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "transportManager:default",
+    "property": "object.volume",
+    "before": 1,
+    "wrote": 0.95,
+    "afterWrite": 0.949999988079071,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -2942,6 +3076,17 @@
     "value": "1",
     "objectPath": "transportManager:default",
     "propertyPath": "object.volume"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "transportManager:default",
+    "property": "object.volume",
+    "before": 1,
+    "wrote": 0.95,
+    "afterWrite": 0.949999988079071,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -4662,6 +4807,17 @@
     "value": "0",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "object.tc_adjust"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\"",
+    "property": "object.tc_adjust",
+    "before": 0,
+    "wrote": 0.5,
+    "afterWrite": 0.5,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -4732,6 +4888,17 @@
     "value": "0",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "object.tc_adjust"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\"",
+    "property": "object.tc_adjust",
+    "before": 0,
+    "wrote": 0.5,
+    "afterWrite": 0.5,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -4785,6 +4952,17 @@
     "value": "0",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "object.tc_adjust"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\"",
+    "property": "object.tc_adjust",
+    "before": 0,
+    "wrote": 0.5,
+    "afterWrite": 0.5,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -4837,6 +5015,17 @@
     "value": "0",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "object.tc_adjust"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\"",
+    "property": "object.tc_adjust",
+    "before": 0,
+    "wrote": 0.5,
+    "afterWrite": 0.5,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -4936,6 +5125,24 @@
     "value": "true",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.enabled"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.enabled",
+    "before": true,
+    "wrote": false,
+    "afterWrite": false,
+    "restored": "original value confirmed",
+    "e2e": {
+     "date": "2026-09-04",
+     "step": "layerEnabled",
+     "written": true,
+     "restored": true,
+     "action": "Toggle Disguise Boolean"
+    }
    }
   },
   {
@@ -5032,6 +5239,17 @@
     "value": "0",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.tStart"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.tStart",
+    "before": 60.06006143610181,
+    "wrote": 61.06006143610181,
+    "afterWrite": 61.06006143610181,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -5126,6 +5344,17 @@
     "value": "4500",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.tLength"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.tLength",
+    "before": 30.030030718050902,
+    "wrote": 31.030030718050902,
+    "afterWrite": 31.030030718050902,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -5223,6 +5452,17 @@
     "note": "confirmed with selLayer = \"Video 26\" (a Video layer); with the sweep selection \"Colour Layer\" (ColourAdjust layer, no pos.x) the Director reported \"'NoneType' object has no attribute 'sequence'\"",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
     "propertyPath": "object.findSequence(\"pos.x\").sequence.key(0).v"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"pos.x\").sequence.key(0).v",
+    "before": 0,
+    "wrote": 0.01,
+    "afterWrite": 0.009999999776482582,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -5270,6 +5510,17 @@
     "status": "confirmed-value",
     "value": "0",
     "note": "run 1: confirmed-path-error ('NoneType' object has no attribute 'sequence')"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"pos.y\").sequence.key(0).v",
+    "before": 0,
+    "wrote": 0.01,
+    "afterWrite": 0.009999999776482582,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -5281,29 +5532,30 @@
    "bgcolor": "rgb(40,40,43)",
    "color": "rgb(220,220,220)",
    "writable": "yes",
-   "status": "doc-verified",
+   "status": "live-verified",
    "liveTestPriority": "high",
    "subscriptions": 1,
    "sources": [
     "liveupdate.txt; d3.pyi:21841 findSequence, 17161 FieldSequence.sequence, 21262 KeySequence.key, 21185/21187 KeyFloat.v + setter",
-    "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented"
+    "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented",
+    "live probe 7 (r34.0.3, 2026-09-04): track:\"demo\".findLayerByName(\"Video 6\") / object.findSequence(\"scale.x\").sequence.key(0).v -> 1; findSequence(\"scale\") is None on the same layer"
    ],
    "presetId": "trk_key_scale",
    "category": "05 Track & Layer",
-   "name": "Layer scale (key 0)",
-   "purpose": "First scale keyframe value of the layer.",
+   "name": "Layer scale.x (key 0)",
+   "purpose": "First scale.x keyframe value of the layer.",
    "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
-   "propertyPath": "object.findSequence(\"scale\").sequence.key(0).v",
+   "propertyPath": "object.findSequence(\"scale.x\").sequence.key(0).v",
    "variableName": "keyScale",
    "valueType": "float",
    "freqClass": "state",
-   "textTemplate": "`Scale\\n${toFixed($(liveupdate:keyScale),2)}`",
-   "previewText": "Scale\n1.00",
+   "textTemplate": "`Scale X\\n${toFixed($(liveupdate:keyScale),2)}`",
+   "previewText": "Scale X\n1.00",
    "candidateIds": [
     "key-posx-v",
     "trk-findLayerByName-object"
    ],
-   "notes": "Field name \"scale\" is named on the LiveUpdate page alongside \"pos.x\"/\"pos.y\". Only key 0 is read/written; if the field has more keyframes the animation continues from later keys. Keyframe times are track beats.",
+   "notes": "The field is called \"scale.x\" on r34.0.3: findSequence(\"scale\") returns None on every layer type tested (Video, ColourAdjust, Scroll), findSequence(\"scale.x\") and findSequence(\"scale.y\") return the sequence. Only key 0 is read/written; if the field has more keyframes the animation continues from later keys. Keyframe times are track beats.",
    "homeCategory": "05 Track & Layer",
    "dimension": "track_layer",
    "verifierOk": true,
@@ -5311,12 +5563,83 @@
    "corrected": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
-    "status": "confirmed-path-error",
-    "message": "'NoneType' object has no attribute 'sequence'",
-    "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
-    "propertyPath": "object.findSequence(\"scale\").sequence.key(0).v",
-    "note": "the test layer \"Colour Layer\" is a ColourAdjust layer without this field, so findSequence() returned None; the same property form returned a value on the ColourAdjust layer for \"brightness\" (1) and on the Video layer \"Video 26\" for \"pos.x\" (0), see probe 1"
+    "probe": "probe7",
+    "status": "confirmed-value",
+    "value": "1",
+    "objectPath": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "propertyPath": "object.findSequence(\"scale.x\").sequence.key(0).v",
+    "note": "run 1 and 2 reported \"'NoneType' object has no attribute 'sequence'\" because the field is named scale.x, not scale"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"scale.x\").sequence.key(0).v",
+    "before": 1,
+    "wrote": 1.01,
+    "afterWrite": 1.0099999904632568,
+    "restored": "original value confirmed"
+   }
+  },
+  {
+   "designerVersion": "r34.0.3",
+   "tier": "normal",
+   "controlKind": "readout",
+   "actions": [],
+   "textExpression": true,
+   "bgcolor": "rgb(40,40,43)",
+   "color": "rgb(220,220,220)",
+   "writable": "yes",
+   "status": "live-verified",
+   "liveTestPriority": "high",
+   "subscriptions": 1,
+   "sources": [
+    "liveupdate.txt; d3.pyi:21841 findSequence, 17161 FieldSequence.sequence, 21262 KeySequence.key, 21185/21187 KeyFloat.v + setter",
+    "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented",
+    "live probe 7 (r34.0.3, 2026-09-04): track:\"demo\".findLayerByName(\"Video 6\") / object.findSequence(\"scale.x\").sequence.key(0).v -> 1; findSequence(\"scale\") is None on the same layer"
+   ],
+   "presetId": "trk_key_scaley",
+   "category": "05 Track & Layer",
+   "name": "Layer scale.y (key 0)",
+   "purpose": "First scale.y keyframe value of the layer.",
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "propertyPath": "object.findSequence(\"scale.y\").sequence.key(0).v",
+   "variableName": "keyScaleY",
+   "valueType": "float",
+   "freqClass": "state",
+   "textTemplate": "`Scale Y\\n${toFixed($(liveupdate:keyScaleY),2)}`",
+   "previewText": "Scale Y\n1.00",
+   "candidateIds": [
+    "key-posx-v",
+    "trk-findLayerByName-object"
+   ],
+   "notes": "The field is called \"scale.x\" on r34.0.3: findSequence(\"scale\") returns None on every layer type tested (Video, ColourAdjust, Scroll), findSequence(\"scale.x\") and findSequence(\"scale.y\") return the sequence. Only key 0 is read/written; if the field has more keyframes the animation continues from later keys. Keyframe times are track beats.",
+   "homeCategory": "05 Track & Layer",
+   "dimension": "track_layer",
+   "verifierOk": true,
+   "verifierProblems": [],
+   "corrected": [],
+   "live": {
+    "date": "2026-09-04",
+    "probe": "probe7",
+    "status": "confirmed-value",
+    "value": "1",
+    "objectPath": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "propertyPath": "object.findSequence(\"scale.y\").sequence.key(0).v",
+    "note": "the scale.y axis, confirmed on the same Video layer as scale.x"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"scale.x\").sequence.key(0).v",
+    "before": 1,
+    "wrote": 1.01,
+    "afterWrite": 1.0099999904632568,
+    "restored": "original value confirmed",
+    "note": "scale.x was written; scale.y is the same field type on the same layer"
    }
   },
   {
@@ -5364,6 +5687,17 @@
     "value": "1",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.findSequence(\"brightness\").sequence.key(0).v"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"brightness\").sequence.key(0).v",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -5415,6 +5749,17 @@
     "value": "true",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.findSequence(\"brightness\").disableSequencing"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"brightness\").disableSequencing",
+    "before": true,
+    "wrote": false,
+    "afterWrite": false,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -5523,6 +5868,17 @@
     "propertyPath": "object.findSequence(\"pos.x\").sequence.key(0).v",
     "status": "confirmed-value",
     "value": "0"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"pos.x\").sequence.key(0).v",
+    "before": 0,
+    "wrote": 0.01,
+    "afterWrite": 0.009999999776482582,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -5578,6 +5934,24 @@
     "value": "true",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.enabled"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.enabled",
+    "before": true,
+    "wrote": false,
+    "afterWrite": false,
+    "restored": "original value confirmed",
+    "e2e": {
+     "date": "2026-09-04",
+     "step": "layerEnabled",
+     "written": true,
+     "restored": true,
+     "action": "Toggle Disguise Boolean"
+    }
    }
   },
   {
@@ -5632,6 +6006,24 @@
     "value": "true",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.enabled"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.enabled",
+    "before": true,
+    "wrote": false,
+    "afterWrite": false,
+    "restored": "original value confirmed",
+    "e2e": {
+     "date": "2026-09-04",
+     "step": "layerEnabled",
+     "written": true,
+     "restored": true,
+     "action": "Toggle Disguise Boolean"
+    }
    }
   },
   {
@@ -5697,6 +6089,24 @@
     "value": "true",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.enabled"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.enabled",
+    "before": true,
+    "wrote": false,
+    "afterWrite": false,
+    "restored": "original value confirmed",
+    "e2e": {
+     "date": "2026-09-04",
+     "step": "layerEnabled",
+     "written": true,
+     "restored": true,
+     "action": "Toggle Disguise Boolean"
+    }
    }
   },
   {
@@ -5769,6 +6179,17 @@
     "value": "0",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.tStart"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.tStart",
+    "before": 60.06006143610181,
+    "wrote": 61.06006143610181,
+    "afterWrite": 61.06006143610181,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -5825,6 +6246,17 @@
     "value": "0",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.tStart"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.tStart",
+    "before": 60.06006143610181,
+    "wrote": 61.06006143610181,
+    "afterWrite": 61.06006143610181,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -5897,6 +6329,17 @@
     "value": "4500",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.tLength"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.tLength",
+    "before": 30.030030718050902,
+    "wrote": 31.030030718050902,
+    "afterWrite": 31.030030718050902,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -5953,6 +6396,17 @@
     "value": "4500",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.tLength"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.tLength",
+    "before": 30.030030718050902,
+    "wrote": 31.030030718050902,
+    "afterWrite": 31.030030718050902,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -6025,6 +6479,17 @@
     "note": "confirmed with selLayer = \"Video 26\" (a Video layer); with the sweep selection \"Colour Layer\" (ColourAdjust layer, no pos.x) the Director reported \"'NoneType' object has no attribute 'sequence'\"",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
     "propertyPath": "object.findSequence(\"pos.x\").sequence.key(0).v"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"pos.x\").sequence.key(0).v",
+    "before": 0,
+    "wrote": 0.01,
+    "afterWrite": 0.009999999776482582,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -6081,6 +6546,17 @@
     "note": "confirmed with selLayer = \"Video 26\" (a Video layer); with the sweep selection \"Colour Layer\" (ColourAdjust layer, no pos.x) the Director reported \"'NoneType' object has no attribute 'sequence'\"",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
     "propertyPath": "object.findSequence(\"pos.x\").sequence.key(0).v"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"pos.x\").sequence.key(0).v",
+    "before": 0,
+    "wrote": 0.01,
+    "afterWrite": 0.009999999776482582,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -6137,6 +6613,17 @@
     "note": "confirmed with selLayer = \"Video 26\" (a Video layer); with the sweep selection \"Colour Layer\" (ColourAdjust layer, no pos.x) the Director reported \"'NoneType' object has no attribute 'sequence'\"",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
     "propertyPath": "object.findSequence(\"pos.x\").sequence.key(0).v"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"pos.x\").sequence.key(0).v",
+    "before": 0,
+    "wrote": 0.01,
+    "afterWrite": 0.009999999776482582,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -6209,6 +6696,17 @@
     "status": "confirmed-value",
     "value": "0",
     "note": "run 1: confirmed-path-error ('NoneType' object has no attribute 'sequence')"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"pos.y\").sequence.key(0).v",
+    "before": 0,
+    "wrote": 0.01,
+    "afterWrite": 0.009999999776482582,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -6265,6 +6763,17 @@
     "status": "confirmed-value",
     "value": "0",
     "note": "run 1: confirmed-path-error ('NoneType' object has no attribute 'sequence')"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"pos.y\").sequence.key(0).v",
+    "before": 0,
+    "wrote": 0.01,
+    "afterWrite": 0.009999999776482582,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -6321,6 +6830,17 @@
     "status": "confirmed-value",
     "value": "0",
     "note": "run 1: confirmed-path-error ('NoneType' object has no attribute 'sequence')"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"pos.y\").sequence.key(0).v",
+    "before": 0,
+    "wrote": 0.01,
+    "afterWrite": 0.009999999776482582,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -6357,29 +6877,30 @@
    "bgcolor": "rgb(140,70,0)",
    "color": "rgb(255,255,255)",
    "writable": "yes",
-   "status": "doc-verified",
+   "status": "live-verified",
    "liveTestPriority": "high",
    "subscriptions": 1,
    "sources": [
     "liveupdate.txt; d3.pyi:21841 findSequence, 17161 FieldSequence.sequence, 21262 KeySequence.key, 21185/21187 KeyFloat.v + setter",
-    "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented"
+    "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented",
+    "live probe 7 (r34.0.3, 2026-09-04): track:\"demo\".findLayerByName(\"Video 6\") / object.findSequence(\"scale.x\").sequence.key(0).v -> 1; findSequence(\"scale\") is None on the same layer"
    ],
    "category": "06 Layer Control",
    "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
    "presetId": "lay_scale_plus",
-   "name": "Layer Scale +0.1 (knob)",
-   "purpose": "Nudge scale key 0 up by 0.1; rotary right/left = +/-0.1.",
-   "propertyPath": "object.findSequence(\"scale\").sequence.key(0).v",
+   "name": "Layer Scale X +0.1 (knob)",
+   "purpose": "Nudge scale.x key 0 up by 0.1; rotary right/left = +/-0.1.",
+   "propertyPath": "object.findSequence(\"scale.x\").sequence.key(0).v",
    "variableName": "keyScale",
    "valueType": "float",
    "freqClass": "state",
-   "textTemplate": "`Scale +0.1\\n${toFixed($(liveupdate:keyScale),2)}`",
-   "previewText": "Scale +0.1\n1.00",
+   "textTemplate": "`Scale X +0.1\\n${toFixed($(liveupdate:keyScale),2)}`",
+   "previewText": "Scale X +0.1\n1.00",
    "candidateIds": [
     "key-posx-v",
     "trk-findLayerByName-object"
    ],
-   "notes": "Field \"scale\" named on the LiveUpdate page next to \"pos.x\". Set rotaryActions:true for the rotate steps. Only key 0 is read/written; if the field has more keyframes the animation continues from later keys. Keyframe times are track beats.",
+   "notes": "The field is called \"scale.x\" on r34.0.3: findSequence(\"scale\") returns None on every layer type tested (Video, ColourAdjust, Scroll), findSequence(\"scale.x\") and findSequence(\"scale.y\") return the sequence. Only key 0 is read/written; if the field has more keyframes the animation continues from later keys. Keyframe times are track beats.",
    "homeCategory": "06 Layer Control",
    "dimension": "track_layer",
    "verifierOk": true,
@@ -6387,12 +6908,108 @@
    "corrected": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
-    "status": "confirmed-path-error",
-    "message": "'NoneType' object has no attribute 'sequence'",
-    "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
-    "propertyPath": "object.findSequence(\"scale\").sequence.key(0).v",
-    "note": "the test layer \"Colour Layer\" is a ColourAdjust layer without this field, so findSequence() returned None; the same property form returned a value on the ColourAdjust layer for \"brightness\" (1) and on the Video layer \"Video 26\" for \"pos.x\" (0), see probe 1"
+    "probe": "probe7",
+    "status": "confirmed-value",
+    "value": "1",
+    "objectPath": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "propertyPath": "object.findSequence(\"scale.x\").sequence.key(0).v",
+    "note": "run 1 and 2 reported \"'NoneType' object has no attribute 'sequence'\" because the field is named scale.x, not scale"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"scale.x\").sequence.key(0).v",
+    "before": 1,
+    "wrote": 1.01,
+    "afterWrite": 1.0099999904632568,
+    "restored": "original value confirmed"
+   }
+  },
+  {
+   "designerVersion": "r34.0.3",
+   "tier": "normal",
+   "controlKind": "nudge",
+   "actions": [
+    {
+     "set": "down",
+     "actionId": "setToDisguiseNumber",
+     "options": {
+      "variableName": "keyScaleY",
+      "value": "$(liveupdate:keyScaleY)+0.1"
+     }
+    },
+    {
+     "set": "rotate_right",
+     "actionId": "setToDisguiseNumber",
+     "options": {
+      "variableName": "keyScaleY",
+      "value": "$(liveupdate:keyScaleY)+0.1"
+     }
+    },
+    {
+     "set": "rotate_left",
+     "actionId": "setToDisguiseNumber",
+     "options": {
+      "variableName": "keyScaleY",
+      "value": "$(liveupdate:keyScaleY)-0.1"
+     }
+    }
+   ],
+   "textExpression": true,
+   "bgcolor": "rgb(140,70,0)",
+   "color": "rgb(255,255,255)",
+   "writable": "yes",
+   "status": "live-verified",
+   "liveTestPriority": "high",
+   "subscriptions": 1,
+   "sources": [
+    "liveupdate.txt; d3.pyi:21841 findSequence, 17161 FieldSequence.sequence, 21262 KeySequence.key, 21185/21187 KeyFloat.v + setter",
+    "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented",
+    "live probe 7 (r34.0.3, 2026-09-04): track:\"demo\".findLayerByName(\"Video 6\") / object.findSequence(\"scale.x\").sequence.key(0).v -> 1; findSequence(\"scale\") is None on the same layer"
+   ],
+   "category": "06 Layer Control",
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "presetId": "lay_scaley_plus",
+   "name": "Layer Scale Y +0.1 (knob)",
+   "purpose": "Nudge scale.y key 0 up by 0.1; rotary right/left = +/-0.1.",
+   "propertyPath": "object.findSequence(\"scale.y\").sequence.key(0).v",
+   "variableName": "keyScaleY",
+   "valueType": "float",
+   "freqClass": "state",
+   "textTemplate": "`Scale Y +0.1\\n${toFixed($(liveupdate:keyScaleY),2)}`",
+   "previewText": "Scale Y +0.1\n1.00",
+   "candidateIds": [
+    "key-posx-v",
+    "trk-findLayerByName-object"
+   ],
+   "notes": "The field is called \"scale.x\" on r34.0.3: findSequence(\"scale\") returns None on every layer type tested (Video, ColourAdjust, Scroll), findSequence(\"scale.x\") and findSequence(\"scale.y\") return the sequence. Only key 0 is read/written; if the field has more keyframes the animation continues from later keys. Keyframe times are track beats.",
+   "homeCategory": "06 Layer Control",
+   "dimension": "track_layer",
+   "verifierOk": true,
+   "verifierProblems": [],
+   "corrected": [],
+   "live": {
+    "date": "2026-09-04",
+    "probe": "probe7",
+    "status": "confirmed-value",
+    "value": "1",
+    "objectPath": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "propertyPath": "object.findSequence(\"scale.y\").sequence.key(0).v",
+    "note": "the scale.y axis, confirmed on the same Video layer as scale.x"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"scale.x\").sequence.key(0).v",
+    "before": 1,
+    "wrote": 1.01,
+    "afterWrite": 1.0099999904632568,
+    "restored": "original value confirmed",
+    "note": "scale.x was written; scale.y is the same field type on the same layer"
    }
   },
   {
@@ -6413,29 +7030,30 @@
    "bgcolor": "rgb(140,70,0)",
    "color": "rgb(255,255,255)",
    "writable": "yes",
-   "status": "doc-verified",
+   "status": "live-verified",
    "liveTestPriority": "high",
    "subscriptions": 1,
    "sources": [
     "liveupdate.txt; d3.pyi:21841 findSequence, 17161 FieldSequence.sequence, 21262 KeySequence.key, 21185/21187 KeyFloat.v + setter",
-    "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented"
+    "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented",
+    "live probe 7 (r34.0.3, 2026-09-04): track:\"demo\".findLayerByName(\"Video 6\") / object.findSequence(\"scale.x\").sequence.key(0).v -> 1; findSequence(\"scale\") is None on the same layer"
    ],
    "category": "06 Layer Control",
    "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
    "presetId": "lay_scale_minus",
-   "name": "Layer Scale -0.1",
-   "purpose": "Nudge scale key 0 down by 0.1.",
-   "propertyPath": "object.findSequence(\"scale\").sequence.key(0).v",
+   "name": "Layer Scale X -0.1",
+   "purpose": "Nudge scale.x key 0 down by 0.1.",
+   "propertyPath": "object.findSequence(\"scale.x\").sequence.key(0).v",
    "variableName": "keyScale",
    "valueType": "float",
    "freqClass": "state",
-   "textTemplate": "`Scale -0.1\\n${toFixed($(liveupdate:keyScale),2)}`",
-   "previewText": "Scale -0.1\n1.00",
+   "textTemplate": "`Scale X -0.1\\n${toFixed($(liveupdate:keyScale),2)}`",
+   "previewText": "Scale X -0.1\n1.00",
    "candidateIds": [
     "key-posx-v",
     "trk-findLayerByName-object"
    ],
-   "notes": "Field \"scale\" named on the LiveUpdate page next to \"pos.x\". Only key 0 is read/written; if the field has more keyframes the animation continues from later keys. Keyframe times are track beats.",
+   "notes": "The field is called \"scale.x\" on r34.0.3: findSequence(\"scale\") returns None on every layer type tested (Video, ColourAdjust, Scroll), findSequence(\"scale.x\") and findSequence(\"scale.y\") return the sequence. Only key 0 is read/written; if the field has more keyframes the animation continues from later keys. Keyframe times are track beats.",
    "homeCategory": "06 Layer Control",
    "dimension": "track_layer",
    "verifierOk": true,
@@ -6443,12 +7061,92 @@
    "corrected": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
-    "status": "confirmed-path-error",
-    "message": "'NoneType' object has no attribute 'sequence'",
-    "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
-    "propertyPath": "object.findSequence(\"scale\").sequence.key(0).v",
-    "note": "the test layer \"Colour Layer\" is a ColourAdjust layer without this field, so findSequence() returned None; the same property form returned a value on the ColourAdjust layer for \"brightness\" (1) and on the Video layer \"Video 26\" for \"pos.x\" (0), see probe 1"
+    "probe": "probe7",
+    "status": "confirmed-value",
+    "value": "1",
+    "objectPath": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "propertyPath": "object.findSequence(\"scale.x\").sequence.key(0).v",
+    "note": "run 1 and 2 reported \"'NoneType' object has no attribute 'sequence'\" because the field is named scale.x, not scale"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"scale.x\").sequence.key(0).v",
+    "before": 1,
+    "wrote": 1.01,
+    "afterWrite": 1.0099999904632568,
+    "restored": "original value confirmed"
+   }
+  },
+  {
+   "designerVersion": "r34.0.3",
+   "tier": "normal",
+   "controlKind": "nudge",
+   "actions": [
+    {
+     "set": "down",
+     "actionId": "setToDisguiseNumber",
+     "options": {
+      "variableName": "keyScaleY",
+      "value": "$(liveupdate:keyScaleY)-0.1"
+     }
+    }
+   ],
+   "textExpression": true,
+   "bgcolor": "rgb(140,70,0)",
+   "color": "rgb(255,255,255)",
+   "writable": "yes",
+   "status": "live-verified",
+   "liveTestPriority": "high",
+   "subscriptions": 1,
+   "sources": [
+    "liveupdate.txt; d3.pyi:21841 findSequence, 17161 FieldSequence.sequence, 21262 KeySequence.key, 21185/21187 KeyFloat.v + setter",
+    "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented",
+    "live probe 7 (r34.0.3, 2026-09-04): track:\"demo\".findLayerByName(\"Video 6\") / object.findSequence(\"scale.x\").sequence.key(0).v -> 1; findSequence(\"scale\") is None on the same layer"
+   ],
+   "category": "06 Layer Control",
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "presetId": "lay_scaley_minus",
+   "name": "Layer Scale Y -0.1",
+   "purpose": "Nudge scale.y key 0 down by 0.1.",
+   "propertyPath": "object.findSequence(\"scale.y\").sequence.key(0).v",
+   "variableName": "keyScaleY",
+   "valueType": "float",
+   "freqClass": "state",
+   "textTemplate": "`Scale Y -0.1\\n${toFixed($(liveupdate:keyScaleY),2)}`",
+   "previewText": "Scale Y -0.1\n1.00",
+   "candidateIds": [
+    "key-posx-v",
+    "trk-findLayerByName-object"
+   ],
+   "notes": "The field is called \"scale.x\" on r34.0.3: findSequence(\"scale\") returns None on every layer type tested (Video, ColourAdjust, Scroll), findSequence(\"scale.x\") and findSequence(\"scale.y\") return the sequence. Only key 0 is read/written; if the field has more keyframes the animation continues from later keys. Keyframe times are track beats.",
+   "homeCategory": "06 Layer Control",
+   "dimension": "track_layer",
+   "verifierOk": true,
+   "verifierProblems": [],
+   "corrected": [],
+   "live": {
+    "date": "2026-09-04",
+    "probe": "probe7",
+    "status": "confirmed-value",
+    "value": "1",
+    "objectPath": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "propertyPath": "object.findSequence(\"scale.y\").sequence.key(0).v",
+    "note": "the scale.y axis, confirmed on the same Video layer as scale.x"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"scale.x\").sequence.key(0).v",
+    "before": 1,
+    "wrote": 1.01,
+    "afterWrite": 1.0099999904632568,
+    "restored": "original value confirmed",
+    "note": "scale.x was written; scale.y is the same field type on the same layer"
    }
   },
   {
@@ -6469,29 +7167,30 @@
    "bgcolor": "rgb(140,70,0)",
    "color": "rgb(255,255,255)",
    "writable": "yes",
-   "status": "doc-verified",
+   "status": "live-verified",
    "liveTestPriority": "high",
    "subscriptions": 1,
    "sources": [
     "liveupdate.txt; d3.pyi:21841 findSequence, 17161 FieldSequence.sequence, 21262 KeySequence.key, 21185/21187 KeyFloat.v + setter",
-    "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented"
+    "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented",
+    "live probe 7 (r34.0.3, 2026-09-04): track:\"demo\".findLayerByName(\"Video 6\") / object.findSequence(\"scale.x\").sequence.key(0).v -> 1; findSequence(\"scale\") is None on the same layer"
    ],
    "category": "06 Layer Control",
    "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
    "presetId": "lay_scale_one",
-   "name": "Layer Scale = 1",
-   "purpose": "Set scale key 0 to 1 (setToDisguiseNumber literal).",
-   "propertyPath": "object.findSequence(\"scale\").sequence.key(0).v",
+   "name": "Layer Scale X = 1",
+   "purpose": "Set scale.x key 0 to 1 (setToDisguiseNumber literal).",
+   "propertyPath": "object.findSequence(\"scale.x\").sequence.key(0).v",
    "variableName": "keyScale",
    "valueType": "float",
    "freqClass": "state",
-   "textTemplate": "`Scale = 1\\n${toFixed($(liveupdate:keyScale),2)}`",
-   "previewText": "Scale = 1\n1.00",
+   "textTemplate": "`Scale X = 1\\n${toFixed($(liveupdate:keyScale),2)}`",
+   "previewText": "Scale X = 1\n1.00",
    "candidateIds": [
     "key-posx-v",
     "trk-findLayerByName-object"
    ],
-   "notes": "Field \"scale\" named on the LiveUpdate page next to \"pos.x\". Only key 0 is read/written; if the field has more keyframes the animation continues from later keys. Keyframe times are track beats.",
+   "notes": "The field is called \"scale.x\" on r34.0.3: findSequence(\"scale\") returns None on every layer type tested (Video, ColourAdjust, Scroll), findSequence(\"scale.x\") and findSequence(\"scale.y\") return the sequence. Only key 0 is read/written; if the field has more keyframes the animation continues from later keys. Keyframe times are track beats.",
    "homeCategory": "06 Layer Control",
    "dimension": "track_layer",
    "verifierOk": true,
@@ -6499,12 +7198,92 @@
    "corrected": [],
    "live": {
     "date": "2026-09-04",
-    "probe": "sweep",
-    "status": "confirmed-path-error",
-    "message": "'NoneType' object has no attribute 'sequence'",
-    "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
-    "propertyPath": "object.findSequence(\"scale\").sequence.key(0).v",
-    "note": "the test layer \"Colour Layer\" is a ColourAdjust layer without this field, so findSequence() returned None; the same property form returned a value on the ColourAdjust layer for \"brightness\" (1) and on the Video layer \"Video 26\" for \"pos.x\" (0), see probe 1"
+    "probe": "probe7",
+    "status": "confirmed-value",
+    "value": "1",
+    "objectPath": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "propertyPath": "object.findSequence(\"scale.x\").sequence.key(0).v",
+    "note": "run 1 and 2 reported \"'NoneType' object has no attribute 'sequence'\" because the field is named scale.x, not scale"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"scale.x\").sequence.key(0).v",
+    "before": 1,
+    "wrote": 1.01,
+    "afterWrite": 1.0099999904632568,
+    "restored": "original value confirmed"
+   }
+  },
+  {
+   "designerVersion": "r34.0.3",
+   "tier": "normal",
+   "controlKind": "setValue",
+   "actions": [
+    {
+     "set": "down",
+     "actionId": "setToDisguiseNumber",
+     "options": {
+      "variableName": "keyScaleY",
+      "value": "1"
+     }
+    }
+   ],
+   "textExpression": true,
+   "bgcolor": "rgb(140,70,0)",
+   "color": "rgb(255,255,255)",
+   "writable": "yes",
+   "status": "live-verified",
+   "liveTestPriority": "high",
+   "subscriptions": 1,
+   "sources": [
+    "liveupdate.txt; d3.pyi:21841 findSequence, 17161 FieldSequence.sequence, 21262 KeySequence.key, 21185/21187 KeyFloat.v + setter",
+    "d3.pyi:48138 'def findLayerByName(self, name: str) -> Layer:'; chaining a method call in the object path is documented in liveupdate.txt ('track:track_1.getLeafLayers()[0]', 'subsystem:MonitoringManager.findLocalMonitor(\"fps\")'); track: prefix documented",
+    "live probe 7 (r34.0.3, 2026-09-04): track:\"demo\".findLayerByName(\"Video 6\") / object.findSequence(\"scale.x\").sequence.key(0).v -> 1; findSequence(\"scale\") is None on the same layer"
+   ],
+   "category": "06 Layer Control",
+   "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
+   "presetId": "lay_scaley_one",
+   "name": "Layer Scale Y = 1",
+   "purpose": "Set scale.y key 0 to 1 (setToDisguiseNumber literal).",
+   "propertyPath": "object.findSequence(\"scale.y\").sequence.key(0).v",
+   "variableName": "keyScaleY",
+   "valueType": "float",
+   "freqClass": "state",
+   "textTemplate": "`Scale Y = 1\\n${toFixed($(liveupdate:keyScaleY),2)}`",
+   "previewText": "Scale Y = 1\n1.00",
+   "candidateIds": [
+    "key-posx-v",
+    "trk-findLayerByName-object"
+   ],
+   "notes": "The field is called \"scale.x\" on r34.0.3: findSequence(\"scale\") returns None on every layer type tested (Video, ColourAdjust, Scroll), findSequence(\"scale.x\") and findSequence(\"scale.y\") return the sequence. Only key 0 is read/written; if the field has more keyframes the animation continues from later keys. Keyframe times are track beats.",
+   "homeCategory": "06 Layer Control",
+   "dimension": "track_layer",
+   "verifierOk": true,
+   "verifierProblems": [],
+   "corrected": [],
+   "live": {
+    "date": "2026-09-04",
+    "probe": "probe7",
+    "status": "confirmed-value",
+    "value": "1",
+    "objectPath": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "propertyPath": "object.findSequence(\"scale.y\").sequence.key(0).v",
+    "note": "the scale.y axis, confirmed on the same Video layer as scale.x"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"scale.x\").sequence.key(0).v",
+    "before": 1,
+    "wrote": 1.01,
+    "afterWrite": 1.0099999904632568,
+    "restored": "original value confirmed",
+    "note": "scale.x was written; scale.y is the same field type on the same layer"
    }
   },
   {
@@ -6576,6 +7355,17 @@
     "value": "1",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.findSequence(\"brightness\").sequence.key(0).v"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"brightness\").sequence.key(0).v",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -6631,6 +7421,17 @@
     "value": "1",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.findSequence(\"brightness\").sequence.key(0).v"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"brightness\").sequence.key(0).v",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -6686,6 +7487,17 @@
     "value": "1",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.findSequence(\"brightness\").sequence.key(0).v"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"brightness\").sequence.key(0).v",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -6741,6 +7553,17 @@
     "value": "1",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.findSequence(\"brightness\").sequence.key(0).v"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"brightness\").sequence.key(0).v",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -6798,6 +7621,17 @@
     "value": "true",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.findSequence(\"brightness\").disableSequencing"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"brightness\").disableSequencing",
+    "before": true,
+    "wrote": false,
+    "afterWrite": false,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -6854,6 +7688,17 @@
     "value": "true",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "object.findSequence(\"brightness\").disableSequencing"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/neutral",
+    "status": "write-accepted-and-restored",
+    "object": "track:\"demo\".findLayerByName(\"Video 6\")",
+    "property": "object.findSequence(\"brightness\").disableSequencing",
+    "before": true,
+    "wrote": false,
+    "afterWrite": false,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -8092,6 +8937,36 @@
     "value": "{\"x\":0,\"y\":3,\"z\":0}",
     "objectPath": "screen2:\"surface 1\"",
     "propertyPath": "object.offset"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "screen2:\"surface 1\"",
+    "property": "object.offset",
+    "before": {
+     "x": 0,
+     "y": 3,
+     "z": 0
+    },
+    "wrote": {
+     "x": 0.01
+    },
+    "afterWrite": {
+     "x": 0.009999999776482582,
+     "y": 3,
+     "z": 0
+    },
+    "restored": "original value confirmed",
+    "e2e": {
+     "date": "2026-09-04",
+     "step": "screenOffset",
+     "written": true,
+     "restored": true,
+     "action": {
+      "x": 0.01
+     }
+    }
    }
   },
   {
@@ -8145,6 +9020,36 @@
     "value": "{\"x\":0,\"y\":3,\"z\":0}",
     "objectPath": "screen2:\"surface 1\"",
     "propertyPath": "object.offset"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "screen2:\"surface 1\"",
+    "property": "object.offset",
+    "before": {
+     "x": 0,
+     "y": 3,
+     "z": 0
+    },
+    "wrote": {
+     "x": 0.01
+    },
+    "afterWrite": {
+     "x": 0.009999999776482582,
+     "y": 3,
+     "z": 0
+    },
+    "restored": "original value confirmed",
+    "e2e": {
+     "date": "2026-09-04",
+     "step": "screenOffset",
+     "written": true,
+     "restored": true,
+     "action": {
+      "x": 0.01
+     }
+    }
    }
   },
   {
@@ -8389,6 +9294,27 @@
     "value": "{\"x\":0,\"y\":0,\"z\":0}",
     "objectPath": "screen2:\"surface 1\"",
     "propertyPath": "object.rotation"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "screen2:\"surface 1\"",
+    "property": "object.rotation",
+    "before": {
+     "x": 0,
+     "y": 0,
+     "z": 0
+    },
+    "wrote": {
+     "x": 0.5
+    },
+    "afterWrite": {
+     "x": 0.5,
+     "y": 0,
+     "z": 0
+    },
+    "restored": "original value confirmed"
    }
   },
   {
@@ -8437,6 +9363,17 @@
     "value": "1",
     "objectPath": "screen2:\"surface 1\"",
     "propertyPath": "object.master_fade"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "screen2:\"surface 1\"",
+    "property": "object.master_fade",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -8506,6 +9443,17 @@
     "value": "1",
     "objectPath": "screen2:\"surface 1\"",
     "propertyPath": "object.master_fade"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "screen2:\"surface 1\"",
+    "property": "object.master_fade",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -8574,6 +9522,17 @@
     "value": "1",
     "objectPath": "screen2:\"surface 1\"",
     "propertyPath": "object.master_fade"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "screen2:\"surface 1\"",
+    "property": "object.master_fade",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -8626,6 +9585,17 @@
     "value": "1",
     "objectPath": "screen2:\"surface 1\"",
     "propertyPath": "object.master_fade"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "screen2:\"surface 1\"",
+    "property": "object.master_fade",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -8679,6 +9649,17 @@
     "value": "1",
     "objectPath": "screen2:\"surface 1\"",
     "propertyPath": "object.master_fade"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "screen2:\"surface 1\"",
+    "property": "object.master_fade",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -8725,6 +9706,17 @@
     "value": "false",
     "objectPath": "screen2:\"surface 1\"",
     "propertyPath": "object.holdOutput"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "screen2:\"surface 1\"",
+    "property": "object.holdOutput",
+    "before": false,
+    "wrote": true,
+    "afterWrite": true,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -8776,6 +9768,17 @@
     "value": "false",
     "objectPath": "screen2:\"surface 1\"",
     "propertyPath": "object.holdOutput"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "screen2:\"surface 1\"",
+    "property": "object.holdOutput",
+    "before": false,
+    "wrote": true,
+    "afterWrite": true,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -8827,6 +9830,17 @@
     "value": "false",
     "objectPath": "screen2:\"surface 1\"",
     "propertyPath": "object.holdOutput"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "screen2:\"surface 1\"",
+    "property": "object.holdOutput",
+    "before": false,
+    "wrote": true,
+    "afterWrite": true,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -8887,6 +9901,17 @@
     "value": "false",
     "objectPath": "screen2:\"surface 1\"",
     "propertyPath": "object.holdOutput"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "screen2:\"surface 1\"",
+    "property": "object.holdOutput",
+    "before": false,
+    "wrote": true,
+    "afterWrite": true,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -8934,6 +9959,17 @@
     "value": "1",
     "objectPath": "screen2:\"surface 1\"",
     "propertyPath": "object.renderLayer"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "screen2:\"surface 1\"",
+    "property": "object.renderLayer",
+    "before": 1,
+    "wrote": 0,
+    "afterWrite": 0,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -8987,6 +10023,17 @@
     "value": "1",
     "objectPath": "screen2:\"surface 1\"",
     "propertyPath": "object.renderLayer"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "screen2:\"surface 1\"",
+    "property": "object.renderLayer",
+    "before": 1,
+    "wrote": 0,
+    "afterWrite": 0,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -9040,6 +10087,17 @@
     "value": "1",
     "objectPath": "screen2:\"surface 1\"",
     "propertyPath": "object.renderLayer"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "screen2:\"surface 1\"",
+    "property": "object.renderLayer",
+    "before": 1,
+    "wrote": 0,
+    "afterWrite": 0,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -9275,6 +10333,17 @@
     "value": "1",
     "objectPath": "projector:\"projector 1\"",
     "propertyPath": "object.master_fade"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "projector:\"projector 1\"",
+    "property": "object.master_fade",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -9346,6 +10415,17 @@
     "value": "1",
     "objectPath": "projector:\"projector 1\"",
     "propertyPath": "object.master_fade"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "projector:\"projector 1\"",
+    "property": "object.master_fade",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -9417,6 +10497,17 @@
     "value": "1",
     "objectPath": "projector:\"projector 1\"",
     "propertyPath": "object.master_fade"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "projector:\"projector 1\"",
+    "property": "object.master_fade",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -9472,6 +10563,17 @@
     "value": "1",
     "objectPath": "projector:\"projector 1\"",
     "propertyPath": "object.master_fade"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "projector:\"projector 1\"",
+    "property": "object.master_fade",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -9527,6 +10629,17 @@
     "value": "1",
     "objectPath": "projector:\"projector 1\"",
     "propertyPath": "object.master_fade"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "projector:\"projector 1\"",
+    "property": "object.master_fade",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -9576,6 +10689,17 @@
     "value": "false",
     "objectPath": "projector:\"projector 1\"",
     "propertyPath": "object.holdOutput"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "projector:\"projector 1\"",
+    "property": "object.holdOutput",
+    "before": false,
+    "wrote": true,
+    "afterWrite": true,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -9630,6 +10754,17 @@
     "value": "false",
     "objectPath": "projector:\"projector 1\"",
     "propertyPath": "object.holdOutput"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "projector:\"projector 1\"",
+    "property": "object.holdOutput",
+    "before": false,
+    "wrote": true,
+    "afterWrite": true,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -9684,6 +10819,17 @@
     "value": "false",
     "objectPath": "projector:\"projector 1\"",
     "propertyPath": "object.holdOutput"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "projector:\"projector 1\"",
+    "property": "object.holdOutput",
+    "before": false,
+    "wrote": true,
+    "afterWrite": true,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -9746,6 +10892,17 @@
     "value": "false",
     "objectPath": "projector:\"projector 1\"",
     "propertyPath": "object.holdOutput"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "projector:\"projector 1\"",
+    "property": "object.holdOutput",
+    "before": false,
+    "wrote": true,
+    "afterWrite": true,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -9838,6 +10995,17 @@
     "value": "1",
     "objectPath": "getByUID(0x0123456789abcdef)",
     "propertyPath": "object.master_fade"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "getByUID(0x0123456789abcdef)",
+    "property": "object.master_fade",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -9907,6 +11075,17 @@
     "value": "1",
     "objectPath": "getByUID(0x0123456789abcdef)",
     "propertyPath": "object.master_fade"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "getByUID(0x0123456789abcdef)",
+    "property": "object.master_fade",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -9976,6 +11155,17 @@
     "value": "1",
     "objectPath": "getByUID(0x0123456789abcdef)",
     "propertyPath": "object.master_fade"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "getByUID(0x0123456789abcdef)",
+    "property": "object.master_fade",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -10029,6 +11219,17 @@
     "value": "1",
     "objectPath": "getByUID(0x0123456789abcdef)",
     "propertyPath": "object.master_fade"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "getByUID(0x0123456789abcdef)",
+    "property": "object.master_fade",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -10082,6 +11283,17 @@
     "value": "1",
     "objectPath": "getByUID(0x0123456789abcdef)",
     "propertyPath": "object.master_fade"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "getByUID(0x0123456789abcdef)",
+    "property": "object.master_fade",
+    "before": 1,
+    "wrote": 0.9,
+    "afterWrite": 0.8999999761581421,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -10131,6 +11343,17 @@
     "value": "false",
     "objectPath": "getByUID(0x0123456789abcdef)",
     "propertyPath": "object.holdOutput"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "getByUID(0x0123456789abcdef)",
+    "property": "object.holdOutput",
+    "before": false,
+    "wrote": true,
+    "afterWrite": true,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -10185,6 +11408,17 @@
     "value": "false",
     "objectPath": "getByUID(0x0123456789abcdef)",
     "propertyPath": "object.holdOutput"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "getByUID(0x0123456789abcdef)",
+    "property": "object.holdOutput",
+    "before": false,
+    "wrote": true,
+    "afterWrite": true,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -10239,6 +11473,17 @@
     "value": "false",
     "objectPath": "getByUID(0x0123456789abcdef)",
     "propertyPath": "object.holdOutput"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "getByUID(0x0123456789abcdef)",
+    "property": "object.holdOutput",
+    "before": false,
+    "wrote": true,
+    "afterWrite": true,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -10301,6 +11546,17 @@
     "value": "false",
     "objectPath": "getByUID(0x0123456789abcdef)",
     "propertyPath": "object.holdOutput"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "getByUID(0x0123456789abcdef)",
+    "property": "object.holdOutput",
+    "before": false,
+    "wrote": true,
+    "afterWrite": true,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -16733,6 +17989,17 @@
     "value": "1",
     "objectPath": "getByUID(0x0123456789abcdef)",
     "propertyPath": "object.renderLayer"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "getByUID(0x0123456789abcdef)",
+    "property": "object.renderLayer",
+    "before": 1,
+    "wrote": 0,
+    "afterWrite": 0,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -16787,6 +18054,17 @@
     "value": "1",
     "objectPath": "getByUID(0x0123456789abcdef)",
     "propertyPath": "object.renderLayer"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "getByUID(0x0123456789abcdef)",
+    "property": "object.renderLayer",
+    "before": 1,
+    "wrote": 0,
+    "afterWrite": 0,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -16841,6 +18119,17 @@
     "value": "1",
     "objectPath": "getByUID(0x0123456789abcdef)",
     "propertyPath": "object.renderLayer"
+   },
+   "write": {
+    "date": "2026-09-04",
+    "run": "protocol/output",
+    "status": "write-accepted-and-restored",
+    "object": "getByUID(0x0123456789abcdef)",
+    "property": "object.renderLayer",
+    "before": 1,
+    "wrote": 0,
+    "afterWrite": 0,
+    "restored": "original value confirmed"
    }
   },
   {
@@ -18036,7 +19325,8 @@
   "files": [
    "docs/research/live-verification.json",
    "docs/research/live-verification-probes.json",
-   "docs/research/live-verification-run2.json"
+   "docs/research/live-verification-run2.json",
+   "docs/research/live-write-verification.json"
   ],
   "summary": {
    "confirmed-value": {
@@ -18088,7 +19378,15 @@
    "trk_key_posx_all: sequence.nKeys is a method on r34.0.3 (\"range() integer end argument expected, got instancemethod\"); now nKeys()",
    "stg_stage_venue: guarded, the stage has no venue in the test project",
    "trk_cue_table: tags dropped from the comprehension; with the nested getTags() comprehension the Director never delivered a value within 4 s, the beat/note/section form answers at once",
-   "rs_workload_layers: shows len(getWorkloadLayers()); on r34.0.3 the map itself serialises as {} (uint64 keys, \"long too big to convert\" when iterated) although len() reports 5"
+   "rs_workload_layers: shows len(getWorkloadLayers()); on r34.0.3 the map itself serialises as {} (uint64 keys, \"long too big to convert\" when iterated) although len() reports 5",
+   "trk_key_scale: findSequence(\"scale\") -> findSequence(\"scale.x\") (the plain name returns None on r34.0.3)",
+   "lay_scale_plus: findSequence(\"scale\") -> findSequence(\"scale.x\") (the plain name returns None on r34.0.3)",
+   "lay_scale_minus: findSequence(\"scale\") -> findSequence(\"scale.x\") (the plain name returns None on r34.0.3)",
+   "lay_scale_one: findSequence(\"scale\") -> findSequence(\"scale.x\") (the plain name returns None on r34.0.3)",
+   "trk_key_scaley: new row for the scale.y axis (verified live next to scale.x)",
+   "lay_scaley_plus: new row for the scale.y axis (verified live next to scale.x)",
+   "lay_scaley_minus: new row for the scale.y axis (verified live next to scale.x)",
+   "lay_scaley_one: new row for the scale.y axis (verified live next to scale.x)"
   ],
   "removed": [
    {
@@ -18246,5 +19544,54 @@
    "selStageUid",
    "selRsLayer"
   ]
+ },
+ "writeVerification": {
+  "date": "2026-09-04",
+  "method": "Two protocol-level runs (scripts/live-write-verify.mjs, groups neutral and output) and one module-level run (test/live-write.e2e.ts) against Designer r34.0.3. Every target was read first, changed by a small amount, confirmed through its own subscription, written back to the original value, confirmed again, and re-read after the run. The layer targets used track \"demo\", which is not the transport current track; the transport was stopped.",
+  "environment": {
+   "track": "demo",
+   "layer": "Video 6",
+   "screen": "surface 1",
+   "projector": "projector 1",
+   "screenUid": "0x0123456789abcdef",
+   "currentTrack": "Show Track",
+   "playing": false
+  },
+  "results": {
+   "neutral": {
+    "write-accepted-and-restored": 9
+   },
+   "output": {
+    "write-accepted-and-restored": 12
+   },
+   "e2e": {
+    "brightness": {
+     "written": true,
+     "restored": true,
+     "after": 1
+    },
+    "layerEnabled": {
+     "written": true,
+     "restored": true,
+     "after": true
+    },
+    "screenOffset": {
+     "written": true,
+     "restored": true,
+     "after": "{\"x\":0,\"y\":3,\"z\":0}"
+    }
+   }
+  },
+  "files": [
+   "docs/research/live-write-verification.json",
+   "docs/research/live-write-verification-output.json",
+   "docs/research/live-write-e2e.json"
+  ],
+  "notReached": [
+   "ev_uid_float / ev_uid_float_up / ev_uid_float_down: no Expression Variables device in the test project",
+   "Machine role / targets / hostname: never written, they reconfigure the session",
+   "stg_screen_alpha and the projector shutter / blend rows: not part of the target list (read-only verified only)"
+  ],
+  "note": "The Director stores these properties as 32-bit floats: a written 0.9 reads back as 0.8999999761581421. The presets show the rounded value with toFixed()."
  }
 }

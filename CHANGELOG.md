@@ -4,7 +4,7 @@
 
 ### Added
 
-- Preset library: 306 presets in 11 categories (connection, local and remote monitoring, transport
+- Preset library: 310 presets in 11 categories (connection, local and remote monitoring, transport
   state, track and layer inspection, layer control, stage and screen, expression variables,
   RenderStream, failover/d3Net, templates) generated from `docs/PRESET_CATALOG.md`, where every row
   is traced to a documented Designer API member. 25 read-only experimental presets
@@ -35,15 +35,25 @@
   mock Director (subscribe, set, toggle, JSON merge, reconnect).
 - `scripts/live-verify.mjs`: read-only live verification of every catalog pair against a Director;
   results and follow-up probes are kept in `docs/research/live-verification*.json`.
-- Live verification on Designer r34.0.3 (2026-09-04, two read-only passes): 272 of the 306
+- Live verification on Designer r34.0.3 (2026-09-04, two read-only passes): 280 of the 310
   default presets confirmed with a value; every catalog row carries its live result
   (`docs/PRESET_CATALOG.md`, column *live*). 103 experimental presets that returned a value
   were promoted to their home categories (ids and variable names unchanged); `selLedScreen`,
   `selStageUid` and `selRsLayer` are regular selections now.
+- Write verification on the same Director: 21 properties written and restored through the protocol
+  (`scripts/live-write-verify.mjs`, groups `neutral` and `output`) and three through the module's own
+  actions (`test/live-write.e2e.ts`: Set Number with an expression, Toggle Boolean, Set JSON with a
+  partial object). Every value came back to its original; the results are in
+  `docs/research/live-write-*.json` and in the *write* column of `docs/PRESET_CATALOG.md`.
+- Layer scale presets for the second axis (`Layer scale.y`, `Scale Y +0.1 / -0.1 / = 1`).
+- `scripts/live-write-verify.mjs`: write verification with read-before, restore-after and a final
+  read-back; an interrupt restores the value in flight before exiting.
 
 ### Changed
 
 - Config updates that only touch presets or selections keep the WebSocket connection.
+- The layer scale presets use `findSequence("scale.x")`: the plain name `scale` returns None on
+  r34.0.3 for every layer type tested, and the second axis got its own presets.
 - Catalog corrections from the live run: the "(by index)" layer presets use `track.layers[i]` (the
   documented `getLeafLayers()[i]` object path is rejected by r34.0.3), the RenderStream layer-route
   presets evaluate `getLeafLayers(RenderStreamModule)[i]` inside the property expression (class names

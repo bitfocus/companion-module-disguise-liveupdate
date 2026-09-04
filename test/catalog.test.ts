@@ -297,3 +297,24 @@ test('live verification results: every row carries one and no row is left on a r
 	for (const removed of catalog.liveVerification.removed)
 		assert.ok(!catalog.rows.some((r: any) => r.presetId === removed.presetId), `${removed.presetId} still present`)
 })
+
+test('write verification: recorded rows are writable, restored, and use known actions', () => {
+	const actionIds = new Set(Object.keys(actionDefs))
+	let recorded = 0
+	for (const row of catalog.rows) {
+		if (!row.write) continue
+		recorded++
+		assert.equal(row.writable, 'yes', `${row.presetId}: write result on a read-only row`)
+		assert.ok(String(row.write.status).startsWith('write-'), `${row.presetId}: status ${row.write.status}`)
+		assert.ok(
+			row.write.restored === 'restored' || String(row.write.restored).startsWith('original value'),
+			`${row.presetId}: not restored (${row.write.restored})`,
+		)
+		if (row.write.e2e) assert.equal(row.write.e2e.restored, true, `${row.presetId}: e2e step not restored`)
+		assert.equal(row.status, 'live-verified', `${row.presetId}: written but not live-verified`)
+		for (const action of row.actions ?? [])
+			assert.ok(actionIds.has(action.actionId), `${row.presetId}: unknown action ${action.actionId}`)
+	}
+	assert.ok(recorded > 0, 'at least one row carries a write result')
+	assert.ok(catalog.writeVerification?.date, 'catalog carries the write verification summary')
+})

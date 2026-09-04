@@ -28,6 +28,14 @@ rule above, changes only category and name prefix. On 2026-09-04 the user decide
 live-confirmed experimental row (103 rows, listed under `promotion` in the catalog JSON); the
 selections they use (selLedScreen, selStageUid, selRsLayer) became regular selections at the same time.
 
+Write verification (2026-09-04) covers the `writable: yes` rows: `scripts/live-write-verify.mjs` reads
+the current value, writes a small change, confirms it through the subscription, writes the original
+value back, confirms that, and re-reads everything at the end; an interrupt restores the value in
+flight before exiting. Targets are grouped: `neutral` touches only a track that is not on air,
+`output` touches master fades, hold and stage flags and refuses to run while the transport plays.
+Failover topology (Machine role / targets / hostname) is never written. A row that was written and
+restored carries a `write` object, rendered in the *write* column of PRESET_CATALOG.md.
+
 ## 2. Categories
 
 Companion 5 sorts categories by name, so every category carries a numeric prefix.
