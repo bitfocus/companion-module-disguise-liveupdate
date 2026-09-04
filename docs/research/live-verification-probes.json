@@ -1,0 +1,812 @@
+{
+ "date": "2026-09-04",
+ "env": "Designer r34.0.3 (rev 258249), project example-show, Director DIRECTOR01 (vx 4+), actor ACTOR01; selections: track \"Show Track\", layer \"Colour Layer\" (ColourAdjust), surface \"surface 1\", projector \"projector 1\", machine DIRECTOR01, host ACTOR01, workload 1000000000000000001 (RenderStream layer \"RenderStream 2\", no running instances)",
+ "probe1": [
+  {
+   "o": "track:\"Show Track\".layers[0]",
+   "p": "object.name",
+   "result": "confirmed-value",
+   "value": "Colour Layer"
+  },
+  {
+   "o": "track:\"Show Track\".getLeafLayers(Layer)[0]",
+   "p": "object.name",
+   "result": "error",
+   "error": "Unable to subscribe to object: Name 'Layer' not found"
+  },
+  {
+   "o": "track:\"Show Track\".getLeafLayers(VariableVideoModule)[0]",
+   "p": "object.name",
+   "result": "error",
+   "error": "Unable to subscribe to object: Name 'VariableVideoModule' not found"
+  },
+  {
+   "o": "track:\"Show Track\".layers[2]",
+   "p": "object.name",
+   "result": "confirmed-value",
+   "value": "Video 26"
+  },
+  {
+   "o": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
+   "p": "object.moduleType",
+   "result": "confirmed-value",
+   "value": "ColourAdjustModule"
+  },
+  {
+   "o": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
+   "p": "object.findSequence(\"brightness\").sequence.key(0).v",
+   "result": "confirmed-value",
+   "value": 1
+  },
+  {
+   "o": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "p": "object.findSequence(\"pos.x\").sequence.key(0).v",
+   "result": "confirmed-value",
+   "value": 0
+  },
+  {
+   "o": "track:\"Show Track\".findLayerByName(\"Video 26\")",
+   "p": "object.moduleType",
+   "result": "confirmed-value",
+   "value": "VariableVideoModule"
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "len(object.getLeafLayers(RenderStreamModule))",
+   "result": "confirmed-value",
+   "value": 3
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "[l.name for l in object.getLeafLayers(VariableVideoModule)]",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadLayers()",
+   "result": "confirmed-value",
+   "value": {}
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.isEnabled",
+   "result": "confirmed-value",
+   "value": true
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.activeLatency()",
+   "result": "confirmed-value",
+   "value": 0
+  },
+  {
+   "o": "subsystem:MonitoringManager",
+   "p": "[m.name for m in object.localMonitors().all()]",
+   "result": "confirmed-value",
+   "value": "<redacted: project content>"
+  },
+  {
+   "o": "subsystem:MonitoringManager.findLocalMonitor(\"Machine\")",
+   "p": "[s.name for s in object.graphDescriptor(False).dataSeries]",
+   "result": "confirmed-value",
+   "value": [
+    "Disk",
+    "CPU Time",
+    "CPU Memory",
+    "GPU Time",
+    "GPU Memory"
+   ]
+  },
+  {
+   "o": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
+   "p": "[s.name for s in object.graphDescriptor(False).dataSeries]",
+   "result": "confirmed-value",
+   "value": [
+    "Video Upload",
+    "Renderer update",
+    "SLC",
+    "Prefetch",
+    "Capture Upload",
+    "Compositor",
+    "GUI",
+    "Render Everything",
+    "DMX",
+    "Total"
+   ]
+  },
+  {
+   "o": "subsystem:MonitoringManager.findLocalMonitor(\"Disk\")",
+   "p": "[s.name for s in object.graphDescriptor(False).dataSeries]",
+   "result": "confirmed-value",
+   "value": [
+    "Read (MB/s)",
+    "Write (MB/s)"
+   ]
+  },
+  {
+   "o": "subsystem:MonitoringManager",
+   "p": "object.remoteNodes()",
+   "result": "confirmed-value",
+   "value": [
+    "ACTOR01:d3"
+   ]
+  },
+  {
+   "o": "subsystem:D3NetManagerSystem",
+   "p": "[{\"name\": m.name, \"hostname\": m.hostname, \"role\": m.role, \"typeName\": m.typeName} for m in object.d3NetManager.machines]",
+   "result": "confirmed-value",
+   "value": [
+    {
+     "typeName": "<redacted>",
+     "hostname": "DIRECTOR01",
+     "role": 2,
+     "name": "DIRECTOR01"
+    },
+    {
+     "typeName": "<redacted>",
+     "hostname": "ACTOR01",
+     "role": 3,
+     "name": "actor 1"
+    }
+   ]
+  },
+  {
+   "o": "subsystem:D3NetManagerSystem",
+   "p": "[d.description for d in resourceManager.allResources(ExpressionVariablesDevice)]",
+   "result": "confirmed-value",
+   "value": []
+  },
+  {
+   "o": "subsystem:D3NetManagerSystem",
+   "p": "[d.description for d in resourceManager.allResources(LedScreen)]",
+   "result": "confirmed-value",
+   "value": "[\"LED Screen 1\",\"LED Screen 3\",\"LED Screen 4\",\"<redacted>\",\"<redacted>\",\"LED Screen 5\",\"<redacted>\",\"LED Screen 6\",\"LED Screen 7\",\"LED Screen 2\",\"<redacted>\",\"<redacted>\"]"
+  },
+  {
+   "o": "subsystem:D3NetManagerSystem",
+   "p": "[d.description for d in resourceManager.allResources(DmxScreen)]",
+   "result": "confirmed-value",
+   "value": []
+  },
+  {
+   "o": "subsystem:D3NetManagerSystem",
+   "p": "[d.description for d in resourceManager.allResources(TransportManager)]",
+   "result": "confirmed-value",
+   "value": [
+    "default"
+   ]
+  }
+ ],
+ "probe2": [
+  {
+   "o": "track:\"Show Track\".layers[0]",
+   "p": "object.findSequence(\"brightness\").sequence.key(0).v",
+   "result": "confirmed-value",
+   "value": 1
+  },
+  {
+   "o": "track:\"Show Track\".layers[0]",
+   "p": "object.moduleType",
+   "result": "confirmed-value",
+   "value": "ColourAdjustModule"
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "len(object.layers)",
+   "result": "confirmed-value",
+   "value": 58
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "[l.name for l in object.layers]",
+   "result": "confirmed-value",
+   "value": [
+    "Colour Layer",
+    "RGBColour 5",
+    "Video 26",
+    "Video 25",
+    "2.5D 2",
+    "2.5D 3",
+    "2.5D",
+    "Video 16",
+    "Video 15",
+    "Video 14",
+    "Video 13",
+    "Video 23",
+    "Video 8",
+    "Video 10",
+    "Video 21",
+    "Video 17",
+    "Video 22",
+    "Video 9",
+    "Video 20",
+    "Video 5",
+    "Video 19",
+    "Video 12",
+    "Video 6",
+    "2.5D 4",
+    "Video 18",
+    "Video 7",
+    "Video 4",
+    "Video 2",
+    "Group",
+    "<redacted>",
+    "<redacted>",
+    "Testpattern",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "RGBColour",
+    "RGBColour 4",
+    "<redacted>",
+    "<redacted>",
+    "Video 11",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "<redacted>",
+    "Group",
+    "RenderStream 2",
+    "<redacted>",
+    "RenderStream",
+    "<redacted>",
+    "Group 4",
+    "Group",
+    "<redacted>",
+    "<redacted>",
+    "RGBColour 3",
+    "Video 24"
+   ]
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "[l.name for l in object.getLeafLayers(RenderStreamModule)]",
+   "result": "confirmed-value",
+   "value": [
+    "RenderStream 2",
+    "RenderStream",
+    "<redacted>"
+   ]
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "object.getLeafLayers(RenderStreamModule)[0].name",
+   "result": "confirmed-value",
+   "value": "RenderStream 2"
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.workloadId",
+   "result": "confirmed-value",
+   "value": 1000000000000000000
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.cluster.workloadHealth",
+   "result": "confirmed-value",
+   "value": {
+    "status": 0,
+    "priority": 0,
+    "message": "Not started",
+    "details": ""
+   }
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.cluster.anyInstanceIsRunning",
+   "result": "confirmed-value",
+   "value": false
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.cluster.nInstances",
+   "result": "confirmed-value",
+   "value": 0
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.cluster.instanceHealth(0).message",
+   "result": "confirmed-value",
+   "value": "Instance not found"
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.cluster.instanceMachine(0).statusString",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "'NoneType' object has no attribute 'statusString'"
+   }
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "\"%d/%d online\" % (len(object.getLeafLayers(RenderStreamModule)[0].moduleConfig.pool.getOnlineRenderMachines()), len(object.getLeafLayers(RenderStreamModule)[0].moduleConfig.pool.machines))",
+   "result": "confirmed-value",
+   "value": "0/3 online"
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.pool.assetErrors(object.getLeafLayers(RenderStreamModule)[0].moduleConfig.asset)",
+   "result": "confirmed-value",
+   "value": [
+    "No machines are online",
+    "The following machines are offline: RENDER01, RENDER02, RENDER03"
+   ]
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.asset.available",
+   "result": "confirmed-value",
+   "value": false
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.framerateFraction",
+   "result": "confirmed-value",
+   "value": 1
+  },
+  {
+   "o": "transportManager:default",
+   "p": "object.timecode is not None",
+   "result": "confirmed-value",
+   "value": false
+  },
+  {
+   "o": "transportManager:default",
+   "p": "(object.timecode.current.__str__() if object.timecode is not None else \"\")",
+   "result": "confirmed-value",
+   "value": ""
+  },
+  {
+   "o": "transportManager:default",
+   "p": "(object.timecode.statusString if object.timecode is not None else \"\")",
+   "result": "confirmed-value",
+   "value": ""
+  },
+  {
+   "o": "transportManager:default",
+   "p": "(object.timecode.description if object.timecode is not None else \"\")",
+   "result": "confirmed-value",
+   "value": ""
+  },
+  {
+   "o": "subsystem:D3NetManagerSystem",
+   "p": "(object.d3NetManager.getDirectorUnderstudy().name if object.d3NetManager.getDirectorUnderstudy() is not None else \"\")",
+   "result": "confirmed-value",
+   "value": ""
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadLayers()",
+   "result": "confirmed-value",
+   "value": {}
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "[l.name for l in object.getWorkloadLayers()]",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "'tuple' object has no attribute 'name'"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstances(1000000000000000000)",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "workloadPtr"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadReceiveStatuses(1000000000000000000)",
+   "result": "confirmed-value",
+   "value": []
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getStreamReceiveStatuses(1000000000000000000, \"DIRECTOR01\")",
+   "result": "confirmed-value",
+   "value": []
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstance(1000000000000000000, 0).machineName",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "workloadPtr"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstance(1000000000000000000, 0).isProcessRunning",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "workloadPtr"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstance(1000000000000000000, 0).isDroppingFrames",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "workloadPtr"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstance(1000000000000000000, 0).isDroppingInputFrames",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "workloadPtr"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstance(1000000000000000000, 0).isHighActiveLatencyDetected",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "workloadPtr"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstance(1000000000000000000, 0).unrecoverableError",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "workloadPtr"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstance(1000000000000000000, 0).status",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "workloadPtr"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstance(1000000000000000000, 0).health().message",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "workloadPtr"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstance(1000000000000000000, 0).health().status",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "workloadPtr"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "\" | \".join([i.machineName + (\":ERR\" if i.unrecoverableError else (\":RUN\" if i.isProcessRunning else \":OFF\")) for i in object.getWorkloadInstances(1000000000000000000)])",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "workloadPtr"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "\"%d/%d\" % (len([i for i in object.getWorkloadInstances(1000000000000000000) if i.isProcessRunning]), len(object.getWorkloadInstances(1000000000000000000)))",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "workloadPtr"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "any([i.isDroppingFrames or i.isDroppingInputFrames for i in object.getWorkloadInstances(1000000000000000000)])",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "workloadPtr"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "any([i.unrecoverableError or not i.isProcessRunning for i in object.getWorkloadInstances(1000000000000000000)])",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "workloadPtr"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "[{\"machine\": i.machineName, \"health\": i.health().message, \"status\": i.health().status} for i in object.getWorkloadInstances(1000000000000000000)]",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "workloadPtr"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "min([s.recentReceivedFPS() for s in object.getWorkloadReceiveStatuses(1000000000000000000)] or [0.0])",
+   "result": "confirmed-value",
+   "value": 0
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "max([s.activeLatency for s in object.getWorkloadReceiveStatuses(1000000000000000000)] or [0.0])",
+   "result": "confirmed-value",
+   "value": 0
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "sum([s.totalDroppedPackets for s in object.getWorkloadReceiveStatuses(1000000000000000000)])",
+   "result": "confirmed-value",
+   "value": 0
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "all([s.subscribeSuccessful for s in object.getWorkloadReceiveStatuses(1000000000000000000) if s.subscriptionWanted])",
+   "result": "confirmed-value",
+   "value": true
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "\"; \".join([s.streamIdentifier.streamName + \": \" + s.tLastErrorMessage for s in object.getWorkloadReceiveStatuses(1000000000000000000) if s.tLastErrorMessage])",
+   "result": "confirmed-value",
+   "value": ""
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "[s.generateStreamStatusMsg(False).message for s in object.getWorkloadReceiveStatuses(1000000000000000000)]",
+   "result": "confirmed-value",
+   "value": []
+  }
+ ],
+ "probe3": [
+  {
+   "o": "track:\"Show Track\"",
+   "p": "str(object.getLeafLayers(RenderStreamModule)[0].moduleConfig.workloadId)",
+   "result": "confirmed-value",
+   "value": "1000000000000000001"
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "[str(l.moduleConfig.workloadId) for l in object.getLeafLayers(RenderStreamModule)]",
+   "result": "confirmed-value",
+   "value": [
+    "1000000000000000001",
+    "1000000000000000002",
+    "1000000000000000003"
+   ]
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "\"%d\" % object.getLeafLayers(RenderStreamModule)[0].moduleConfig.workloadId",
+   "result": "confirmed-value",
+   "value": "1000000000000000001"
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "[str(k) for k in object.getWorkloadLayers().keys()]",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "'map<uint64_t, Layer_RP>' object has no attribute 'keys'"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "[l.name for k, l in object.getWorkloadLayers().items()]",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "'map<uint64_t, Layer_RP>' object has no attribute 'items'"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstances(1000000000000000001)",
+   "result": "confirmed-value",
+   "value": []
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadReceiveStatuses(1000000000000000001)",
+   "result": "confirmed-value",
+   "value": []
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getStreamReceiveStatuses(1000000000000000001, \"DIRECTOR01\")",
+   "result": "confirmed-value",
+   "value": []
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstance(1000000000000000001, 0).machineName",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "Workload: out of range error accessing workload instance"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstance(1000000000000000001, 0).isProcessRunning",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "Workload: out of range error accessing workload instance"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstance(1000000000000000001, 0).health().message",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "Workload: out of range error accessing workload instance"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "\" | \".join([i.machineName + (\":ERR\" if i.unrecoverableError else (\":RUN\" if i.isProcessRunning else \":OFF\")) for i in object.getWorkloadInstances(1000000000000000001)])",
+   "result": "confirmed-value",
+   "value": ""
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "\"%d/%d\" % (len([i for i in object.getWorkloadInstances(1000000000000000001) if i.isProcessRunning]), len(object.getWorkloadInstances(1000000000000000001)))",
+   "result": "confirmed-value",
+   "value": "0/0"
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "any([i.isDroppingFrames or i.isDroppingInputFrames for i in object.getWorkloadInstances(1000000000000000001)])",
+   "result": "confirmed-value",
+   "value": false
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "[{\"machine\": i.machineName, \"health\": i.health().message, \"status\": i.health().status} for i in object.getWorkloadInstances(1000000000000000001)]",
+   "result": "confirmed-value",
+   "value": []
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstances(1000000000000000002)",
+   "result": "confirmed-value",
+   "value": []
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadReceiveStatuses(1000000000000000002)",
+   "result": "confirmed-value",
+   "value": []
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstances(1000000000000000003)",
+   "result": "confirmed-value",
+   "value": []
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadReceiveStatuses(1000000000000000003)",
+   "result": "confirmed-value",
+   "value": []
+  }
+ ],
+ "probe4": [
+  {
+   "o": "track:\"Show Track\"",
+   "p": "str(object.getLeafLayers(RenderStreamModule)[0].moduleConfig.workloadId)",
+   "result": "confirmed-value",
+   "value": "1000000000000000001"
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "[str(l.moduleConfig.workloadId) for l in object.getLeafLayers(RenderStreamModule)]",
+   "result": "confirmed-value",
+   "value": [
+    "1000000000000000001",
+    "1000000000000000002",
+    "1000000000000000003"
+   ]
+  },
+  {
+   "o": "track:\"Show Track\"",
+   "p": "\"%d\" % object.getLeafLayers(RenderStreamModule)[0].moduleConfig.workloadId",
+   "result": "confirmed-value",
+   "value": "1000000000000000001"
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "[str(k) for k in object.getWorkloadLayers().keys()]",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "'map<uint64_t, Layer_RP>' object has no attribute 'keys'"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "[l.name for k, l in object.getWorkloadLayers().items()]",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "'map<uint64_t, Layer_RP>' object has no attribute 'items'"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "any([i.unrecoverableError or not i.isProcessRunning for i in object.getWorkloadInstances(1000000000000000001)])",
+   "result": "confirmed-value",
+   "value": false
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstance(1000000000000000001, 0).isDroppingFrames",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "Workload: out of range error accessing workload instance"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstance(1000000000000000001, 0).status",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "Workload: out of range error accessing workload instance"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "any([i.unrecoverableError or not i.isProcessRunning for i in object.getWorkloadInstances(1000000000000000002)])",
+   "result": "confirmed-value",
+   "value": false
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstance(1000000000000000002, 0).isDroppingFrames",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "Workload: out of range error accessing workload instance"
+   }
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "any([i.unrecoverableError or not i.isProcessRunning for i in object.getWorkloadInstances(1000000000000000003)])",
+   "result": "confirmed-value",
+   "value": false
+  },
+  {
+   "o": "subsystem:RenderStreamSystem",
+   "p": "object.getWorkloadInstance(1000000000000000003, 0).isDroppingFrames",
+   "result": "confirmed-path-error",
+   "value": {
+    "errorType": "propertyPathError",
+    "message": "Workload: out of range error accessing workload instance"
+   }
+  }
+ ]
+}
