@@ -13,7 +13,24 @@ export interface DisguiseActionDefinitions extends CompanionActionDefinitions {
 	setToDisguiseNumber: CompanionActionDefinition
 	setToDisguiseBoolean: CompanionActionDefinition
 	setToDisguiseJSON: CompanionActionDefinition
+	setToDisguiseToggle: CompanionActionDefinition
 	setSelection: CompanionActionDefinition
+}
+
+/**
+ * Interpret the current value of a subscription as a boolean (Designer sends real booleans;
+ * strings such as "True"/"False" and 0/1 are accepted for robustness). Returns undefined when
+ * the value cannot be read as a boolean.
+ */
+export function readBooleanValue(value: unknown): boolean | undefined {
+	if (typeof value === 'boolean') return value
+	if (typeof value === 'number') return value !== 0
+	if (typeof value === 'string') {
+		const normalised = value.trim().toLowerCase()
+		if (normalised === 'true' || normalised === '1') return true
+		if (normalised === 'false' || normalised === '0') return false
+	}
+	return undefined
 }
 
 /**
@@ -223,6 +240,38 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
 				if (value === null) return
 
 				instance.setProperty(subscription.id, value)
+			},
+		},
+
+		setToDisguiseToggle: {
+			name: 'Toggle Disguise Boolean',
+			description: 'Flip a boolean Disguise property using the current value of its LiveUpdate Variable',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Variable Name',
+					id: 'variableName',
+					default: '',
+					useVariables: false,
+					tooltip: 'The variable name from your LiveUpdate Variable feedback (e.g., "layerEnabled")',
+				},
+			],
+			callback: async (action: CompanionActionEvent, _context: CompanionActionContext) => {
+				const variableName = String(action.options.variableName || '')
+
+				const subscription = getSubscriptionForAction(instance, variableName)
+				if (!subscription) return
+
+				const current = readBooleanValue(subscription.value)
+				if (current === undefined) {
+					instance.log(
+						'warn',
+						`Variable '${variableName}' has no boolean value yet (${JSON.stringify(subscription.value)}), cannot toggle`,
+					)
+					return
+				}
+
+				instance.setProperty(subscription.id, !current)
 			},
 		},
 
