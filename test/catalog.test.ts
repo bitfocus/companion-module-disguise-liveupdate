@@ -12,7 +12,8 @@ import { destroyInstances, FakeDirector, loadDist, newInstance, ROOT } from './h
 afterEach(destroyInstances)
 
 const dist = loadDist()
-const catalog = JSON.parse(readFileSync(path.join(ROOT, 'docs/research/phase1-catalog.json'), 'utf8'))
+const catalogText = readFileSync(path.join(ROOT, 'docs/research/phase1-catalog.json'), 'utf8')
+const catalog = JSON.parse(catalogText)
 const help = readFileSync(path.join(ROOT, 'companion/HELP.md'), 'utf8')
 /** Companion 5.0.4's expression semantics, shared with scripts/gen-presets.mjs */
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -509,4 +510,32 @@ test('renaming the connection publishes presets with the new label', async () =>
 	inst.label = 'd3_b'
 	await inst.configUpdated({ ...inst.config })
 	assert.equal(objectPath(), 'track:"$(d3_b:selTrack)"')
+})
+
+test("setup texts send commands to this module's REST actions, not to another module", () => {
+	const actionNames = Object.values(actionDefs).map((a: any) => String(a.name))
+	for (const id of ['conn_setup', 'tr_setup', 'rs_setup', 'fo_setup']) {
+		const text: string = dist.PRESET_TEXTS.find((t: any) => t.id === id).text
+		assert.ok(
+			!/companion-module-disguise-osc|cannot issue transport|only available through the REST/.test(text),
+			`${id} still sends commands elsewhere`,
+		)
+		const named = text.match(/'(?:Transport|RenderStream|Failover):'/g) ?? []
+		assert.ok(named.length > 0, `${id} names no command action`)
+		for (const prefix of named)
+			assert.ok(
+				actionNames.some((name) => name.startsWith(prefix.slice(1, -1))),
+				`${id} names ${prefix}, which no action has`,
+			)
+	}
+	const connection: string = dist.PRESET_TEXTS.find((t: any) => t.id === 'conn_setup').text
+	for (const prefix of ['Transport:', 'RenderStream:', 'Failover:'])
+		assert.ok(connection.includes(`'${prefix}'`), `conn_setup does not name the ${prefix} actions`)
+})
+
+test('no preset carries a redaction placeholder and the catalog cites no local file', () => {
+	for (const [id, preset] of Object.entries(presets))
+		assert.ok(!JSON.stringify(preset).includes('<redacted'), `${id} carries a redaction placeholder`)
+	const local = /[A-Za-z]:[\\/]+Users[\\/]|scratchpad|AppData|[\\/]Desktop[\\/]/i.exec(catalogText)
+	assert.equal(local, null, `the catalog cites a path on the author's machine: ${local?.[0]}`)
 })

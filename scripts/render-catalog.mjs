@@ -108,7 +108,7 @@ md.push(
 )
 md.push('')
 md.push(
-	'Transport **commands** (play, stop, cue, section navigation, fades) are not reachable through LiveUpdate; they stay with companion-module-disguise-osc or the REST Transport API. This library provides the state readouts and property knobs around them.',
+	"**Commands** (play, stop, section and track jumps, RenderStream workload control, failover) are not reachable through LiveUpdate; the module sends them over the Designer Session REST API as its 'Transport:', 'RenderStream:' and 'Failover:' actions (see *Commands* in the HELP). This catalog lists the LiveUpdate readouts and property knobs around them.",
 )
 md.push('')
 md.push(

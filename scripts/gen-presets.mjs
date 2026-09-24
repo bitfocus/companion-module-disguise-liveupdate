@@ -77,6 +77,8 @@ function convertRow(row) {
 		const problems = markerProblems(row.textTemplate, markers)
 		if (problems.length) hidingTexts.push(`${id}:\n    ${problems.join('\n    ')}`)
 	}
+	if (/<redacted/.test(JSON.stringify([row.textTemplate, row.previewText, row.actions])))
+		throw new Error(`${id}: preset content carries a redaction placeholder`)
 
 	const entry = {
 		id,
