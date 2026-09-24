@@ -1,10 +1,15 @@
 # Module inventory — companion-module-disguise-liveupdate (Phase 0)
 
-Snapshot of what the module implements today, taken from `src/` at upstream `main`
+Snapshot of what the module implemented when this work started, taken from `src/` at upstream `main`
 (commit `0d9895c`; `src/` is byte-identical to tag `v1.0.2`, later commits only bump dependencies).
 Everything below was read from the code, the installed `@companion-module/base` type definitions
-and the Companion 5.0.4 host sources. Nothing is taken from README/HELP, which are partly out of
+and the Companion 5.0.4 host sources. Nothing is taken from README/HELP, which were partly out of
 date (see §11).
+
+This is a record of release 1.0.2, kept for reference; it does not describe the module as it is now.
+Release 1.1.0 addresses most of the hazards in §5 and the drift in §11, and the open questions in §12
+were settled in the Phase 0 review. For the current behaviour see `companion/HELP.md`, `README.md`
+and `CHANGELOG.md`.
 
 ## 1. Toolchain and build status
 

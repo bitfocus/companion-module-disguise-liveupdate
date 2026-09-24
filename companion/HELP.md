@@ -1,14 +1,11 @@
 # disguise: LiveUpdate
 
-Monitor and control disguise Designer through its WebSocket **LiveUpdate API**: subscribe to any
-property of the show (frame rate, transport state, track and layer data, screen geometry,
-RenderStream health, failover state) as a live Companion variable, and write properties back.
-
-**What LiveUpdate is not:** it does not issue transport commands. Play, stop, cue, section
-navigation and fades stay with [companion-module-disguise-osc](https://github.com/bitfocus/companion-module-disguise-osc)
-or the Designer REST Transport API. This module gives you the state readouts and the property knobs
-around those commands; the two modules are meant to sit on the same page (see *Using with the OSC
-module* below).
+Monitor and control disguise Designer from Companion. Through the WebSocket **LiveUpdate API** the
+module subscribes to any property of the show (frame rate, transport state, track and layer data,
+screen geometry, RenderStream health, failover state) as a live Companion variable, and writes
+properties back. Through Designer's **Session REST API** it sends the commands LiveUpdate cannot
+carry: play, stop, section and track jumps, brightness and volume, RenderStream layer control and
+failover (see *Commands*).
 
 Object paths are verified against the Designer r34 LiveUpdate documentation and Python API stubs
 (d3.pyi r34.0). On 2026-09-04 the catalog was checked read-only against a Designer r34.0.3 Director:
@@ -32,29 +29,87 @@ Requires Companion 4.1 or newer.
 
 ## Commands
 
-LiveUpdate reads and writes properties; it cannot tell the Director to play, stop or jump. Those go
-over Designer's Session REST API, on the same host and port, and this module sends them for you:
+LiveUpdate reads and writes properties; it cannot tell the Director to play, stop or jump. The module
+sends those commands over Designer's Session REST API, on the same host and port as the LiveUpdate
+connection, so no second module is needed for them:
 
-- **Transport**: play, stop, play to end of section, loop section, return to start, next and previous
-  section and track, go to section / note / tag / track / timecode / time, brightness, volume, speed,
-  engaged.
-- **RenderStream**: start, stop, restart and sync the layers of a workload.
-- **Failover**: fail over a machine, restore a machine, apply default routing.
+- **Transport:** *Play*, *Stop*, *Play to end of section*, *Loop section*, *Return to start*, *Next
+  section*, *Previous section*, *Next track*, *Previous track*, *Go to section*, *Go to note*, *Go to
+  tag*, *Go to track*, *Go to timecode*, *Go to time (seconds)*, *Set brightness*, *Set volume*, *Set
+  speed*, *Set engaged*.
+- **RenderStream:** *Start layers*, *Stop layers*, *Restart layers*, *Sync layers*.
+- **Failover:** *Fail over machine*, *Restore machine*, *Apply default routing*.
+- **Command: rescan the command API** (see below).
 
-The RenderStream and failover commands change the shape of the session, so they are refused until
-*Allow destructive commands* is on in the connection settings, and then they arm on the first press
-and only fire on the second within the confirm window. The arm is tied to the target, so changing the
-machine between presses arms again instead of firing at the new one. Put the *Command armed* feedback
-on the button to see the state. `rest_last_command`, `rest_last_status` and `rest_last_message` report what
-happened; *Last command failed* colours the button when it did not work.
+### What fires on one press
 
-A Designer that does not know a command answers 404; the module says so once and stops sending it
-until you use *Rescan the command API*. A command it does know but will not carry out answers HTTP
-200 with a reason in the body; the module treats that as a failure too and puts the Director's own
-words in `rest_last_message`.
+While *Enable commands* is on (the default), every **Transport:** action fires on a single press.
+None of them counts as destructive: *Stop*, *Set brightness* 0 and *Set volume* 0 go out at once, so
+place those buttons where they cannot be hit by accident.
 
-Three things about the transport commands were established on an r34.0.3 Director and are worth
-knowing before you build the buttons:
+Only the **RenderStream:** and **Failover:** actions, which change the shape of the session, are
+gated. They are refused until *Allow destructive commands* is on (it is off by default). Then the first
+press only arms the command, and a second press of the same button within *Confirm within (s)*
+(default 5) sends it. The arm is tied to the button and to the resolved target, so changing the machine
+between the presses arms again instead of firing at the new one. Arms are dropped when *Allow
+destructive commands* or *Enable commands* is turned off, or when the host or port changes.
+
+Put the *Command armed* feedback on the button: it lights only on the button whose press armed the
+command. `rest_armed` names the most recent arm that is still waiting (empty when none is).
+
+### What happened
+
+After a command is sent, `rest_last_command`, `rest_last_status` (`OK`, `FAILED` or `UNSUPPORTED`)
+and `rest_last_message` report what happened, and *Last command failed* colours a button while the
+last command this connection sent did not succeed. That feedback covers the whole connection, not one
+button.
+
+A press that is refused before anything is sent only writes a warning to the log: commands switched
+off, destructive commands not allowed, or a parameter that cannot be sent (see below). The
+`rest_last_*` variables and *Last command failed* keep describing the previous command, and nothing
+is armed.
+
+A command the Director knows but will not carry out answers HTTP 200 with a reason in the body; the
+module counts that as `FAILED` and puts the Director's own words in `rest_last_message`. A reply that
+does not arrive within *Command timeout (ms)* (default 5000), or that stalls or breaks after its
+headers, is a failure too (`timed out`, `timed out reading the reply` or
+`could not read the reply: ...`).
+
+A Designer that does not know a command answers 404 or 405. The module sends such a command once,
+remembers the answer and does not send it again: later presses report `UNSUPPORTED` and log "This
+Designer build has no '...' command" each time. *Command: rescan the command API* forgets what was
+remembered, for example after a Designer upgrade; saving the connection settings does too.
+
+### Command parameters
+
+- **Transport, track, machine and RenderStream layers** take a name or a uid. A value of 6 or more
+  digits only is sent as a uid, anything else as a name. Prefix `name:` to force a name
+  (`name:20250914` for a date-stamped track) or `uid:` to force a uid (decimal digits only). A bare
+  prefix, or `uid:` followed by anything but digits (a `0x` hex id, for example), is refused. The
+  prefixes are lowercase.
+- Every free-text parameter (transport, track, machine, the layer list and each entry in it, section,
+  note, tag value, timecode, and the number fields time, brightness, volume and speed) is checked
+  after its variables are parsed. When it is empty, contains `$NA` (an unknown variable or an empty
+  selection) or still holds a `$(...)` reference, the command is refused with one warning and nothing
+  is sent. An empty number field is never sent as 0.
+- A RenderStream layer list is comma separated and every entry must resolve. An empty entry (a
+  trailing or double comma included) or an unresolved one refuses the whole command: no partial list
+  is sent, and a destructive command is not armed.
+- *Go to section*, *Go to note*, *Go to tag*, *Go to track*, *Go to timecode* and the four *Next /
+  Previous section / track* actions have *Play mode after the jump*: `Leave unchanged` (the default,
+  sent as `NotSet`), `Play`, `PlaySection`, `Loop` or `Stop`. A next / previous button saved before the
+  option existed sends `Leave unchanged`, so the play state stays as it was.
+
+### Established on an r34.0.3 Director
+
+`scripts/rest-command-verify.mjs` sent the commands to a Designer r34.0.3 Director on 2026-09-04. Every
+step read the state, proved the command took effect and put it back
+(`docs/research/rest-verification.json`). Every transport command except *Go to tag* was sent and
+checked (*Set speed* was refused, see below), and so was *Sync layers*. Starting, stopping and restarting layers and
+the failover commands were not sent, because a second command does not undo them. The script sent its
+jumps with play mode `Stop`. The next / previous section and track actions now send the body the
+OpenAPI document records for them, with the play mode chosen on the button; that body has not been
+sent to a Director by the module yet.
 
 - *Go to section* takes the section **number**, counting from 0. The published API describes the
   field as a string, but Designer parses it as an integer and refuses a section name. To jump by the
@@ -67,40 +122,134 @@ knowing before you build the buttons:
 ## Choosing selections from the Director
 
 Instead of typing a track or surface name, use the per-selection actions (*Set selection: Track*,
-*Set selection: Surface*, ...). Their value is a dropdown of the names Designer actually has, read
-from the Director when the connection comes up and refreshed by the *Refresh selection lists* action.
-A name can still be typed. *Set selection profile* applies several selections with one press, so one
-button re-points a whole page at another part of the show.
+*Set selection: Surface (screen2)*, ...). Their value is a dropdown of the names Designer actually
+has, read when the connection comes up (*Read selection lists on connect*, on by default) and whenever
+the *Refresh selection lists* action runs. A name can still be typed.
+
+Any answer from the Director replaces a list, even an empty one; the action then falls back to a text
+field. A read that fails (an error or no answer) keeps the previous list, and a list that needs a
+selection that is empty (the layer list needs `selTrack`) is left as it is. A list whose property a
+placed button already holds is read from that button.
+
+*Set selection profile* applies several selections (track, layer, surface, projector, machine,
+RenderStream workload) with one press, so one button re-points a whole page at another part of the
+show. A field left empty leaves that selection unchanged.
 
 ## Seeing a trend
 
 The *LiveUpdate Sparkline* feedback draws the recent values of a variable as a line on the button.
 Put it on the same button as the LiveUpdate Variable feedback that owns the value; the number stays
-readable on top. It has a window length, automatic or fixed scale, a colour, an optional fill and an
-optional threshold rule such as a frame budget.
+readable on top. Options: *Samples to keep* (default 60), *Scale to the values seen* or a fixed
+*Minimum* / *Maximum*, *Line colour*, *Fill under the line* (on by default) and an optional threshold
+rule such as a frame budget.
+
+- *Samples to keep* counts value updates, not time: 60 samples of a 1000 ms monitor are one minute.
+  It is held to 4..300, and a blank or unreadable value means 60. Each Sparkline draws its own number
+  of samples; two Sparklines on the same variable share one history, kept for the longer window.
+- A value the readout loses shows as a break in the line and in the fill, never as a line joining the
+  values on either side: `OFFLINE` during an outage, `ERROR`, `PATH_ERROR`,
+  `PATH_ERROR (unsubscribed)`, `UNSET` and any other value that is not a number (empty text,
+  objects, arrays). An outage or an error streak of any length is one break, and the column the break
+  falls in stays empty.
+  During an outage the button is redrawn with the break, so the line stops short of the right edge.
+- Numeric text is drawn as its number, and on/off values as 1 and 0. The fill covers every column
+  under the line, also while the history is still short. With more samples than pixel columns, a
+  column shows the range of the samples in it. The threshold rule is drawn over the fill, and the line
+  over the rule.
+
+**Companion 5** (checked on 5.0.4) draws the line into an *Image* layer of the button. Buttons placed
+from this module's presets already have one below the text, so a Sparkline added to them works
+without extra steps. A button created by hand starts with only the Canvas, Background and Text layers:
+a Sparkline added to it shows nothing, and nothing is logged. Add the layer first:
+
+1. Open the button and select the **Background** layer in the layer list.
+2. Click *Add element* (**+**) and choose **Image**. The new layer is inserted directly above the
+   selected one, so it sits below Text and the number stays on top.
+3. Add the *LiveUpdate Variable* and *LiveUpdate Sparkline* feedbacks.
+
+Companion binds the image when the feedback is added, so a Sparkline added before the button had an
+Image layer does not use a layer added later. Delete that Sparkline and add it again, or open the
+feedback's style overrides, use *Add override* on the Image layer's *Image* property and pick *Image
+Buffers (Deprecated)*, which is Companion's name for this output.
 
 ## Checking the presets on your Director
 
 *Check presets against this Director* subscribes once to every preset property whose selections are
-filled in, records whether the Director accepted it and releases it again. The counts land in the
-`selfcheck_*` variables. Run it when you arrive on site: it tells you which presets work with this
-Designer build and this show file. It does not touch the subscriptions your buttons already hold.
+filled in, records whether the Director answered with a value and releases it again. Rows that share
+a property are checked once, so every count is of distinct properties:
 
-The Designer version is published as `$(liveupdate:designer_version)`, and the log says so when the
-Director runs a different major version from the one the preset catalog was verified against.
+- `selfcheck_ok`: answered with a value;
+- `selfcheck_failed`: answered with an error, or not at all;
+- `selfcheck_skipped`: need a selection that is empty or invalid;
+- `selfcheck_progress`: `checked/total` while the check runs.
 
-## Behaviour when the Director goes away
+Template rows and rows without a path (the connection indicator) are not counted. A property a placed
+button already holds is read from that button, without a subscription of its own, so the check does
+not touch the subscriptions your buttons hold. Run it when you arrive on site: it tells you which
+presets work with this Designer build and this show file.
 
-Every readout is set to OFFLINE rather than keeping the last value it had, because a stale number on
-a monitoring button is worse than no number. The variables stay defined, the connection status goes
-to Disconnected and the module reconnects on its own.
+## Designer version
+
+`$(liveupdate:designer_version)` holds the version of the connected Director
+(`ReleaseVersion.versionString()`, for example `r34.0.3, rev 258249`). It is read on every connection,
+whatever *Read selection lists on connect* says. The log warns when the major version differs from
+r34, the version the preset catalog was verified against (`r34.0.3`, `34.0.3.258249` and `d3 r34.0.3`
+are all understood).
+
+## What a readout shows
+
+A LiveUpdate Variable holds the Director's value: numbers, text and booleans as they are, objects and
+arrays as JSON text. In place of a value it can hold one of these words, and the preset buttons show
+them as they are, unformatted and without a unit, so you can read the state off the button itself:
+
+| On the button | Meaning |
+|---|---|
+| (empty) | no value yet: the connection is coming up, or the Director has not sent one |
+| `OFFLINE` | the connection to the Director is closed |
+| `ERROR` | the Director refused the object path: wrong name or type prefix, or the object does not exist |
+| `PATH_ERROR` | the object exists but the property path failed |
+| `PATH_ERROR (unsubscribed)` | the property path failed three times in a row; the subscription was dropped and is retried with a back-off |
+| `UNSET` | the path cannot be resolved yet: an empty selection or `$NA`, an unparsed `$(...)`, an empty object or property path, a bare empty name such as `track:""`, or a template placeholder such as `<OBJECT_PATH>` |
+| `$NA` | Companion's own text for a variable that does not exist: the name in the button text matches no feedback |
+
+Formatted preset texts (numbers, times, on/off words, JSON fields) format only a value of the kind they
+expect and show anything else as it is: an on/off readout shows its words (YES / no, HELD / Live,
+RUNNING / STOPPED, ...) only for a real true or false, a numeric readout decodes only numbers, and a
+JSON readout shows the raw value when it is not JSON. A button therefore never shows NaN or a
+healthy-looking word for a value it does not have. When you edit a preset's text, keep its
+`isNumber(...)` / `jsonparse(...) === null` guard.
+
+Clearing a selection, or emptying a path, makes the readout show `UNSET` instead of the previous
+object's value, unless another feedback still feeds the same variable name; a *LiveUpdate Compare* on
+it turns off.
+
+The module does not send a path that is empty, holds a template placeholder such as `<OBJECT_PATH>`,
+`$NA` or a raw `$(...)` reference, and for object paths also a bare empty name (`type:""` or `type:''`)
+or the remote-monitor node without a host (`":d3"`). Everything else is sent as written, including
+`""`, `[]` and `(1,)` in a property path and `findLayerByName("")`; when the Director cannot evaluate
+it, the readout shows `ERROR` or `PATH_ERROR`. A refused path is logged once per feedback, at warn
+level, and the readout shows `UNSET`.
+
+## When the Director goes away
+
+Every readout owned by a LiveUpdate Variable feedback is set to `OFFLINE` rather than keeping the last
+value it had, because a stale number on a monitoring button is worse than no number. Selections and
+the module's own variables keep their values, and `connection_status` goes to `Disconnected`. The
+variables stay defined, also when you save the connection settings while the Director is away, and
+the module reconnects on its own after the *Reconnect Interval*.
+
+On disconnect and on reconnect the module re-checks *Connection OK*, *LiveUpdate Compare*,
+*LiveUpdate Sparkline*, *Command armed* and *Last command failed*, so no state colour outlives the
+connection. After a reconnect no readout stays `OFFLINE`: each one is emptied and either subscribes
+again (its value arrives) or shows `UNSET`. Changing the host or port while connected shows `OFFLINE`
+in every readout until the new Director answers.
 
 ## Configuration
 
 ### Connection settings
 
 - **Director IP Address**: the Designer Director machine (default: 127.0.0.1)
-- **Port**: HTTP/WebSocket port of the Director (default: 80)
+- **Port**: HTTP/WebSocket port of the Director (default: 80); the commands use the same host and port
 - **Reconnect Interval (ms)**: wait before reconnecting after a connection loss (default: 5000)
 - **Pending Subscription Timeout (ms)**: how long a subscribe request may stay unanswered (default: 30000)
 
@@ -110,23 +259,47 @@ to Disconnected and the module reconnects on its own.
   path is not documented for LiveUpdate, see *Experimental presets*). Off by default.
 - **Monitoring / Playhead / State / Static interval (ms)**: the update intervals written into the
   presets when you place them (defaults 1000 / 250 / 500 / 5000). A placed button keeps its own
-  value and can be edited per feedback; editing it re-subscribes. Buttons that share one property
-  share one subscription, so the interval of the first placed button applies to all of them. `0`
-  means "every frame" and is not recommended for monitors.
+  value and can be edited per feedback; editing it re-subscribes. `0` means "as fast as possible" (the
+  Director's default) and is not recommended for monitors.
+- **Read selection lists on connect** (default on): read the names the *Set selection: ...* actions
+  offer when the connection comes up (see *Choosing selections from the Director*). The Designer
+  version is read either way.
+
+Buttons that share one property share one Director subscription, which runs at the fastest interval
+any placed feedback asks for; `0` beats any number. When a faster feedback joins, the module subscribes
+again at the faster rate, also when the first request is still on its way. Removing the faster button
+does not slow the subscription down again straight away. The intervals are remembered across
+reconnects.
+
+### Commands
+
+- **Enable commands** (default on): send the *Transport:*, *RenderStream:* and *Failover:* actions.
+  Off, every command press is refused and logged.
+- **Allow destructive commands** (default off): allow the *RenderStream:* and *Failover:* actions,
+  which then need two presses (see *Commands*).
+- **Confirm within (s)** (default 5, shown when destructive commands are allowed): how long an armed
+  command waits for its second press.
+- **Command timeout (ms)** (default 5000): how long a command may take, reading the reply included.
 
 ### Selections
 
 The presets do not contain fixed object names. They address the show through **selection
 variables** such as `$(liveupdate:selTrack)` inside their object paths, for example
 `track:"$(liveupdate:selTrack)"`. Fill the selections in here once, or change them live with the
-*Set selection* action; every preset built on a selection re-subscribes to the new object
+*Set selection* actions; every preset built on a selection re-subscribes to the new object
 automatically.
+
+The presets follow their own connection. They are written with the connection's label, so a second
+connection (`liveupdate_2`) or a renamed one gets `$(liveupdate_2:selTrack)` in its paths and follows
+its own selections. Companion 5.0.4 rewrites the label in a preset's button text, style overrides and
+action options itself, but not in its feedback options, so the module writes it there. Buttons placed
+before a rename are relabelled by Companion.
 
 | Selection | Variable | What to enter |
 |---|---|---|
 | Track | `selTrack` | track name as shown in Designer, e.g. `Track 1` |
 | Layer | `selLayer` | layer name inside the selected track, e.g. `Video 1` |
-| Layer index | `selLayerIndex` | 0-based leaf-layer index (index-based probes only) |
+| Layer index | `selLayerIndex` | 0-based position in the track's layer list (`track.layers`), for the "(by index)" presets |
 | Section index | `selSection` | 0-based section index |
 | Beat | `selBeat` | a track beat, e.g. `32` |
 | Surface (screen2) | `selScreen` | surface name, e.g. `Surface 1` |
@@ -134,21 +307,22 @@ automatically.
 | Display UID | `selScreenUid` | UID of any display, hex with `0x` (right-click the editor title bar > Copy UID) |
 | Machine | `selMachine` | Machine resource name as listed in d3Net Manager |
 | Remote host | `selHost` | hostname of the remote machine **without** `:d3` (the presets append it) |
-| RenderStream workload id | `selWorkload` | integer id (REST `GET /api/session/renderstream/layerstatus` or the Cluster Workload widget > Copy UID) |
+| RenderStream workload id | `selWorkload` | integer id (the *RS Layer Workload ID* preset shows it; also REST `GET /api/session/renderstream/layerstatus` or the Cluster Workload widget > Copy UID) |
 | RenderStream instance index | `selInstance` | 0-based |
 | Expression Variables device UID | `selEvUid` | hex with `0x` |
 | Expression variable index | `selEvIndex` | 0-based row inside the device |
+| LED screen | `selLedScreen` | LED screen name, e.g. `LED 1` |
+| Stage UID | `selStageUid` | UID of the Stage, hex with `0x` |
+| RenderStream layer index | `selRsLayer` | 0-based index among the selected track's RenderStream leaf layers (the RS Layer presets also need `selTrack`) |
 
 Experimental presets use five more selections (`selTransport`, `selDmxScreen`, `selEvDevice`,
-`selEvName`, `selEvLayer`); they only appear in the
-settings when experimental presets are enabled.
+`selEvName`, `selEvLayer`); they only appear in the settings when experimental presets are enabled.
 
 Names are used verbatim (case-sensitive) inside quotes and must not contain quotes, backslashes or
 line breaks; hostnames allow letters, digits, `.`, `_` and `-`; indices are plain decimal integers
 (no leading zero); UIDs and workload ids are decimal or `0x` hex integers. Invalid values are
-rejected with a log message. While a selection is empty the presets that depend on it show `$NA`
-and do not subscribe. The variable names `sel...` and `connection_status` are reserved for the
-module and cannot be used as LiveUpdate Variable names.
+rejected with a log message. An empty selection is published as `$NA`; the presets that depend on it
+do not subscribe, and their readouts show `UNSET` until it is filled in.
 
 ## Quick start
 
@@ -169,6 +343,9 @@ names a variable (`fps`), an *object path* (a Designer expression that finds the
 - Feedbacks with the same object and property paths share one subscription on the Director. The
   presets use one fixed variable name per property for that reason; keep the name when you copy a
   preset, and only rename it when you point the copy at a different object.
+- One variable name watches one object/property pair: a second feedback that uses the name for
+  another pair is not subscribed, and the log says so, because the Set and Toggle actions find their
+  subscription by variable name.
 - Objects and arrays arrive as JSON text; use `jsonparse(...)` in an expression to read a field.
   Designer resources arrive as `{"uid": ..., "path": ..., "type": ...}`.
 - Property paths run as Python 2.7 expressions on the Director; method calls, list and dictionary
@@ -176,6 +353,9 @@ names a variable (`fps`), an *object path* (a Designer expression that finds the
 - "Set to Disguise" actions write to the subscription created by the feedback with the same variable
   name, so a control button always carries that feedback as well. Writes are undoable in Designer
   and are saved with the project.
+- Subscribe requests asked for together (a reconnect, a page of presets placed at once, a selection
+  change) leave as one frame per object and update interval; the Director still holds one
+  subscription per property.
 
 ## Presets
 
@@ -188,7 +368,7 @@ carry a *LiveUpdate Compare* feedback (for example FPS turns red below 50, "take
 
 Designer's Python API exposes far more than the LiveUpdate documentation shows. Presets whose object
 path is only inferred from the API stub (for example `expressionvariablesdevice:"..."`,
-`ledscreen:"..."`, `subsystem:D3NetManagerSystem`) are shipped read-only in `99 Experimental`, named
+`dmxscreen:"..."`, a named `transportManager:"..."`) are shipped read-only in `99 Experimental`, named
 `[EXP] ...`, and only when *Show experimental presets* is enabled. They may show `ERROR` or
 `PATH_ERROR`; that is not a module bug. Presets that prove to work on a Director are promoted to
 their home category in a later release without changing their ids or variable names.
@@ -625,18 +805,45 @@ _310 presets ship by default; 25 experimental presets appear when "Show experime
 
 Creates the subscription and the module variable.
 
-- **Variable Name**: name of the variable, letters, digits, `_` and `-` only
+- **Variable Name**: name of the variable: letters, digits, `_` and `-` (Companion's own rule). A
+  leading digit is allowed and there is no length limit. The module's own variables (see *Variables*)
+  are reserved: a feedback that uses one of those names is never subscribed, and the log says so once.
 - **Object Path**: Designer expression, e.g. `track:"Track 1"`, `screen2:"Surface 1"`, `Machine:"Director"`, `getByUID(0x...)`, `subsystem:MonitoringManager.findLocalMonitor("fps")`. Companion variables are expanded before the subscription is made.
 - **Property Path**: Python expression on `object`, e.g. `object.lengthInBeats`, `object.player.tRender`, `object.seriesAverage("Actual", 1)`
-- **Update Frequency (ms)**: minimum time between updates (`0` = every change)
+- **Update Frequency (ms)**: minimum time between updates (`0` = as fast as possible, the Director's
+  default). Feedbacks that share a property run at the fastest interval any of them asks for.
 
 The feedback itself applies no style; use *LiveUpdate Compare* or Companion expressions for colours.
 
 ### LiveUpdate Compare
 
-Boolean feedback on the current value of a LiveUpdate Variable: equals, not equal, less/greater
-(numeric), true/non-zero/non-empty, contains text. Add it to any button, together with a LiveUpdate
-Variable feedback of the same name somewhere in the config.
+Boolean feedback on the current value of a LiveUpdate Variable: equals, not equal, less / less or
+equal / greater / greater or equal (numeric), is true / non-zero / non-empty, contains text. Add it to
+any button, together with a LiveUpdate Variable feedback of the same name somewhere in the config.
+
+A value that is unknown satisfies no comparison, not even *not equal* or *is true*: no value yet,
+`null` (Python `None`), a Director error, or one of the words `OFFLINE`, `ERROR`, `PATH_ERROR`,
+`PATH_ERROR (unsubscribed)` and `UNSET`, also when the Director itself sends that text. A `PATH_ERROR`
+therefore never lights a "not equal" alarm: the button keeps its own colour and its text shows the
+word.
+
+### LiveUpdate Sparkline
+
+Draws the recent values of a LiveUpdate Variable as a line on the button: *Variable Name*, *Samples
+to keep* (4..300, default 60), *Scale to the values seen* or a fixed *Minimum* / *Maximum*, *Line
+colour*, *Fill under the line* and *Draw a threshold line* with its *Threshold*. On Companion 5 the
+button needs an Image layer; see *Seeing a trend*.
+
+### Command armed
+
+True on the button whose press armed a destructive command, until the second press sends it or
+*Confirm within (s)* runs out. See *Commands*.
+
+### Last command failed
+
+True while `rest_last_status` is `FAILED` or `UNSUPPORTED`, that is while the last command this
+connection sent did not succeed. It covers the whole connection. A press refused before sending does
+not change it.
 
 ### Connection OK
 
@@ -655,48 +862,86 @@ Write a value to the property behind a LiveUpdate Variable.
 Use the type that matches the property; a string sent to a float property makes the Director close
 the connection with "Cannot convert JSON String to double" (the module reconnects).
 
+A Number value is evaluated after its variables are parsed and only a finite number is sent. A value
+that refers to a readout of this connection, such as `$(liveupdate:brightness)-0.05`, is not sent
+while that readout has no numeric value yet (it is empty, `OFFLINE`, `UNSET`, ...): the expression
+would reach the Director as an absolute value. The check recognises the connection's own label, so it
+works for `liveupdate_2` or a renamed connection, and for hyphenated variable names.
+
+Writes to the same property in quick succession (a rotary encoder) are collapsed: the first goes out
+at once, then one write per 40 ms carries the latest value.
+
 ### Toggle Disguise Boolean
 
-Flips a boolean property using the current value of its LiveUpdate Variable.
+Flips a boolean property using the current value of its LiveUpdate Variable. Nothing is sent while
+the readout holds no on/off value (true / false, 1 / 0).
 
-### Set selection
+### Selections
 
-Sets one selection variable (dropdown) to a value (variables allowed, e.g. `$(custom:show_track)`)
-and stores it in the connection settings. Put it on a button to switch every track preset to another
-track in one press.
+- **Set selection**: sets one selection variable (dropdown) to a value (variables allowed, e.g.
+  `$(custom:show_track)`) and stores it in the connection settings. Put it on a button to switch every
+  track preset to another track in one press. A value that parses to `$NA` or to an unresolved
+  reference clears the selection.
+- **Set selection: Track**, **Set selection: Layer**, ...: one action per selection, with the names
+  read from the Director as a dropdown (see *Choosing selections from the Director*).
+- **Set selection profile**: several selections with one press; an empty field leaves its selection
+  unchanged.
+- **Refresh selection lists**: read the lists again, for example after the show file changed.
+
+### Check presets against this Director
+
+Checks every preset property whose selections are filled in; see *Checking the presets on your
+Director*.
+
+### Commands
+
+The *Transport:*, *RenderStream:* and *Failover:* actions and *Command: rescan the command API*; see
+*Commands*.
 
 ## Variables
 
 - `connection_status`: `Connected` / `Disconnected`
-- `sel...`: the selections (see *Selections*)
-- one variable per active LiveUpdate Variable feedback, named as configured
+- `designer_version`: Designer version of the connected Director
+- `selfcheck_progress`, `selfcheck_ok`, `selfcheck_failed`, `selfcheck_skipped`: the preset check
+- `rest_last_command`, `rest_last_status`, `rest_last_message`: the last command sent and its result
+- `rest_armed`: the most recent destructive command waiting for its second press (empty when none)
+- `selTrack`, `selLayer`, ...: the selections (see *Selections*), `$NA` while empty
+- one variable per placed LiveUpdate Variable feedback, named as configured
+
+All of the module's own variables above, the selection ids included, are reserved and cannot be used
+as LiveUpdate Variable names. Only the exact selection ids are reserved, not every name starting with
+`sel`.
 
 ## Using with the OSC module
 
-Put the OSC module's *Show control* presets (play, stop, next section, fades) and this module's
-readouts on the same page. The transport presets use the OSC module's variable ids where the value
-matches, so button expressions can be swapped between the two:
+This module sends the transport commands itself (see *Commands*), so
+[companion-module-disguise-osc](https://github.com/bitfocus/companion-module-disguise-osc) is
+optional. It can sit on the same page, for example for its fades. The transport presets use the OSC
+module's variable ids where the value matches, so button expressions can be moved between the two;
+all of these presets are in `04 Transport State`:
 
 | OSC module variable | LiveUpdate preset / variable | Notes |
 |---|---|---|
 | `trackname` | `Current track name` / `trackname` | |
 | `playMode` | `Play mode (string)` / `playMode` | Python string of the play mode |
 | `brightness`, `volume` | `Master brightness` / `Master volume` | writable here (nudges, full, zero) |
-| `bpm` | `[EXP] BPM at playhead` / `bpm` | experimental |
-| `currentSectionName`, `nextSectionName` | experimental transport presets | experimental |
-| `sectionElapsed`, `sectionRemaining` | experimental transport presets | **beats**, not seconds |
-| `trackposition`, `timecodeposition` | experimental transport presets | experimental; `Playhead (beats)` is documented |
+| `bpm` | `BPM at playhead` / `bpm` | |
+| `currentSectionName`, `nextSectionName` | `Current section name` / `Next section name` | |
+| `sectionElapsed`, `sectionRemaining` | `Section elapsed (beats)` / `Section remaining (beats)` | **beats**, not seconds |
+| `trackposition`, `timecodeposition` | `Track position (seconds)` / `Timecode position` | |
 | `heartbeat` | `Connection status` / `connection_status` | |
 
 ## Object path reference
 
 - `type:name` finds a resource by type and name: `track:"Track 1"`, `screen2:"Surface 1"`,
-  `projector:"Projector 1"`, `Machine:"Director"`, `transportManager:default`. Names with spaces need
-  the quotes; older Designer versions only accept the sanitised form (`track:track_1`).
+  `projector:"Projector 1"`, `ledscreen:"LED 1"`, `Machine:"Director"`, `transportManager:default`.
+  Names with spaces need the quotes; older Designer versions only accept the sanitised form
+  (`track:track_1`).
 - `getByUID(0x...)` finds any resource by UID, independent of its name (right-click the editor
   title bar > Copy UID).
 - `subsystem:MonitoringManager` and `subsystem:RenderStreamSystem` address the subsystems shown in
-  the LiveUpdate documentation; other `subsystem:` prefixes are experimental.
+  the LiveUpdate documentation. `subsystem:D3NetManagerSystem`, `subsystem:GuiSystem` and
+  `subsystem:SessionSystem` are not shown there; the presets that use them were confirmed on r34.0.3.
 - Chained calls are allowed in the object part: `track:"Track 1".findLayerByName("Video 1")`,
   `subsystem:MonitoringManager.findLocalMonitor("fps")`.
 - Remote monitors take the node name `"<hostname>:d3"`.
@@ -705,27 +950,48 @@ matches, so button expressions can be swapped between the two:
 
 ## Troubleshooting
 
-- Variable shows `$NA`: the selection the preset depends on is empty, or the variable name in the
-  button text does not match the feedback.
-- Variable shows `ERROR`: the Director could not resolve the object path (wrong name, wrong type
-  prefix, object does not exist). The subscription is retried with a growing back-off (2 s up to
-  60 s) until you fix the path.
-- Variable shows `PATH_ERROR` / `PATH_ERROR (unsubscribed)`: the object exists but the property
-  expression fails; after three errors the module unsubscribes and retries with the same back-off
-  (2 s doubling up to 60 s, reset by the first good value or by editing the feedback).
+Look at the button first: a readout shows what went wrong (see *What a readout shows*).
+
+- `UNSET`: the path cannot be resolved yet. Usually the selection the preset depends on is empty;
+  fill it in. The log says "Not subscribing feedback ...: the path cannot be resolved yet".
+- `$NA`: the variable name in the button text matches no feedback.
+- `OFFLINE`: the connection to the Director is closed; `connection_status` says `Disconnected` and
+  the module reconnects on its own.
+- `ERROR`: the Director could not resolve the object path (wrong name, wrong type prefix, object does
+  not exist). The subscription is retried with a growing back-off (2 s doubling up to 60 s) until you
+  fix the path.
+- `PATH_ERROR` / `PATH_ERROR (unsubscribed)`: the object exists but the property expression fails;
+  after three errors in a row the module unsubscribes and retries with the same back-off (reset by the
+  first good value or by editing the feedback).
+- Empty: no value yet. The connection is coming up, or the Director has not sent one; a request that
+  stays unanswered for the *Pending Subscription Timeout* is dropped and retried with the back-off.
 - Log says "Selection rejected" or "Selection ignored": the value contains characters that are not
   allowed for that selection (see *Selections*); the selection stays unset.
+- Log says "Variable name '...' is reserved for the module" or "LiveUpdate Variable feedback ... needs
+  a Variable Name": give the feedback a name of its own.
+- Log says "Variable '...' is already watching ...": one variable name watches one object/property
+  pair; give the second feedback its own name (and change it in its button text and actions).
 - A control does nothing: the button needs the LiveUpdate Variable feedback with the same variable
-  name; check the log for "No LiveUpdate Variable found".
+  name; check the log for "No LiveUpdate Variable found" or, for a nudge, "Not writing: '...' has no
+  numeric value yet".
+- A command button does nothing: check the log. "Command channel is off", "is a destructive command;
+  enable ...", "... is empty or unresolved, nothing was sent" and "Armed '...'. Press again within
+  ..." are refusals or arms; nothing was sent.
 - Connection closes right after a set: wrong value type for the property, see *Set to Disguise*.
 - Values are in **beats** unless stated otherwise (track time); `beatToTime` converts to seconds.
 
 ## Limits
 
-- No transport commands (protocol limit), no failover or RenderStream commands (REST only).
+- LiveUpdate itself carries properties only. The commands go over the Session REST API on the same
+  host and port; a command the Designer build does not have is reported as `UNSUPPORTED`.
+- Starting, stopping and restarting RenderStream layers and the failover commands were never sent to
+  a Director during verification (a second command does not undo them); their paths and bodies come
+  from the Director's own OpenAPI document.
 - Whether a property accepts a set can only be found out by trying; the presets only ship writes on
   members that have a setter in the Designer API.
 - Object paths in `99 Experimental` are not documented by disguise and may fail on your version.
+- On Companion 5 the Sparkline needs an Image layer on a button that was not placed from a preset
+  (see *Seeing a trend*).
 
 ## Links
 

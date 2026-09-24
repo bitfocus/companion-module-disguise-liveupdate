@@ -8,7 +8,9 @@
 // Usage:
 //   node scripts/rest-command-verify.mjs --host 192.0.2.10 [--port 80]
 //        [--group transport|renderstream|all] [--yes] [--force]
-//        [--out <file, default .live/rest-verification.json>]
+//        [--out <file, default .live/rest-verification.json>] [--designer <version, default r34.0.3>]
+//
+// The results record the host as 192.0.2.10 and the Designer version given with --designer.
 //
 // Without --yes nothing is sent: the script reads the state, prints the plan and exits. With --yes
 // it sends the commands of the selected group. The default group only touches the transport and

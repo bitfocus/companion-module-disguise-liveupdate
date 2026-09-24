@@ -16,8 +16,11 @@ const catalogText = readFileSync(path.join(ROOT, 'docs/research/phase1-catalog.j
 const catalog = JSON.parse(catalogText)
 const help = readFileSync(path.join(ROOT, 'companion/HELP.md'), 'utf8')
 /** Companion 5.0.4's expression semantics, shared with scripts/gen-presets.mjs */
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+/* eslint-disable @typescript-eslint/no-require-imports */
 const expression = require(path.join(ROOT, 'scripts/companion-expression.cjs'))
+const distConfig = require(path.join(ROOT, 'dist/config.js'))
+const distVariables = require(path.join(ROOT, 'dist/variables.js'))
+/* eslint-enable @typescript-eslint/no-require-imports */
 
 const fakeInstance = { config: { host: '10.0.0.1', port: 80, showExperimentalPresets: true } }
 const presets = dist.getPresetDefinitions(fakeInstance)
@@ -288,6 +291,36 @@ test('HELP lists every preset and every selection', () => {
 	}
 	for (const selection of dist.SELECTIONS)
 		assert.ok(help.includes(selection.id), `HELP lacks selection ${selection.id}`)
+})
+
+test('HELP and README name every setting, feedback, action and module variable', () => {
+	const readme = readFileSync(path.join(ROOT, 'README.md'), 'utf8')
+	// Markdown wraps lines, so a name can be split across two of them
+	const flat = (text: string): string => text.replace(/\s+/g, ' ')
+	const helpText = flat(help)
+	const readmeText = flat(readme)
+	for (const field of distConfig.getConfigFields()) {
+		if (field.type === 'static-text' || SELECTION_IDS.has(field.id) || field.id.startsWith('presetInterval')) continue
+		assert.ok(helpText.includes(field.label), `HELP lacks the setting '${field.label}'`)
+	}
+	for (const feedback of Object.values(feedbackDefs)) {
+		assert.ok(helpText.includes(`### ${feedback.name}`), `HELP has no section for the feedback '${feedback.name}'`)
+		assert.ok(readmeText.includes(`**${feedback.name}**`), `README lacks the feedback '${feedback.name}'`)
+	}
+	for (const action of Object.values(actionDefs)) {
+		const name = String(action.name)
+		if (name.startsWith('Set selection: ')) continue
+		const command = /^(?:Transport|RenderStream|Failover): (.+)$/.exec(name)
+		if (command) assert.ok(helpText.includes(`*${command[1]}*`), `HELP lacks the command '${name}'`)
+		else if (/^Set to Disguise \(/.test(name))
+			assert.ok(helpText.includes('Set to Disguise (String / Number / Boolean / JSON)'), `HELP lacks '${name}'`)
+		else assert.ok(helpText.includes(name), `HELP lacks the action '${name}'`)
+	}
+	for (const { variableId } of distVariables.getVariableDefinitions()) {
+		if (SELECTION_IDS.has(variableId)) continue
+		assert.ok(helpText.includes(`\`${variableId}\``), `HELP lacks the variable ${variableId}`)
+		assert.ok(readmeText.includes(`\`${variableId}\``), `README lacks the variable ${variableId}`)
+	}
 })
 
 test('live verification results: every row carries one and no row is left on a rejected subscription', () => {

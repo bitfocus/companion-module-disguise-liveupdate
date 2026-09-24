@@ -31,10 +31,13 @@ selections they use (selLedScreen, selStageUid, selRsLayer) became regular selec
 Write verification (2026-09-04) covers the `writable: yes` rows: `scripts/live-write-verify.mjs` reads
 the current value, writes a small change, confirms it through the subscription, writes the original
 value back, confirms that, and re-reads everything at the end; an interrupt restores the value in
-flight before exiting. Targets are grouped: `neutral` touches only a track that is not on air,
-`output` touches master fades, hold and stage flags and refuses to run while the transport plays.
-Failover topology (Machine role / targets / hostname) is never written. A row that was written and
-restored carries a `write` object, rendered in the *write* column of PRESET_CATALOG.md.
+flight before exiting. Targets are grouped: `neutral` touches only a track that is not the
+transport's current track, `output` touches master fades, hold and stage flags and refuses to run
+while the transport plays. Both guards fail closed: `neutral` is refused when the track it would use
+is the current one or the current track cannot be read, `output` when the playing state cannot be
+read. `--force` overrides them. Failover topology (Machine role / targets / hostname) is never
+written. A row that was written and restored carries a `write` object, rendered in the *write* column
+of PRESET_CATALOG.md.
 
 ## 2. Categories
 
@@ -77,8 +80,13 @@ A preset cannot ship `$(custom:...)` references, though: when presets are import
 rewrites every `$(label:var)` whose label is not `local` to the connection's label
 (`Definitions.ts` → `replaceAllVariables`, `preserveLabels = {'local'}`), so `$(custom:d3_track)`
 would become `$(<connection>:d3_track)` and resolve to `$NA`. References to the module's **own**
-variables survive the rewrite correctly. The library therefore uses module-owned *selection
-variables* (extension 7 in §11):
+variables are what that rewrite is for, with one gap: Companion 5.0.4 rewrites the label in a
+preset's button text, style overrides and action options, but not in its feedback options. The
+catalog keeps writing `$(liveupdate:...)`, and `src/presets.ts` replaces that label with the
+connection's own (`instance.label`) in the LiveUpdate Variable paths and the Compare value, so a second
+connection (`liveupdate_2`) or a renamed one follows its own selections. A rename reaches
+`configUpdated`, which publishes the presets again; buttons placed before the rename are relabelled
+by Companion. The library therefore uses module-owned *selection variables* (extension 7 in §11):
 
 | selection variable | used in | example value |
 |---|---|---|
@@ -92,7 +100,13 @@ variables* (extension 7 in §11):
 | `$(liveupdate:selHost)` | `findRemoteMonitor("$(liveupdate:selHost):d3", ...)` | `VX4-02` |
 | `$(liveupdate:selWorkload)`, `selInstance` | RenderStream workload id / instance index in the property path | `12345`, `0` |
 | `$(liveupdate:selEvUid)`, `selEvIndex` | Expression Variables device UID / variable index | — |
-| experimental: `selTransport`, `selLedScreen`, `selDmxScreen`, `selStageUid`, `selEvDevice`, `selEvName`, `selEvLayer`, `selRsLayer` | Experimental rows only | — |
+| `$(liveupdate:selLedScreen)` | `ledscreen:"$(liveupdate:selLedScreen)"` | `LED 1` |
+| `$(liveupdate:selStageUid)` | `getByUID($(liveupdate:selStageUid))` | `0x0123456789abcdef` |
+| `$(liveupdate:selRsLayer)` | `getLeafLayers(RenderStreamModule)[$(liveupdate:selRsLayer)]` inside the property path, on `track:"$(liveupdate:selTrack)"` | `0` |
+| experimental: `selTransport`, `selDmxScreen`, `selEvDevice`, `selEvName`, `selEvLayer` | Experimental rows only | — |
+
+`selLedScreen`, `selStageUid` and `selRsLayer` started as experimental selections and became regular
+ones when their rows were promoted after the 2026-09-04 live run (§1).
 
 Selection variables are ordinary module variables: their values come from a "Selections" section in
 the connection settings and can be changed live with a `Set selection` action (value field with
@@ -104,13 +118,13 @@ Rules:
 - Quoted names (`track:"..."`) are used everywhere so names with spaces work (Designer r34 supports the quoted form; the sanitised `track_1` form is documented as the legacy fallback).
 - `transportManager:default` (casing as in disguise's own plugin guide) and `subsystem:...` paths carry no variable.
 - Selection references never appear in `variableName` (that option is not parsed).
-- `11 Templates` uses literal `<OBJECT_PATH>` / `<PROPERTY_PATH>` placeholders. The module's guard (`isUnresolvedPath` in `src/index.ts`) never subscribes while a path contains an `<UPPER_CASE>` placeholder token, `$NA`, an unparsed `$(...)` reference, an empty quoted name (`""` / `''`), an empty argument or index slot (`f(, 1)`, `f(1, )`, `a[]`) or the remote-node form without a hostname (`":d3"`). Unset selections publish `$NA`, so every preset built on them is covered whatever the slot looks like.
+- `11 Templates` uses literal `<OBJECT_PATH>` / `<PROPERTY_PATH>` placeholders. The module's guard (`isUnresolvedPath` and `isUnresolvedObjectPath` in `src/index.ts`) never subscribes while a path is empty or contains an `<UPPER_CASE>` placeholder token, `$NA` or an unparsed `$(...)` reference, nor while an object path is a bare empty name (`track:""` / `track:''`) or the remote-node form without a hostname (`":d3"`); the readout shows `UNSET` and the refusal is logged once per feedback. Everything else is sent as written, because `""`, `[]` and `(1,)` are ordinary Python in a property path (several shipped paths end in `else ""`) and `findLayerByName("")` is a path the Director answers with a visible `ERROR` or `PATH_ERROR`. Unset selections publish `$NA`, so every preset built on them is covered whatever the slot looks like.
 - Selection values are validated by kind before use (`src/selections.ts`): names must not contain quotes, backslashes or line breaks; hosts are `[A-Za-z0-9._-]`; indices are plain decimal integers; UIDs are decimal or `0x` hex integers. Invalid values are rejected in the Set selection action and ignored (treated as unset) when read from the config.
 - Rejected alternatives: (a) literal `<TRACK_NAME>` placeholders in every path: one edit per button, no central re-pointing, and they trigger the subscribe-storm hazard until edited; they remain the documented manual fallback. (b) `$(custom:...)` inside shipped presets: broken by the host's label rewrite (above); operators may still type it into a placed button.
 
 ## 5. Variable names
 
-- `variableName` is `[A-Za-z0-9_]`, ≤ 40 characters, semantic (not preset-based).
+- `variableName` is `[A-Za-z0-9_]`, ≤ 40 characters, semantic (not preset-based). This is the library's own convention; the module accepts any name Companion accepts (letters, digits, `_` and `-`, a leading digit included, no length limit) and refuses only its own variable ids (`connection_status`, `designer_version`, `selfcheck_*`, `rest_*` and the selection ids).
 - Exactly one variable name per unique (objectPath, propertyPath) pair in the whole library; every preset that subscribes to that pair uses the same name and the same frequency class.
 - Names mirror `companion-module-disguise-osc` where the meaning matches: `trackname`, `currentSectionName`, `nextSectionName`, `sectionElapsed`, `sectionRemaining`, `volume`, `brightness`, `bpm`, `playMode`, `trackposition`, `timecodeposition`. Everything else is lowerCamelCase (`fps`, `fpsAvg10`, `gpuTotalMs`, `playheadBeats`, `isPlaying`, `layerEnabled`, `screenOffsetX`).
 - Duplicating a preset for a second object requires renaming the variable in the feedback and in the button text; the HELP documents this.
@@ -129,9 +143,14 @@ The defaults live in connection settings (`presetIntervalMonitoring`, `presetInt
 so editing the settings changes the prefilled value of presets dragged afterwards. Every placed
 button keeps its own editable `updateFrequency`. `0` (unthrottled) is never a library default.
 
+Presets that share a pair share one Director subscription, which runs at the fastest interval any
+placed feedback asks for (`0`, the Director default, beats any number); that is why a pair keeps one
+frequency class across the library (§5).
+
 ## 7. Button style
 
 - Readouts: bgcolor `rgb(40,40,43)` (MatteBlack) and colour `rgb(220,220,220)` (Gainsboro), the disguise-osc palette, so both modules look coherent on one page. Size `auto`. Text is `Title\nvalue`; `textExpression: true` whenever formatting is needed (`toFixed`, `secondsToTimestamp`, `jsonparse`).
+- An expression text formats only a value of the kind it expects and shows anything else as it is, so the readout markers (`OFFLINE`, `ERROR`, `PATH_ERROR`, `PATH_ERROR (unsubscribed)`, `UNSET`, `SENTINELS` in `src/variables.ts`) and an undefined value (`$NA`) reach the button: booleans compare strictly (`V === true ? .. : V === false ? .. : V`), numbers and numeric enums are guarded with `isNumber()`, units sit inside the guarded branch, and JSON rows fall back to the raw value when `jsonparse()` returns null. `scripts/gen-presets.mjs` refuses a text that hides a marker or an undefined value or renders NaN (rendered with Companion 5.0.4's semantics by `scripts/companion-expression.cjs`).
 - Controls: amber `rgb(140,70,0)` for writes (nudge / set), green `rgb(0,100,0)` for enable / on, FireBrick `rgb(178,34,34)` for disable / hold / off.
 - Experimental: bgcolor `rgb(70,70,90)`.
 - `previewStyle` shows a representative value so the preset browser is readable.
@@ -161,24 +180,30 @@ Designer version notes, a live-test priority, and the number of subscriptions it
 ## 10. OSC parity and future integration
 
 `04 Transport State` (normal tier) covers the disguise-osc variables `trackname`, `playMode`,
-`brightness` and `volume`; the section, bpm, track-position and timecode-position counterparts
-are experimental until they are verified on a Director (their expressions are chains that the
-LiveUpdate documentation does not show) and keep the OSC ids so they can be promoted without
-renaming. Transport commands (play, stop, cue, fades) are not available through LiveUpdate; the
-HELP explains building one page with disguise-osc for commands and this module for state.
-Categories, colours and variable ids are aligned so that a later merge or a combined page needs no
-renaming.
+`brightness` and `volume`, and also `bpm`, `currentSectionName`, `nextSectionName`,
+`sectionElapsed`, `sectionRemaining`, `trackposition` and `timecodeposition`. Those seven started
+as experimental rows (their expressions are chains that the LiveUpdate documentation does not show),
+returned a value on the 2026-09-04 r34.0.3 live run and were promoted with the OSC ids unchanged.
+`sectionElapsed` and `sectionRemaining` are in beats, not seconds.
+
+Transport commands cannot travel over LiveUpdate. The module sends them over the Session REST API
+as its `Transport:` actions (play, stop, section and track jumps, go to time / timecode / note / tag,
+brightness, volume, speed, engaged), next to the `RenderStream:` and `Failover:` actions, so
+disguise-osc is no longer needed for them; it can still share a page, for example for fades. The
+catalog ships no command presets. Categories, colours and variable ids are aligned so that a combined
+page needs no renaming.
 
 ## 11. Module extensions required by the catalog (each a separate, backward-compatible commit)
 
-All items below are implemented on the branch `feat/preset-library` (Phase 2).
+All items below are implemented on the branch `feat/preset-library` (Phase 2). The commit subjects are
+given instead of hashes, which do not survive a rebase or a squash merge.
 
-1. Unresolved-path guard and back-off (commits `b85b220`, `3c6a9d3`): never subscribe while a path contains an `<UPPER_CASE>` placeholder, `$NA`, an unparsed `$(...)`, an empty quoted name, an empty argument/index slot or `":d3"`; after a failed subscription (Director error, three property-path errors, or a pending request that times out) the feedback backs off 2 s doubling up to 60 s, a timer re-evaluates it when the delay elapses, and the back-off is cleared by the first good value or by editing the feedback. Subscribe requests are joined while in flight and shared subscriptions are reference counted.
-2. Connection settings `showExperimentalPresets` and the four `presetInterval*` fields (commit `21b527e`).
-3. `liveUpdateCompare` boolean feedback (commit `55983c2`).
-4. `setToDisguiseToggle` action (commit `2267b4a`).
-5. `companion/manifest.json` `apiVersion: 0.0.0`, `@companion-module/base` pinned to `~1.13.2` (commit `a670566`).
-6. ESLint 9 flat configuration, prettier and devDependency alignment (commit `e6fbaec`).
-7. Selection variables (commit `d74c201`, validation in `3c6a9d3`): module variables `selTrack`, `selLayer`, `selLayerIndex`, `selSection`, `selBeat`, `selScreen`, `selProjector`, `selScreenUid`, `selMachine`, `selHost`, `selWorkload`, `selInstance`, `selEvUid`, `selEvIndex` (plus the experimental set) fed from a "Selections" block of the connection settings and from the `setSelection` action; values are validated by kind, persisted with `saveConfig`, and published as `$NA` while unset. `sel...` and `connection_status` are reserved variable names.
-8. `configUpdated` keeps the WebSocket when only preset settings or selections changed (commit `d74c201`).
-9. Every variable owned by a placed LiveUpdate Variable feedback stays defined, the Connection OK feedback is re-evaluated on connect/disconnect, and editing Update Frequency re-subscribes (commit `3c6a9d3`).
+1. Unresolved-path guard and back-off ("feat: guard unresolved paths and back off after subscription errors", "fix: de-duplicate subscriptions, retry on a timer and validate selections"): never subscribe while a path is empty or contains an `<UPPER_CASE>` placeholder, `$NA` or an unparsed `$(...)`, nor while an object path is a bare empty name (`track:""`) or `":d3"` (see §4); the readout shows `UNSET`. After a failed subscription (Director error, three property-path errors, or a pending request that times out) the feedback backs off 2 s doubling up to 60 s, a timer of its own re-evaluates it when the delay elapses, and the back-off is cleared by the first good value or by editing the feedback. Subscribe requests are joined while in flight and shared subscriptions are reference counted.
+2. Connection settings `showExperimentalPresets` and the four `presetInterval*` fields ("feat: add preset interval and experimental preset settings").
+3. `liveUpdateCompare` boolean feedback ("feat: add LiveUpdate Compare feedback").
+4. `setToDisguiseToggle` action ("feat: add Toggle Disguise Boolean action").
+5. `companion/manifest.json` `apiVersion: 0.0.0`, `@companion-module/base` pinned to `~1.13.2` ("chore: reset manifest apiVersion and pin module-base").
+6. ESLint 9 flat configuration, prettier and devDependency alignment ("chore: add ESLint 9 flat config and align dev dependencies").
+7. Selection variables ("feat: add selection variables and Set selection action", validation in "fix: de-duplicate subscriptions, retry on a timer and validate selections"): module variables `selTrack`, `selLayer`, `selLayerIndex`, `selSection`, `selBeat`, `selScreen`, `selProjector`, `selScreenUid`, `selMachine`, `selHost`, `selWorkload`, `selInstance`, `selEvUid`, `selEvIndex`, `selLedScreen`, `selStageUid`, `selRsLayer` (plus the experimental set) fed from a "Selections" block of the connection settings and from the `setSelection` action; values are validated by kind, persisted with `saveConfig`, and published as `$NA` while unset. The selection ids and the module's other own variables (`connection_status`, `designer_version`, `selfcheck_*`, `rest_*`) are reserved variable names.
+8. `configUpdated` keeps the WebSocket when only preset settings or selections changed ("feat: add selection variables and Set selection action").
+9. Every variable owned by a placed LiveUpdate Variable feedback stays defined, the Connection OK feedback is re-evaluated on connect/disconnect, and editing Update Frequency re-subscribes ("fix: de-duplicate subscriptions, retry on a timer and validate selections").

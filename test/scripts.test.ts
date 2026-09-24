@@ -441,3 +441,15 @@ test('HELP renders angle-bracket placeholders literally', () => {
 	const prose = block.replace(/`[^`\n]*`/g, '')
 	assert.ok(!prose.includes('<'), `raw '<' in the preset list: ${prose.match(/.{0,30}<.{0,30}/)?.[0]}`)
 })
+
+test('the hand-written docs keep angle-bracket placeholders in code', () => {
+	for (const file of ['companion/HELP.md', 'README.md', 'CHANGELOG.md']) {
+		const prose = readFileSync(path.join(ROOT, file), 'utf8')
+			.replace(/```[\s\S]*?```/g, '')
+			.replace(/<!--[\s\S]*?-->/g, '')
+			.replace(/`[^`]*`/g, '')
+		// '<' before a letter opens an HTML tag; a comparison sign such as '<,' is plain text
+		const tag = /.{0,30}<[A-Za-z/].{0,30}/.exec(prose)
+		assert.equal(tag, null, `${file}: a placeholder outside code reads as an HTML tag: ${tag?.[0]}`)
+	}
+})
