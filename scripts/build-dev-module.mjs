@@ -5,16 +5,33 @@
 // data, no TypeScript sources) is copied.
 //
 // Usage:
-//   yarn build && node scripts/build-dev-module.mjs [--out <dir>] [--label <name>] [--version 1.0.0]
+//   yarn build && node scripts/build-dev-module.mjs [--out <dir>] [--label <name>] [--version <semver>]
 //
-// The manifest of the copy gets the custom label and version; the repository keeps its own.
-// The module id and shortname are never changed: the id keeps existing connections working and the
-// shortname is the variable prefix every preset references ($(liveupdate:...)).
+// The build goes to <out>/companion-module-disguise-liveupdate (--out is relative to the checkout,
+// default ../dev-module-build). The manifest of the copy gets the custom label and version (default:
+// the version in package.json); the repository keeps its own. The module id and shortname are never
+// changed: the id keeps existing connections working and the shortname is the variable prefix every
+// preset references ($(liveupdate:...)).
+//
+// The script only ever deletes its own earlier build: it refuses an --out that is a drive root, the
+// home folder, the checkout or a folder that contains the checkout, and an existing output folder
+// that does not look like an earlier build (see dev-module-guard.cjs).
 
-import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
+import { createRequire } from 'node:module'
+import { homedir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+const require = createRequire(import.meta.url)
+const {
+	BUILD_FOLDER,
+	buildVersion,
+	outRootProblem,
+	previousBuildProblem,
+	removePreviousBuild,
+} = require('./dev-module-guard.cjs')
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = {}
@@ -25,18 +42,37 @@ for (let i = 2; i < process.argv.length; i++) {
 	args[a.slice(2)] = next && !next.startsWith('--') ? (i++, next) : true
 }
 
-const label = args.label === undefined || args.label === true ? '' : String(args.label)
-const version = String(args.version ?? '1.0.0')
-const outRoot = resolve(root, String(args.out ?? '../dev-module-build'))
-const outDir = join(outRoot, 'companion-module-disguise-liveupdate')
-
-if (!existsSync(join(root, 'dist', 'index.js'))) {
-	console.error('dist/index.js is missing - run "yarn build" first')
+const fail = (message) => {
+	console.error(message)
 	process.exit(1)
 }
 
+const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
+const repoManifest = JSON.parse(readFileSync(join(root, 'companion', 'manifest.json'), 'utf8'))
+const label = args.label === undefined || args.label === true ? '' : String(args.label)
+const stamped = buildVersion(args.version, pkg.version)
+if (stamped.error) fail(stamped.error)
+const version = stamped.version
+if (args.out === true) fail('--out needs a folder')
+const outRoot = resolve(root, String(args.out ?? '../dev-module-build'))
+const outDir = join(outRoot, BUILD_FOLDER)
+
+if (!existsSync(join(root, 'dist', 'index.js'))) fail('dist/index.js is missing - run "yarn build" first')
+
+const outProblem = outRootProblem({ root, outRoot, home: homedir() })
+if (outProblem) fail(`refusing to build: ${outProblem}. Pick an empty folder outside the checkout.`)
+const buildProblem = previousBuildProblem(outDir, repoManifest.id)
+if (buildProblem) fail(`refusing to delete ${outDir}: ${buildProblem}. Pick another --out or move that folder.`)
+
 console.log(`building the dev module folder in ${outDir}`)
-rmSync(outDir, { recursive: true, force: true })
+const locked = removePreviousBuild(outDir)
+if (locked) {
+	console.log(
+		`could not remove the earlier build (${locked}); a running Companion probably has it loaded. ` +
+			'Overwriting its files in place instead: files the new build no longer has stay behind until ' +
+			'the folder can be deleted.',
+	)
+}
 mkdirSync(outDir, { recursive: true })
 
 for (const entry of ['dist', 'companion', 'LICENSE', 'README.md']) {
@@ -46,7 +82,6 @@ for (const entry of ['dist', 'companion', 'LICENSE', 'README.md']) {
 }
 
 // package.json without the dev dependencies and scripts: the copy is not a development checkout
-const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
 const slim = {
 	name: pkg.name,
 	version,
