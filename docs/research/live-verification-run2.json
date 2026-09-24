@@ -145,7 +145,7 @@
    "objectPath": "subsystem:RenderStreamSystem",
    "propertyPath": "[str(k) for k in object.getWorkloadLayers()]",
    "result": "confirmed-path-error",
-   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"<redacted>\"}"
+   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"long too big to convert\"}"
   },
   {
    "selection": "selWorkload",
@@ -461,7 +461,7 @@
    "resolvedObjectPath": "subsystem:MonitoringManager",
    "resolvedPropertyPath": "[m.name for m in object.localMonitors().all()]",
    "result": "confirmed-value",
-   "value": "<redacted: project content>"
+   "value": "[\"Disk\",\"CPU IO\",\"GPUMemory\",\"GPUProfiler\",\"ProcessMemory\",\"CPU\",\"Machine\",\"Frame latency\",\"timer\",\"fps\",\"Frame time trends\",\"Interval Adjustment\",\"Present Estimation Error\",\"vsync count\",\"vsync times\",\"Prefetcher_Deliver_Best\",\"<redacted>\",\"<redacted>\",…"
   },
   {
    "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"CPU\")",
@@ -545,7 +545,7 @@
    "resolvedObjectPath": "subsystem:MonitoringManager",
    "resolvedPropertyPath": "[m.name for m in object.remoteMetricMonitorsForNode(\"ACTOR01:d3\").all()]",
    "result": "confirmed-value",
-   "value": "<redacted: project content>"
+   "value": "[\"Disk\",\"CPU\",\"timer\",\"CPU IO\",\"Frame latency\",\"fps\",\"GPUMemory\",\"Frame time trends\",\"Machine\",\"ProcessMemory\",\"Prefetcher_Misses\",\"Prefetcher_Deliver_Best\",\"<redacted>\",\"Prefetcher_Requests\",\"<redacted>\",\"Prefetcher_Times\",\"<redacted>\",…"
   },
   {
    "objectPath": "subsystem:MonitoringManager.findRemoteMonitor(\"$(liveupdate:selHost):d3\", \"Machine\")",
@@ -820,7 +820,7 @@
    "resolvedObjectPath": "transportManager:default",
    "resolvedPropertyPath": "object.tcStatusString",
    "result": "confirmed-value",
-   "value": "<redacted: project content>"
+   "value": "stopped"
   },
   {
    "objectPath": "transportManager:default",
@@ -1515,7 +1515,7 @@
    "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
    "resolvedPropertyPath": "[{\"name\": f.name, \"user\": f.userName, \"type\": f.typeName, \"sequenced\": not f.disableSequencing, \"patched\": f.isPatched} for f in object.fields]",
    "result": "confirmed-value",
-   "value": "<redacted: project content>"
+   "value": "[{\"sequenced\":false,\"patched\":false,\"type\":\"uint\",\"name\":\"blendMode\",\"user\":\"\"},{\"sequenced\":false,\"patched\":false,\"type\":\"float\",\"name\":\"brightness\",\"user\":\"\"},{\"sequenced\":false,\"patched\":false,\"type\":\"Projection::RP\",\"name\":\"mapping\",\"user\":\"\"},{\"sequenced\":false,\"patched\":false,\"type\":\"DxTexture…"
   },
   {
    "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
@@ -1539,7 +1539,7 @@
    "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
    "resolvedPropertyPath": "[{\"t\": object.findSequence(\"pos.x\").sequence.key(i).localT, \"v\": object.findSequence(\"pos.x\").sequence.key(i).v} for i in range(object.findSequence(\"pos.x\").sequence.nKeys)]",
    "result": "confirmed-path-error",
-   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"<redacted>\"}"
+   "value": "{\"errorType\":\"propertyPathError\",\"message\":\"range() integer end argument expected, got instancemethod.\"}"
   },
   {
    "objectPath": "track:\"$(liveupdate:selTrack)\".findLayerByName(\"$(liveupdate:selLayer)\")",
@@ -1587,7 +1587,7 @@
    "resolvedObjectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
    "resolvedPropertyPath": "object.findSequence(\"video\").sequence.key(0).r",
    "result": "confirmed-value",
-   "value": "{\"uid\":\"0x0123456789abcde1\",\"path\":\"objects/videoclip/test patterns/grey 10steps 1024x1024.png.apx\",\"type\":\"<redacted>\"}"
+   "value": "{\"uid\":\"0x0123456789abcde1\",\"path\":\"objects/videoclip/test patterns/grey 10steps 1024x1024.png.apx\",\"type\":\"VideoClip\"}"
   },
   {
    "objectPath": "screen2:\"$(liveupdate:selScreen)\"",
@@ -2792,7 +2792,7 @@
    "resolvedObjectPath": "Machine:\"DIRECTOR01\"",
    "resolvedPropertyPath": "object.typeName",
    "result": "confirmed-value",
-   "value": "<redacted: project content>"
+   "value": "vx 4+"
   },
   {
    "objectPath": "Machine:\"$(liveupdate:selMachine)\"",
@@ -3080,7 +3080,7 @@
    "resolvedObjectPath": "subsystem:D3NetManagerSystem",
    "resolvedPropertyPath": "object.d3NetManager",
    "result": "confirmed-value",
-   "value": "{\"uid\":\"0x0123456789abcde2\",\"path\":\"objects/d3netmanager/d3net.apx\",\"type\":\"<redacted>\"}"
+   "value": "{\"uid\":\"0x0123456789abcde2\",\"path\":\"objects/d3netmanager/d3net.apx\",\"type\":\"D3NetManager\"}"
   },
   {
    "objectPath": "subsystem:MonitoringManager",
@@ -3128,7 +3128,7 @@
    "resolvedObjectPath": "subsystem:MonitoringManager",
    "resolvedPropertyPath": "ReleaseVersion.versionString()",
    "result": "confirmed-value",
-   "value": "<redacted: project content>"
+   "value": "r34.0.3, rev 258249"
   },
   {
    "objectPath": "subsystem:MonitoringManager",
@@ -3140,7 +3140,7 @@
    "resolvedObjectPath": "subsystem:MonitoringManager",
    "resolvedPropertyPath": "ReleaseVersion.versionName()",
    "result": "confirmed-value",
-   "value": "<redacted: project content>"
+   "value": "r34.0.3"
   },
   {
    "objectPath": "subsystem:MonitoringManager",

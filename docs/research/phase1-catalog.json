@@ -1201,7 +1201,7 @@
     "date": "2026-09-04",
     "probe": "sweep",
     "status": "confirmed-value",
-    "value": "<redacted: project content>",
+    "value": "[\"Disk\",\"CPU IO\",\"GPUMemory\",\"GPUProfiler\",\"ProcessMemory\",\"CPU\",\"Machine\",\"Fram…",
     "objectPath": "subsystem:MonitoringManager",
     "propertyPath": "[m.name for m in object.localMonitors().all()]"
    },
@@ -1401,7 +1401,7 @@
     "date": "2026-09-04",
     "probe": "sweep",
     "status": "confirmed-value",
-    "value": "<redacted: project content>",
+    "value": "[{\"value\":16.683332443237305,\"label\":\"Critical\"},{\"value\":13.34666633605957,\"lab…",
     "objectPath": "subsystem:MonitoringManager.findLocalMonitor(\"GPUProfiler\")",
     "propertyPath": "[{\"label\": t.label, \"value\": t.value} for t in object.graphDescriptor(False).thresholds]"
    },
@@ -1550,7 +1550,7 @@
     "date": "2026-09-04",
     "probe": "sweep",
     "status": "confirmed-value",
-    "value": "<redacted: project content>",
+    "value": "[\"Disk\",\"CPU\",\"timer\",\"CPU IO\",\"Frame latency\",\"fps\",\"GPUMemory\",\"Frame time tre…",
     "objectPath": "subsystem:MonitoringManager",
     "propertyPath": "[m.name for m in object.remoteMetricMonitorsForNode(\"ACTOR01:d3\").all()]"
    },
@@ -3520,7 +3520,7 @@
     "date": "2026-09-04",
     "probe": "sweep",
     "status": "confirmed-value",
-    "value": "<redacted: project content>",
+    "value": "stopped",
     "objectPath": "transportManager:default",
     "propertyPath": "object.tcStatusString"
    }
@@ -8259,7 +8259,7 @@
     "date": "2026-09-04",
     "probe": "probe5",
     "status": "confirmed-value",
-    "value": "<redacted: project content>",
+    "value": "[{\"beat\":0,\"note\":\"<redacted>\",\"section\":true},{\"beat\":5,\"note\":\"<redacted>\",\"se…",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "[{\"beat\": object.cues.getT(i), \"note\": object.cues.getV(i).note, \"section\": object.cues.getV(i).section} for i in range(object.cues.n())]"
    },
@@ -8472,7 +8472,7 @@
     "date": "2026-09-04",
     "probe": "sweep",
     "status": "confirmed-value",
-    "value": "<redacted: project content>",
+    "value": "[{\"sequenced\":false,\"patched\":false,\"type\":\"uint\",\"name\":\"blendMode\",\"user\":\"\"},…",
     "objectPath": "track:\"Show Track\".findLayerByName(\"Colour Layer\")",
     "propertyPath": "[{\"name\": f.name, \"user\": f.userName, \"type\": f.typeName, \"sequenced\": not f.disableSequencing, \"patched\": f.isPatched} for f in object.fields]"
    },
@@ -8794,7 +8794,7 @@
     "objectPath": "track:\"Show Track\".findLayerByName(\"Video 26\")",
     "propertyPath": "object.findSequence(\"video\").sequence.key(0).r",
     "status": "confirmed-value",
-    "value": "<redacted: project content>",
+    "value": "{\"uid\":\"0x0123456789abcde1\",\"path\":\"objects/videoclip/test patterns/grey 10steps…",
     "note": "run 1: confirmed-path-error ('NoneType' object has no attribute 'sequence')"
    },
    "promoted": {
@@ -14817,7 +14817,7 @@
     "date": "2026-09-04",
     "probe": "probe2",
     "status": "confirmed-value",
-    "value": "<redacted: project content>",
+    "value": "[\"No machines are online\",\"The following machines are offline: RENDER01, RENDER0…",
     "objectPath": "track:\"Show Track\"",
     "propertyPath": "object.getLeafLayers(RenderStreamModule)[0].moduleConfig.pool.assetErrors(object.getLeafLayers(RenderStreamModule)[0].moduleConfig.asset)"
    },
@@ -15583,7 +15583,7 @@
     "date": "2026-09-04",
     "probe": "sweep",
     "status": "confirmed-value",
-    "value": "<redacted: project content>",
+    "value": "vx 4+",
     "objectPath": "Machine:\"DIRECTOR01\"",
     "propertyPath": "object.typeName"
    }
@@ -16499,7 +16499,7 @@
     "date": "2026-09-04",
     "probe": "sweep",
     "status": "confirmed-value",
-    "value": "<redacted: project content>",
+    "value": "[{\"name\":\"DIRECTOR01\",\"takenOver\":false,\"hostname\":\"DIRECTOR01\",\"failed\":false,\"…",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "[{\"name\": m.name, \"hostname\": m.hostname, \"role\": m.role, \"connected\": m.networkConnected, \"active\": m.active, \"failed\": m.failed, \"takenOver\": m.hasTakenOverFailedMachine()} for m in object.d3NetManager.machines]"
    },
@@ -16867,7 +16867,7 @@
     "date": "2026-09-04",
     "probe": "sweep",
     "status": "confirmed-value",
-    "value": "<redacted: project content>",
+    "value": "{\"uid\":\"0x0123456789abcde2\",\"path\":\"objects/d3netmanager/d3net.apx\",\"type\":\"D3Ne…",
     "objectPath": "subsystem:D3NetManagerSystem",
     "propertyPath": "object.d3NetManager"
    },
@@ -17081,7 +17081,7 @@
     "date": "2026-09-04",
     "probe": "sweep",
     "status": "confirmed-value",
-    "value": "<redacted: project content>",
+    "value": "r34.0.3, rev 258249",
     "objectPath": "subsystem:MonitoringManager",
     "propertyPath": "ReleaseVersion.versionString()"
    },
@@ -17135,7 +17135,7 @@
     "date": "2026-09-04",
     "probe": "sweep",
     "status": "confirmed-value",
-    "value": "<redacted: project content>",
+    "value": "r34.0.3",
     "objectPath": "subsystem:MonitoringManager",
     "propertyPath": "ReleaseVersion.versionName()"
    },
