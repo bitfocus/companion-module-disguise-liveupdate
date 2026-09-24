@@ -7,14 +7,21 @@
 // Usage: node scripts/gen-presets.mjs   (then `yarn format`)
 
 import { readFileSync, writeFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+const require = createRequire(import.meta.url)
+const { markerProblems, readMarkers } = require('./companion-expression.cjs')
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const input = resolve(root, 'docs/research/phase1-catalog.json')
 const output = resolve(root, 'src/presetCatalog.ts')
 
 const catalog = JSON.parse(readFileSync(input, 'utf8'))
+// What the module writes into a readout instead of a Director value (SENTINELS in src/variables.ts)
+const markers = readMarkers(readFileSync(resolve(root, 'src/variables.ts'), 'utf8'))
+const hidingTexts = []
 
 const OPERATORS = {
 	'==': 'eq',
@@ -63,6 +70,13 @@ function convertRow(row) {
 		throw new Error(`${id}: textExpression is set but the text is not a template literal`)
 	if (/\$\((?!liveupdate:)[a-z]+:/.test(`${row.textTemplate} ${row.objectPath} ${row.propertyPath}`))
 		throw new Error(`${id}: references a variable of another connection; presets may only use $(liveupdate:...)`)
+	// A readout holds OFFLINE, ERROR, PATH_ERROR or UNSET, or nothing yet, as often as a value: the
+	// button has to show that, not format it into NaN or a healthy-looking word (rendered the way
+	// Companion 5.0.4 does, see companion-expression.cjs)
+	if (row.textExpression) {
+		const problems = markerProblems(row.textTemplate, markers)
+		if (problems.length) hidingTexts.push(`${id}:\n    ${problems.join('\n    ')}`)
+	}
 
 	const entry = {
 		id,
@@ -98,6 +112,10 @@ function convertRow(row) {
 }
 
 const entries = catalog.rows.map(convertRow)
+if (hidingTexts.length)
+	throw new Error(
+		`${hidingTexts.length} button texts hide what the module writes into a readout:\n  ${hidingTexts.join('\n  ')}`,
+	)
 const texts = catalog.textPresets.map((text) => ({
 	id: text.presetId,
 	category: text.category,

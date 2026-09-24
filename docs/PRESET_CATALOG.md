@@ -247,32 +247,32 @@ Rows removed after the live run:
 
 | preset id | textExpression | text | preview |
 |---|---|---|---|
-| `monl_fps` | yes | `` `FPS\n${toFixed($(liveupdate:fps), 1)}` `` | `FPS\n60.0` |
-| `monl_fps_avg10` | yes | `` `FPS avg10\n${toFixed($(liveupdate:fpsAvg10), 1)}` `` | `FPS avg10\n59.8` |
-| `monl_fps_avg60` | yes | `` `FPS avg60\n${toFixed($(liveupdate:fpsAvg60), 1)}` `` | `FPS avg60\n59.9` |
-| `monl_gpu_total` | yes | `` `GPU total\n${toFixed($(liveupdate:gpuTotalMs), 1)} ms` `` | `GPU total\n12.3 ms` |
-| `monl_gpu_compositor` | yes | `` `Compositor\n${toFixed($(liveupdate:gpuCompositorMs), 1)} ms` `` | `Compositor\n8.1 ms` |
-| `monl_gpu_gui` | yes | `` `GPU GUI\n${toFixed($(liveupdate:gpuGuiMs), 1)} ms` `` | `GPU GUI\n1.2 ms` |
-| `monl_gpu_render_everything` | yes | `` `Render all\n${toFixed($(liveupdate:gpuRenderEverythingMs), 1)} ms` `` | `Render all\n9.3 ms` |
-| `monl_gpu_dmx` | yes | `` `GPU DMX\n${toFixed($(liveupdate:gpuDmxMs), 2)} ms` `` | `GPU DMX\n0.05 ms` |
-| `monl_gpu_video_upload` | yes | `` `Video upload\n${toFixed($(liveupdate:gpuVideoUploadMs), 1)} ms` `` | `Video upload\n2.4 ms` |
-| `monl_gpu_capture_upload` | yes | `` `Capture upload\n${toFixed($(liveupdate:gpuCaptureUploadMs), 1)} ms` `` | `Capture upload\n0.8 ms` |
-| `monl_cpu_total` | yes | `` `CPU total\n${toFixed($(liveupdate:cpuTotalMs), 1)}` `` | `CPU total\n9.4` |
-| `monl_gpu_mem` | yes | `` `GPU mem MB\n${round($(liveupdate:gpuMemMb))}` `` | `GPU mem MB\n3210` |
-| `monl_proc_mem` | yes | `` `Proc mem\n${round($(liveupdate:processMemMb))} MB` `` | `Proc mem\n5120 MB` |
-| `monl_machine_cpu_time` | yes | `` `CPU time\n${toFixed($(liveupdate:machineCpuPct), 0)}%` `` | `CPU time\n42%` |
-| `monl_machine_gpu_time` | yes | `` `GPU time\n${toFixed($(liveupdate:machineGpuPct), 0)}%` `` | `GPU time\n65%` |
-| `monl_machine_cpu_mem` | yes | `` `CPU mem\n${toFixed($(liveupdate:machineCpuMemPct), 0)}%` `` | `CPU mem\n38%` |
-| `monl_machine_gpu_mem` | yes | `` `GPU mem %\n${toFixed($(liveupdate:machineGpuMemPct), 0)}%` `` | `GPU mem %\n47%` |
-| `monl_machine_disk` | yes | `` `Disk\n${toFixed($(liveupdate:machineDiskPct), 0)}%` `` | `Disk\n12%` |
-| `monl_disk_read` | yes | `` `Disk read\n${toFixed($(liveupdate:diskReadMbs), 1)} MB/s` `` | `Disk read\n120.5 MB/s` |
-| `monl_disk_write` | yes | `` `Disk write\n${toFixed($(liveupdate:diskWriteMbs), 1)} MB/s` `` | `Disk write\n4.2 MB/s` |
+| `monl_fps` | yes | `` `FPS\n${isNumber($(liveupdate:fps)) ? toFixed($(liveupdate:fps), 1) : $(liveupdate:fps)}` `` | `FPS\n60.0` |
+| `monl_fps_avg10` | yes | `` `FPS avg10\n${isNumber($(liveupdate:fpsAvg10)) ? toFixed($(liveupdate:fpsAvg10), 1) : $(liveupdate:fpsAvg10)}` `` | `FPS avg10\n59.8` |
+| `monl_fps_avg60` | yes | `` `FPS avg60\n${isNumber($(liveupdate:fpsAvg60)) ? toFixed($(liveupdate:fpsAvg60), 1) : $(liveupdate:fpsAvg60)}` `` | `FPS avg60\n59.9` |
+| `monl_gpu_total` | yes | `` `GPU total\n${isNumber($(liveupdate:gpuTotalMs)) ? concat(toFixed($(liveupdate:gpuTotalMs), 1), ' ms') : $(liveupdate:gpuTotalMs)}` `` | `GPU total\n12.3 ms` |
+| `monl_gpu_compositor` | yes | `` `Compositor\n${isNumber($(liveupdate:gpuCompositorMs)) ? concat(toFixed($(liveupdate:gpuCompositorMs), 1), ' ms') : $(liveupdate:gpuCompositorMs)}` `` | `Compositor\n8.1 ms` |
+| `monl_gpu_gui` | yes | `` `GPU GUI\n${isNumber($(liveupdate:gpuGuiMs)) ? concat(toFixed($(liveupdate:gpuGuiMs), 1), ' ms') : $(liveupdate:gpuGuiMs)}` `` | `GPU GUI\n1.2 ms` |
+| `monl_gpu_render_everything` | yes | `` `Render all\n${isNumber($(liveupdate:gpuRenderEverythingMs)) ? concat(toFixed($(liveupdate:gpuRenderEverythingMs), 1), ' ms') : $(liveupdate:gpuRenderEverythingMs)}` `` | `Render all\n9.3 ms` |
+| `monl_gpu_dmx` | yes | `` `GPU DMX\n${isNumber($(liveupdate:gpuDmxMs)) ? concat(toFixed($(liveupdate:gpuDmxMs), 2), ' ms') : $(liveupdate:gpuDmxMs)}` `` | `GPU DMX\n0.05 ms` |
+| `monl_gpu_video_upload` | yes | `` `Video upload\n${isNumber($(liveupdate:gpuVideoUploadMs)) ? concat(toFixed($(liveupdate:gpuVideoUploadMs), 1), ' ms') : $(liveupdate:gpuVideoUploadMs)}` `` | `Video upload\n2.4 ms` |
+| `monl_gpu_capture_upload` | yes | `` `Capture upload\n${isNumber($(liveupdate:gpuCaptureUploadMs)) ? concat(toFixed($(liveupdate:gpuCaptureUploadMs), 1), ' ms') : $(liveupdate:gpuCaptureUploadMs)}` `` | `Capture upload\n0.8 ms` |
+| `monl_cpu_total` | yes | `` `CPU total\n${isNumber($(liveupdate:cpuTotalMs)) ? toFixed($(liveupdate:cpuTotalMs), 1) : $(liveupdate:cpuTotalMs)}` `` | `CPU total\n9.4` |
+| `monl_gpu_mem` | yes | `` `GPU mem MB\n${isNumber($(liveupdate:gpuMemMb)) ? round($(liveupdate:gpuMemMb)) : $(liveupdate:gpuMemMb)}` `` | `GPU mem MB\n3210` |
+| `monl_proc_mem` | yes | `` `Proc mem\n${isNumber($(liveupdate:processMemMb)) ? concat(round($(liveupdate:processMemMb)), ' MB') : $(liveupdate:processMemMb)}` `` | `Proc mem\n5120 MB` |
+| `monl_machine_cpu_time` | yes | `` `CPU time\n${isNumber($(liveupdate:machineCpuPct)) ? concat(toFixed($(liveupdate:machineCpuPct), 0), '%') : $(liveupdate:machineCpuPct)}` `` | `CPU time\n42%` |
+| `monl_machine_gpu_time` | yes | `` `GPU time\n${isNumber($(liveupdate:machineGpuPct)) ? concat(toFixed($(liveupdate:machineGpuPct), 0), '%') : $(liveupdate:machineGpuPct)}` `` | `GPU time\n65%` |
+| `monl_machine_cpu_mem` | yes | `` `CPU mem\n${isNumber($(liveupdate:machineCpuMemPct)) ? concat(toFixed($(liveupdate:machineCpuMemPct), 0), '%') : $(liveupdate:machineCpuMemPct)}` `` | `CPU mem\n38%` |
+| `monl_machine_gpu_mem` | yes | `` `GPU mem %\n${isNumber($(liveupdate:machineGpuMemPct)) ? concat(toFixed($(liveupdate:machineGpuMemPct), 0), '%') : $(liveupdate:machineGpuMemPct)}` `` | `GPU mem %\n47%` |
+| `monl_machine_disk` | yes | `` `Disk\n${isNumber($(liveupdate:machineDiskPct)) ? concat(toFixed($(liveupdate:machineDiskPct), 0), '%') : $(liveupdate:machineDiskPct)}` `` | `Disk\n12%` |
+| `monl_disk_read` | yes | `` `Disk read\n${isNumber($(liveupdate:diskReadMbs)) ? concat(toFixed($(liveupdate:diskReadMbs), 1), ' MB/s') : $(liveupdate:diskReadMbs)}` `` | `Disk read\n120.5 MB/s` |
+| `monl_disk_write` | yes | `` `Disk write\n${isNumber($(liveupdate:diskWriteMbs)) ? concat(toFixed($(liveupdate:diskWriteMbs), 1), ' MB/s') : $(liveupdate:diskWriteMbs)}` `` | `Disk write\n4.2 MB/s` |
 | `monl_monitor_names` | no | `Monitors\n$(liveupdate:localMonitorNames)` | `Monitors\n["fps","GPUProfiler","CPU"]` |
 | `monl_cpu_series_names` | no | `CPU series\n$(liveupdate:cpuSeriesNames)` | `CPU series\n["Total","Working Time (ms)"]` |
 | `monl_cpu_units` | no | `CPU units\n$(liveupdate:cpuUnits)` | `CPU units\nms` |
 | `monl_gpu_mem_units` | no | `GPU mem units\n$(liveupdate:gpuMemUnits)` | `GPU mem units\nMB` |
 | `monl_gpu_thresholds` | no | `GPU limits\n$(liveupdate:gpuThresholds)` | `GPU limits\n[{"label":"60fps","value":16.7}]` |
-| `monl_fps_minmax` | yes | `` `FPS min\n${toFixed(jsonpath(jsonparse($(liveupdate:fpsMinMax)), '$.Actual.min'), 1)}` `` | `FPS min\n58.2` |
+| `monl_fps_minmax` | yes | `` `FPS min\n${jsonparse($(liveupdate:fpsMinMax)) === null ? $(liveupdate:fpsMinMax) : toFixed(jsonpath(jsonparse($(liveupdate:fpsMinMax)), '$.Actual.min'), 1)}` `` | `FPS min\n58.2` |
 | `monl_graph_categories` | no | `Categories\n$(liveupdate:graphCategories)` | `Categories\n["Local","RenderStream"]` |
 
 </details>
@@ -313,16 +313,16 @@ Rows removed after the live run:
 
 | preset id | textExpression | text | preview |
 |---|---|---|---|
-| `monr_fps` | yes | `` `${$(liveupdate:selHost)} FPS\n${toFixed($(liveupdate:remoteFps), 1)}` `` | `ACTOR01 FPS\n60.0` |
-| `monr_fps_avg10` | yes | `` `${$(liveupdate:selHost)} avg10\n${toFixed($(liveupdate:remoteFpsAvg10), 1)}` `` | `ACTOR01 avg10\n59.8` |
-| `monr_fps_expired` | yes | `` `${$(liveupdate:selHost)}\n${$(liveupdate:remoteFpsExpired) ? 'EXPIRED' : 'reporting'}` `` | `ACTOR01\nreporting` |
+| `monr_fps` | yes | `` `${$(liveupdate:selHost)} FPS\n${isNumber($(liveupdate:remoteFps)) ? toFixed($(liveupdate:remoteFps), 1) : $(liveupdate:remoteFps)}` `` | `ACTOR01 FPS\n60.0` |
+| `monr_fps_avg10` | yes | `` `${$(liveupdate:selHost)} avg10\n${isNumber($(liveupdate:remoteFpsAvg10)) ? toFixed($(liveupdate:remoteFpsAvg10), 1) : $(liveupdate:remoteFpsAvg10)}` `` | `ACTOR01 avg10\n59.8` |
+| `monr_fps_expired` | yes | `` `${$(liveupdate:selHost)}\n${$(liveupdate:remoteFpsExpired) === true ? 'EXPIRED' : $(liveupdate:remoteFpsExpired) === false ? 'reporting' : $(liveupdate:remoteFpsExpired)}` `` | `ACTOR01\nreporting` |
 | `monr_remote_nodes` | no | `Nodes\n$(liveupdate:remoteNodes)` | `Nodes\n["ACTOR01:d3","ACTOR02:d3"]` |
 | `monr_node_monitor_names` | no | `Remote monitors\n$(liveupdate:remoteMonitorNames)` | `Remote monitors\n["fps","GPUProfiler"]` |
-| `monr_machine_cpu_time` | yes | `` `${$(liveupdate:selHost)} CPU %\n${toFixed($(liveupdate:remoteMachineCpuPct), 0)}%` `` | `ACTOR01 CPU %\n42%` |
-| `monr_machine_gpu_time` | yes | `` `${$(liveupdate:selHost)} GPU %\n${toFixed($(liveupdate:remoteMachineGpuPct), 0)}%` `` | `ACTOR01 GPU %\n65%` |
-| `monr_gpu_total` | yes | `` `${$(liveupdate:selHost)} GPU ms\n${toFixed($(liveupdate:remoteGpuTotalMs), 1)}` `` | `ACTOR01 GPU ms\n12.3` |
-| `monr_cpu_total` | yes | `` `${$(liveupdate:selHost)} CPU total\n${toFixed($(liveupdate:remoteCpuTotalMs), 1)}` `` | `ACTOR01 CPU total\n9.4` |
-| `monr_gpu_mem` | yes | `` `${$(liveupdate:selHost)} GPU mem\n${round($(liveupdate:remoteGpuMemMb))} MB` `` | `ACTOR01 GPU mem\n3210 MB` |
+| `monr_machine_cpu_time` | yes | `` `${$(liveupdate:selHost)} CPU %\n${isNumber($(liveupdate:remoteMachineCpuPct)) ? concat(toFixed($(liveupdate:remoteMachineCpuPct), 0), '%') : $(liveupdate:remoteMachineCpuPct)}` `` | `ACTOR01 CPU %\n42%` |
+| `monr_machine_gpu_time` | yes | `` `${$(liveupdate:selHost)} GPU %\n${isNumber($(liveupdate:remoteMachineGpuPct)) ? concat(toFixed($(liveupdate:remoteMachineGpuPct), 0), '%') : $(liveupdate:remoteMachineGpuPct)}` `` | `ACTOR01 GPU %\n65%` |
+| `monr_gpu_total` | yes | `` `${$(liveupdate:selHost)} GPU ms\n${isNumber($(liveupdate:remoteGpuTotalMs)) ? toFixed($(liveupdate:remoteGpuTotalMs), 1) : $(liveupdate:remoteGpuTotalMs)}` `` | `ACTOR01 GPU ms\n12.3` |
+| `monr_cpu_total` | yes | `` `${$(liveupdate:selHost)} CPU total\n${isNumber($(liveupdate:remoteCpuTotalMs)) ? toFixed($(liveupdate:remoteCpuTotalMs), 1) : $(liveupdate:remoteCpuTotalMs)}` `` | `ACTOR01 CPU total\n9.4` |
+| `monr_gpu_mem` | yes | `` `${$(liveupdate:selHost)} GPU mem\n${isNumber($(liveupdate:remoteGpuMemMb)) ? concat(round($(liveupdate:remoteGpuMemMb)), ' MB') : $(liveupdate:remoteGpuMemMb)}` `` | `ACTOR01 GPU mem\n3210 MB` |
 
 </details>
 
@@ -430,50 +430,50 @@ Rows removed after the live run:
 
 | preset id | textExpression | text | preview |
 |---|---|---|---|
-| `tr_playhead_beats` | yes | `` `Playhead\n${toFixed($(liveupdate:playheadBeats), 2)}` `` | `Playhead\n12.50` |
+| `tr_playhead_beats` | yes | `` `Playhead\n${isNumber($(liveupdate:playheadBeats)) ? toFixed($(liveupdate:playheadBeats), 2) : $(liveupdate:playheadBeats)}` `` | `Playhead\n12.50` |
 | `tr_playmode` | no | `Mode\n$(liveupdate:playMode)` | `Mode\nPlay` |
 | `tr_playmode_state` | no | `State\n$(liveupdate:playModeState)` | `State\n0` |
-| `tr_playing` | yes | `` `Playing\n${$(liveupdate:isPlaying) ? 'YES' : 'no'}` `` | `Playing\nYES` |
-| `tr_stopped` | yes | `` `Stopped\n${$(liveupdate:isStopped) ? 'YES' : 'no'}` `` | `Stopped\nno` |
-| `tr_holding` | yes | `` `Holding\n${$(liveupdate:isHolding) ? 'HOLD' : 'no'}` `` | `Holding\nHOLD` |
-| `tr_section_play_mode` | yes | `` `Play to end\n${$(liveupdate:sectionPlayMode) ? 'ON' : 'off'}` `` | `Play to end\nON` |
-| `tr_loop_section_mode` | yes | `` `Loop section\n${$(liveupdate:loopSectionMode) ? 'ON' : 'off'}` `` | `Loop section\noff` |
-| `tr_has_track` | yes | `` `Track loaded\n${$(liveupdate:hasTrack) ? 'YES' : 'NO'}` `` | `Track loaded\nYES` |
-| `tr_speed` | yes | `` `Speed\n${toFixed($(liveupdate:speed), 2)}x` `` | `Speed\n1.00x` |
-| `tr_brightness` | yes | `` `Brightness\n${toFixed($(liveupdate:brightness) * 100, 0)}%` `` | `Brightness\n100%` |
-| `tr_brightness_up` | yes | `` `Bright +5%\n${toFixed($(liveupdate:brightness) * 100, 0)}%` `` | `Bright +5%\n100%` |
-| `tr_brightness_down` | yes | `` `Bright -5%\n${toFixed($(liveupdate:brightness) * 100, 0)}%` `` | `Bright -5%\n100%` |
+| `tr_playing` | yes | `` `Playing\n${$(liveupdate:isPlaying) === true ? 'YES' : $(liveupdate:isPlaying) === false ? 'no' : $(liveupdate:isPlaying)}` `` | `Playing\nYES` |
+| `tr_stopped` | yes | `` `Stopped\n${$(liveupdate:isStopped) === true ? 'YES' : $(liveupdate:isStopped) === false ? 'no' : $(liveupdate:isStopped)}` `` | `Stopped\nno` |
+| `tr_holding` | yes | `` `Holding\n${$(liveupdate:isHolding) === true ? 'HOLD' : $(liveupdate:isHolding) === false ? 'no' : $(liveupdate:isHolding)}` `` | `Holding\nHOLD` |
+| `tr_section_play_mode` | yes | `` `Play to end\n${$(liveupdate:sectionPlayMode) === true ? 'ON' : $(liveupdate:sectionPlayMode) === false ? 'off' : $(liveupdate:sectionPlayMode)}` `` | `Play to end\nON` |
+| `tr_loop_section_mode` | yes | `` `Loop section\n${$(liveupdate:loopSectionMode) === true ? 'ON' : $(liveupdate:loopSectionMode) === false ? 'off' : $(liveupdate:loopSectionMode)}` `` | `Loop section\noff` |
+| `tr_has_track` | yes | `` `Track loaded\n${$(liveupdate:hasTrack) === true ? 'YES' : $(liveupdate:hasTrack) === false ? 'NO' : $(liveupdate:hasTrack)}` `` | `Track loaded\nYES` |
+| `tr_speed` | yes | `` `Speed\n${isNumber($(liveupdate:speed)) ? concat(toFixed($(liveupdate:speed), 2), 'x') : $(liveupdate:speed)}` `` | `Speed\n1.00x` |
+| `tr_brightness` | yes | `` `Brightness\n${isNumber($(liveupdate:brightness)) ? concat(toFixed($(liveupdate:brightness) * 100, 0), '%') : $(liveupdate:brightness)}` `` | `Brightness\n100%` |
+| `tr_brightness_up` | yes | `` `Bright +5%\n${isNumber($(liveupdate:brightness)) ? concat(toFixed($(liveupdate:brightness) * 100, 0), '%') : $(liveupdate:brightness)}` `` | `Bright +5%\n100%` |
+| `tr_brightness_down` | yes | `` `Bright -5%\n${isNumber($(liveupdate:brightness)) ? concat(toFixed($(liveupdate:brightness) * 100, 0), '%') : $(liveupdate:brightness)}` `` | `Bright -5%\n100%` |
 | `tr_brightness_full` | no | `Bright\nFULL` | `Bright\nFULL` |
 | `tr_brightness_zero` | no | `Bright\nZERO` | `Bright\nZERO` |
-| `tr_volume` | yes | `` `Volume\n${toFixed($(liveupdate:volume) * 100, 0)}%` `` | `Volume\n100%` |
-| `tr_volume_up` | yes | `` `Vol +5%\n${toFixed($(liveupdate:volume) * 100, 0)}%` `` | `Vol +5%\n100%` |
-| `tr_volume_down` | yes | `` `Vol -5%\n${toFixed($(liveupdate:volume) * 100, 0)}%` `` | `Vol -5%\n100%` |
+| `tr_volume` | yes | `` `Volume\n${isNumber($(liveupdate:volume)) ? concat(toFixed($(liveupdate:volume) * 100, 0), '%') : $(liveupdate:volume)}` `` | `Volume\n100%` |
+| `tr_volume_up` | yes | `` `Vol +5%\n${isNumber($(liveupdate:volume)) ? concat(toFixed($(liveupdate:volume) * 100, 0), '%') : $(liveupdate:volume)}` `` | `Vol +5%\n100%` |
+| `tr_volume_down` | yes | `` `Vol -5%\n${isNumber($(liveupdate:volume)) ? concat(toFixed($(liveupdate:volume) * 100, 0), '%') : $(liveupdate:volume)}` `` | `Vol -5%\n100%` |
 | `tr_volume_full` | no | `Volume\nFULL` | `Volume\nFULL` |
 | `tr_volume_mute` | no | `Volume\nMUTE` | `Volume\nMUTE` |
-| `tr_engaged` | yes | `` `Transport\n${$(liveupdate:engaged) ? 'ENGAGED' : 'DISENGAGED'}` `` | `Transport\nENGAGED` |
+| `tr_engaged` | yes | `` `Transport\n${$(liveupdate:engaged) === true ? 'ENGAGED' : $(liveupdate:engaged) === false ? 'DISENGAGED' : $(liveupdate:engaged)}` `` | `Transport\nENGAGED` |
 | `tr_engage` | no | `ENGAGE` | `ENGAGE` |
 | `tr_disengage` | no | `DISENGAGE` | `DISENGAGE` |
-| `tr_engaged_toggle` | yes | `` `Engaged\n${$(liveupdate:engaged) ? 'ON' : 'OFF'}` `` | `Engaged\nON` |
+| `tr_engaged_toggle` | yes | `` `Engaged\n${$(liveupdate:engaged) === true ? 'ON' : $(liveupdate:engaged) === false ? 'OFF' : $(liveupdate:engaged)}` `` | `Engaged\nON` |
 | `tr_trackname` | no | `Track\n$(liveupdate:trackname)` | `Track\nAct 1` |
 | `tr_section_count` | no | `Sections\n$(liveupdate:sectionCount)` | `Sections\n12` |
 | `tr_transport_status` | no | `Chase\n$(liveupdate:transportStatus)` | `Chase\nNo matching timecode` |
 | `tr_tc_status` | no | `TC\n$(liveupdate:tcStatus)` | `TC\nstopped` |
-| `tr_preroll` | yes | `` `Pre-roll\n${toFixed($(liveupdate:preRollSec), 1)} s` `` | `Pre-roll\n4.0 s` |
+| `tr_preroll` | yes | `` `Pre-roll\n${isNumber($(liveupdate:preRollSec)) ? concat(toFixed($(liveupdate:preRollSec), 1), ' s') : $(liveupdate:preRollSec)}` `` | `Pre-roll\n4.0 s` |
 | `tr_tc_incoming` | no | `TC in\n$(liveupdate:tcIncoming)` | `TC in\n01:00:12:04` |
 | `tr_tc_source_status` | no | `TC src\n$(liveupdate:tcSourceStatus)` | `TC src\nOK` |
-| `tr_trackposition` | yes | `` `Position\n${secondsToTimestamp($(liveupdate:trackposition))}` `` | `Position\n00:00:12` |
+| `tr_trackposition` | yes | `` `Position\n${isNumber($(liveupdate:trackposition)) ? secondsToTimestamp($(liveupdate:trackposition)) : $(liveupdate:trackposition)}` `` | `Position\n00:00:12` |
 | `tr_timecodeposition` | no | `Timecode\n$(liveupdate:timecodeposition)` | `Timecode\n01:00:12:04` |
-| `tr_free_running` | yes | `` `Free run\n${$(liveupdate:isFreeRunning) ? 'YES' : 'no'}` `` | `Free run\nYES` |
-| `tr_bpm` | yes | `` `BPM\n${toFixed($(liveupdate:bpm), 1)}` `` | `BPM\n120.0` |
-| `tr_section_index` | yes | `` `Section\n${$(liveupdate:sectionIndex) + 1}` `` | `Section\n3` |
+| `tr_free_running` | yes | `` `Free run\n${$(liveupdate:isFreeRunning) === true ? 'YES' : $(liveupdate:isFreeRunning) === false ? 'no' : $(liveupdate:isFreeRunning)}` `` | `Free run\nYES` |
+| `tr_bpm` | yes | `` `BPM\n${isNumber($(liveupdate:bpm)) ? toFixed($(liveupdate:bpm), 1) : $(liveupdate:bpm)}` `` | `BPM\n120.0` |
+| `tr_section_index` | yes | `` `Section\n${isNumber($(liveupdate:sectionIndex)) ? $(liveupdate:sectionIndex) + 1 : $(liveupdate:sectionIndex)}` `` | `Section\n3` |
 | `tr_current_section_name` | no | `Section\n$(liveupdate:currentSectionName)` | `Section\nVerse 2` |
 | `tr_next_section_name` | no | `Next\n$(liveupdate:nextSectionName)` | `Next\nChorus` |
-| `tr_section_remaining` | yes | `` `Sec remain\n${toFixed($(liveupdate:sectionRemaining), 1)}` `` | `Sec remain\n12.3` |
-| `tr_section_elapsed` | yes | `` `Sec elapsed\n${toFixed($(liveupdate:sectionElapsed), 1)}` `` | `Sec elapsed\n4.2` |
+| `tr_section_remaining` | yes | `` `Sec remain\n${isNumber($(liveupdate:sectionRemaining)) ? toFixed($(liveupdate:sectionRemaining), 1) : $(liveupdate:sectionRemaining)}` `` | `Sec remain\n12.3` |
+| `tr_section_elapsed` | yes | `` `Sec elapsed\n${isNumber($(liveupdate:sectionElapsed)) ? toFixed($(liveupdate:sectionElapsed), 1) : $(liveupdate:sectionElapsed)}` `` | `Sec elapsed\n4.2` |
 | `tr_setlist_tracks` | no | `Set list\n$(liveupdate:setListTracks)` | `Set list\n["Act 1","Act 2"]` |
 | `tr_active_layer_count` | no | `Active layers\n$(liveupdate:activeLayerCount)` | `Active layers\n3` |
-| `tr_gui_playhead_beats` | yes | `` `GUI playhead\n${toFixed($(liveupdate:guiPlayheadBeats), 2)}` `` | `GUI playhead\n12.50` |
-| `tr_track_length_beats` | yes | `` `Track len\n${toFixed($(liveupdate:currentTrackLengthBeats), 1)}` `` | `Track len\n240.0` |
+| `tr_gui_playhead_beats` | yes | `` `GUI playhead\n${isNumber($(liveupdate:guiPlayheadBeats)) ? toFixed($(liveupdate:guiPlayheadBeats), 2) : $(liveupdate:guiPlayheadBeats)}` `` | `GUI playhead\n12.50` |
+| `tr_track_length_beats` | yes | `` `Track len\n${isNumber($(liveupdate:currentTrackLengthBeats)) ? toFixed($(liveupdate:currentTrackLengthBeats), 1) : $(liveupdate:currentTrackLengthBeats)}` `` | `Track len\n240.0` |
 
 </details>
 
@@ -573,53 +573,53 @@ Rows removed after the live run:
 | preset id | textExpression | text | preview |
 |---|---|---|---|
 | `trk_track_name` | no | `Track\n$(liveupdate:selectedTrackName)` | `Track\nTrack 1` |
-| `trk_length_beats` | yes | `` `Length\n${toFixed($(liveupdate:trackLengthBeats),1)} b` `` | `Length\n256.0 b` |
-| `trk_length_sec` | yes | `` `Length\n${secondsToTimestamp($(liveupdate:trackLengthSec))}` `` | `Length\n00:04:16` |
-| `trk_bpm` | yes | `` `BPM\n${toFixed($(liveupdate:trackBpm),1)}` `` | `BPM\n120.0` |
+| `trk_length_beats` | yes | `` `Length\n${isNumber($(liveupdate:trackLengthBeats)) ? concat(toFixed($(liveupdate:trackLengthBeats), 1), ' b') : $(liveupdate:trackLengthBeats)}` `` | `Length\n256.0 b` |
+| `trk_length_sec` | yes | `` `Length\n${isNumber($(liveupdate:trackLengthSec)) ? secondsToTimestamp($(liveupdate:trackLengthSec)) : $(liveupdate:trackLengthSec)}` `` | `Length\n00:04:16` |
+| `trk_bpm` | yes | `` `BPM\n${isNumber($(liveupdate:trackBpm)) ? toFixed($(liveupdate:trackBpm), 1) : $(liveupdate:trackBpm)}` `` | `BPM\n120.0` |
 | `trk_nsections` | no | `Sections\n$(liveupdate:trackNSections)` | `Sections\n8` |
 | `trk_nlayers` | no | `Layers\n$(liveupdate:trackNLayers)` | `Layers\n12` |
-| `trk_section_start` | yes | `` `Sec ${$(liveupdate:selSection)} start\n${toFixed($(liveupdate:sectionStartBeats),1)} b` `` | `Sec 2 start\n64.0 b` |
-| `trk_section_end` | yes | `` `Sec ${$(liveupdate:selSection)} end\n${toFixed($(liveupdate:sectionEndBeats),1)} b` `` | `Sec 2 end\n96.0 b` |
+| `trk_section_start` | yes | `` `Sec ${$(liveupdate:selSection)} start\n${isNumber($(liveupdate:sectionStartBeats)) ? concat(toFixed($(liveupdate:sectionStartBeats), 1), ' b') : $(liveupdate:sectionStartBeats)}` `` | `Sec 2 start\n64.0 b` |
+| `trk_section_end` | yes | `` `Sec ${$(liveupdate:selSection)} end\n${isNumber($(liveupdate:sectionEndBeats)) ? concat(toFixed($(liveupdate:sectionEndBeats), 1), ' b') : $(liveupdate:sectionEndBeats)}` `` | `Sec 2 end\n96.0 b` |
 | `trk_note_at_beat` | no | `Note @$(liveupdate:selBeat)\n$(liveupdate:noteAtBeat)` | `Note @64\nVerse 2` |
-| `trk_beat_to_sec` | yes | `` `Beat ${$(liveupdate:selBeat)}\n${secondsToTimestamp($(liveupdate:beatToSec))}` `` | `Beat 64\n00:00:32` |
-| `trk_tc_adjust` | yes | `` `TC Adjust\n${toFixed($(liveupdate:trackTcAdjust),2)}` `` | `TC Adjust\n0.00` |
-| `trk_tc_adjust_plus` | yes | `` `TC Adj +0.1\n${toFixed($(liveupdate:trackTcAdjust),2)}` `` | `TC Adj +0.1\n0.00` |
-| `trk_tc_adjust_minus` | yes | `` `TC Adj -0.1\n${toFixed($(liveupdate:trackTcAdjust),2)}` `` | `TC Adj -0.1\n0.00` |
-| `trk_tc_adjust_reset` | yes | `` `TC Adj = 0\n${toFixed($(liveupdate:trackTcAdjust),2)}` `` | `TC Adj = 0\n0.00` |
+| `trk_beat_to_sec` | yes | `` `Beat ${$(liveupdate:selBeat)}\n${isNumber($(liveupdate:beatToSec)) ? secondsToTimestamp($(liveupdate:beatToSec)) : $(liveupdate:beatToSec)}` `` | `Beat 64\n00:00:32` |
+| `trk_tc_adjust` | yes | `` `TC Adjust\n${isNumber($(liveupdate:trackTcAdjust)) ? toFixed($(liveupdate:trackTcAdjust), 2) : $(liveupdate:trackTcAdjust)}` `` | `TC Adjust\n0.00` |
+| `trk_tc_adjust_plus` | yes | `` `TC Adj +0.1\n${isNumber($(liveupdate:trackTcAdjust)) ? toFixed($(liveupdate:trackTcAdjust), 2) : $(liveupdate:trackTcAdjust)}` `` | `TC Adj +0.1\n0.00` |
+| `trk_tc_adjust_minus` | yes | `` `TC Adj -0.1\n${isNumber($(liveupdate:trackTcAdjust)) ? toFixed($(liveupdate:trackTcAdjust), 2) : $(liveupdate:trackTcAdjust)}` `` | `TC Adj -0.1\n0.00` |
+| `trk_tc_adjust_reset` | yes | `` `TC Adj = 0\n${isNumber($(liveupdate:trackTcAdjust)) ? toFixed($(liveupdate:trackTcAdjust), 2) : $(liveupdate:trackTcAdjust)}` `` | `TC Adj = 0\n0.00` |
 | `trk_layer_name` | no | `Layer\n$(liveupdate:layerName)` | `Layer\nVideo 1` |
-| `trk_layer_enabled` | yes | `` `${$(liveupdate:selLayer)}\n${$(liveupdate:layerEnabled) ? 'ENABLED' : 'DISABLED'}` `` | `Video 1\nENABLED` |
-| `trk_layer_live` | yes | `` `Live\n${$(liveupdate:layerLive) ? 'YES' : 'NO'}` `` | `Live\nYES` |
-| `trk_layer_tstart` | yes | `` `Start\n${toFixed($(liveupdate:layerTStart),1)} b` `` | `Start\n16.0 b` |
-| `trk_layer_tend` | yes | `` `End\n${toFixed($(liveupdate:layerTEnd),1)} b` `` | `End\n24.0 b` |
-| `trk_layer_tlength` | yes | `` `Length\n${toFixed($(liveupdate:layerTLength),1)} b` `` | `Length\n8.0 b` |
-| `trk_layer_anchored` | yes | `` `Anchored\n${$(liveupdate:layerAnchored) ? 'YES' : 'NO'}` `` | `Anchored\nNO` |
-| `trk_key_posx` | yes | `` `Pos X\n${toFixed($(liveupdate:keyPosX),2)}` `` | `Pos X\n0.00` |
-| `trk_key_posy` | yes | `` `Pos Y\n${toFixed($(liveupdate:keyPosY),2)}` `` | `Pos Y\n0.00` |
-| `trk_key_scale` | yes | `` `Scale X\n${toFixed($(liveupdate:keyScale),2)}` `` | `Scale X\n1.00` |
-| `trk_key_scaley` | yes | `` `Scale Y\n${toFixed($(liveupdate:keyScaleY),2)}` `` | `Scale Y\n1.00` |
-| `trk_key_brightness` | yes | `` `Bright\n${toFixed($(liveupdate:keyBrightness),2)}` `` | `Bright\n1.00` |
-| `trk_brightness_const` | yes | `` `Bright const\n${$(liveupdate:brightnessConstant) ? 'ON' : 'OFF'}` `` | `Bright const\nON` |
+| `trk_layer_enabled` | yes | `` `${$(liveupdate:selLayer)}\n${$(liveupdate:layerEnabled) === true ? 'ENABLED' : $(liveupdate:layerEnabled) === false ? 'DISABLED' : $(liveupdate:layerEnabled)}` `` | `Video 1\nENABLED` |
+| `trk_layer_live` | yes | `` `Live\n${$(liveupdate:layerLive) === true ? 'YES' : $(liveupdate:layerLive) === false ? 'NO' : $(liveupdate:layerLive)}` `` | `Live\nYES` |
+| `trk_layer_tstart` | yes | `` `Start\n${isNumber($(liveupdate:layerTStart)) ? concat(toFixed($(liveupdate:layerTStart), 1), ' b') : $(liveupdate:layerTStart)}` `` | `Start\n16.0 b` |
+| `trk_layer_tend` | yes | `` `End\n${isNumber($(liveupdate:layerTEnd)) ? concat(toFixed($(liveupdate:layerTEnd), 1), ' b') : $(liveupdate:layerTEnd)}` `` | `End\n24.0 b` |
+| `trk_layer_tlength` | yes | `` `Length\n${isNumber($(liveupdate:layerTLength)) ? concat(toFixed($(liveupdate:layerTLength), 1), ' b') : $(liveupdate:layerTLength)}` `` | `Length\n8.0 b` |
+| `trk_layer_anchored` | yes | `` `Anchored\n${$(liveupdate:layerAnchored) === true ? 'YES' : $(liveupdate:layerAnchored) === false ? 'NO' : $(liveupdate:layerAnchored)}` `` | `Anchored\nNO` |
+| `trk_key_posx` | yes | `` `Pos X\n${isNumber($(liveupdate:keyPosX)) ? toFixed($(liveupdate:keyPosX), 2) : $(liveupdate:keyPosX)}` `` | `Pos X\n0.00` |
+| `trk_key_posy` | yes | `` `Pos Y\n${isNumber($(liveupdate:keyPosY)) ? toFixed($(liveupdate:keyPosY), 2) : $(liveupdate:keyPosY)}` `` | `Pos Y\n0.00` |
+| `trk_key_scale` | yes | `` `Scale X\n${isNumber($(liveupdate:keyScale)) ? toFixed($(liveupdate:keyScale), 2) : $(liveupdate:keyScale)}` `` | `Scale X\n1.00` |
+| `trk_key_scaley` | yes | `` `Scale Y\n${isNumber($(liveupdate:keyScaleY)) ? toFixed($(liveupdate:keyScaleY), 2) : $(liveupdate:keyScaleY)}` `` | `Scale Y\n1.00` |
+| `trk_key_brightness` | yes | `` `Bright\n${isNumber($(liveupdate:keyBrightness)) ? toFixed($(liveupdate:keyBrightness), 2) : $(liveupdate:keyBrightness)}` `` | `Bright\n1.00` |
+| `trk_brightness_const` | yes | `` `Bright const\n${$(liveupdate:brightnessConstant) === true ? 'ON' : $(liveupdate:brightnessConstant) === false ? 'OFF' : $(liveupdate:brightnessConstant)}` `` | `Bright const\nON` |
 | `trk_layer_name_idx` | no | `Layer [$(liveupdate:selLayerIndex)]\n$(liveupdate:idxLayerName)` | `Layer [0]\nVideo 1` |
-| `trk_key_posx_idx` | yes | `` `Pos X [${$(liveupdate:selLayerIndex)}]\n${toFixed($(liveupdate:idxKeyPosX),2)}` `` | `Pos X [0]\n0.00` |
-| `trk_layer_names` | yes | `` `Layers\n${jsonpath($(liveupdate:trackLayerNames),'$.length')}` `` | `Layers\n12` |
-| `trk_layer_tstart_bycomp` | yes | `` `Start (comp)\n${toFixed($(liveupdate:layerTStartByComp),1)} b` `` | `Start (comp)\n16.0 b` |
-| `trk_section_table` | yes | `` `Sections\n${jsonpath($(liveupdate:trackSectionTable),'$.length')}` `` | `Sections\n8` |
+| `trk_key_posx_idx` | yes | `` `Pos X [${$(liveupdate:selLayerIndex)}]\n${isNumber($(liveupdate:idxKeyPosX)) ? toFixed($(liveupdate:idxKeyPosX), 2) : $(liveupdate:idxKeyPosX)}` `` | `Pos X [0]\n0.00` |
+| `trk_layer_names` | yes | `` `Layers\n${jsonparse($(liveupdate:trackLayerNames)) === null ? $(liveupdate:trackLayerNames) : jsonpath($(liveupdate:trackLayerNames), '$.length')}` `` | `Layers\n12` |
+| `trk_layer_tstart_bycomp` | yes | `` `Start (comp)\n${isNumber($(liveupdate:layerTStartByComp)) ? concat(toFixed($(liveupdate:layerTStartByComp), 1), ' b') : $(liveupdate:layerTStartByComp)}` `` | `Start (comp)\n16.0 b` |
+| `trk_section_table` | yes | `` `Sections\n${jsonparse($(liveupdate:trackSectionTable)) === null ? $(liveupdate:trackSectionTable) : jsonpath($(liveupdate:trackSectionTable), '$.length')}` `` | `Sections\n8` |
 | `trk_section_note` | no | `Sec $(liveupdate:selSection) note\n$(liveupdate:sectionNote)` | `Sec 2 note\nVerse 2` |
-| `trk_section_length` | yes | `` `Sec ${$(liveupdate:selSection)} len\n${toFixed($(liveupdate:sectionLengthBeats),1)} b` `` | `Sec 2 len\n32.0 b` |
-| `trk_section_start_sec` | yes | `` `Sec ${$(liveupdate:selSection)} start\n${secondsToTimestamp($(liveupdate:sectionStartSec))}` `` | `Sec 2 start\n00:00:32` |
+| `trk_section_length` | yes | `` `Sec ${$(liveupdate:selSection)} len\n${isNumber($(liveupdate:sectionLengthBeats)) ? concat(toFixed($(liveupdate:sectionLengthBeats), 1), ' b') : $(liveupdate:sectionLengthBeats)}` `` | `Sec 2 len\n32.0 b` |
+| `trk_section_start_sec` | yes | `` `Sec ${$(liveupdate:selSection)} start\n${isNumber($(liveupdate:sectionStartSec)) ? secondsToTimestamp($(liveupdate:sectionStartSec)) : $(liveupdate:sectionStartSec)}` `` | `Sec 2 start\n00:00:32` |
 | `trk_section_of_beat` | no | `Section @$(liveupdate:selBeat)\n$(liveupdate:sectionAtBeat)` | `Section @64\n2` |
 | `trk_cue_tag_at_beat` | no | `CUE @$(liveupdate:selBeat)\n$(liveupdate:cueNumberAtBeat)` | `CUE @64\n1.2` |
-| `trk_tags_at_beat` | yes | `` `Tags @${$(liveupdate:selBeat)}\n${jsonpath($(liveupdate:tagsAtBeat),'$.length')}` `` | `Tags @64\n1` |
-| `trk_cue_table` | yes | `` `Cue table\n${jsonpath($(liveupdate:trackCueTable),'$.length')}` `` | `Cue table\n14` |
-| `trk_layer_extents` | yes | `` `${jsonpath($(liveupdate:layerExtents),'$.name')}\n${toFixed(jsonpath($(liveupdate:layerExtents),'$.start'),1)}-${toFixed(jsonpath($(liveupdate:layerExtents),'$.end'),1)}` `` | `Video 1\n16.0-24.0` |
-| `trk_layer_crashed` | yes | `` `Crashed\n${$(liveupdate:layerCrashed) ? 'YES' : 'no'}` `` | `Crashed\nno` |
-| `trk_layer_dormant` | yes | `` `Dormant\n${$(liveupdate:layerDormant) ? 'YES' : 'no'}` `` | `Dormant\nno` |
-| `trk_layer_fields` | yes | `` `Fields\n${jsonpath($(liveupdate:layerFields),'$.length')}` `` | `Fields\n23` |
-| `trk_layer_keytimes` | yes | `` `Key beats\n${jsonpath($(liveupdate:layerKeyTimes),'$.length')}` `` | `Key beats\n3` |
-| `trk_key_posx_all` | yes | `` `Pos X keys\n${jsonpath($(liveupdate:keyPosXAll),'$.length')}` `` | `Pos X keys\n2` |
-| `trk_brightness_patched` | yes | `` `Bright patched\n${$(liveupdate:brightnessPatched) ? 'YES' : 'no'}` `` | `Bright patched\nno` |
+| `trk_tags_at_beat` | yes | `` `Tags @${$(liveupdate:selBeat)}\n${jsonparse($(liveupdate:tagsAtBeat)) === null ? $(liveupdate:tagsAtBeat) : jsonpath($(liveupdate:tagsAtBeat), '$.length')}` `` | `Tags @64\n1` |
+| `trk_cue_table` | yes | `` `Cue table\n${jsonparse($(liveupdate:trackCueTable)) === null ? $(liveupdate:trackCueTable) : jsonpath($(liveupdate:trackCueTable), '$.length')}` `` | `Cue table\n14` |
+| `trk_layer_extents` | yes | `` `${jsonparse($(liveupdate:layerExtents)) === null ? $(liveupdate:selLayer) : jsonpath($(liveupdate:layerExtents), '$.name')}\n${jsonparse($(liveupdate:layerExtents)) === null ? $(liveupdate:layerExtents) : concat(toFixed(jsonpath($(liveupdate:layerExtents), '$.start'), 1), '-', toFixed(jsonpath($(liveupdate:layerExtents), '$.end'), 1))}` `` | `Video 1\n16.0-24.0` |
+| `trk_layer_crashed` | yes | `` `Crashed\n${$(liveupdate:layerCrashed) === true ? 'YES' : $(liveupdate:layerCrashed) === false ? 'no' : $(liveupdate:layerCrashed)}` `` | `Crashed\nno` |
+| `trk_layer_dormant` | yes | `` `Dormant\n${$(liveupdate:layerDormant) === true ? 'YES' : $(liveupdate:layerDormant) === false ? 'no' : $(liveupdate:layerDormant)}` `` | `Dormant\nno` |
+| `trk_layer_fields` | yes | `` `Fields\n${jsonparse($(liveupdate:layerFields)) === null ? $(liveupdate:layerFields) : jsonpath($(liveupdate:layerFields), '$.length')}` `` | `Fields\n23` |
+| `trk_layer_keytimes` | yes | `` `Key beats\n${jsonparse($(liveupdate:layerKeyTimes)) === null ? $(liveupdate:layerKeyTimes) : jsonpath($(liveupdate:layerKeyTimes), '$.length')}` `` | `Key beats\n3` |
+| `trk_key_posx_all` | yes | `` `Pos X keys\n${jsonparse($(liveupdate:keyPosXAll)) === null ? $(liveupdate:keyPosXAll) : jsonpath($(liveupdate:keyPosXAll), '$.length')}` `` | `Pos X keys\n2` |
+| `trk_brightness_patched` | yes | `` `Bright patched\n${$(liveupdate:brightnessPatched) === true ? 'YES' : $(liveupdate:brightnessPatched) === false ? 'no' : $(liveupdate:brightnessPatched)}` `` | `Bright patched\nno` |
 | `trk_brightness_at_beat` | no | `Bright @$(liveupdate:selBeat)\n$(liveupdate:brightnessAtBeat)` | `Bright @64\n1.0` |
-| `trk_key_video` | yes | `` `Clip\n${jsonpath($(liveupdate:keyVideo),'$.path')}` `` | `Clip\nsample/george.jpg` |
+| `trk_key_video` | yes | `` `Clip\n${jsonparse($(liveupdate:keyVideo)) === null ? $(liveupdate:keyVideo) : jsonpath($(liveupdate:keyVideo), '$.path')}` `` | `Clip\nsample/george.jpg` |
 
 </details>
 
@@ -689,27 +689,27 @@ Rows removed after the live run:
 |---|---|---|---|
 | `lay_enable_on` | no | `$(liveupdate:selLayer)\nENABLE` | `Video 1\nENABLE` |
 | `lay_enable_off` | no | `$(liveupdate:selLayer)\nDISABLE` | `Video 1\nDISABLE` |
-| `lay_enable_toggle` | yes | `` `${$(liveupdate:selLayer)}\n${$(liveupdate:layerEnabled) ? 'ON' : 'OFF'}` `` | `Video 1\nON` |
-| `lay_tstart_plus` | yes | `` `Start +1\n${toFixed($(liveupdate:layerTStart),1)} b` `` | `Start +1\n16.0 b` |
-| `lay_tstart_minus` | yes | `` `Start -1\n${toFixed($(liveupdate:layerTStart),1)} b` `` | `Start -1\n16.0 b` |
-| `lay_tlength_plus` | yes | `` `Length +1\n${toFixed($(liveupdate:layerTLength),1)} b` `` | `Length +1\n8.0 b` |
-| `lay_tlength_minus` | yes | `` `Length -1\n${toFixed($(liveupdate:layerTLength),1)} b` `` | `Length -1\n8.0 b` |
-| `lay_posx_plus` | yes | `` `Pos X +1\n${toFixed($(liveupdate:keyPosX),2)}` `` | `Pos X +1\n0.00` |
-| `lay_posx_minus` | yes | `` `Pos X -1\n${toFixed($(liveupdate:keyPosX),2)}` `` | `Pos X -1\n0.00` |
-| `lay_posx_zero` | yes | `` `Pos X = 0\n${toFixed($(liveupdate:keyPosX),2)}` `` | `Pos X = 0\n0.00` |
-| `lay_posy_plus` | yes | `` `Pos Y +1\n${toFixed($(liveupdate:keyPosY),2)}` `` | `Pos Y +1\n0.00` |
-| `lay_posy_minus` | yes | `` `Pos Y -1\n${toFixed($(liveupdate:keyPosY),2)}` `` | `Pos Y -1\n0.00` |
-| `lay_posy_zero` | yes | `` `Pos Y = 0\n${toFixed($(liveupdate:keyPosY),2)}` `` | `Pos Y = 0\n0.00` |
-| `lay_scale_plus` | yes | `` `Scale X +0.1\n${toFixed($(liveupdate:keyScale),2)}` `` | `Scale X +0.1\n1.00` |
-| `lay_scaley_plus` | yes | `` `Scale Y +0.1\n${toFixed($(liveupdate:keyScaleY),2)}` `` | `Scale Y +0.1\n1.00` |
-| `lay_scale_minus` | yes | `` `Scale X -0.1\n${toFixed($(liveupdate:keyScale),2)}` `` | `Scale X -0.1\n1.00` |
-| `lay_scaley_minus` | yes | `` `Scale Y -0.1\n${toFixed($(liveupdate:keyScaleY),2)}` `` | `Scale Y -0.1\n1.00` |
-| `lay_scale_one` | yes | `` `Scale X = 1\n${toFixed($(liveupdate:keyScale),2)}` `` | `Scale X = 1\n1.00` |
-| `lay_scaley_one` | yes | `` `Scale Y = 1\n${toFixed($(liveupdate:keyScaleY),2)}` `` | `Scale Y = 1\n1.00` |
-| `lay_bright_plus` | yes | `` `Bright +0.1\n${toFixed($(liveupdate:keyBrightness),2)}` `` | `Bright +0.1\n1.00` |
-| `lay_bright_minus` | yes | `` `Bright -0.1\n${toFixed($(liveupdate:keyBrightness),2)}` `` | `Bright -0.1\n1.00` |
-| `lay_bright_full` | yes | `` `Bright = 1\n${toFixed($(liveupdate:keyBrightness),2)}` `` | `Bright = 1\n1.00` |
-| `lay_bright_zero` | yes | `` `Bright = 0\n${toFixed($(liveupdate:keyBrightness),2)}` `` | `Bright = 0\n1.00` |
+| `lay_enable_toggle` | yes | `` `${$(liveupdate:selLayer)}\n${$(liveupdate:layerEnabled) === true ? 'ON' : $(liveupdate:layerEnabled) === false ? 'OFF' : $(liveupdate:layerEnabled)}` `` | `Video 1\nON` |
+| `lay_tstart_plus` | yes | `` `Start +1\n${isNumber($(liveupdate:layerTStart)) ? concat(toFixed($(liveupdate:layerTStart), 1), ' b') : $(liveupdate:layerTStart)}` `` | `Start +1\n16.0 b` |
+| `lay_tstart_minus` | yes | `` `Start -1\n${isNumber($(liveupdate:layerTStart)) ? concat(toFixed($(liveupdate:layerTStart), 1), ' b') : $(liveupdate:layerTStart)}` `` | `Start -1\n16.0 b` |
+| `lay_tlength_plus` | yes | `` `Length +1\n${isNumber($(liveupdate:layerTLength)) ? concat(toFixed($(liveupdate:layerTLength), 1), ' b') : $(liveupdate:layerTLength)}` `` | `Length +1\n8.0 b` |
+| `lay_tlength_minus` | yes | `` `Length -1\n${isNumber($(liveupdate:layerTLength)) ? concat(toFixed($(liveupdate:layerTLength), 1), ' b') : $(liveupdate:layerTLength)}` `` | `Length -1\n8.0 b` |
+| `lay_posx_plus` | yes | `` `Pos X +1\n${isNumber($(liveupdate:keyPosX)) ? toFixed($(liveupdate:keyPosX), 2) : $(liveupdate:keyPosX)}` `` | `Pos X +1\n0.00` |
+| `lay_posx_minus` | yes | `` `Pos X -1\n${isNumber($(liveupdate:keyPosX)) ? toFixed($(liveupdate:keyPosX), 2) : $(liveupdate:keyPosX)}` `` | `Pos X -1\n0.00` |
+| `lay_posx_zero` | yes | `` `Pos X = 0\n${isNumber($(liveupdate:keyPosX)) ? toFixed($(liveupdate:keyPosX), 2) : $(liveupdate:keyPosX)}` `` | `Pos X = 0\n0.00` |
+| `lay_posy_plus` | yes | `` `Pos Y +1\n${isNumber($(liveupdate:keyPosY)) ? toFixed($(liveupdate:keyPosY), 2) : $(liveupdate:keyPosY)}` `` | `Pos Y +1\n0.00` |
+| `lay_posy_minus` | yes | `` `Pos Y -1\n${isNumber($(liveupdate:keyPosY)) ? toFixed($(liveupdate:keyPosY), 2) : $(liveupdate:keyPosY)}` `` | `Pos Y -1\n0.00` |
+| `lay_posy_zero` | yes | `` `Pos Y = 0\n${isNumber($(liveupdate:keyPosY)) ? toFixed($(liveupdate:keyPosY), 2) : $(liveupdate:keyPosY)}` `` | `Pos Y = 0\n0.00` |
+| `lay_scale_plus` | yes | `` `Scale X +0.1\n${isNumber($(liveupdate:keyScale)) ? toFixed($(liveupdate:keyScale), 2) : $(liveupdate:keyScale)}` `` | `Scale X +0.1\n1.00` |
+| `lay_scaley_plus` | yes | `` `Scale Y +0.1\n${isNumber($(liveupdate:keyScaleY)) ? toFixed($(liveupdate:keyScaleY), 2) : $(liveupdate:keyScaleY)}` `` | `Scale Y +0.1\n1.00` |
+| `lay_scale_minus` | yes | `` `Scale X -0.1\n${isNumber($(liveupdate:keyScale)) ? toFixed($(liveupdate:keyScale), 2) : $(liveupdate:keyScale)}` `` | `Scale X -0.1\n1.00` |
+| `lay_scaley_minus` | yes | `` `Scale Y -0.1\n${isNumber($(liveupdate:keyScaleY)) ? toFixed($(liveupdate:keyScaleY), 2) : $(liveupdate:keyScaleY)}` `` | `Scale Y -0.1\n1.00` |
+| `lay_scale_one` | yes | `` `Scale X = 1\n${isNumber($(liveupdate:keyScale)) ? toFixed($(liveupdate:keyScale), 2) : $(liveupdate:keyScale)}` `` | `Scale X = 1\n1.00` |
+| `lay_scaley_one` | yes | `` `Scale Y = 1\n${isNumber($(liveupdate:keyScaleY)) ? toFixed($(liveupdate:keyScaleY), 2) : $(liveupdate:keyScaleY)}` `` | `Scale Y = 1\n1.00` |
+| `lay_bright_plus` | yes | `` `Bright +0.1\n${isNumber($(liveupdate:keyBrightness)) ? toFixed($(liveupdate:keyBrightness), 2) : $(liveupdate:keyBrightness)}` `` | `Bright +0.1\n1.00` |
+| `lay_bright_minus` | yes | `` `Bright -0.1\n${isNumber($(liveupdate:keyBrightness)) ? toFixed($(liveupdate:keyBrightness), 2) : $(liveupdate:keyBrightness)}` `` | `Bright -0.1\n1.00` |
+| `lay_bright_full` | yes | `` `Bright = 1\n${isNumber($(liveupdate:keyBrightness)) ? toFixed($(liveupdate:keyBrightness), 2) : $(liveupdate:keyBrightness)}` `` | `Bright = 1\n1.00` |
+| `lay_bright_zero` | yes | `` `Bright = 0\n${isNumber($(liveupdate:keyBrightness)) ? toFixed($(liveupdate:keyBrightness), 2) : $(liveupdate:keyBrightness)}` `` | `Bright = 0\n1.00` |
 | `lay_bright_const_on` | no | `Bright const\nON` | `Bright const\nON` |
 | `lay_bright_const_off` | no | `Bright const\nOFF` | `Bright const\nOFF` |
 
@@ -837,57 +837,57 @@ Rows removed after the live run:
 | preset id | textExpression | text | preview |
 |---|---|---|---|
 | `stg_screen_name` | no | `Screen\n$(liveupdate:screenName)` | `Screen\nSurface 1` |
-| `stg_screen_in_error` | yes | `` `Screen\n${$(liveupdate:screenInError) ? 'ERROR' : 'OK'}` `` | `Screen\nOK` |
-| `stg_screen_active_stage` | yes | `` `Active stage\n${$(liveupdate:screenInActiveStage) ? 'YES' : 'NO'}` `` | `Active stage\nYES` |
-| `stg_screen_offset` | yes | `` `Offset (m)\n${toFixed(jsonpath(jsonparse($(liveupdate:screenOffset)), '$.x'), 2)} ${toFixed(jsonpath(jsonparse($(liveupdate:screenOffset)), '$.y'), 2)} ${toFixed(jsonpath(jsonparse($(liveupdate:screenOffset)), '$.z'), 2)}` `` | `Offset (m)\n0.00 3.00 0.00` |
-| `stg_screen_offset_reset` | yes | `` `Offset 0\n${toFixed(jsonpath(jsonparse($(liveupdate:screenOffset)), '$.x'), 1)} ${toFixed(jsonpath(jsonparse($(liveupdate:screenOffset)), '$.y'), 1)} ${toFixed(jsonpath(jsonparse($(liveupdate:screenOffset)), '$.z'), 1)}` `` | `Offset 0\n0.0 3.0 0.0` |
-| `stg_screen_offset_x` | yes | `` `X (m)\n${toFixed($(liveupdate:screenOffsetX), 2)}` `` | `X (m)\n0.00` |
-| `stg_screen_offset_x_up` | yes | `` `X +0.1\n${toFixed($(liveupdate:screenOffsetX), 2)}` `` | `X +0.1\n0.10` |
-| `stg_screen_offset_x_down` | yes | `` `X -0.1\n${toFixed($(liveupdate:screenOffsetX), 2)}` `` | `X -0.1\n-0.10` |
-| `stg_screen_rotation` | yes | `` `Rot (deg)\n${toFixed(jsonpath(jsonparse($(liveupdate:screenRotation)), '$.x'), 1)} ${toFixed(jsonpath(jsonparse($(liveupdate:screenRotation)), '$.y'), 1)} ${toFixed(jsonpath(jsonparse($(liveupdate:screenRotation)), '$.z'), 1)}` `` | `Rot (deg)\n0.0 90.0 0.0` |
-| `stg_screen_fade` | yes | `` `Fade\n${toFixed($(liveupdate:screenMasterFade), 2)}` `` | `Fade\n1.00` |
-| `stg_screen_fade_up` | yes | `` `Fade +\n${toFixed($(liveupdate:screenMasterFade), 2)}` `` | `Fade +\n1.00` |
-| `stg_screen_fade_down` | yes | `` `Fade -\n${toFixed($(liveupdate:screenMasterFade), 2)}` `` | `Fade -\n0.95` |
-| `stg_screen_fade_full` | yes | `` `Fade 1.0\n${toFixed($(liveupdate:screenMasterFade), 2)}` `` | `Fade 1.0\n1.00` |
-| `stg_screen_fade_zero` | yes | `` `Fade 0.0\n${toFixed($(liveupdate:screenMasterFade), 2)}` `` | `Fade 0.0\n0.00` |
-| `stg_screen_hold` | yes | `` `Hold\n${$(liveupdate:screenHoldOutput) ? 'HELD' : 'Live'}` `` | `Hold\nLive` |
-| `stg_screen_hold_on` | yes | `` `Hold ON\n${$(liveupdate:screenHoldOutput) ? 'HELD' : 'Live'}` `` | `Hold ON\nLive` |
-| `stg_screen_hold_off` | yes | `` `Hold OFF\n${$(liveupdate:screenHoldOutput) ? 'HELD' : 'Live'}` `` | `Hold OFF\nHELD` |
-| `stg_screen_hold_toggle` | yes | `` `Hold\n${$(liveupdate:screenHoldOutput) ? 'HELD' : 'Live'}` `` | `Hold\nLive` |
-| `stg_screen_render_layer` | yes | `` `Layer\n${$(liveupdate:screenRenderLayer) == 0 ? 'Off stage' : $(liveupdate:screenRenderLayer) == 1 ? 'On stage' : $(liveupdate:screenRenderLayer) == 2 ? 'Frontplate' : $(liveupdate:screenRenderLayer) == 3 ? 'Backplate' : $(liveupdate:screenRenderLayer) == 4 ? 'SetExt mask' : $(liveupdate:screenRenderLayer) == 5 ? 'SetExt add' : $(liveupdate:screenRenderLayer) == 6 ? 'Live action' : $(liveupdate:screenRenderLayer) == 7 ? '2.5D' : $(liveupdate:screenRenderLayer)}` `` | `Layer\nOn stage` |
-| `stg_screen_on_stage` | yes | `` `On stage\n${$(liveupdate:screenRenderLayer) == 1 ? 'ON' : $(liveupdate:screenRenderLayer) == 0 ? 'OFF' : $(liveupdate:screenRenderLayer)}` `` | `On stage\nON` |
-| `stg_screen_off_stage` | yes | `` `Off stage\n${$(liveupdate:screenRenderLayer) == 0 ? 'OFF' : 'on'}` `` | `Off stage\non` |
-| `stg_screen_tracking_live` | yes | `` `Tracking\n${$(liveupdate:screenTrackingLive) ? 'LIVE' : 'no data'}` `` | `Tracking\nLIVE` |
+| `stg_screen_in_error` | yes | `` `Screen\n${$(liveupdate:screenInError) === true ? 'ERROR' : $(liveupdate:screenInError) === false ? 'OK' : $(liveupdate:screenInError)}` `` | `Screen\nOK` |
+| `stg_screen_active_stage` | yes | `` `Active stage\n${$(liveupdate:screenInActiveStage) === true ? 'YES' : $(liveupdate:screenInActiveStage) === false ? 'NO' : $(liveupdate:screenInActiveStage)}` `` | `Active stage\nYES` |
+| `stg_screen_offset` | yes | `` `Offset (m)\n${jsonparse($(liveupdate:screenOffset)) === null ? $(liveupdate:screenOffset) : concat(toFixed(jsonpath(jsonparse($(liveupdate:screenOffset)), '$.x'), 2), ' ', toFixed(jsonpath(jsonparse($(liveupdate:screenOffset)), '$.y'), 2), ' ', toFixed(jsonpath(jsonparse($(liveupdate:screenOffset)), '$.z'), 2))}` `` | `Offset (m)\n0.00 3.00 0.00` |
+| `stg_screen_offset_reset` | yes | `` `Offset 0\n${jsonparse($(liveupdate:screenOffset)) === null ? $(liveupdate:screenOffset) : concat(toFixed(jsonpath(jsonparse($(liveupdate:screenOffset)), '$.x'), 1), ' ', toFixed(jsonpath(jsonparse($(liveupdate:screenOffset)), '$.y'), 1), ' ', toFixed(jsonpath(jsonparse($(liveupdate:screenOffset)), '$.z'), 1))}` `` | `Offset 0\n0.0 3.0 0.0` |
+| `stg_screen_offset_x` | yes | `` `X (m)\n${isNumber($(liveupdate:screenOffsetX)) ? toFixed($(liveupdate:screenOffsetX), 2) : $(liveupdate:screenOffsetX)}` `` | `X (m)\n0.00` |
+| `stg_screen_offset_x_up` | yes | `` `X +0.1\n${isNumber($(liveupdate:screenOffsetX)) ? toFixed($(liveupdate:screenOffsetX), 2) : $(liveupdate:screenOffsetX)}` `` | `X +0.1\n0.10` |
+| `stg_screen_offset_x_down` | yes | `` `X -0.1\n${isNumber($(liveupdate:screenOffsetX)) ? toFixed($(liveupdate:screenOffsetX), 2) : $(liveupdate:screenOffsetX)}` `` | `X -0.1\n-0.10` |
+| `stg_screen_rotation` | yes | `` `Rot (deg)\n${jsonparse($(liveupdate:screenRotation)) === null ? $(liveupdate:screenRotation) : concat(toFixed(jsonpath(jsonparse($(liveupdate:screenRotation)), '$.x'), 1), ' ', toFixed(jsonpath(jsonparse($(liveupdate:screenRotation)), '$.y'), 1), ' ', toFixed(jsonpath(jsonparse($(liveupdate:screenRotation)), '$.z'), 1))}` `` | `Rot (deg)\n0.0 90.0 0.0` |
+| `stg_screen_fade` | yes | `` `Fade\n${isNumber($(liveupdate:screenMasterFade)) ? toFixed($(liveupdate:screenMasterFade), 2) : $(liveupdate:screenMasterFade)}` `` | `Fade\n1.00` |
+| `stg_screen_fade_up` | yes | `` `Fade +\n${isNumber($(liveupdate:screenMasterFade)) ? toFixed($(liveupdate:screenMasterFade), 2) : $(liveupdate:screenMasterFade)}` `` | `Fade +\n1.00` |
+| `stg_screen_fade_down` | yes | `` `Fade -\n${isNumber($(liveupdate:screenMasterFade)) ? toFixed($(liveupdate:screenMasterFade), 2) : $(liveupdate:screenMasterFade)}` `` | `Fade -\n0.95` |
+| `stg_screen_fade_full` | yes | `` `Fade 1.0\n${isNumber($(liveupdate:screenMasterFade)) ? toFixed($(liveupdate:screenMasterFade), 2) : $(liveupdate:screenMasterFade)}` `` | `Fade 1.0\n1.00` |
+| `stg_screen_fade_zero` | yes | `` `Fade 0.0\n${isNumber($(liveupdate:screenMasterFade)) ? toFixed($(liveupdate:screenMasterFade), 2) : $(liveupdate:screenMasterFade)}` `` | `Fade 0.0\n0.00` |
+| `stg_screen_hold` | yes | `` `Hold\n${$(liveupdate:screenHoldOutput) === true ? 'HELD' : $(liveupdate:screenHoldOutput) === false ? 'Live' : $(liveupdate:screenHoldOutput)}` `` | `Hold\nLive` |
+| `stg_screen_hold_on` | yes | `` `Hold ON\n${$(liveupdate:screenHoldOutput) === true ? 'HELD' : $(liveupdate:screenHoldOutput) === false ? 'Live' : $(liveupdate:screenHoldOutput)}` `` | `Hold ON\nLive` |
+| `stg_screen_hold_off` | yes | `` `Hold OFF\n${$(liveupdate:screenHoldOutput) === true ? 'HELD' : $(liveupdate:screenHoldOutput) === false ? 'Live' : $(liveupdate:screenHoldOutput)}` `` | `Hold OFF\nHELD` |
+| `stg_screen_hold_toggle` | yes | `` `Hold\n${$(liveupdate:screenHoldOutput) === true ? 'HELD' : $(liveupdate:screenHoldOutput) === false ? 'Live' : $(liveupdate:screenHoldOutput)}` `` | `Hold\nLive` |
+| `stg_screen_render_layer` | yes | `` `Layer\n${isNumber($(liveupdate:screenRenderLayer)) ? ($(liveupdate:screenRenderLayer) == 0 ? 'Off stage' : $(liveupdate:screenRenderLayer) == 1 ? 'On stage' : $(liveupdate:screenRenderLayer) == 2 ? 'Frontplate' : $(liveupdate:screenRenderLayer) == 3 ? 'Backplate' : $(liveupdate:screenRenderLayer) == 4 ? 'SetExt mask' : $(liveupdate:screenRenderLayer) == 5 ? 'SetExt add' : $(liveupdate:screenRenderLayer) == 6 ? 'Live action' : $(liveupdate:screenRenderLayer) == 7 ? '2.5D' : $(liveupdate:screenRenderLayer)) : $(liveupdate:screenRenderLayer)}` `` | `Layer\nOn stage` |
+| `stg_screen_on_stage` | yes | `` `On stage\n${isNumber($(liveupdate:screenRenderLayer)) ? ($(liveupdate:screenRenderLayer) == 1 ? 'ON' : $(liveupdate:screenRenderLayer) == 0 ? 'OFF' : $(liveupdate:screenRenderLayer)) : $(liveupdate:screenRenderLayer)}` `` | `On stage\nON` |
+| `stg_screen_off_stage` | yes | `` `Off stage\n${isNumber($(liveupdate:screenRenderLayer)) ? ($(liveupdate:screenRenderLayer) == 0 ? 'OFF' : 'on') : $(liveupdate:screenRenderLayer)}` `` | `Off stage\non` |
+| `stg_screen_tracking_live` | yes | `` `Tracking\n${$(liveupdate:screenTrackingLive) === true ? 'LIVE' : $(liveupdate:screenTrackingLive) === false ? 'no data' : $(liveupdate:screenTrackingLive)}` `` | `Tracking\nLIVE` |
 | `stg_proj_name` | no | `Projector\n$(liveupdate:projectorName)` | `Projector\nprojector 1` |
-| `stg_proj_in_error` | yes | `` `Projector\n${$(liveupdate:projectorInError) ? 'ERROR' : 'OK'}` `` | `Projector\nOK` |
-| `stg_proj_has_feed` | yes | `` `Feed\n${$(liveupdate:projectorHasFeed) ? 'assigned' : 'NONE'}` `` | `Feed\nassigned` |
-| `stg_proj_fade` | yes | `` `Fade\n${toFixed($(liveupdate:projectorMasterFade), 2)}` `` | `Fade\n1.00` |
-| `stg_proj_fade_up` | yes | `` `Fade +\n${toFixed($(liveupdate:projectorMasterFade), 2)}` `` | `Fade +\n1.00` |
-| `stg_proj_fade_down` | yes | `` `Fade -\n${toFixed($(liveupdate:projectorMasterFade), 2)}` `` | `Fade -\n0.95` |
-| `stg_proj_fade_full` | yes | `` `Fade 1.0\n${toFixed($(liveupdate:projectorMasterFade), 2)}` `` | `Fade 1.0\n1.00` |
-| `stg_proj_fade_zero` | yes | `` `Fade 0.0\n${toFixed($(liveupdate:projectorMasterFade), 2)}` `` | `Fade 0.0\n0.00` |
-| `stg_proj_hold` | yes | `` `Hold\n${$(liveupdate:projectorHoldOutput) ? 'HELD' : 'Live'}` `` | `Hold\nLive` |
-| `stg_proj_hold_on` | yes | `` `Hold ON\n${$(liveupdate:projectorHoldOutput) ? 'HELD' : 'Live'}` `` | `Hold ON\nLive` |
-| `stg_proj_hold_off` | yes | `` `Hold OFF\n${$(liveupdate:projectorHoldOutput) ? 'HELD' : 'Live'}` `` | `Hold OFF\nHELD` |
-| `stg_proj_hold_toggle` | yes | `` `Hold\n${$(liveupdate:projectorHoldOutput) ? 'HELD' : 'Live'}` `` | `Hold\nLive` |
+| `stg_proj_in_error` | yes | `` `Projector\n${$(liveupdate:projectorInError) === true ? 'ERROR' : $(liveupdate:projectorInError) === false ? 'OK' : $(liveupdate:projectorInError)}` `` | `Projector\nOK` |
+| `stg_proj_has_feed` | yes | `` `Feed\n${$(liveupdate:projectorHasFeed) === true ? 'assigned' : $(liveupdate:projectorHasFeed) === false ? 'NONE' : $(liveupdate:projectorHasFeed)}` `` | `Feed\nassigned` |
+| `stg_proj_fade` | yes | `` `Fade\n${isNumber($(liveupdate:projectorMasterFade)) ? toFixed($(liveupdate:projectorMasterFade), 2) : $(liveupdate:projectorMasterFade)}` `` | `Fade\n1.00` |
+| `stg_proj_fade_up` | yes | `` `Fade +\n${isNumber($(liveupdate:projectorMasterFade)) ? toFixed($(liveupdate:projectorMasterFade), 2) : $(liveupdate:projectorMasterFade)}` `` | `Fade +\n1.00` |
+| `stg_proj_fade_down` | yes | `` `Fade -\n${isNumber($(liveupdate:projectorMasterFade)) ? toFixed($(liveupdate:projectorMasterFade), 2) : $(liveupdate:projectorMasterFade)}` `` | `Fade -\n0.95` |
+| `stg_proj_fade_full` | yes | `` `Fade 1.0\n${isNumber($(liveupdate:projectorMasterFade)) ? toFixed($(liveupdate:projectorMasterFade), 2) : $(liveupdate:projectorMasterFade)}` `` | `Fade 1.0\n1.00` |
+| `stg_proj_fade_zero` | yes | `` `Fade 0.0\n${isNumber($(liveupdate:projectorMasterFade)) ? toFixed($(liveupdate:projectorMasterFade), 2) : $(liveupdate:projectorMasterFade)}` `` | `Fade 0.0\n0.00` |
+| `stg_proj_hold` | yes | `` `Hold\n${$(liveupdate:projectorHoldOutput) === true ? 'HELD' : $(liveupdate:projectorHoldOutput) === false ? 'Live' : $(liveupdate:projectorHoldOutput)}` `` | `Hold\nLive` |
+| `stg_proj_hold_on` | yes | `` `Hold ON\n${$(liveupdate:projectorHoldOutput) === true ? 'HELD' : $(liveupdate:projectorHoldOutput) === false ? 'Live' : $(liveupdate:projectorHoldOutput)}` `` | `Hold ON\nLive` |
+| `stg_proj_hold_off` | yes | `` `Hold OFF\n${$(liveupdate:projectorHoldOutput) === true ? 'HELD' : $(liveupdate:projectorHoldOutput) === false ? 'Live' : $(liveupdate:projectorHoldOutput)}` `` | `Hold OFF\nHELD` |
+| `stg_proj_hold_toggle` | yes | `` `Hold\n${$(liveupdate:projectorHoldOutput) === true ? 'HELD' : $(liveupdate:projectorHoldOutput) === false ? 'Live' : $(liveupdate:projectorHoldOutput)}` `` | `Hold\nLive` |
 | `stg_uid_name` | no | `Display\n$(liveupdate:uidName)` | `Display\nLED wall` |
-| `stg_uid_fade` | yes | `` `Fade\n${toFixed($(liveupdate:uidMasterFade), 2)}` `` | `Fade\n1.00` |
-| `stg_uid_fade_up` | yes | `` `Fade +\n${toFixed($(liveupdate:uidMasterFade), 2)}` `` | `Fade +\n1.00` |
-| `stg_uid_fade_down` | yes | `` `Fade -\n${toFixed($(liveupdate:uidMasterFade), 2)}` `` | `Fade -\n0.95` |
-| `stg_uid_fade_full` | yes | `` `Fade 1.0\n${toFixed($(liveupdate:uidMasterFade), 2)}` `` | `Fade 1.0\n1.00` |
-| `stg_uid_fade_zero` | yes | `` `Fade 0.0\n${toFixed($(liveupdate:uidMasterFade), 2)}` `` | `Fade 0.0\n0.00` |
-| `stg_uid_hold` | yes | `` `Hold\n${$(liveupdate:uidHoldOutput) ? 'HELD' : 'Live'}` `` | `Hold\nLive` |
-| `stg_uid_hold_on` | yes | `` `Hold ON\n${$(liveupdate:uidHoldOutput) ? 'HELD' : 'Live'}` `` | `Hold ON\nLive` |
-| `stg_uid_hold_off` | yes | `` `Hold OFF\n${$(liveupdate:uidHoldOutput) ? 'HELD' : 'Live'}` `` | `Hold OFF\nHELD` |
-| `stg_uid_hold_toggle` | yes | `` `Hold\n${$(liveupdate:uidHoldOutput) ? 'HELD' : 'Live'}` `` | `Hold\nLive` |
+| `stg_uid_fade` | yes | `` `Fade\n${isNumber($(liveupdate:uidMasterFade)) ? toFixed($(liveupdate:uidMasterFade), 2) : $(liveupdate:uidMasterFade)}` `` | `Fade\n1.00` |
+| `stg_uid_fade_up` | yes | `` `Fade +\n${isNumber($(liveupdate:uidMasterFade)) ? toFixed($(liveupdate:uidMasterFade), 2) : $(liveupdate:uidMasterFade)}` `` | `Fade +\n1.00` |
+| `stg_uid_fade_down` | yes | `` `Fade -\n${isNumber($(liveupdate:uidMasterFade)) ? toFixed($(liveupdate:uidMasterFade), 2) : $(liveupdate:uidMasterFade)}` `` | `Fade -\n0.95` |
+| `stg_uid_fade_full` | yes | `` `Fade 1.0\n${isNumber($(liveupdate:uidMasterFade)) ? toFixed($(liveupdate:uidMasterFade), 2) : $(liveupdate:uidMasterFade)}` `` | `Fade 1.0\n1.00` |
+| `stg_uid_fade_zero` | yes | `` `Fade 0.0\n${isNumber($(liveupdate:uidMasterFade)) ? toFixed($(liveupdate:uidMasterFade), 2) : $(liveupdate:uidMasterFade)}` `` | `Fade 0.0\n0.00` |
+| `stg_uid_hold` | yes | `` `Hold\n${$(liveupdate:uidHoldOutput) === true ? 'HELD' : $(liveupdate:uidHoldOutput) === false ? 'Live' : $(liveupdate:uidHoldOutput)}` `` | `Hold\nLive` |
+| `stg_uid_hold_on` | yes | `` `Hold ON\n${$(liveupdate:uidHoldOutput) === true ? 'HELD' : $(liveupdate:uidHoldOutput) === false ? 'Live' : $(liveupdate:uidHoldOutput)}` `` | `Hold ON\nLive` |
+| `stg_uid_hold_off` | yes | `` `Hold OFF\n${$(liveupdate:uidHoldOutput) === true ? 'HELD' : $(liveupdate:uidHoldOutput) === false ? 'Live' : $(liveupdate:uidHoldOutput)}` `` | `Hold OFF\nHELD` |
+| `stg_uid_hold_toggle` | yes | `` `Hold\n${$(liveupdate:uidHoldOutput) === true ? 'HELD' : $(liveupdate:uidHoldOutput) === false ? 'Live' : $(liveupdate:uidHoldOutput)}` `` | `Hold\nLive` |
 | `stg_screen_projectors` | no | `Projectors\n$(liveupdate:screenProjectors)` | `Projectors\n["projector 1","projector 2"]` |
 | `stg_proj_screens` | no | `Screens\n$(liveupdate:projectorScreens)` | `Screens\n["Surface 1"]` |
 | `stg_led_name` | no | `LED\n$(liveupdate:ledName)` | `LED\nLED wall` |
-| `stg_led_fade` | yes | `` `LED fade\n${toFixed($(liveupdate:ledMasterFade), 2)}` `` | `LED fade\n1.00` |
-| `stg_led_hold` | yes | `` `LED hold\n${$(liveupdate:ledHoldOutput) ? 'HELD' : 'Live'}` `` | `LED hold\nLive` |
-| `stg_led_offset` | yes | `` `LED pos\n${toFixed(jsonpath(jsonparse($(liveupdate:ledOffset)), '$.x'), 2)} ${toFixed(jsonpath(jsonparse($(liveupdate:ledOffset)), '$.y'), 2)} ${toFixed(jsonpath(jsonparse($(liveupdate:ledOffset)), '$.z'), 2)}` `` | `LED pos\n0.00 2.00 0.00` |
+| `stg_led_fade` | yes | `` `LED fade\n${isNumber($(liveupdate:ledMasterFade)) ? toFixed($(liveupdate:ledMasterFade), 2) : $(liveupdate:ledMasterFade)}` `` | `LED fade\n1.00` |
+| `stg_led_hold` | yes | `` `LED hold\n${$(liveupdate:ledHoldOutput) === true ? 'HELD' : $(liveupdate:ledHoldOutput) === false ? 'Live' : $(liveupdate:ledHoldOutput)}` `` | `LED hold\nLive` |
+| `stg_led_offset` | yes | `` `LED pos\n${jsonparse($(liveupdate:ledOffset)) === null ? $(liveupdate:ledOffset) : concat(toFixed(jsonpath(jsonparse($(liveupdate:ledOffset)), '$.x'), 2), ' ', toFixed(jsonpath(jsonparse($(liveupdate:ledOffset)), '$.y'), 2), ' ', toFixed(jsonpath(jsonparse($(liveupdate:ledOffset)), '$.z'), 2))}` `` | `LED pos\n0.00 2.00 0.00` |
 | `stg_stage_displays` | no | `Displays\n$(liveupdate:stageDisplayCount)` | `Displays\n6` |
-| `stg_stage_dyn_blend` | yes | `` `Dyn blend\n${$(liveupdate:stageDynBlend) == 1 ? 'On' : 'Off'}` `` | `Dyn blend\nOn` |
+| `stg_stage_dyn_blend` | yes | `` `Dyn blend\n${isNumber($(liveupdate:stageDynBlend)) ? ($(liveupdate:stageDynBlend) == 1 ? 'On' : 'Off') : $(liveupdate:stageDynBlend)}` `` | `Dyn blend\nOn` |
 | `stg_uid_render_layer` | no | `Render layer\n$(liveupdate:uidRenderLayer)` | `Render layer\n1` |
 | `stg_uid_on_stage` | no | `ON stage\n$(liveupdate:uidRenderLayer)` | `ON stage\n1` |
 | `stg_uid_off_stage` | no | `OFF stage\n$(liveupdate:uidRenderLayer)` | `OFF stage\n0` |
@@ -926,13 +926,13 @@ Rows removed after the live run:
 
 | preset id | textExpression | text | preview |
 |---|---|---|---|
-| `ev_uid_float` | yes | `` `Var ${$(liveupdate:selEvIndex)}\n${toFixed($(liveupdate:evFloat), 2)}` `` | `Var 0\n0.50` |
+| `ev_uid_float` | yes | `` `Var ${$(liveupdate:selEvIndex)}\n${isNumber($(liveupdate:evFloat)) ? toFixed($(liveupdate:evFloat), 2) : $(liveupdate:evFloat)}` `` | `Var 0\n0.50` |
 | `ev_uid_string` | no | `Var $(liveupdate:selEvIndex)\n$(liveupdate:evString)` | `Var 1\nHello` |
 | `ev_uid_name` | no | `Name\n$(liveupdate:evName)` | `Name\nspeed` |
-| `ev_uid_type` | yes | `` `Type\n${$(liveupdate:evType) == 0 ? 'Float' : ($(liveupdate:evType) == 1 ? 'String' : ($(liveupdate:evType) == 2 ? 'Function' : $(liveupdate:evType)))}` `` | `Type\nFloat` |
+| `ev_uid_type` | yes | `` `Type\n${isNumber($(liveupdate:evType)) ? ($(liveupdate:evType) == 0 ? 'Float' : ($(liveupdate:evType) == 1 ? 'String' : ($(liveupdate:evType) == 2 ? 'Function' : $(liveupdate:evType)))) : $(liveupdate:evType)}` `` | `Type\nFloat` |
 | `ev_uid_description` | no | `EV device\n$(liveupdate:evDeviceName)` | `EV device\nShow Vars` |
-| `ev_uid_float_up` | yes | `` `EV +0.1\n${toFixed($(liveupdate:evFloat), 2)}` `` | `EV +0.1\n0.50` |
-| `ev_uid_float_down` | yes | `` `EV -0.1\n${toFixed($(liveupdate:evFloat), 2)}` `` | `EV -0.1\n0.40` |
+| `ev_uid_float_up` | yes | `` `EV +0.1\n${isNumber($(liveupdate:evFloat)) ? toFixed($(liveupdate:evFloat), 2) : $(liveupdate:evFloat)}` `` | `EV +0.1\n0.50` |
+| `ev_uid_float_down` | yes | `` `EV -0.1\n${isNumber($(liveupdate:evFloat)) ? toFixed($(liveupdate:evFloat), 2) : $(liveupdate:evFloat)}` `` | `EV -0.1\n0.40` |
 
 </details>
 
@@ -1015,42 +1015,42 @@ Rows removed after the live run:
 
 | preset id | textExpression | text | preview |
 |---|---|---|---|
-| `rs_enabled` | yes | `` `RS Enabled\n${bool($(liveupdate:rsEnabled)) ? 'ON' : 'OFF'}` `` | `RS Enabled\nON` |
-| `rs_licensing` | yes | `` `RS License\n${$(liveupdate:rsLicensingState) == 2 ? 'FULL' : $(liveupdate:rsLicensingState)}` `` | `RS License\nFULL` |
-| `rs_active_latency` | yes | `` `RS Latency\n${toFixed($(liveupdate:rsActiveLatency), 2)}` `` | `RS Latency\n1.00` |
+| `rs_enabled` | yes | `` `RS Enabled\n${$(liveupdate:rsEnabled) === true ? 'ON' : $(liveupdate:rsEnabled) === false ? 'OFF' : $(liveupdate:rsEnabled)}` `` | `RS Enabled\nON` |
+| `rs_licensing` | yes | `` `RS License\n${isNumber($(liveupdate:rsLicensingState)) ? ($(liveupdate:rsLicensingState) == 2 ? 'FULL' : $(liveupdate:rsLicensingState)) : $(liveupdate:rsLicensingState)}` `` | `RS License\nFULL` |
+| `rs_active_latency` | yes | `` `RS Latency\n${isNumber($(liveupdate:rsActiveLatency)) ? toFixed($(liveupdate:rsActiveLatency), 2) : $(liveupdate:rsActiveLatency)}` `` | `RS Latency\n1.00` |
 | `rs_workload_layers` | no | `RS workload\nlayers: $(liveupdate:rsWorkloadLayers)` | `RS workload\nlayers: 5` |
-| `rs_workload_instances` | yes | `` `Nodes\n${jsonpath(jsonparse($(liveupdate:rsWorkloadInstances)), '$[*].machineName')}` `` | `Nodes\nRX1,RX2` |
-| `rs_workload_receive` | yes | `` `Streams\n${jsonpath(jsonparse($(liveupdate:rsWorkloadReceiveStatuses)), '$[*].streamIdentifier.streamName')}` `` | `Streams\nmain,aux` |
-| `rs_stream_receive` | yes | `` `Node Sub OK\n${jsonpath(jsonparse($(liveupdate:rsStreamReceiveStatuses)), '$[*].subscribeSuccessful')}` `` | `Node Sub OK\ntrue,true` |
+| `rs_workload_instances` | yes | `` `Nodes\n${jsonparse($(liveupdate:rsWorkloadInstances)) === null ? $(liveupdate:rsWorkloadInstances) : jsonpath(jsonparse($(liveupdate:rsWorkloadInstances)), '$[*].machineName')}` `` | `Nodes\nRX1,RX2` |
+| `rs_workload_receive` | yes | `` `Streams\n${jsonparse($(liveupdate:rsWorkloadReceiveStatuses)) === null ? $(liveupdate:rsWorkloadReceiveStatuses) : jsonpath(jsonparse($(liveupdate:rsWorkloadReceiveStatuses)), '$[*].streamIdentifier.streamName')}` `` | `Streams\nmain,aux` |
+| `rs_stream_receive` | yes | `` `Node Sub OK\n${jsonparse($(liveupdate:rsStreamReceiveStatuses)) === null ? $(liveupdate:rsStreamReceiveStatuses) : jsonpath(jsonparse($(liveupdate:rsStreamReceiveStatuses)), '$[*].subscribeSuccessful')}` `` | `Node Sub OK\ntrue,true` |
 | `rs_inst_machine` | no | `Instance machine\n$(liveupdate:rsInstanceMachineName)` | `Instance machine\nRX01` |
-| `rs_inst_running` | yes | `` `Process\n${bool($(liveupdate:rsInstanceProcessRunning)) ? 'RUNNING' : 'STOPPED'}` `` | `Process\nRUNNING` |
-| `rs_inst_dropping` | yes | `` `Drop Frames\n${bool($(liveupdate:rsInstanceDroppingFrames)) ? 'DROPPING' : 'OK'}` `` | `Drop Frames\nOK` |
-| `rs_inst_dropping_input` | yes | `` `Drop Inputs\n${bool($(liveupdate:rsInstanceDroppingInputFrames)) ? 'DROPPING' : 'OK'}` `` | `Drop Inputs\nOK` |
-| `rs_inst_high_latency` | yes | `` `Latency\n${bool($(liveupdate:rsInstanceHighLatency)) ? 'HIGH' : 'OK'}` `` | `Latency\nOK` |
-| `rs_inst_error` | yes | `` `Instance\n${bool($(liveupdate:rsInstanceUnrecoverableError)) ? 'ERROR' : 'OK'}` `` | `Instance\nOK` |
+| `rs_inst_running` | yes | `` `Process\n${$(liveupdate:rsInstanceProcessRunning) === true ? 'RUNNING' : $(liveupdate:rsInstanceProcessRunning) === false ? 'STOPPED' : $(liveupdate:rsInstanceProcessRunning)}` `` | `Process\nRUNNING` |
+| `rs_inst_dropping` | yes | `` `Drop Frames\n${$(liveupdate:rsInstanceDroppingFrames) === true ? 'DROPPING' : $(liveupdate:rsInstanceDroppingFrames) === false ? 'OK' : $(liveupdate:rsInstanceDroppingFrames)}` `` | `Drop Frames\nOK` |
+| `rs_inst_dropping_input` | yes | `` `Drop Inputs\n${$(liveupdate:rsInstanceDroppingInputFrames) === true ? 'DROPPING' : $(liveupdate:rsInstanceDroppingInputFrames) === false ? 'OK' : $(liveupdate:rsInstanceDroppingInputFrames)}` `` | `Drop Inputs\nOK` |
+| `rs_inst_high_latency` | yes | `` `Latency\n${$(liveupdate:rsInstanceHighLatency) === true ? 'HIGH' : $(liveupdate:rsInstanceHighLatency) === false ? 'OK' : $(liveupdate:rsInstanceHighLatency)}` `` | `Latency\nOK` |
+| `rs_inst_error` | yes | `` `Instance\n${$(liveupdate:rsInstanceUnrecoverableError) === true ? 'ERROR' : $(liveupdate:rsInstanceUnrecoverableError) === false ? 'OK' : $(liveupdate:rsInstanceUnrecoverableError)}` `` | `Instance\nOK` |
 | `rs_inst_status` | no | `Inst Status\n$(liveupdate:rsInstanceStatus)` | `Inst Status\n2` |
 | `rs_inst_health_msg` | no | `Health\n$(liveupdate:rsInstanceHealthMessage)` | `Health\nRunning` |
 | `rs_inst_health_status` | no | `Health Code\n$(liveupdate:rsInstanceHealthStatus)` | `Health Code\n0` |
 | `rs_nodes_summary` | no | `Nodes\n$(liveupdate:rsInstancesSummary)` | `Nodes\nRX1:RUN \| RX2:RUN` |
 | `rs_running_count` | no | `Running\n$(liveupdate:rsInstancesRunningCount)` | `Running\n4/4` |
-| `rs_any_dropping` | yes | `` `Any Drop\n${bool($(liveupdate:rsAnyInstanceDropping)) ? 'DROPPING' : 'OK'}` `` | `Any Drop\nOK` |
-| `rs_any_down` | yes | `` `Any Down\n${bool($(liveupdate:rsAnyInstanceDown)) ? 'DOWN' : 'OK'}` `` | `Any Down\nOK` |
-| `rs_health_list` | yes | `` `Health\n${jsonpath(jsonparse($(liveupdate:rsInstancesHealthList)), '$[*].health')}` `` | `Health\nRunning,Running` |
-| `rs_min_fps` | yes | `` `Min RX FPS\n${toFixed($(liveupdate:rsReceiveMinFps), 1)}` `` | `Min RX FPS\n60.0` |
-| `rs_max_latency` | yes | `` `Max Latency\n${toFixed($(liveupdate:rsReceiveMaxLatency), 2)}` `` | `Max Latency\n1.00` |
+| `rs_any_dropping` | yes | `` `Any Drop\n${$(liveupdate:rsAnyInstanceDropping) === true ? 'DROPPING' : $(liveupdate:rsAnyInstanceDropping) === false ? 'OK' : $(liveupdate:rsAnyInstanceDropping)}` `` | `Any Drop\nOK` |
+| `rs_any_down` | yes | `` `Any Down\n${$(liveupdate:rsAnyInstanceDown) === true ? 'DOWN' : $(liveupdate:rsAnyInstanceDown) === false ? 'OK' : $(liveupdate:rsAnyInstanceDown)}` `` | `Any Down\nOK` |
+| `rs_health_list` | yes | `` `Health\n${jsonparse($(liveupdate:rsInstancesHealthList)) === null ? $(liveupdate:rsInstancesHealthList) : jsonpath(jsonparse($(liveupdate:rsInstancesHealthList)), '$[*].health')}` `` | `Health\nRunning,Running` |
+| `rs_min_fps` | yes | `` `Min RX FPS\n${isNumber($(liveupdate:rsReceiveMinFps)) ? toFixed($(liveupdate:rsReceiveMinFps), 1) : $(liveupdate:rsReceiveMinFps)}` `` | `Min RX FPS\n60.0` |
+| `rs_max_latency` | yes | `` `Max Latency\n${isNumber($(liveupdate:rsReceiveMaxLatency)) ? toFixed($(liveupdate:rsReceiveMaxLatency), 2) : $(liveupdate:rsReceiveMaxLatency)}` `` | `Max Latency\n1.00` |
 | `rs_dropped_total` | no | `Dropped Pkts\n$(liveupdate:rsReceiveDroppedTotal)` | `Dropped Pkts\n0` |
-| `rs_all_subscribed` | yes | `` `Subs\n${bool($(liveupdate:rsReceiveAllSubscribed)) ? 'ALL OK' : 'MISSING'}` `` | `Subs\nALL OK` |
+| `rs_all_subscribed` | yes | `` `Subs\n${$(liveupdate:rsReceiveAllSubscribed) === true ? 'ALL OK' : $(liveupdate:rsReceiveAllSubscribed) === false ? 'MISSING' : $(liveupdate:rsReceiveAllSubscribed)}` `` | `Subs\nALL OK` |
 | `rs_last_errors` | no | `Stream Errors\n$(liveupdate:rsReceiveLastErrors)` | `Stream Errors\n` |
-| `rs_status_msgs` | yes | `` `Stream Status\n${jsonparse($(liveupdate:rsReceiveStatusMessages))}` `` | `Stream Status\nReceiving,Receiving` |
+| `rs_status_msgs` | yes | `` `Stream Status\n${jsonparse($(liveupdate:rsReceiveStatusMessages)) === null ? $(liveupdate:rsReceiveStatusMessages) : jsonparse($(liveupdate:rsReceiveStatusMessages))}` `` | `Stream Status\nReceiving,Receiving` |
 | `rs_layer_workload_id` | no | `Workload ID\n$(liveupdate:rsLayerWorkloadId)` | `Workload ID\n123456` |
-| `rs_layer_health` | yes | `` `Cluster\n${jsonpath(jsonparse($(liveupdate:rsLayerClusterHealth)), '$.message')}` `` | `Cluster\nRunning` |
-| `rs_layer_any_running` | yes | `` `Cluster\n${bool($(liveupdate:rsLayerAnyRunning)) ? 'RUNNING' : 'STOPPED'}` `` | `Cluster\nRUNNING` |
+| `rs_layer_health` | yes | `` `Cluster\n${jsonparse($(liveupdate:rsLayerClusterHealth)) === null ? $(liveupdate:rsLayerClusterHealth) : jsonpath(jsonparse($(liveupdate:rsLayerClusterHealth)), '$.message')}` `` | `Cluster\nRunning` |
+| `rs_layer_any_running` | yes | `` `Cluster\n${$(liveupdate:rsLayerAnyRunning) === true ? 'RUNNING' : $(liveupdate:rsLayerAnyRunning) === false ? 'STOPPED' : $(liveupdate:rsLayerAnyRunning)}` `` | `Cluster\nRUNNING` |
 | `rs_layer_n_instances` | no | `Instances\n$(liveupdate:rsLayerInstanceCount)` | `Instances\n4` |
 | `rs_layer_inst_health` | no | `Inst Health\n$(liveupdate:rsLayerInstanceHealthMessage)` | `Inst Health\nRunning` |
 | `rs_layer_pool_online` | no | `Pool\n$(liveupdate:rsLayerPoolOnline)` | `Pool\n4/4 online` |
-| `rs_layer_asset_errors` | yes | `` `Asset Errors\n${jsonparse($(liveupdate:rsLayerAssetErrors))}` `` | `Asset Errors\n` |
-| `rs_layer_asset_available` | yes | `` `Asset\n${bool($(liveupdate:rsLayerAssetAvailable)) ? 'AVAILABLE' : 'MISSING'}` `` | `Asset\nAVAILABLE` |
-| `rs_layer_framerate` | yes | `` `FPS Fraction\n${$(liveupdate:rsLayerFramerateFraction) == 0 ? '1' : $(liveupdate:rsLayerFramerateFraction) == 1 ? '1/2' : $(liveupdate:rsLayerFramerateFraction) == 2 ? '1/3' : '1/4'}` `` | `FPS Fraction\n1` |
+| `rs_layer_asset_errors` | yes | `` `Asset Errors\n${jsonparse($(liveupdate:rsLayerAssetErrors)) === null ? $(liveupdate:rsLayerAssetErrors) : jsonparse($(liveupdate:rsLayerAssetErrors))}` `` | `Asset Errors\n` |
+| `rs_layer_asset_available` | yes | `` `Asset\n${$(liveupdate:rsLayerAssetAvailable) === true ? 'AVAILABLE' : $(liveupdate:rsLayerAssetAvailable) === false ? 'MISSING' : $(liveupdate:rsLayerAssetAvailable)}` `` | `Asset\nAVAILABLE` |
+| `rs_layer_framerate` | yes | `` `FPS Fraction\n${isNumber($(liveupdate:rsLayerFramerateFraction)) ? ($(liveupdate:rsLayerFramerateFraction) == 0 ? '1' : $(liveupdate:rsLayerFramerateFraction) == 1 ? '1/2' : $(liveupdate:rsLayerFramerateFraction) == 2 ? '1/3' : '1/4') : $(liveupdate:rsLayerFramerateFraction)}` `` | `FPS Fraction\n1` |
 
 </details>
 
@@ -1152,9 +1152,9 @@ Rows removed after the live run:
 | `fo_network_connected` | yes | `` `Network\n${$(liveupdate:networkConnected) === true ? 'online' : $(liveupdate:networkConnected) === false ? 'OFFLINE' : $(liveupdate:networkConnected)}` `` | `Network\nonline` |
 | `fo_network_status` | no | `Net status\n$(liveupdate:networkStatus)` | `Net status\n0` |
 | `fo_active` | yes | `` `Active\n${$(liveupdate:machineActive) === true ? 'active' : $(liveupdate:machineActive) === false ? 'INACTIVE' : $(liveupdate:machineActive)}` `` | `Active\nactive` |
-| `fo_role` | yes | `` `Role\n${$(liveupdate:machineRole) === 3 ? 'Actor' : $(liveupdate:machineRole) === 4 ? 'Understudy' : $(liveupdate:machineRole) === 1 ? 'Director' : $(liveupdate:machineRole) === 2 ? 'Director (non-ded)' : $(liveupdate:machineRole) === 0 ? 'Solo' : $(liveupdate:machineRole) === 5 ? 'Mobile editor' : '?'} (${$(liveupdate:machineRole)})` `` | `Role\nActor (3)` |
+| `fo_role` | yes | `` `Role\n${isNumber($(liveupdate:machineRole)) ? concat($(liveupdate:machineRole) === 3 ? 'Actor' : $(liveupdate:machineRole) === 4 ? 'Understudy' : $(liveupdate:machineRole) === 1 ? 'Director' : $(liveupdate:machineRole) === 2 ? 'Director (non-ded)' : $(liveupdate:machineRole) === 0 ? 'Solo' : $(liveupdate:machineRole) === 5 ? 'Mobile editor' : '?', ' (', $(liveupdate:machineRole), ')') : $(liveupdate:machineRole)}` `` | `Role\nActor (3)` |
 | `fo_running_as` | no | `Running as\n$(liveupdate:runningAs)` | `Running as\nvx4-actor1` |
-| `fo_targets` | yes | `` `Targets\n${length(jsonparse($(liveupdate:understudyTargets)))}` `` | `Targets\n2` |
+| `fo_targets` | yes | `` `Targets\n${jsonparse($(liveupdate:understudyTargets)) === null ? $(liveupdate:understudyTargets) : length(jsonparse($(liveupdate:understudyTargets)))}` `` | `Targets\n2` |
 | `fo_hostname` | no | `Host\n$(liveupdate:machineHostname)` | `Host\nVX4-ACTOR1` |
 | `fo_ip` | no | `IP\n$(liveupdate:machineIp)` | `IP\n192.0.2.10` |
 | `fo_name` | no | `Machine\n$(liveupdate:machineName)` | `Machine\nvx4-actor1` |
@@ -1181,7 +1181,7 @@ Rows removed after the live run:
 | `fo_understudy_table` | no | `Understudies\n$(liveupdate:understudyTable)` | `Understudies\n[{"understudy":"vx4-us1","targets":["vx4-1"],"configStatus":0,...}]` |
 | `fo_failover_timeout` | yes | `` `Failover t/o\n${$(liveupdate:failoverTimeout) === 0 ? 'OFF (0)' : $(liveupdate:failoverTimeout)}` `` | `Failover t/o\n10` |
 | `fo_host_taken_over` | yes | `` `Taken over\n${$(liveupdate:hostTakenOver) === true ? 'YES' : $(liveupdate:hostTakenOver) === false ? 'no' : $(liveupdate:hostTakenOver)}` `` | `Taken over\nno` |
-| `fo_d3net_ref` | yes | `` `d3Net uid\n${jsonparse($(liveupdate:d3NetManagerRef)).uid}` `` | `d3Net uid\n0x0123456789abcdef` |
+| `fo_d3net_ref` | yes | `` `d3Net uid\n${jsonparse($(liveupdate:d3NetManagerRef)) === null ? $(liveupdate:d3NetManagerRef) : jsonparse($(liveupdate:d3NetManagerRef)).uid}` `` | `d3Net uid\n0x0123456789abcdef` |
 | `fo_locked_to_director` | yes | `` `Locked to dir\n${$(liveupdate:lockedToDirector) === true ? 'locked' : $(liveupdate:lockedToDirector) === false ? 'free' : $(liveupdate:lockedToDirector)}` `` | `Locked to dir\nlocked` |
 | `fo_network_adaptors` | no | `NICs\n$(liveupdate:machineNetworkAdaptors)` | `NICs\n[...]` |
 
@@ -1226,16 +1226,16 @@ Rows removed after the live run:
 | preset id | textExpression | text | preview |
 |---|---|---|---|
 | `tpl_watch_string` | no | `Value\n$(liveupdate:tplString)` | `Value\nTrack 1` |
-| `tpl_watch_number` | yes | `` `Value\n${toFixed($(liveupdate:tplNumber), 2)}` `` | `Value\n12.34` |
-| `tpl_watch_json` | yes | `` `x\n${jsonpath(jsonparse($(liveupdate:tplJson)), '$.x')}` `` | `x\n0.5` |
-| `tpl_set_number` | yes | `` `Set 0\n${toFixed($(liveupdate:tplSetNumber), 2)}` `` | `Set 0\n12.34` |
+| `tpl_watch_number` | yes | `` `Value\n${isNumber($(liveupdate:tplNumber)) ? toFixed($(liveupdate:tplNumber), 2) : $(liveupdate:tplNumber)}` `` | `Value\n12.34` |
+| `tpl_watch_json` | yes | `` `x\n${jsonparse($(liveupdate:tplJson)) === null ? $(liveupdate:tplJson) : jsonpath(jsonparse($(liveupdate:tplJson)), '$.x')}` `` | `x\n0.5` |
+| `tpl_set_number` | yes | `` `Set 0\n${isNumber($(liveupdate:tplSetNumber)) ? toFixed($(liveupdate:tplSetNumber), 2) : $(liveupdate:tplSetNumber)}` `` | `Set 0\n12.34` |
 | `tpl_set_string` | no | `Set text\n$(liveupdate:tplSetString)` | `Set text\nold text` |
 | `tpl_set_true` | no | `Set ON\n$(liveupdate:tplBoolTrue)` | `Set ON\ntrue` |
 | `tpl_set_false` | no | `Set OFF\n$(liveupdate:tplBoolFalse)` | `Set OFF\nfalse` |
 | `tpl_toggle` | no | `Toggle\n$(liveupdate:tplToggle)` | `Toggle\ntrue` |
-| `tpl_set_json` | yes | `` `Set x=0\n${jsonpath(jsonparse($(liveupdate:tplSetJson)), '$.x')}` `` | `Set x=0\n0.5` |
-| `tpl_nudge_up` | yes | `` `+1\n${toFixed($(liveupdate:tplNudgeUp), 2)}` `` | `+1\n13.34` |
-| `tpl_nudge_down` | yes | `` `-1\n${toFixed($(liveupdate:tplNudgeDown), 2)}` `` | `-1\n11.34` |
+| `tpl_set_json` | yes | `` `Set x=0\n${jsonparse($(liveupdate:tplSetJson)) === null ? $(liveupdate:tplSetJson) : jsonpath(jsonparse($(liveupdate:tplSetJson)), '$.x')}` `` | `Set x=0\n0.5` |
+| `tpl_nudge_up` | yes | `` `+1\n${isNumber($(liveupdate:tplNudgeUp)) ? toFixed($(liveupdate:tplNudgeUp), 2) : $(liveupdate:tplNudgeUp)}` `` | `+1\n13.34` |
+| `tpl_nudge_down` | yes | `` `-1\n${isNumber($(liveupdate:tplNudgeDown)) ? toFixed($(liveupdate:tplNudgeDown), 2) : $(liveupdate:tplNudgeDown)}` `` | `-1\n11.34` |
 
 </details>
 
@@ -1262,7 +1262,7 @@ Rows removed after the live run:
 | preset id | textExpression | text | preview |
 |---|---|---|---|
 | `tr_tc_source_name` | no | `TC source\n$(liveupdate:tcSourceName)` | `TC source\nLTC 1` |
-| `tr_named_playhead_beats` | yes | `` `Playhead\n${toFixed($(liveupdate:namedPlayheadBeats), 2)}` `` | `Playhead\n12.50` |
+| `tr_named_playhead_beats` | yes | `` `Playhead\n${isNumber($(liveupdate:namedPlayheadBeats)) ? toFixed($(liveupdate:namedPlayheadBeats), 2) : $(liveupdate:namedPlayheadBeats)}` `` | `Playhead\n12.50` |
 
 </details>
 
@@ -1313,10 +1313,10 @@ Rows removed after the live run:
 | preset id | textExpression | text | preview |
 |---|---|---|---|
 | `stg_dmx_name` | no | `DMX\n$(liveupdate:dmxName)` | `DMX\nPixel tape` |
-| `stg_dmx_status` | yes | `` `DMX\n${$(liveupdate:dmxStatus) == 0 ? 'MUTE' : $(liveupdate:dmxStatus) == 1 ? 'Active' : $(liveupdate:dmxStatus)}` `` | `DMX\nActive` |
+| `stg_dmx_status` | yes | `` `DMX\n${isNumber($(liveupdate:dmxStatus)) ? ($(liveupdate:dmxStatus) == 0 ? 'MUTE' : $(liveupdate:dmxStatus) == 1 ? 'Active' : $(liveupdate:dmxStatus)) : $(liveupdate:dmxStatus)}` `` | `DMX\nActive` |
 | `stg_dmx_universe` | no | `Universe\n$(liveupdate:dmxUniverse)` | `Universe\n1` |
 | `stg_dmx_fixture` | no | `Fixture\n$(liveupdate:dmxFixtureType)` | `Fixture\nRGB` |
-| `stg_dmx_table_bad` | yes | `` `DMX table\n${$(liveupdate:dmxTableMalformed) ? 'MALFORMED' : 'OK'}` `` | `DMX table\nOK` |
+| `stg_dmx_table_bad` | yes | `` `DMX table\n${$(liveupdate:dmxTableMalformed) === true ? 'MALFORMED' : $(liveupdate:dmxTableMalformed) === false ? 'OK' : $(liveupdate:dmxTableMalformed)}` `` | `DMX table\nOK` |
 | `stg_stage_venue` | no | `Venue\n$(liveupdate:stageVenue)` | `Venue\nArena` |
 
 </details>
@@ -1353,7 +1353,7 @@ Rows removed after the live run:
 - `ev_dev_expression`: note: method call in property path; candidate exists (d3.pyi:16113, returns str) and is assumed non-mutating - experimental only, as drafted. Zero-argument method, no docstring, no doc example; semantics unknown. Method-call property paths are documented in liveupdate.txt. Assumed non-mutating (returns str); remove if the live test shows side effects.
 - `ev_dev_float_by_name`: minor: introduces custom variable d3_evname, not in the lead's variable list - documented in ev_setup/ev_x_setup and openQuestions; lead to accept the name. Comprehension result is a copied value, so it can never be a set target (verifier corrected writable to no). Raises IndexError if the name is absent (feedback shows an error). Introduces selection variable(s) selEvName.
 - `ev_dev_value_by_name`: minor: uses d3_evname (see ev_dev_float_by_name). Display-only. Plain text (no toFixed) because the value may be a string.
-- `ev_dev_all_dict`: corrected textTemplate. minor: JSON path is built with string '+' ('$.' + $(custom:d3_evname)); the style rule prefers template-literal concatenation, but a nested template literal inside the outer one is fragile, and jsonpath() also accepts the raw JSON string, so the jsonparse wrapper is optional. Works as drafted; the alternative below is equivalent. The variable holds a JSON string (dict serialised as a JSON object per liveupdate.txt); jsonparse + jsonpath pick one entry. Whole-device payload every 500 ms - keep the device small or raise the interval.
+- `ev_dev_all_dict`: corrected textTemplate. Fixed: the draft built the JSON path with string '+' ('$.' + $(custom:d3_evname)). Companion 5 resolves expressions with stringConcatenation off, so '+' is numeric, the path became NaN and the button always showed $NA; the path is now concat('$.', name). The variable holds a JSON string (dict serialised as a JSON object per liveupdate.txt); jsonpath picks one entry; the path is built with concat('$.', name) because '+' in a Companion expression is numeric ('$.' + name is NaN). Whole-device payload every 500 ms - keep the device small or raise the interval.
 - `ev_dev_all_list`:  Button text lists the names in index order; the full JSON is in $(liveupdate:evDevAllList) for the Companion variables page.
 - `ev_layer_vars`: note: candidate object path is module:<layer_name>; quoted form module:"..." follows the catalog convention but the help page documents underscores for module: references - already flagged in notes/openQuestions, keep as experimental. module:<layer> is documented as Designer expression syntax but track_layer's verifier rejects it as a LiveUpdate object path (contradiction for the lead to rule on). f.value is a ReflectionValue with undocumented JSON serialisation - may come back opaque/empty. Fails whenever the layer is not under the playhead. Layer names with spaces: help says underscores for module: references; the quoted form is used here per catalog convention - test both. Never call f.setFloat/f.setString from a property path (re-executes on every evaluation).
 
@@ -1364,18 +1364,18 @@ Rows removed after the live run:
 | preset id | textExpression | text | preview |
 |---|---|---|---|
 | `ev_dev_description` | no | `Device\n$(liveupdate:evDeviceDescription)` | `Device\nPluginVariable` |
-| `ev_dev_started` | yes | `` `Device\n${bool($(liveupdate:evDeviceStarted)) ? 'STARTED' : 'STOPPED'}` `` | `Device\nSTARTED` |
+| `ev_dev_started` | yes | `` `Device\n${$(liveupdate:evDeviceStarted) === true ? 'STARTED' : $(liveupdate:evDeviceStarted) === false ? 'STOPPED' : $(liveupdate:evDeviceStarted)}` `` | `Device\nSTARTED` |
 | `ev_dev_count` | no | `Var count\n$(liveupdate:evDeviceVarCount)` | `Var count\n4` |
-| `ev_dev_float` | yes | `` `Var ${$(liveupdate:selEvIndex)}\n${toFixed($(liveupdate:evDevFloat), 2)}` `` | `Var 0\n0.50` |
+| `ev_dev_float` | yes | `` `Var ${$(liveupdate:selEvIndex)}\n${isNumber($(liveupdate:evDevFloat)) ? toFixed($(liveupdate:evDevFloat), 2) : $(liveupdate:evDevFloat)}` `` | `Var 0\n0.50` |
 | `ev_dev_string` | no | `Var $(liveupdate:selEvIndex)\n$(liveupdate:evDevString)` | `Var 1\nHello` |
 | `ev_dev_name` | no | `Name\n$(liveupdate:evDevName)` | `Name\nspeed` |
-| `ev_dev_type` | yes | `` `Type\n${$(liveupdate:evDevType) == 0 ? 'Float' : ($(liveupdate:evDevType) == 1 ? 'String' : ($(liveupdate:evDevType) == 2 ? 'Function' : $(liveupdate:evDevType)))}` `` | `Type\nFloat` |
+| `ev_dev_type` | yes | `` `Type\n${isNumber($(liveupdate:evDevType)) ? ($(liveupdate:evDevType) == 0 ? 'Float' : ($(liveupdate:evDevType) == 1 ? 'String' : ($(liveupdate:evDevType) == 2 ? 'Function' : $(liveupdate:evDevType)))) : $(liveupdate:evDevType)}` `` | `Type\nFloat` |
 | `ev_dev_error` | yes | `` `Var ${$(liveupdate:selEvIndex)} err\n${$(liveupdate:evDevError) == '' ? 'OK' : $(liveupdate:evDevError)}` `` | `Var 0 err\nOK` |
 | `ev_dev_expression` | no | `Expr\n$(liveupdate:evDevExpression)` | `Expr\nspeed = 0.5` |
-| `ev_dev_float_by_name` | yes | `` `${$(liveupdate:selEvName)}\n${toFixed($(liveupdate:evFloatByName), 2)}` `` | `speed\n0.50` |
+| `ev_dev_float_by_name` | yes | `` `${$(liveupdate:selEvName)}\n${isNumber($(liveupdate:evFloatByName)) ? toFixed($(liveupdate:evFloatByName), 2) : $(liveupdate:evFloatByName)}` `` | `speed\n0.50` |
 | `ev_dev_value_by_name` | no | `$(liveupdate:selEvName)\n$(liveupdate:evValueByName)` | `speed\n0.5` |
-| `ev_dev_all_dict` | yes | `` `${$(liveupdate:selEvName)}\n${jsonpath($(liveupdate:evDevAllDict), '$.' + $(liveupdate:selEvName))}` `` | `speed\n0.5` |
-| `ev_dev_all_list` | yes | `` `Vars\n${jsonpath(jsonparse($(liveupdate:evDevAllList)), '$[*].name')}` `` | `Vars\nspeed,label,fx` |
+| `ev_dev_all_dict` | yes | `` `${$(liveupdate:selEvName)}\n${jsonparse($(liveupdate:evDevAllDict)) === null ? $(liveupdate:evDevAllDict) : jsonpath($(liveupdate:evDevAllDict), concat('$.', $(liveupdate:selEvName)))}` `` | `speed\n0.5` |
+| `ev_dev_all_list` | yes | `` `Vars\n${jsonparse($(liveupdate:evDevAllList)) === null ? $(liveupdate:evDevAllList) : jsonpath(jsonparse($(liveupdate:evDevAllList)), '$[*].name')}` `` | `Vars\nspeed,label,fx` |
 | `ev_layer_vars` | no | `Layer vars\n$(liveupdate:evLayerVars)` | `Layer vars\n[{"name":"speed",...}]` |
 
 </details>
@@ -2157,7 +2157,7 @@ See [PRESET_CATALOG_RULES.md §11](PRESET_CATALOG_RULES.md). Rows with `stateCol
 | medium | `ev_uid_string` | `getByUID($(liveupdate:selEvUid))` | `object.container.variables[$(liveupdate:selEvIndex)].defaultString` | Object path from ev-device-by-uid (doc-verified getByUID), property chain container -> variables -> defaultString verified in pyi (16056/16064). For Function-type variables the expression text may also live here (unconfi |
 | medium | `ev_dev_error` | `expressionvariablesdevice:"$(liveupdate:selEvDevice)"` | `object.container.variables[$(liveupdate:selEvIndex)].errorText` | errorText has no docstring; linking it to the help page's 'error state' message is an assumption. pyi setter exists but is never exposed. |
 | medium | `ev_dev_float_by_name` | `expressionvariablesdevice:"$(liveupdate:selEvDevice)"` | `[v.defaultFloat for v in object.container.variables if v.name == "$(liveupdate:selEvName)"][0]` | Comprehension result is a copied value, so it can never be a set target (verifier corrected writable to no). Raises IndexError if the name is absent (feedback shows an error). Introduces selection variable(s) selEvName. |
-| medium | `ev_dev_all_dict` | `expressionvariablesdevice:"$(liveupdate:selEvDevice)"` | `{v.name: (v.defaultFloat if v.type == 0 else v.defaultString) for v in object.container.variables}` | The variable holds a JSON string (dict serialised as a JSON object per liveupdate.txt); jsonparse + jsonpath pick one entry. Whole-device payload every 500 ms - keep the device small or raise the interval. |
+| medium | `ev_dev_all_dict` | `expressionvariablesdevice:"$(liveupdate:selEvDevice)"` | `{v.name: (v.defaultFloat if v.type == 0 else v.defaultString) for v in object.container.variables}` | The variable holds a JSON string (dict serialised as a JSON object per liveupdate.txt); jsonpath picks one entry; the path is built with concat('$.', name) because '+' in a Companion expression is numeric ('$.' + name is |
 | medium | `rs_enabled` | `subsystem:RenderStreamSystem` | `object.isEnabled` | No setter in pyi. Useful first preset to prove the subsystem object path resolves before adding workload rows. |
 | medium | `rs_active_latency` | `subsystem:RenderStreamSystem` | `object.activeLatency()` | Units (frames vs seconds) undocumented; compare with the experimental per-stream max latency on a live system before adding a threshold colour. |
 | medium | `rs_inst_dropping_input` | `subsystem:RenderStreamSystem` | `object.getWorkloadInstance($(liveupdate:selWorkload), $(liveupdate:selInstance)).isDroppingInputFrames` |  |

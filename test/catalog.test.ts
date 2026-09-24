@@ -12,6 +12,9 @@ import { loadDist, ROOT } from './harness'
 const dist = loadDist()
 const catalog = JSON.parse(readFileSync(path.join(ROOT, 'docs/research/phase1-catalog.json'), 'utf8'))
 const help = readFileSync(path.join(ROOT, 'companion/HELP.md'), 'utf8')
+/** Companion 5.0.4's expression semantics, shared with scripts/gen-presets.mjs */
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const expression = require(path.join(ROOT, 'scripts/companion-expression.cjs'))
 
 const fakeInstance = { config: { host: '10.0.0.1', port: 80, showExperimentalPresets: true } }
 const presets = dist.getPresetDefinitions(fakeInstance)
@@ -349,4 +352,125 @@ test('each Templates preset ships its own variable name', () => {
 	assert.equal(new Set(names).size, names.length, `template variable names collide: ${names.join(', ')}`)
 	for (const row of templates)
 		assert.ok(/^[A-Za-z0-9_-]{1,40}$/.test(row.variableName), `${row.presetId}: bad variable ${row.variableName}`)
+})
+
+const liveupdate = (values: Record<string, unknown>): Record<string, unknown> =>
+	Object.fromEntries(Object.entries(values).map(([name, value]) => [`liveupdate:${name}`, value]))
+
+test('the offline renderer reproduces what Companion 5.0.4 shows', () => {
+	const render = expression.renderExpression
+	const v = (value: unknown) => liveupdate({ v: value })
+	// a ternary tests truthiness and bool() is true for any other word: a marker took the true branch
+	assert.equal(render("`${$(liveupdate:v) ? 'YES' : 'no'}`", v('OFFLINE')), 'YES')
+	assert.equal(render("`${bool($(liveupdate:v)) ? 'RUNNING' : 'STOPPED'}`", v('PATH_ERROR')), 'RUNNING')
+	// formatting turns a marker into NaN, a count into the length of the word
+	assert.equal(render('`${toFixed($(liveupdate:v), 1)}`', v('OFFLINE')), 'NaN')
+	assert.equal(render('`${secondsToTimestamp($(liveupdate:v))}`', v('ERROR')), 'NaN:NaN:NaN')
+	assert.equal(render("`${jsonpath($(liveupdate:v), '$.length')}`", v('OFFLINE')), '7')
+	assert.equal(render('`${length(jsonparse($(liveupdate:v)))}`', v('ERROR')), '0')
+	// '+' is numeric: Companion resolves expressions with stringConcatenation off
+	assert.equal(render("`${'$.' + $(liveupdate:v)}`", v('speed')), 'NaN')
+	// an undefined slot renders $NA; normal values format as usual
+	assert.equal(render('`x ${$(liveupdate:v)}`', {}), 'x $NA')
+	assert.equal(render('`${secondsToTimestamp($(liveupdate:v))}`', v(3725)), '01:02:05')
+	assert.equal(render('`${isNumber($(liveupdate:v))} ${isNumber("")} ${isNumber("2.5")}`', v(true)), 'false false true')
+	assert.throws(() => render('`${notAFunction(1)}`'), /notAFunction/)
+})
+
+test('every expression text shows a readout marker or an undefined value as it is', () => {
+	// the generator reads the markers from the source; they must be the ones the module writes
+	const fromSource = expression.readMarkers(readFileSync(path.join(ROOT, 'src/variables.ts'), 'utf8'))
+	assert.deepEqual(fromSource, [...dist.SENTINELS])
+	const failures: string[] = []
+	for (const entry of dist.PRESET_CATALOG) {
+		if (!entry.textExpression) continue
+		const problems: string[] = expression.markerProblems(entry.text, dist.SENTINELS)
+		if (problems.length) failures.push(`${entry.id}: ${problems[0]}`)
+	}
+	assert.deepEqual(failures, [])
+
+	const text = (id: string) => dist.PRESET_CATALOG.find((e: any) => e.id === id).text
+	const render = expression.renderExpression
+	assert.equal(render(text('tr_playing'), liveupdate({ isPlaying: 'OFFLINE' })), 'Playing\\nOFFLINE')
+	assert.equal(
+		render(text('rs_inst_running'), liveupdate({ rsInstanceProcessRunning: 'PATH_ERROR' })),
+		'Process\\nPATH_ERROR',
+	)
+	assert.equal(render(text('monl_gpu_total'), liveupdate({ gpuTotalMs: 'UNSET' })), 'GPU total\\nUNSET')
+	assert.equal(render(text('trk_layer_names'), liveupdate({ trackLayerNames: 'ERROR' })), 'Layers\\nERROR')
+	assert.equal(render(text('fo_targets'), liveupdate({ understudyTargets: 'OFFLINE' })), 'Targets\\nOFFLINE')
+	assert.equal(render(text('rs_layer_framerate'), liveupdate({})), 'FPS Fraction\\n$NA')
+	assert.equal(render(text('stg_screen_offset'), liveupdate({ screenOffset: 'OFFLINE' })), 'Offset (m)\\nOFFLINE')
+})
+
+/** Normal values render exactly as the unguarded texts did (outputs recorded from those texts) */
+const NORMAL_RENDERINGS: [string, Record<string, unknown>, string][] = [
+	['monl_fps', { fps: 59.94269478380189 }, 'FPS\\n59.9'],
+	['monl_gpu_total', { gpuTotalMs: 3.5404800000000005 }, 'GPU total\\n3.5 ms'],
+	['monl_gpu_mem', { gpuMemMb: 1110 }, 'GPU mem MB\\n1110'],
+	['monl_proc_mem', { processMemMb: 2625.26171875 }, 'Proc mem\\n2625 MB'],
+	['monl_machine_cpu_time', { machineCpuPct: 55.99219799041748 }, 'CPU time\\n56%'],
+	['monr_fps', { selHost: 'RX1', remoteFps: 59.94089827432126 }, 'RX1 FPS\\n59.9'],
+	['monl_fps_minmax', { fpsMinMax: '{"Actual":{"latest":59.9,"min":58.2,"max":60.1}}' }, 'FPS min\\n58.2'],
+	['tr_playing', { isPlaying: true }, 'Playing\\nYES'],
+	['tr_playing', { isPlaying: false }, 'Playing\\nno'],
+	['tr_brightness', { brightness: 0.95 }, 'Brightness\\n95%'],
+	['tr_speed', { speed: 1 }, 'Speed\\n1.00x'],
+	['tr_trackposition', { trackposition: 3210.8333333333335 }, 'Position\\n00:53:30'],
+	['tr_section_index', { sectionIndex: 32 }, 'Section\\n33'],
+	['trk_section_start', { selSection: '2', sectionStartBeats: 64 }, 'Sec 2 start\\n64.0 b'],
+	['trk_layer_names', { trackLayerNames: '["Video 1","Audio"]' }, 'Layers\\n2'],
+	['trk_layer_keytimes', { layerKeyTimes: '[]' }, 'Key beats\\n0'],
+	[
+		'trk_layer_extents',
+		{ selLayer: 'Colour Layer', layerExtents: '{"start":0,"length":4500,"end":4500,"name":"Colour Layer"}' },
+		'Colour Layer\\n0.0-4500.0',
+	],
+	[
+		'trk_key_video',
+		{ keyVideo: '{"uid":"0x1","path":"objects/videofile/sample.mov"}' },
+		'Clip\\nobjects/videofile/sample.mov',
+	],
+	[
+		'stg_screen_offset',
+		{ screenOffset: '{"x":0,"y":3.619999885559082,"z":2.450000047683716}' },
+		'Offset (m)\\n0.00 3.62 2.45',
+	],
+	['stg_screen_render_layer', { screenRenderLayer: 1 }, 'Layer\\nOn stage'],
+	['stg_screen_render_layer', { screenRenderLayer: 9 }, 'Layer\\n9'],
+	['stg_screen_off_stage', { screenRenderLayer: 0 }, 'Off stage\\nOFF'],
+	['stg_screen_off_stage', { screenRenderLayer: 3 }, 'Off stage\\non'],
+	['stg_stage_dyn_blend', { stageDynBlend: 0 }, 'Dyn blend\\nOff'],
+	['ev_uid_type', { evType: 1 }, 'Type\nString'],
+	['rs_inst_running', { rsInstanceProcessRunning: true }, 'Process\\nRUNNING'],
+	['rs_inst_running', { rsInstanceProcessRunning: false }, 'Process\\nSTOPPED'],
+	['rs_licensing', { rsLicensingState: 2 }, 'RS License\\nFULL'],
+	[
+		'rs_workload_instances',
+		{ rsWorkloadInstances: '[{"machineName":"RX1"},{"machineName":"RX2"}]' },
+		'Nodes\\nRX1,RX2',
+	],
+	['rs_status_msgs', { rsReceiveStatusMessages: '["Receiving","Receiving"]' }, 'Stream Status\\nReceiving,Receiving'],
+	['rs_layer_health', { rsLayerClusterHealth: '{"status":0,"message":"Not started"}' }, 'Cluster\\nNot started'],
+	['rs_layer_framerate', { rsLayerFramerateFraction: 2 }, 'FPS Fraction\\n1/3'],
+	['fo_role', { machineRole: 3 }, 'Role\\nActor (3)'],
+	['fo_role', { machineRole: 9 }, 'Role\\n? (9)'],
+	['fo_targets', { understudyTargets: '[{"uid":"0x1"},{"uid":"0x2"}]' }, 'Targets\\n2'],
+	['fo_d3net_ref', { d3NetManagerRef: '{"uid":"0x0123456789abcdef"}' }, 'd3Net uid\\n0x0123456789abcdef'],
+	['fo_taken_over', { machineTakenOver: false }, 'Taken over\\nno'],
+	['fo_failover_timeout', { failoverTimeout: 0 }, 'Failover t/o\\nOFF (0)'],
+	['tpl_watch_json', { tplJson: '{"x":0.5,"y":1}' }, 'x\\n0.5'],
+]
+
+test('guarded expression texts render normal values exactly as before', () => {
+	for (const [id, values, expected] of NORMAL_RENDERINGS) {
+		const entry = dist.PRESET_CATALOG.find((e: any) => e.id === id)
+		assert.equal(expression.renderExpression(entry.text, liveupdate(values)), expected, id)
+	}
+	// the dictionary lookup builds its path with concat(): '$.' + name was NaN, so it always showed $NA
+	const dictionary = dist.PRESET_CATALOG.find((e: any) => e.id === 'ev_dev_all_dict')
+	assert.equal(
+		expression.renderExpression(dictionary.text, liveupdate({ selEvName: 'speed', evDevAllDict: '{"speed":0.5}' })),
+		'speed\n0.5',
+	)
 })
