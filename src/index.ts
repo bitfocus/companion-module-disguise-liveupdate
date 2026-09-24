@@ -768,7 +768,11 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	 */
 	private emptyUnfedReadout(variableName: string): void {
 		if (!this.isReadoutName(variableName) || this.isVariableFed(variableName)) return
-		if (this.getVariableValue(variableName) === '') return
+		// A name with no value is not defined yet (the subscribe hook of a feedback placed while connected
+		// runs before its callback): module-base gives it '' when the callback defines it. A write before
+		// then reaches Companion as a delete, which its value batcher can apply after that '': $NA for good.
+		const current = this.getVariableValue(variableName)
+		if (current === undefined || current === '') return
 		this.setVariableValues({ [variableName]: undefined })
 	}
 

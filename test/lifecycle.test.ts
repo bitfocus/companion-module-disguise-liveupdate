@@ -344,6 +344,39 @@ test('a shared subscription keeps the variable name of the feedback that created
 	await inst.destroy()
 })
 
+test('a second name placed on a shared property is not written before it is defined', async () => {
+	// The subscribe hook runs before the callback defines the name. A value written into a name that is
+	// not defined reaches Companion as a delete, and Companion batches values but applies the '' a
+	// definition seeds at once, so a delete sent first can land after the seed: $NA for good.
+	for (const waiting of [false, true]) {
+		const when = waiting ? 'while the request waits' : 'once it is confirmed'
+		const director = new FakeDirector({ refCount: true, valueFor: () => 240 })
+		const { inst, host } = await newInstance(director)
+		if (waiting) director.hold()
+		inst.updateFeedbacks({ a: liveUpdateFeedback('a', TRACK, 'object.lengthInBeats', 'lenA') })
+		await settle(20)
+		assert.equal(host.variables.get('lenA'), waiting ? 'PENDING' : 240, when)
+
+		const undefinedWrites: string[] = []
+		const setVariableValues = inst.setVariableValues.bind(inst)
+		inst.setVariableValues = (values: Record<string, unknown>) => {
+			for (const id of Object.keys(values)) if (!host.definedVariables.has(id)) undefinedWrites.push(id)
+			setVariableValues(values)
+		}
+		inst.updateFeedbacks({ b: liveUpdateFeedback('b', TRACK, 'object.lengthInBeats', 'lenB') })
+		await settle(20)
+		assert.deepEqual(undefinedWrites, [], `nothing is written into a name that is not defined, ${when}`)
+		assert.equal(host.variables.get('lenB'), '', `the second name is empty, ${when}`)
+
+		director.release()
+		await settle(50)
+		assert.equal(host.variables.get('lenA'), 240, when)
+		assert.equal(host.variables.get('lenB'), '', `the second name stays empty, ${when}`)
+		assert.deepEqual(undefinedWrites, [], when)
+		await inst.destroy()
+	}
+})
+
 test('a disconnect replaces every readout with OFFLINE and keeps the variable defined', async () => {
 	const director = new FakeDirector({ valueFor: () => 0.42 })
 	const { inst, host } = await newInstance(director, [
