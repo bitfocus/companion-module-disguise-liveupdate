@@ -982,6 +982,24 @@ test('saving the settings while the Director is away keeps OFFLINE on the readou
 	await inst.destroy()
 })
 
+test('a readout placed or renamed while the Director is away says OFFLINE, not empty', async () => {
+	const director = new FakeDirector({ valueFor: () => 0.42 })
+	const { inst, host } = await newInstance(director, [], { reconnectInterval: 100 })
+	director.sock!.drop()
+	// the Director is switched off: no connection attempt opens, and none reports a failure either
+	useDirector(new FakeDirector({ unreachable: true }))
+	await settle(20)
+	const readout = liveUpdateFeedback('b', 'transportManager:default', 'object.brightness', 'brightness')
+	inst.updateFeedbacks({ b: readout })
+	await settle(20)
+	assert.equal(host.variables.get('brightness'), 'OFFLINE', 'an empty text would read as a Director value')
+	inst.updateFeedbacks({ b: { ...readout, options: { ...readout.options, variableName: 'brightnessB' } } })
+	await settle(20)
+	assert.equal(host.variables.get('brightnessB'), 'OFFLINE')
+	assert.ok(!host.definedVariables.has('brightness'), 'the old name is gone with the rename')
+	await inst.destroy()
+})
+
 test('pointing the connection at another Director replaces the old values with OFFLINE', async () => {
 	const director = new FakeDirector({ valueFor: () => 0.42 })
 	const { inst, host } = await newInstance(director, [

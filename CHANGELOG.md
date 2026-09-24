@@ -153,9 +153,10 @@
 - When the connection drops, every readout owned by a LiveUpdate Variable feedback shows `OFFLINE`
   instead of the last value it had; 1.0.2 kept the stale value. Selections and the module's own
   variables are left alone. After a reconnect each readout says `PENDING` until its value arrives or
-  shows `UNSET`, and saving the settings while the Director is away keeps `OFFLINE`. On disconnect
-  and reconnect the module re-checks Connection OK, LiveUpdate Compare, LiveUpdate Sparkline, Command
-  armed and Last command failed, so no state colour outlives the connection.
+  shows `UNSET`, and saving the settings while the Director is away keeps `OFFLINE`; a feedback placed
+  or renamed while the Director is away shows it too. On disconnect and reconnect the module
+  re-checks Connection OK, LiveUpdate Compare, LiveUpdate Sparkline, Command armed and Last command
+  failed, so no state colour outlives the connection.
 - Clearing a selection or emptying a path makes the readout show `UNSET` instead of the previous
   object's value, unless another feedback still feeds the same variable name.
 - Shared subscriptions: identical object/property pairs share one Director subscription, requests are

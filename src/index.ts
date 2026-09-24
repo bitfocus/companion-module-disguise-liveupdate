@@ -436,6 +436,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			this.retainReadout(feedbackId, variableName)
 			// The variable exists from the moment the feedback is placed, so error indicators can reach it
 			this.updateVariableDefinitions()
+			this.markOffline(variableName)
 
 			// An empty path is refused by subscribeToVariable itself, which marks the variable UNSET
 			if (!existingSubscription && this.isConnectionReady() && variableName) {
@@ -459,6 +460,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			this.retainReadout(feedbackId, variableName)
 			this.unsubscribeFromVariable(feedbackId)
 			this.updateVariableDefinitions()
+			this.markOffline(variableName)
 
 			if (variableName) {
 				this.subscribeToVariable(feedbackId, variableName, objectPath, propertyPath, updateFrequency)
@@ -577,6 +579,17 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		if (!this.connectionReady || !this.isReadoutName(variableName) || this.isVariableFed(variableName)) return
 		this.setVariableValues({ [variableName]: UNSET_VALUE })
 		this.recordHistory(variableName, UNSET_VALUE)
+	}
+
+	/**
+	 * Show OFFLINE in a readout defined while the socket is not open: a feedback placed or renamed
+	 * while the Director is away, or before the first connection. It would otherwise stay empty, which
+	 * reads as a Director value, until a connection attempt fails; the open handler replaces it.
+	 */
+	private markOffline(variableName: string): void {
+		if (this.connectionReady || !this.isReadoutName(variableName)) return
+		this.setVariableValues({ [variableName]: OFFLINE_VALUE })
+		this.recordHistory(variableName, OFFLINE_VALUE)
 	}
 
 	/**

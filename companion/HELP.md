@@ -210,7 +210,7 @@ last two rows are not words the module writes:
 | On the button | Meaning |
 |---|---|
 | `PENDING` | requested from the Director, no value yet: the connection has just opened, the feedback was just placed or changed, or a request that failed or went unanswered is being made again |
-| `OFFLINE` | the connection to the Director is closed |
+| `OFFLINE` | the connection to the Director is closed, or not open yet |
 | `ERROR` | the Director refused the object path: wrong name or type prefix, or the object does not exist |
 | `PATH_ERROR` | the object exists but the property path failed |
 | `PATH_ERROR (unsubscribed)` | the property path failed three times in a row; the subscription was dropped and is retried with a back-off |
@@ -243,7 +243,8 @@ Every readout owned by a LiveUpdate Variable feedback is set to `OFFLINE` rather
 value it had, because a stale number on a monitoring button is worse than no number. Selections and
 the module's own variables keep their values, and `connection_status` goes to `Disconnected`. The
 variables stay defined, also when you save the connection settings while the Director is away, and
-the module reconnects on its own after the *Reconnect Interval*.
+the module reconnects on its own after the *Reconnect Interval*. A feedback placed or renamed while
+the Director is away shows `OFFLINE` as well.
 
 On disconnect and on reconnect the module re-checks *Connection OK*, *LiveUpdate Compare*,
 *LiveUpdate Sparkline*, *Command armed* and *Last command failed*, so no state colour outlives the
