@@ -1,6 +1,7 @@
 import { CompanionFeedbackDefinitions, combineRgb, splitRgb } from '@companion-module/base'
 import type { DisguiseInstance } from './index'
 import { drawSparkline } from './sparkline'
+import { isSentinel } from './variables'
 
 type DisguiseFeedbackDefinitions = CompanionFeedbackDefinitions
 
@@ -34,14 +35,23 @@ function isTruthy(value: unknown): boolean {
 	return true
 }
 
+/** The {errorType, message} object the Director sends in place of a value when a property path fails */
+export function isDirectorError(value: unknown): value is { errorType: unknown; message?: unknown } {
+	return value !== null && typeof value === 'object' && !Array.isArray(value) && 'errorType' in value
+}
+
 /**
  * Compare a LiveUpdate value against the text the user entered.
  * Numbers are compared numerically when both sides are numeric, booleans against true/false,
  * everything else as text (objects and arrays as their JSON form).
+ *
+ * A value whose state is unknown - none yet, null, a Director error or one of the module's own
+ * readout markers (OFFLINE, ERROR, PATH_ERROR, UNSET) - satisfies no comparison, including 'ne':
+ * the button falls back to its base colour and its text shows the marker.
  */
 export function compareValues(actual: unknown, operator: CompareOperator, expected: string): boolean {
+	if (actual === null || actual === undefined || isSentinel(actual) || isDirectorError(actual)) return false
 	if (operator === 'truthy') return isTruthy(actual)
-	if (actual === null || actual === undefined) return false
 
 	const actualNumber = toNumber(actual)
 	const expectedNumber = toNumber(expected)
@@ -158,8 +168,10 @@ export function getFeedbackDefinitions(instance: DisguiseInstance): DisguiseFeed
 				const propertyPath = String(feedback.options.propertyPath || '')
 				const updateFrequency = Number(feedback.options.updateFrequency)
 
-				if (!variableName || !objectPath || !propertyPath) {
-					instance.log('warn', 'Variable name, object path, and property path are required')
+				// An empty object or property path is refused by subscribeToVariable, which marks the
+				// variable UNSET; without a name there is no variable to mark.
+				if (!variableName) {
+					instance.log('warn', `LiveUpdate Variable feedback ${feedback.id} needs a Variable Name`)
 					return
 				}
 
@@ -307,10 +319,11 @@ export function getFeedbackDefinitions(instance: DisguiseInstance): DisguiseFeed
 			type: 'boolean',
 			name: 'Command armed',
 			description:
-				'True while a destructive command is waiting for its confirming press. Put it on the same button as the command so the operator can see the button is armed.',
+				'True while a destructive command on this button is waiting for its confirming press. Put it on the same button as the command so the operator can see the button is armed.',
 			defaultStyle: { bgcolor: combineRgb(200, 120, 0), color: combineRgb(0, 0, 0) },
 			options: [],
-			callback: () => instance.isRestArmed(),
+			// the arm belongs to the button that was pressed, so only that button lights up
+			callback: (feedback) => instance.isRestArmed(feedback.controlId),
 		},
 
 		restLastResult: {

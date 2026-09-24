@@ -174,7 +174,7 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			width: 6,
 			default: true,
 			tooltip:
-				'Asks the Director once per connection for its tracks, layers, surfaces, projectors and machines so the "Set selection" actions offer the real names. Each list is one short-lived subscription.',
+				'Asks the Director once per connection for its tracks, layers, surfaces, projectors and machines so the "Set selection" actions offer the real names. Each list is one short-lived subscription. This setting only controls the selection lists: the Designer version (the designer_version variable) is read on every connection either way.',
 		},
 		{
 			type: 'static-text',

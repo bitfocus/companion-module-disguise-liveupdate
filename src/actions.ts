@@ -6,7 +6,8 @@ import {
 } from '@companion-module/base'
 import type { DisguiseInstance } from './index'
 import type { LiveUpdateSubscription } from './index'
-import { isReservedVariableName, SELECTIONS } from './selections'
+import { SELECTIONS } from './selections'
+import { isReservedVariableName } from './variables'
 
 export interface DisguiseActionDefinitions extends CompanionActionDefinitions {
 	setToDisguiseString: CompanionActionDefinition
@@ -72,8 +73,12 @@ async function processNumberValue(
 	// A nudge such as "$(liveupdate:brightness)-0.05" must not fire before the first value has
 	// arrived: the host substitutes an empty string for a variable it has no value for, the
 	// expression collapses to "-0.05" and the Director would receive that as an absolute value.
-	for (const match of valueStr.matchAll(/\$\(liveupdate:([A-Za-z0-9_]+)\)/g)) {
-		const referenced = match[1]
+	// Companion rewrites the label of an imported preset to the connection's own label (a second
+	// connection is liveupdate_2), so the reference is matched against that label, read here so a
+	// rename is picked up.
+	for (const match of valueStr.matchAll(/\$\(([^:$)]+):([A-Za-z0-9_-]+)\)/g)) {
+		if (match[1] !== instance.label) continue
+		const referenced = match[2]
 		if (isReservedVariableName(referenced)) continue
 		const current = instance.getSubscriptionByVariableName(referenced)?.value
 		if (typeof current === 'number' && Number.isFinite(current)) continue
@@ -343,7 +348,7 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
 		checkPresets: {
 			name: 'Check presets against this Director',
 			description:
-				'Subscribes once to every preset property whose selections are filled in, records whether the Director accepted it and releases it again. The counts land in the selfcheck_* variables. It does not touch the subscriptions your buttons already hold.',
+				'Subscribes once to every preset property whose selections are filled in, records whether the Director accepted it and releases it again. The counts land in the selfcheck_* variables. It does not touch the subscriptions your buttons already hold: a property a button holds is read from that button.',
 			options: [],
 			callback: async () => {
 				await instance.runSelfCheck()

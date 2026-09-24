@@ -4,7 +4,7 @@ import { loadDist } from './harness'
 
 const dist = loadDist()
 
-test('isUnresolvedPath refuses placeholders, unresolved variables and empty slots', () => {
+test('isUnresolvedPath refuses placeholders and unresolved variables', () => {
 	const unresolved = [
 		'',
 		'   ',
@@ -14,15 +14,12 @@ test('isUnresolvedPath refuses placeholders, unresolved variables and empty slot
 		'track:"$NA"',
 		'getByUID($NA)',
 		'track:"$(custom:show_track)"',
-		'track:""',
-		"track:''",
-		'object.getWorkloadInstance(, )',
-		'object.getWorkloadInstance(1234, )',
-		'object.getWorkloadInstance(, 0)',
-		'object.container.variables[].defaultFloat',
-		'subsystem:MonitoringManager.findRemoteMonitor(":d3", "fps")',
+		'object.getWorkloadInstance($NA, $NA).health()',
 	]
-	for (const path of unresolved) assert.equal(dist.isUnresolvedPath(path), true, `should be unresolved: ${path}`)
+	for (const path of unresolved) {
+		assert.equal(dist.isUnresolvedPath(path), true, `should be unresolved: ${path}`)
+		assert.equal(dist.isUnresolvedObjectPath(path), true, `should be an unresolved object path: ${path}`)
+	}
 
 	const resolved = [
 		'track:"Track 1"',
@@ -151,7 +148,7 @@ test('getPresetInterval uses the connection settings with defaults and clamping'
 	assert.equal(dist.getPresetInterval({ host: 'x', port: 80, presetIntervalState: 'abc' as any }, 'state'), 500)
 })
 
-test('a Python empty-string literal is a resolved path, an empty quoted name is not', () => {
+test('a property path is free Python: empty strings, empty lists and 1-tuples are sent', () => {
 	const resolved = [
 		// the else branch of the catalog's None-guarded conditionals
 		'(object.timecode.current.__str__() if object.timecode is not None else "")',
@@ -160,11 +157,79 @@ test('a Python empty-string literal is a resolved path, an empty quoted name is 
 		'(object.d3NetManager.getDirectorUnderstudy().name if object.d3NetManager.getDirectorUnderstudy() is not None else "")',
 		'[{"runningAs": (m.runningAs.name if m.runningAs is not None else "")} for m in object.machines]',
 		'"; ".join([s.name + ": " + s.error for s in object.statuses if s.error])',
+		// expressions 1.0.2 sent as they were
+		'object.name.replace(" ", "")',
+		'object.name.replace("_", "")',
+		'getattr(object, "description", "")',
+		'object.get("k", "")',
+		'[l.name for l in object.layers] or []',
+		'len(object.layers or [])',
+		'object.f((1,))',
+		'{"a": ""}',
+		'str("".join(x))',
+		'x if object.description not in ("", None) else "untitled"',
+		'object.name + ":d3"',
+		// a broken slot is the Director's to refuse, with a visible PATH_ERROR
+		'object.getWorkloadInstance(, )',
+		'object.container.variables[].defaultFloat',
 	]
 	for (const path of resolved) assert.equal(dist.isUnresolvedPath(path), false, `resolved: ${path}`)
+})
 
-	const unresolved = ['track:""', "track:''", 'track:"A".findLayerByName("")', 'object.f(1, "")', 'object.g([""])']
-	for (const path of unresolved) assert.equal(dist.isUnresolvedPath(path), true, `unresolved: ${path}`)
+test('an object path is refused only for a bare empty name or a remote node without a host', () => {
+	const unresolved = [
+		'track:""',
+		"track:''",
+		' screen2 : "" ',
+		'subsystem:MonitoringManager.findRemoteMonitor(":d3", "fps")',
+	]
+	for (const path of unresolved) assert.equal(dist.isUnresolvedObjectPath(path), true, `unresolved: ${path}`)
+
+	const resolved = [
+		'track:"Track 1"',
+		'track:"A".findLayerByName("")',
+		'track:"".layers',
+		'subsystem:MonitoringManager.findRemoteMonitor("ACTOR01:d3", "fps")',
+		'subsystem:MonitoringManager',
+	]
+	for (const path of resolved) assert.equal(dist.isUnresolvedObjectPath(path), false, `resolved: ${path}`)
+})
+
+test('designerMajor reads the major version of a Designer build', () => {
+	assert.equal(dist.designerMajor('r34.0.3'), '34')
+	assert.equal(dist.designerMajor('34.0.3.258249'), '34')
+	assert.equal(dist.designerMajor('r35.0.1'), '35')
+	assert.equal(dist.designerMajor('r33'), '33')
+	assert.equal(dist.designerMajor('d3 r34.0.3'), '34')
+	assert.equal(dist.designerMajor('Designer'), undefined)
+	assert.equal(dist.designerMajor(''), undefined)
+})
+
+test('compareValues satisfies no comparison for a value whose state is unknown', () => {
+	const c = dist.compareValues
+	const unknown = [undefined, null, { errorType: 'propertyPathError', message: 'x' }, ...dist.SENTINELS]
+	const rules: [string, string][] = [
+		['eq', ''],
+		['ne', '[]'],
+		['ne', '1'],
+		['ne', ''],
+		['lt', '5'],
+		['ge', '0'],
+		['truthy', ''],
+		['contains', 'E'],
+	]
+	for (const value of unknown) {
+		for (const [operator, expected] of rules) {
+			assert.equal(c(value, operator, expected), false, `${JSON.stringify(value)} ${operator} ${expected}`)
+		}
+	}
+	assert.deepEqual(
+		[...dist.SENTINELS].sort(),
+		['ERROR', 'OFFLINE', 'PATH_ERROR', 'PATH_ERROR (unsubscribed)', 'UNSET'],
+		'the markers a button can show besides a value',
+	)
+	// a real value that merely contains a marker's text is still compared
+	assert.equal(c('ERROR 42', 'contains', 'ERROR'), true)
 })
 
 test('every catalog property path survives the guard once its selections are filled in', () => {
@@ -176,7 +241,7 @@ test('every catalog property path survives the guard once its selections are fil
 		if (!entry.objectPath) continue
 		if (entry.objectPath.includes('<') || entry.propertyPath.includes('<')) continue // templates
 		assert.equal(
-			dist.isUnresolvedPath(substitute(entry.objectPath)),
+			dist.isUnresolvedObjectPath(substitute(entry.objectPath)),
 			false,
 			`${entry.id}: object path refused by the guard: ${substitute(entry.objectPath)}`,
 		)

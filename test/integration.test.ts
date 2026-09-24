@@ -72,11 +72,16 @@ test('subscribes over ws, receives values, sets and toggles properties', async (
 	assert.equal(host.variables.get('engaged'), true)
 	assert.equal(host.variables.get('screenOffset'), '{"x":0,"y":3,"z":0}')
 	assert.equal(director.subscriptions.length, 4)
-	// the module batches the properties of one object into a single frame
+	// the module batches the properties of one object into a single frame; the Designer version read
+	// every connection makes is its own frame (this mock does not know the pair and refuses it)
 	assert.equal(
-		director.received.filter((m) => m.subscribe).reduce((total, m) => total + m.subscribe.properties.length, 0),
+		director.received
+			.filter((m) => m.subscribe && m.subscribe.properties[0] !== 'ReleaseVersion.versionString()')
+			.reduce((total, m) => total + m.subscribe.properties.length, 0),
 		4,
 	)
+	assert.equal(host.variables.get('designer_version'), undefined, 'a refused version read publishes nothing')
+	assert.ok(!host.logs.some((l: { message: string }) => l.message.includes('Attributing the error')))
 
 	// value pushed by the Director
 	director.publish(TRACK, 'object.lengthInBeats', 300)

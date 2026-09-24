@@ -226,11 +226,6 @@ export function isSelectionId(id: string): boolean {
 	return SELECTION_BY_ID.has(id)
 }
 
-/** Variable ids the module owns; a LiveUpdate Variable feedback must not reuse them */
-export function isReservedVariableName(name: string): boolean {
-	return name === 'connection_status' || SELECTION_BY_ID.has(name)
-}
-
 const KIND_RULES: Readonly<Record<SelectionKind, { pattern: RegExp; hint: string }>> = {
 	// Names are placed inside double quotes of a Designer expression; quotes, backslashes and
 	// line breaks would end or corrupt the expression (the escape rules are undocumented).

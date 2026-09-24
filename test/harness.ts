@@ -26,6 +26,10 @@ export interface DirectorSubscription {
 	updateFrequencyMs?: number
 }
 
+/** The pair the module reads the Designer version from on every connection */
+export const VERSION_OBJECT = 'subsystem:MonitoringManager'
+export const VERSION_PROPERTY = 'ReleaseVersion.versionString()'
+
 export interface FakeDirectorOptions {
 	/** Reference-count identical subscriptions like the real Director */
 	refCount?: boolean
@@ -37,6 +41,13 @@ export interface FakeDirectorOptions {
 	valueFor?: (objectPath: string, propertyPath: string) => unknown
 	/** Never answer (simulates a Director that ignores requests) */
 	silent?: boolean
+	/**
+	 * The Designer version the Director answers for the version pair, whatever errorFor and valueFor
+	 * say (default 'r34.0.3'). null leaves the pair to errorFor and valueFor like any other.
+	 */
+	version?: string | null
+	/** The socket never opens (a Director that is switched off) */
+	unreachable?: boolean
 }
 
 /**
@@ -47,7 +58,11 @@ export class FakeDirector {
 	received: any[] = []
 	nextId = 1
 	sock: FakeWebSocket | null = null
-	private opts: FakeDirectorOptions
+	/** Ids handed out for the version pair, so count() can leave the connect-time version read out */
+	private versionIds = new Set<number>()
+	/** Replies held back by hold(), in order */
+	private held: { sock: FakeWebSocket | null; msg: unknown }[] | null = null
+	opts: FakeDirectorOptions
 
 	constructor(opts: FakeDirectorOptions = {}) {
 		this.opts = opts
@@ -55,6 +70,30 @@ export class FakeDirector {
 
 	attach(sock: FakeWebSocket): void {
 		this.sock = sock
+	}
+
+	/** The client went away: like the real Director, drop everything it subscribed to */
+	detach(sock: FakeWebSocket): void {
+		if (this.sock === sock) this.subs = []
+	}
+
+	/** Keep every reply back until release(), so a test can act while requests are in flight */
+	hold(): void {
+		this.held ??= []
+	}
+
+	/** Deliver the held replies in the order they were produced, and answer at once again */
+	release(): void {
+		const held = this.held ?? []
+		this.held = null
+		for (const { sock, msg } of held) setImmediate(() => sock?.emit('message', Buffer.from(JSON.stringify(msg))))
+	}
+
+	/** Director reference count of a pair (0 when the Director does not hold it) */
+	refs(objectPath: string, propertyPath: string): number {
+		return this.subs
+			.filter((s) => s.objectPath === objectPath && s.propertyPath === propertyPath)
+			.reduce((total, s) => total + s.ref, 0)
 	}
 
 	/** Report a subscription list the module did not ask for (an out-of-band Director state) */
@@ -69,6 +108,10 @@ export class FakeDirector {
 
 	reply(msg: unknown): void {
 		const sock = this.sock
+		if (this.held) {
+			this.held.push({ sock, msg })
+			return
+		}
 		setImmediate(() => sock?.emit('message', Buffer.from(JSON.stringify(msg))))
 	}
 
@@ -87,7 +130,9 @@ export class FakeDirector {
 			// the Director answers a frame with several properties with one subscription each
 			for (const property of m.subscribe.properties as string[]) {
 				const propertyPath = String(property)
-				const error = this.opts.errorFor?.(objectPath, propertyPath)
+				const isVersion =
+					objectPath === VERSION_OBJECT && propertyPath === VERSION_PROPERTY && this.opts.version !== null
+				const error = isVersion ? null : this.opts.errorFor?.(objectPath, propertyPath)
 				if (error) {
 					this.reply({ error })
 					continue
@@ -107,6 +152,11 @@ export class FakeDirector {
 					this.subs.push(sub)
 				}
 				this.reply(this.subscriptionsMessage())
+				if (isVersion) {
+					this.versionIds.add(sub.id)
+					this.pushValue(sub.id, this.opts.version ?? 'r34.0.3')
+					continue
+				}
 				const errorValue = this.opts.errorValueFor?.(objectPath, propertyPath)
 				if (errorValue !== undefined) this.pushValue(sub.id, errorValue)
 				else {
@@ -141,13 +191,31 @@ export class FakeDirector {
 		this.pushValue(sub.id, value)
 	}
 
-	/** Properties asked for across every subscribe frame: the module may batch them per object */
-	subscribedProperties(): number {
-		return this.received.filter((m) => m.subscribe).reduce((total, m) => total + m.subscribe.properties.length, 0)
+	/**
+	 * The connect-time Designer version read: its single-property subscribe frame and the unsubscribe
+	 * that releases it. Every connection makes it, so count() leaves it out; `received` has it.
+	 */
+	private isVersionRead(m: any): boolean {
+		if (m.subscribe)
+			return (
+				m.subscribe.object === VERSION_OBJECT &&
+				m.subscribe.properties.length === 1 &&
+				m.subscribe.properties[0] === VERSION_PROPERTY
+			)
+		if (m.unsubscribe) return this.versionIds.has(m.unsubscribe.id)
+		return false
 	}
 
+	/** Properties asked for across every subscribe frame: the module may batch them per object */
+	subscribedProperties(): number {
+		return this.received
+			.filter((m) => m.subscribe && !this.isVersionRead(m))
+			.reduce((total, m) => total + m.subscribe.properties.length, 0)
+	}
+
+	/** Frames of one kind the module sent, leaving out the connect-time version read */
 	count(kind: 'subscribe' | 'unsubscribe' | 'set'): number {
-		return this.received.filter((m) => m[kind]).length
+		return this.received.filter((m) => m[kind] && !this.isVersionRead(m)).length
 	}
 }
 
@@ -160,29 +228,34 @@ export class FakeWebSocket extends EventEmitter {
 	static CLOSED = 3
 	readyState = FakeWebSocket.CONNECTING
 	url: string
+	private director: FakeDirector
 	constructor(url: string) {
 		super()
 		this.url = url
 		if (!currentDirector) throw new Error('no FakeDirector installed')
-		currentDirector.attach(this)
+		this.director = currentDirector
+		this.director.attach(this)
+		if (this.director.opts.unreachable) return
 		setImmediate(() => {
 			this.readyState = FakeWebSocket.OPEN
 			this.emit('open')
 		})
 	}
 	send(data: string): void {
-		currentDirector?.handle(data)
+		this.director.handle(data)
 	}
 	terminate(): void {
 		this.close()
 	}
 	close(): void {
 		this.readyState = FakeWebSocket.CLOSED
+		this.director.detach(this)
 		setImmediate(() => this.emit('close', 1000, Buffer.from('')))
 	}
 	/** Simulate the Director dropping the connection */
 	drop(): void {
 		this.readyState = FakeWebSocket.CLOSED
+		this.director.detach(this)
 		this.emit('close', 1006, Buffer.from('dropped'))
 	}
 }
@@ -197,6 +270,8 @@ export interface HostRecord {
 	actionDefinitions: Record<string, any>
 	feedbackDefinitions: Record<string, any>
 	variableDefinitionCalls: number
+	/** The latest value each feedback instance reported to the host, by instance id: what the button shows */
+	feedbackValues: Map<string, unknown>
 }
 
 /**
@@ -214,6 +289,7 @@ export class StubInstanceBase {
 		actionDefinitions: {},
 		feedbackDefinitions: {},
 		variableDefinitionCalls: 0,
+		feedbackValues: new Map(),
 	}
 	fm: any
 	label = 'liveupdate'
@@ -221,7 +297,10 @@ export class StubInstanceBase {
 	constructor() {
 		this.fm = new FeedbackManager(
 			async ({ text }: { text: string }) => ({ text }),
-			() => {},
+			// module-base sends the values debounced (5 ms, at most 25 ms); settle() waits for them
+			(msg: { values: { id: string; value: unknown }[] }) => {
+				for (const entry of msg.values) this.host.feedbackValues.set(entry.id, entry.value)
+			},
 			() => {},
 			(level: string, message: string) => this.log(level, message),
 		)
@@ -334,6 +413,9 @@ export function installHarness(options: HarnessOptions = {}): void {
 export function loadDist(): {
 	DisguiseInstance: any
 	isUnresolvedPath: (path: string) => boolean
+	isUnresolvedObjectPath: (path: string) => boolean
+	designerMajor: (version: string) => string | undefined
+	SENTINELS: readonly string[]
 	compareValues: (actual: unknown, operator: string, expected: string) => boolean
 	readBooleanValue: (value: unknown) => boolean | undefined
 	validateSelection: (id: string, value: string) => string | undefined
@@ -364,6 +446,9 @@ export function loadDist(): {
 	return {
 		DisguiseInstance: index.DisguiseInstance,
 		isUnresolvedPath: index.isUnresolvedPath,
+		isUnresolvedObjectPath: index.isUnresolvedObjectPath,
+		designerMajor: index.designerMajor,
+		SENTINELS: index.SENTINELS,
 		compareValues: feedbacks.compareValues,
 		readBooleanValue: actions.readBooleanValue,
 		validateSelection: selections.validateSelection,
@@ -384,15 +469,50 @@ export function loadDist(): {
 
 export const tick = async (ms = 0): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
 
-/** Let queued socket replies and feedback checks run */
+/** One turn of the event loop: the fake socket, the module and the FeedbackManager queue their work this way */
+export const hop = async (): Promise<void> => new Promise((resolve) => setImmediate(resolve))
+
+/**
+ * Let queued socket replies and feedback checks run, then the host's debounced feedback values.
+ * It waits for event-loop turns rather than timer rounds, so it takes the same few tens of
+ * milliseconds on every machine whatever its timer resolution; a test that has to see a longer
+ * timer fire (write coalescing, back-off, timeouts) waits for it with tick().
+ */
 export async function settle(rounds = 30): Promise<void> {
-	for (let i = 0; i < rounds; i++) await tick(0)
+	for (let i = 0; i < rounds; i++) await hop()
+	// module-base sends feedback values debounced: 5 ms after the last check, at most 25 ms
+	await tick(30)
+	for (let i = 0; i < rounds; i++) await hop()
+}
+
+/** Wait until the predicate holds (checked every event-loop turn and every few ms), at most `ms` */
+export async function until(predicate: () => boolean, ms = 2000): Promise<boolean> {
+	const deadline = Date.now() + ms
+	while (!predicate()) {
+		if (Date.now() > deadline) return false
+		await hop()
+		await tick(1)
+	}
+	return true
 }
 
 export interface Instance {
 	inst: any
 	host: HostRecord
 	stub: StubInstanceBase
+}
+
+/** Every instance newInstance created and nobody destroyed yet */
+const liveInstances = new Set<any>()
+
+/**
+ * Destroy every instance a test left behind. A test that fails before its own destroy() would
+ * otherwise keep its reconnect and back-off timers running: they hang the test file and attach a
+ * reconnecting socket to the next test's Director. Register it with afterEach.
+ */
+export async function destroyInstances(): Promise<void> {
+	for (const inst of [...liveInstances]) await inst.destroy()
+	liveInstances.clear()
 }
 
 /**
@@ -406,8 +526,10 @@ export async function newInstance(
 	const { DisguiseInstance } = loadDist()
 	currentDirector = director
 	const inst = new DisguiseInstance()
+	liveInstances.add(inst)
 	const fullConfig = {
-		host: '10.0.0.1',
+		// the fake socket ignores it; loopback keeps a command channel test from reaching the network
+		host: '127.0.0.1',
 		port: 80,
 		reconnectInterval: 5000,
 		pendingSubscriptionTimeout: 30000,
