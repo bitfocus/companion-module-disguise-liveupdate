@@ -324,9 +324,11 @@ Experimental presets use five more selections (`selTransport`, `selDmxScreen`, `
 
 Names are used verbatim (case-sensitive) inside quotes and must not contain quotes, backslashes or
 line breaks; hostnames allow letters, digits, `.`, `_` and `-`; indices are plain decimal integers
-(no leading zero); UIDs and workload ids are decimal or `0x` hex integers. Invalid values are
-rejected with a log message. An empty selection is published as `$NA`; the presets that depend on it
-do not subscribe, and their readouts show `UNSET` until it is filled in.
+(no leading zero); UIDs and workload ids are decimal or `0x` hex integers. A *Set selection* action
+with an invalid value is refused and the selection keeps its previous value; an invalid value in the
+connection settings is ignored and the selection counts as empty. Both write a log message. An empty
+selection is published as `$NA`; the presets that depend on it do not subscribe, and their readouts
+show `UNSET` until it is filled in.
 
 ## Quick start
 
@@ -754,7 +756,7 @@ _310 presets ship by default; 25 experimental presets appear when "Show experime
 
 ### 11 Templates
 
-> Templates are generic buttons with literal placeholders; they do nothing until edited (the module does not subscribe while a path still contains a placeholder such as &lt;OBJECT_PATH&gt;; the readout shows UNSET). After dragging one: (1) open the LiveUpdate Variable feedback and replace &lt;OBJECT_PATH&gt; with a Designer object expression (e.g. track:"Track 1", screen2:"LED Wall", transportManager:default, subsystem:MonitoringManager.findLocalMonitor("fps")) and object.&lt;PROPERTY_PATH&gt; with the Python member path (e.g. object.description, object.lengthInBeats, object.player.tRender); (2) each template carries its own variable name (tplString, tplSetNumber, ...); rename it to something meaningful for that object/property pair (letters, digits, '_' and '-') and change every $(liveupdate:...) in the button text and in the actions to the new name. One variable name must watch exactly one object/property pair: the module refuses a second subscription for a name that is already bound elsewhere and says so in the log, because the Set / Toggle actions find their subscription by variable name; two buttons watching the same path must use the same variable name, and their shared subscription runs at the fastest Update Frequency any of them asks for; (3) keep Update Frequency above 0 (prefilled from the State interval setting, 500 ms). Set / Nudge / Toggle actions do not take paths: they write to the subscription that owns the variable name, which is why each control template carries the matching feedback. Number values are JavaScript expressions evaluated after variable substitution ($(liveupdate:myValue)+1 works; the result must be a finite number); Boolean is a checkbox; JSON is a partial object merged into the property ({"x": 0.0} changes only x of a vector); String is sent verbatim. Object, array and resource values ({uid, path, type}) arrive as JSON strings, so use jsonparse / jsonpath in expressions (see Watch: JSON field x). A readout shows ERROR or PATH_ERROR when the Director rejects the path; fix the path, the module resubscribes on its own. The button texts show such a marker (and OFFLINE or UNSET) as it is rather than formatting it: keep the isNumber(...) / jsonparse(...) === null guard when you edit a text.
+> Templates are generic buttons with literal placeholders; they do nothing until edited (the module does not subscribe while a path still contains a placeholder such as &lt;OBJECT_PATH&gt;; the readout shows UNSET). After dragging one: (1) open the LiveUpdate Variable feedback and replace &lt;OBJECT_PATH&gt; with a Designer object expression (e.g. track:"Track 1", screen2:"LED Wall", transportManager:default, subsystem:MonitoringManager.findLocalMonitor("fps")) and object.&lt;PROPERTY_PATH&gt; with the Python member path (e.g. object.description, object.lengthInBeats, object.player.tRender); (2) each template carries its own variable name (tplString, tplSetNumber, ...); rename it to something meaningful for that object/property pair (letters, digits, '_', '-' and '.') and change every $(liveupdate:...) in the button text and in the actions to the new name. One variable name must watch exactly one object/property pair: the module refuses a second subscription for a name that is already bound elsewhere and says so in the log, because the Set / Toggle actions find their subscription by variable name; two buttons watching the same path must use the same variable name, and their shared subscription runs at the fastest Update Frequency any of them asks for; (3) keep Update Frequency above 0 (prefilled from the State interval setting, 500 ms). Set / Nudge / Toggle actions do not take paths: they write to the subscription that owns the variable name, which is why each control template carries the matching feedback. Number values are JavaScript expressions evaluated after variable substitution ($(liveupdate:myValue)+1 works; the result must be a finite number); Boolean is a checkbox; JSON is a partial object merged into the property ({"x": 0.0} changes only x of a vector); String is sent verbatim. Object, array and resource values ({uid, path, type}) arrive as JSON strings, so use jsonparse / jsonpath in expressions (see Watch: JSON field x). A readout shows ERROR or PATH_ERROR when the Director rejects the path; fix the path, the module resubscribes on its own. The button texts show such a marker (and OFFLINE or UNSET) as it is rather than formatting it: keep the isNumber(...) / jsonparse(...) === null guard when you edit a text.
 
 | Preset | What it does | Object path | Property path | Variable | Kind |
 |---|---|---|---|---|---|
@@ -809,9 +811,11 @@ _310 presets ship by default; 25 experimental presets appear when "Show experime
 
 Creates the subscription and the module variable.
 
-- **Variable Name**: name of the variable: letters, digits, `_` and `-` (Companion's own rule). A
-  leading digit is allowed and there is no length limit. The module's own variables (see *Variables*)
-  are reserved: a feedback that uses one of those names is never subscribed, and the log says so once.
+- **Variable Name**: name of the variable: letters, digits, `_`, `-` and `.`, the characters Companion
+  itself accepts in a variable id. A leading digit is allowed and there is no length limit. A name
+  with any other character (a space, for example) is never subscribed, and the log says so once. The
+  module's own variables (see *Variables*) are reserved: a feedback that uses one of those names is
+  never subscribed either, and the log says so once.
 - **Object Path**: Designer expression, e.g. `track:"Track 1"`, `screen2:"Surface 1"`, `Machine:"Director"`, `getByUID(0x...)`, `subsystem:MonitoringManager.findLocalMonitor("fps")`. Companion variables are expanded before the subscription is made.
 - **Property Path**: Python expression on `object`, e.g. `object.lengthInBeats`, `object.player.tRender`, `object.seriesAverage("Actual", 1)`
 - **Update Frequency (ms)**: minimum time between updates (`0` = as fast as possible, the Director's
@@ -969,8 +973,10 @@ Look at the button first: a readout shows what went wrong (see *What a readout s
   first good value or by editing the feedback).
 - Empty: no value yet. The connection is coming up, or the Director has not sent one; a request that
   stays unanswered for the *Pending Subscription Timeout* is dropped and retried with the back-off.
-- Log says "Selection rejected" or "Selection ignored": the value contains characters that are not
-  allowed for that selection (see *Selections*); the selection stays unset.
+- Log says "Selection rejected": the value a *Set selection* action sent contains characters that are
+  not allowed for that selection (see *Selections*), and the selection keeps its previous value.
+  "Selection ignored": a value in the connection settings is invalid, and the selection counts as
+  empty (`$NA`) until it is corrected.
 - Log says "Variable name '...' is reserved for the module" or "LiveUpdate Variable feedback ... needs
   a Variable Name": give the feedback a name of its own.
 - Log says "Variable '...' is already watching ...": one variable name watches one object/property

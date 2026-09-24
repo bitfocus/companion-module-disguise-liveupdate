@@ -182,7 +182,8 @@ Lifecycle (`feedbacks.ts` + `index.ts`):
 3. **`variableName` is used unsanitised** as a Companion `variableId`. Companion's documented rule is
    letters, digits, underscore and hyphen only
    (`companion.free/for-developers/module-development/connection-basics/variables`). Nothing in the
-   module enforces it.
+   module enforces it. The Companion 5.0.4 host defines a variable only when its id matches
+   `/^([a-zA-Z0-9-_.]+)$/`, so it accepts `.` as well, and lists any other id as invalid in its log.
 4. On `close` the module clears all maps; the Director drops subscriptions with the socket, so there
    is no leak across reconnects. On reconnect `subscribeFeedbacks()` re-runs `subscribe` for every
    feedback.

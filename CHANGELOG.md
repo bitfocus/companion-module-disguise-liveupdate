@@ -54,9 +54,10 @@
     still waiting. `rest_last_command`, `rest_last_status` (`OK` / `FAILED` / `UNSUPPORTED`) and
     `rest_last_message` report the last command sent, and *Last command failed* colours a button. A
     press refused before sending is only logged.
-  - The jumps have a *Play mode after the jump* option (default *Leave unchanged*, sent as `NotSet`),
-    next and previous section and track included; those four send the body the OpenAPI document
-    records for them, and a button saved without the option leaves the play state as it is.
+  - *Go to section*, *note*, *tag*, *track* and *timecode* and next / previous section and track have
+    a *Play mode after the jump* option (default *Leave unchanged*, sent as `NotSet`); *Go to time*
+    does not. The four next / previous actions send the body the OpenAPI document records for them,
+    and a button saved without the option leaves the play state as it is.
   - Object references are a name or, with 6 or more digits, a uid; `name:` or `uid:` chooses
     explicitly (`name:20250914` for a date-stamped track).
   - A free-text parameter that is empty, contains `$NA` or an unparsed `$(...)` refuses the command
@@ -137,9 +138,13 @@
 
 ### Changed
 
-- Compatibility with 1.0.2 is kept: a LiveUpdate Variable name may use letters, digits, `_` and `-`
-  and start with a digit, and property paths are sent as written, so valid Python such as `""`, `[]`
-  or `(1,)` in a property path reaches the Director as before. The module's own variable names
+- A LiveUpdate Variable name is checked against the characters Companion itself accepts in a variable
+  id: letters, digits, `_`, `-` and `.`, a leading digit included, no length limit, so every name
+  Companion could define in 1.0.2 keeps working. A name with any other character (a space, for
+  example), which Companion refuses to define and reports as an invalid id in its log, is no longer
+  subscribed; the module logs that once. Rename such a feedback and every `$(liveupdate:...)`
+  reference to it. Property paths are sent as written, so valid Python such as `""`, `[]` or `(1,)` in
+  a property path reaches the Director as before. The module's own variable names
   (`connection_status`, `designer_version`, the `selfcheck_*` and `rest_*` variables and every
   selection id) are reserved: a feedback that uses one is not subscribed, and the log says so once.
 - When the connection drops, every readout owned by a LiveUpdate Variable feedback shows `OFFLINE`
@@ -161,8 +166,9 @@
   static on `transportManager:default`, plus the GUI playhead). The Director still holds one
   subscription per property.
 - Variable definitions are sent to Companion only when they change, and a Director confirmation
-  re-runs only the feedbacks it concerns: with 30 feedbacks, 960 callback runs before, at most 90 now.
-  A reconnect sends no definition push.
+  re-runs only the feedbacks it concerns (1.0.2 re-ran every feedback on every Director message); with
+  30 feedbacks placed at once that is at most three callback runs per feedback. A reconnect sends no
+  definition push.
 - A burst of writes to the same property is collapsed: the first goes out at once so a single
   press stays instant, and a fast rotary spin becomes one write per 40 ms window carrying the value
   the operator stopped on, instead of one write per detent.

@@ -47,8 +47,8 @@ See [companion/HELP.md](companion/HELP.md) for the user documentation and
 ## Feedbacks
 
 - **LiveUpdate Variable**: subscribes to an object path / property path and exposes the value as a
-  variable. The Variable Name uses letters, digits, `_` and `-`; the module's own variable names are
-  reserved
+  variable. The Variable Name uses letters, digits, `_`, `-` and `.`, the characters Companion accepts
+  in a variable id; the module's own variable names are reserved
 - **LiveUpdate Compare**: boolean comparison of a LiveUpdate Variable (=, ≠, <, ≤, >, ≥, truthy,
   contains); an unknown value (none yet, null, a Director error or a readout marker) satisfies none
 - **LiveUpdate Sparkline**: draws the recent values of a variable as a trend line on the button. On
@@ -149,12 +149,13 @@ yarn build
 node scripts/build-dev-module.mjs --label InHouse --version 1.1.0-inhouse.1
 ```
 
-It writes `<out>/companion-module-disguise-liveupdate` containing only `companion/`, `dist/`,
-`package.json` and the production `node_modules` (about 5 MB). `--out` is resolved relative to the
-checkout and defaults to `../dev-module-build`. `--version` defaults to the version in `package.json`
-and must be semver (`1.1.0-inhouse.1`); a bare `--version` or a non-semver value exits 1. The module id
-and the variable prefix stay the same, so existing connections keep working. Copy the folder into the
-Developer modules path; Companion picks it up without a restart.
+It writes `<out>/companion-module-disguise-liveupdate` containing `companion/`, `dist/`, `LICENSE`,
+`README.md`, a slim `package.json` (no dev dependencies or scripts) and the production `node_modules`
+(about 5 MB). `--out` is resolved relative to the checkout and defaults to `../dev-module-build`.
+`--version` defaults to the version in `package.json` and must be semver (`1.1.0-inhouse.1`); a bare
+`--version` or a non-semver value exits 1. The module id and the variable prefix stay the same, so
+existing connections keep working. Copy the folder into the Developer modules path; Companion picks it
+up without a restart.
 
 The script only ever deletes its own earlier build. It refuses an `--out` that is a drive or
 filesystem root, the home folder or one of its parents, the checkout itself or any folder that

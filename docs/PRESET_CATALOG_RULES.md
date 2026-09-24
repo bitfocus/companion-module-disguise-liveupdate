@@ -124,7 +124,7 @@ Rules:
 
 ## 5. Variable names
 
-- `variableName` is `[A-Za-z0-9_]`, ≤ 40 characters, semantic (not preset-based). This is the library's own convention; the module accepts any name Companion accepts (letters, digits, `_` and `-`, a leading digit included, no length limit) and refuses only its own variable ids (`connection_status`, `designer_version`, `selfcheck_*`, `rest_*` and the selection ids).
+- `variableName` is `[A-Za-z0-9_]`, ≤ 40 characters, semantic (not preset-based). This is the library's own convention; the module accepts any name Companion accepts as a variable id (letters, digits, `_`, `-` and `.`, a leading digit included, no length limit) and refuses only its own variable ids (`connection_status`, `designer_version`, `selfcheck_*`, `rest_*` and the selection ids).
 - Exactly one variable name per unique (objectPath, propertyPath) pair in the whole library; every preset that subscribes to that pair uses the same name and the same frequency class.
 - Names mirror `companion-module-disguise-osc` where the meaning matches: `trackname`, `currentSectionName`, `nextSectionName`, `sectionElapsed`, `sectionRemaining`, `volume`, `brightness`, `bpm`, `playMode`, `trackposition`, `timecodeposition`. Everything else is lowerCamelCase (`fps`, `fpsAvg10`, `gpuTotalMs`, `playheadBeats`, `isPlaying`, `layerEnabled`, `screenOffsetX`).
 - Duplicating a preset for a second object requires renaming the variable in the feedback and in the button text; the HELP documents this.
