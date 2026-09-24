@@ -134,6 +134,9 @@ with an in-process fake socket connected to a `FakeDirector`:
 - `newInstance()` connects to host 127.0.0.1, `host.feedbackValues` holds what each feedback last
   reported to the host, and `destroyInstances()` (registered with `afterEach`) stops the timers of an
   instance a failed test left behind.
+- `host.variables` keeps the values the way module-base 1.13.6 does: a defined variable holds `''`
+  until something else is written and `''` again when `undefined` is written; only a name that is not
+  defined has no value, which Companion shows as `$NA`.
 
 `test/integration.test.ts` runs over a real WebSocket against `test/mock-director.ts`,
 `test/rest.test.ts` against a mock Session REST API on 127.0.0.1, and `test/scripts.test.ts` checks the

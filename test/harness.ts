@@ -275,8 +275,11 @@ export interface HostRecord {
 }
 
 /**
- * Stub of InstanceBase: records host traffic, emulates the variable store rules of module-base
- * (values of undefined variables are dropped) and drives the real FeedbackManager.
+ * Stub of InstanceBase: records host traffic, emulates the variable store rules of module-base 1.13.6
+ * (dist/module-api/base.js, with variable validation on, its default) and drives the real
+ * FeedbackManager. A defined variable always holds a value: '' until something else is written, and
+ * '' again when undefined is written. Only a name that is not defined has no value, which is what
+ * Companion shows as $NA.
  */
 export class StubInstanceBase {
 	host: HostRecord = {
@@ -325,14 +328,20 @@ export class StubInstanceBase {
 	setVariableDefinitions(definitions: { variableId: string }[]): void {
 		this.host.variableDefinitionCalls++
 		this.host.definedVariables = new Set(definitions.map((d) => d.variableId))
+		// module-base gives every newly defined variable the value '' and deletes the values of the
+		// variables that are no longer defined
+		for (const id of this.host.definedVariables) {
+			if (!this.host.variables.has(id)) this.host.variables.set(id, '')
+		}
 		for (const id of [...this.host.variables.keys()]) {
 			if (!this.host.definedVariables.has(id)) this.host.variables.delete(id)
 		}
 	}
 	setVariableValues(values: Record<string, unknown>): void {
 		for (const [id, value] of Object.entries(values)) {
-			if (value === undefined || !this.host.definedVariables.has(id)) this.host.variables.delete(id)
-			else this.host.variables.set(id, value)
+			// a defined variable stores `value ?? ''`; a name that is not defined is deleted
+			if (this.host.definedVariables.has(id)) this.host.variables.set(id, value ?? '')
+			else this.host.variables.delete(id)
 		}
 	}
 	getVariableValue(id: string): unknown {

@@ -203,8 +203,11 @@ test('a destructive command is refused until it is allowed, then needs two press
 	const press = () =>
 		actions.restRsRestart.callback({ options: { layers: 'RenderStream 2' }, controlId: 'bank9' }, context)
 
+	// defined from the start, so a button text or a trigger reads '' (not $NA) while nothing is armed
+	assert.equal(inst.host.variables.get('rest_armed'), '')
 	await press()
 	assert.equal(received.length, 0, 'refused while destructive commands are off')
+	assert.equal(inst.host.variables.get('rest_armed'), '')
 	assert.ok(inst.host.logs.some((l: { message: string }) => l.message.includes('Allow destructive commands')))
 
 	await inst.configUpdated({ ...inst.config, restAllowDestructive: true })
@@ -306,7 +309,7 @@ test('a text parameter that is empty or unresolved is refused with one warning, 
 		const what = `${actionId} ${JSON.stringify(options)}`
 		assert.equal(logged.length, 1, `${what} logs one warning: ${logged.join(' | ')}`)
 		assert.ok(logged[0].includes(field) && logged[0].includes('nothing was sent'), logged[0])
-		assert.equal(inst.host.variables.get('rest_armed') ?? '', '', `${what} does not arm`)
+		assert.equal(inst.host.variables.get('rest_armed'), '', `${what} does not arm`)
 	}
 	assert.equal(received.length, 0)
 	await inst.destroy()

@@ -128,7 +128,7 @@ test('every variable the module defines itself is reserved', async () => {
 	)
 	await settle(50)
 	assert.equal(director.count('subscribe'), 0, 'none of them is subscribed')
-	assert.equal(host.variables.get('rest_last_status'), undefined, 'no Director value in a module variable')
+	assert.equal(host.variables.get('rest_last_status'), '', 'no Director value in a module variable')
 	assert.equal(host.variables.get('designer_version'), 'r34.0.3', 'the version read still owns designer_version')
 	await inst.destroy()
 })
@@ -334,6 +334,7 @@ test('a shared subscription keeps the variable name of the feedback that created
 	await settle(50)
 	assert.equal(director.count('subscribe'), 1)
 	assert.equal(host.variables.get('lenA'), 240, 'the first name still receives values')
+	assert.equal(host.variables.get('lenB'), '', 'the second name receives none and stays empty')
 	assert.equal(inst.getSubscriptionByVariableName('lenA')?.propertyPath, 'object.lengthInBeats')
 	assert.ok(
 		host.logs.some((l) => l.level === 'warn' && l.message.includes("'lenA' will receive the values")),
@@ -901,7 +902,7 @@ test('an outage turns every state colour off and no readout stays OFFLINE once t
 	assert.equal(host.feedbackValues.get('eq'), true)
 	assert.equal(host.feedbackValues.get('ok'), true)
 	assert.equal(host.variables.get('len'), 'UNSET', 'an unresolved path says so, not OFFLINE')
-	assert.notEqual(host.variables.get('playingToo'), 'OFFLINE')
+	assert.equal(host.variables.get('playingToo'), '', 'a name no value reaches is empty, not OFFLINE')
 	await inst.destroy()
 })
 
@@ -1186,6 +1187,7 @@ test('another Director does not inherit the selection lists or version of the pr
 
 	await inst.configUpdated({ ...inst.config, host: '192.0.2.11', discoverOnConnect: false })
 	assert.equal(inst.discoveryChoices.size, 0, 'the lists belonged to the old Director')
-	assert.equal(host.variables.get('designer_version'), undefined)
+	// module-base stores '' for a defined variable written as undefined: the old version is gone
+	assert.equal(host.variables.get('designer_version'), '')
 	await inst.destroy()
 })

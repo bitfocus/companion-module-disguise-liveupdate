@@ -66,7 +66,8 @@ test('subscribes over ws, receives values, sets and toggles properties', async (
 	])
 	const host = inst.host
 	await waitFor(
-		() => host.variables.get('trackLengthBeats') === 240 && host.variables.get('screenOffset') !== undefined,
+		() =>
+			host.variables.get('trackLengthBeats') === 240 && host.variables.get('screenOffset') === '{"x":0,"y":3,"z":0}',
 	)
 	assert.equal(host.variables.get('brightness'), 1)
 	assert.equal(host.variables.get('engaged'), true)
@@ -80,7 +81,7 @@ test('subscribes over ws, receives values, sets and toggles properties', async (
 			.reduce((total, m) => total + m.subscribe.properties.length, 0),
 		4,
 	)
-	assert.equal(host.variables.get('designer_version'), undefined, 'a refused version read publishes nothing')
+	assert.equal(host.variables.get('designer_version'), '', 'a refused version read publishes nothing')
 	assert.ok(!host.logs.some((l: { message: string }) => l.message.includes('Attributing the error')))
 
 	// value pushed by the Director
@@ -141,7 +142,7 @@ test('errors from the Director: unknown object and failing property', async () =
 test('connection loss is reported and reconnection is scheduled', async () => {
 	const inst = await connected([liveUpdateFeedback('len', TRACK, 'object.lengthInBeats', 'trackLengthBeats', 5000)])
 	const host = inst.host
-	await waitFor(() => host.variables.get('trackLengthBeats') !== undefined)
+	await waitFor(() => typeof host.variables.get('trackLengthBeats') === 'number')
 	for (const client of director.clients) client.terminate()
 	await waitFor(() => host.variables.get('connection_status') === 'Disconnected')
 	assert.equal(inst.isConnectionReady(), false)
