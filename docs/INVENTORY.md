@@ -12,7 +12,7 @@ date (see §11).
 |---|---|---|
 | Node | v22.23.2 (fnm 1.39.0, default) | not on the Git Bash PATH; use `fnm env` or `%APPDATA%\fnm\node-versions\v22.23.2\installation` |
 | npm | 10.9.8 | the corepack shim in this Node install is broken (`corepack.js` missing) |
-| yarn | 1.22.22 (`yarn.lock` is lockfile v1) | installed into the scratch dir with `npm install yarn@1.22.22`, nothing global |
+| yarn | 1.22.22 (`yarn.lock` is lockfile v1) | installed into a throwaway folder with `npm install yarn@1.22.22`, nothing global |
 | `@companion-module/base` | **1.13.2** (range `^1.6.3`) | `dist/module-api/*.d.ts` is the type authority for this project |
 | `@companion-module/tools` | 2.8.0 (range `^2.8.0`) | provides `eslint/config.mjs` (`generateEslintConfig`) and `companion-module-build` |
 | typescript | 5.9.3 | `tsconfig.json`: ES2019 / CommonJS / strict / `rootDir src` / `outDir dist` |
@@ -23,12 +23,12 @@ date (see §11).
 | `yarn lint` | **FAILS** | `ESLint couldn't find a configuration file`. The repo has no `.eslintrc*` / `eslint.config.*`. `companion-module-template-ts` ships `eslint.config.mjs` (`generateEslintConfig({ enableTypescript: true })` from `@companion-module/tools`), which needs ESLint 9 + `typescript-eslint` 8 + prettier 3 (peer deps of tools 2.8, not installed here). Fixing lint means adding the config file **and** aligning devDependencies. Deferred to Phase 2 as a separate chore commit. |
 | CI | `.github/workflows/companion-module-checks.yaml` → `bitfocus/actions/.github/workflows/module-checks.yaml@main` | Bitfocus module checks on push |
 
-Host on this machine: Companion **5.0.4**, config in `%APPDATA%\companion`,
-`dev_modules_path = a local folder`, developer mode enabled,
-Companion currently not running.
+Host on the development machine: Companion **5.0.4**, config in `%APPDATA%\companion`,
+`dev_modules_path` set to a local folder, developer mode enabled,
+Companion not running at the time of the snapshot.
 
-The store-installed copy `%APPDATA%\companion\modules\disguise-liveupdate-1.0.2` (the same files
-sit in `a local disguise-liveupdate folder`) is a webpack bundle (`main.js`, 175 KB)
+The store-installed copy `%APPDATA%\companion\modules\disguise-liveupdate-1.0.2` (a copy of the same
+files sits in a local folder next to the clone) is a webpack bundle (`main.js`, 175 KB)
 whose manifest was rewritten by `companion-module-build` (`runtime.apiVersion: 1.13.2`,
 `entrypoint: ../main.js`). Its action / feedback / preset strings match upstream `src/` exactly, so
 the source clone is authoritative and that folder is not usable as a work tree.
@@ -275,15 +275,14 @@ partial JSON set on `object.offset`). All existing presets except the fps one us
 
 ## 12. Open questions for the reviewer
 
-1. Work tree: `a local disguise-liveupdate folder` is the packaged store copy (no
-   `src/`, no git). Phase 0 was done on a fresh clone at
-   `the clone`. Confirm this clone (or a fork
-   of it) is the intended work branch for Phases 2–4.
+1. Work tree: the local `disguise-liveupdate` folder is the packaged store copy (no `src/`, no
+   git). Phase 0 was done on a fresh clone of this repository. Confirm this clone (or a fork of it)
+   is the intended work branch for Phases 2–4.
 2. `yarn lint` fails upstream as-is (no ESLint config). Is adding `eslint.config.mjs` plus the
    devDependency alignment acceptable as a separate chore commit in Phase 2?
 3. Director `192.0.2.10:80`: ping and TCP connect both fail from this machine right now (local
-   interfaces include `192.0.2.20` on the control network). Live verification needs the Director online and
-   an explicit go-ahead for read-only subscriptions and for any write-test objects.
+   interfaces include `192.0.2.20` on the control network). Live verification needs the Director
+   online and an explicit go-ahead for read-only subscriptions and for any write-test objects.
 4. The subscribe-storm hazard (§5, item 1) makes placeholder presets risky without a small module
    guard. Is a minimal, backward-compatible guard (skip subscribe while a path contains `<…>`, back
    off after errors) acceptable as the one allowed module extension?
