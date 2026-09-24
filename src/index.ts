@@ -330,6 +330,13 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			this.clearArms()
 		}
 
+		// The selection lists and the version belong to the Director they were read from. A failed
+		// read on the new host must leave the lists empty rather than offer the old show's names.
+		if (this.config && (this.config.host !== config.host || this.config.port !== config.port)) {
+			this.discoveryChoices.clear()
+			this.setVariableValues({ designer_version: undefined })
+		}
+
 		if (!connectionChanged && this.connectionReady) {
 			// Only preset settings or selections changed: refresh definitions and variables
 			// without dropping the socket (and the subscriptions) for nothing.
@@ -1158,12 +1165,25 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	 * `subscriptions` message that was already in flight is not answered with a second unsubscribe.
 	 */
 	private releaseSubscription(subscriptionId: number): void {
+		const variableName = this.subscriptions.get(subscriptionId)?.variableName
 		this.send({ unsubscribe: { id: subscriptionId } })
 		this.subscriptions.delete(subscriptionId)
 		for (const [feedbackId, id] of this.feedbackIdToSubscriptionId.entries()) {
 			if (id === subscriptionId) this.feedbackIdToSubscriptionId.delete(feedbackId)
 		}
 		this.releasedSubscriptionIds.set(subscriptionId, Date.now())
+		this.recheckStateOf(variableName)
+	}
+
+	/**
+	 * Re-evaluate the Compare and Sparkline feedbacks of a variable whose subscription just went
+	 * away. Nothing else would: the Director's reply to the unsubscribe no longer names the pair, so
+	 * a state colour would otherwise stay lit on a value that is no longer watched.
+	 */
+	private recheckStateOf(variableName: string | undefined): void {
+		if (!variableName) return
+		const ids = this.stateFeedbacksOf(new Set([variableName]))
+		if (ids.length) this.checkFeedbacksById(...ids)
 	}
 
 	/**
@@ -1226,6 +1246,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			this.log('warn', 'Cannot unsubscribe - WebSocket not connected')
 			this.subscriptions.delete(subscriptionId)
 			this.updateVariableDefinitions()
+			this.recheckStateOf(subscription?.variableName)
 			return
 		}
 
@@ -1235,6 +1256,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		this.subscriptions.delete(subscriptionId)
 		this.releasedSubscriptionIds.set(subscriptionId, Date.now())
 		this.updateVariableDefinitions()
+		this.recheckStateOf(subscription?.variableName)
 	}
 
 	/**

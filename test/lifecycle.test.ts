@@ -1158,3 +1158,34 @@ test('after a reconnect a second button at the same interval joins the subscript
 	assert.equal(host.variables.get('brightness'), 0.5)
 	await inst.destroy()
 })
+
+test('removing the variable feedback turns its Compare colour off', async () => {
+	const director = new FakeDirector({ valueFor: () => true })
+	const { inst, host } = await newInstance(director, [
+		liveUpdateFeedback('p', 'transportManager:default', 'object.player.playing', 'isPlaying'),
+		compareFeedback('eq', 'isPlaying', 'eq', 'true'),
+	])
+	await settle(50)
+	assert.equal(host.feedbackValues.get('eq'), true)
+
+	inst.updateFeedbacks({ p: null })
+	await settle(50)
+	assert.equal(director.subs.length, 0, 'the subscription was released')
+	assert.equal(host.feedbackValues.get('eq'), false, 'no colour for a value nobody watches any more')
+	await inst.destroy()
+})
+
+test('another Director does not inherit the selection lists or version of the previous one', async () => {
+	const director = new FakeDirector({
+		valueFor: (_o, p) => (p === '[l.name for l in object.layers]' ? ['Video 1'] : []),
+	})
+	const { inst, host } = await newInstance(director, [], { selTrack: 'demo' })
+	await inst.refreshDiscovery()
+	assert.deepEqual(inst.discoveryChoices.get('selLayer'), ['Video 1'])
+	host.variables.set('designer_version', 'r34.0.3')
+
+	await inst.configUpdated({ ...inst.config, host: '192.0.2.11', discoverOnConnect: false })
+	assert.equal(inst.discoveryChoices.size, 0, 'the lists belonged to the old Director')
+	assert.equal(host.variables.get('designer_version'), undefined)
+	await inst.destroy()
+})
