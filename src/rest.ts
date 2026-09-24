@@ -135,11 +135,34 @@ export const layersBody = (targets: RestTarget[]): unknown => ({ layers: targets
 export const machineBody = (target: RestTarget): unknown => ({ machine: target })
 
 /**
- * A Designer object reference from a free-text option: a plain decimal string is a uid, anything
- * else is a name. Both are accepted by every endpoint that takes {uid, name}.
+ * Text a command must not carry: empty, or still holding the host's '$NA' (an unknown variable, or a
+ * selection the module publishes while it is empty) or a $(...) reference the host left unparsed.
+ * Every free-text command parameter goes through this one test before anything is sent.
  */
-export function parseTarget(text: string): RestTarget {
+export function isUnresolvedText(text: string): boolean {
 	const trimmed = text.trim()
+	return !trimmed || trimmed.includes('$NA') || trimmed.includes('$(')
+}
+
+/**
+ * A Designer object reference from a free-text option: 6 or more decimal digits are a uid,
+ * anything else is a name. Both are accepted by every endpoint that takes {uid, name}. A name that
+ * is all digits (a date-stamped track such as 20250914) would read as a uid, so the operator can
+ * choose explicitly: 'name:<text>' is always a name, 'uid:<digits>' always a uid.
+ *
+ * Null when the text names nothing: empty, a bare prefix, or 'uid:' followed by anything but digits.
+ */
+export function parseTarget(text: string): RestTarget | null {
+	const trimmed = text.trim()
+	if (trimmed.startsWith('name:')) {
+		const name = trimmed.slice('name:'.length).trim()
+		return name ? { name } : null
+	}
+	if (trimmed.startsWith('uid:')) {
+		const uid = trimmed.slice('uid:'.length).trim()
+		return /^\d+$/.test(uid) ? { uid } : null
+	}
+	if (!trimmed) return null
 	if (/^\d{6,}$/.test(trimmed)) return { uid: trimmed }
 	return { name: trimmed }
 }
@@ -198,7 +221,6 @@ export class RestClient {
 				body: JSON.stringify(body),
 				signal: controller.signal,
 			})
-			const durationMs = Date.now() - started
 			const absent = response.status === 404 || response.status === 405
 			if (absent) this.absent.add(endpoint.path)
 			let message = ''
@@ -217,9 +239,15 @@ export class RestClient {
 				} catch {
 					message = text.slice(0, 200)
 				}
-			} catch {
-				message = ''
+			} catch (error) {
+				// The timer still runs while the body is read. A reply that stalls or breaks after the
+				// headers may carry a refusal we never saw, so the outcome is unknown: a failure, never OK.
+				message =
+					error instanceof Error && error.name === 'AbortError'
+						? 'timed out reading the reply'
+						: `could not read the reply${error instanceof Error && error.message ? `: ${error.message}` : ''}`
 			}
+			const durationMs = Date.now() - started
 			const ok = response.ok && !message
 			this.options.log(
 				ok ? 'debug' : 'warn',

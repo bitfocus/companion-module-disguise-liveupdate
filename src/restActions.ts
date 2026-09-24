@@ -13,15 +13,22 @@
 import { CompanionActionDefinition, CompanionActionDefinitions, CompanionActionEvent } from '@companion-module/base'
 import type { DisguiseInstance } from './index'
 import {
+	isUnresolvedText,
 	layersBody,
 	machineBody,
 	parseTarget,
 	PLAYMODES,
 	REST_ENDPOINTS,
 	RestCommand,
+	RestTarget,
 	transportsBody,
 	transportsWith,
 } from './rest'
+
+/** How a free-text object reference is read; shown on every option that takes one */
+const TARGET_RULE =
+	'A value of 6 or more digits only is sent as a uid, anything else as a name. ' +
+	'Prefix name: or uid: to choose, e.g. name:20250914.'
 
 const TRANSPORT_OPTION = {
 	type: 'textinput' as const,
@@ -29,7 +36,7 @@ const TRANSPORT_OPTION = {
 	id: 'transport',
 	default: 'default',
 	useVariables: true,
-	tooltip: 'Transport manager name (or its uid). "default" is the one every preset reads.',
+	tooltip: `Transport manager name (or its uid). "default" is the one every preset reads. ${TARGET_RULE}`,
 }
 
 const PLAYMODE_OPTION = {
@@ -40,29 +47,43 @@ const PLAYMODE_OPTION = {
 	choices: PLAYMODES.map((id) => ({ id, label: id === 'NotSet' ? 'Leave unchanged' : id })),
 }
 
+type ParseContext = { parseVariablesInString: (text: string) => Promise<string> }
+
+const refuse = (
+	instance: DisguiseInstance,
+	action: CompanionActionEvent,
+	label: string,
+	why = 'is empty or unresolved',
+): null => {
+	instance.log('warn', `${String(action.actionId)}: '${label}' ${why}, nothing was sent`)
+	return null
+}
+
+/**
+ * A free-text option after variable parsing. Empty text, the host's '$NA' and a reference left
+ * unparsed are refused with one warning, so a button whose variable or selection is not set yet
+ * sends nothing rather than a literal '$NA' or an empty value.
+ */
+const text = async (
+	instance: DisguiseInstance,
+	action: CompanionActionEvent,
+	context: ParseContext,
+	id: string,
+	label = id,
+): Promise<string | null> => {
+	const value = (await context.parseVariablesInString(String(action.options[id] ?? ''))).trim()
+	return isUnresolvedText(value) ? refuse(instance, action, label) : value
+}
+
 const target = async (
 	instance: DisguiseInstance,
 	action: CompanionActionEvent,
-	context: { parseVariablesInString: (text: string) => Promise<string> },
+	context: ParseContext,
 	id = 'transport',
-): Promise<{ uid?: string; name?: string } | null> => {
-	const raw = await context.parseVariablesInString(String(action.options[id] ?? ''))
-	const text = raw.trim()
-	if (!text || text === '$NA' || text.includes('$(')) {
-		instance.log('warn', `${String(action.actionId)}: '${id}' is empty or unresolved, nothing was sent`)
-		return null
-	}
-	return parseTarget(text)
-}
-
-const num = async (
-	action: CompanionActionEvent,
-	context: { parseVariablesInString: (text: string) => Promise<string> },
-	id: string,
-): Promise<number | null> => {
-	const text = await context.parseVariablesInString(String(action.options[id] ?? ''))
-	const value = Number(text)
-	return Number.isFinite(value) ? value : null
+): Promise<RestTarget | null> => {
+	const value = await text(instance, action, context, id)
+	if (value === null) return null
+	return parseTarget(value) ?? refuse(instance, action, id, 'is neither a name nor a decimal uid')
 }
 
 export function getRestActionDefinitions(instance: DisguiseInstance): CompanionActionDefinitions {
@@ -71,10 +92,7 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 		name: string,
 		key: RestCommand,
 		options: CompanionActionDefinition['options'],
-		build: (
-			action: CompanionActionEvent,
-			context: { parseVariablesInString: (text: string) => Promise<string> },
-		) => Promise<{ body: unknown; describe: string } | null>,
+		build: (action: CompanionActionEvent, context: ParseContext) => Promise<{ body: unknown; describe: string } | null>,
 	): CompanionActionDefinition => ({
 		name,
 		description: REST_ENDPOINTS[key].destructive
@@ -88,12 +106,28 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 		},
 	})
 
+	/** Play, stop, play/loop section and return to start: the body only names the transport */
 	const simpleTransport = (name: string, key: RestCommand): CompanionActionDefinition =>
 		command(name, key, [TRANSPORT_OPTION], async (action, context) => {
 			const transport = await target(instance, action, context)
 			if (!transport) return null
 			return {
 				body: transportsBody(transport),
+				describe: `${REST_ENDPOINTS[key].summary} on ${transport.name ?? transport.uid}`,
+			}
+		})
+
+	/**
+	 * Next / previous section and track: the OpenAPI body wraps the transport and carries the play
+	 * mode after the step, like the goto commands. A button saved before the option existed has no
+	 * playmode and sends 'NotSet', which leaves the play state as it is.
+	 */
+	const stepTransport = (name: string, key: RestCommand): CompanionActionDefinition =>
+		command(name, key, [TRANSPORT_OPTION, PLAYMODE_OPTION], async (action, context) => {
+			const transport = await target(instance, action, context)
+			if (!transport) return null
+			return {
+				body: transportsWith(transport, { playmode: String(action.options.playmode ?? 'NotSet') }),
 				describe: `${REST_ENDPOINTS[key].summary} on ${transport.name ?? transport.uid}`,
 			}
 		})
@@ -112,8 +146,11 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 			async (action, context) => {
 				const transport = await target(instance, action, context)
 				if (!transport) return null
-				const value = await num(action, context, field)
-				if (value === null) {
+				// An empty field must not become 0 (Number('') is 0): black, silence or a jump to 0 s.
+				const raw = await text(instance, action, context, field, label)
+				if (raw === null) return null
+				const value = Number(raw)
+				if (!Number.isFinite(value)) {
 					instance.log('warn', `${name}: '${label}' is not a number, nothing was sent`)
 					return null
 				}
@@ -128,10 +165,10 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 		restPlaySection: simpleTransport('Transport: Play to end of section', 'playSection'),
 		restLoopSection: simpleTransport('Transport: Loop section', 'loopSection'),
 		restReturnToStart: simpleTransport('Transport: Return to start', 'returnToStart'),
-		restNextSection: simpleTransport('Transport: Next section', 'nextSection'),
-		restPrevSection: simpleTransport('Transport: Previous section', 'prevSection'),
-		restNextTrack: simpleTransport('Transport: Next track', 'nextTrack'),
-		restPrevTrack: simpleTransport('Transport: Previous track', 'prevTrack'),
+		restNextSection: stepTransport('Transport: Next section', 'nextSection'),
+		restPrevSection: stepTransport('Transport: Previous section', 'prevSection'),
+		restNextTrack: stepTransport('Transport: Next track', 'nextTrack'),
+		restPrevTrack: stepTransport('Transport: Previous track', 'prevTrack'),
 
 		restGotoSection: command(
 			'Transport: Go to section',
@@ -154,8 +191,8 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 			async (action, context) => {
 				const transport = await target(instance, action, context)
 				if (!transport) return null
-				const section = (await context.parseVariablesInString(String(action.options.section ?? ''))).trim()
-				if (!section) return null
+				const section = await text(instance, action, context, 'section', 'Section number')
+				if (section === null) return null
 				return {
 					body: transportsWith(transport, { section, playmode: String(action.options.playmode ?? 'NotSet') }),
 					describe: `go to section ${section}`,
@@ -181,8 +218,8 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 			async (action, context) => {
 				const transport = await target(instance, action, context)
 				if (!transport) return null
-				const note = (await context.parseVariablesInString(String(action.options.note ?? ''))).trim()
-				if (!note) return null
+				const note = await text(instance, action, context, 'note', 'Note')
+				if (note === null) return null
 				return {
 					body: transportsWith(transport, { note, playmode: String(action.options.playmode ?? 'NotSet') }),
 					describe: `go to note ${note}`,
@@ -215,8 +252,8 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 			async (action, context) => {
 				const transport = await target(instance, action, context)
 				if (!transport) return null
-				const value = (await context.parseVariablesInString(String(action.options.value ?? ''))).trim()
-				if (!value) return null
+				const value = await text(instance, action, context, 'value', 'Tag value')
+				if (value === null) return null
 				return {
 					body: transportsWith(transport, {
 						type: String(action.options.tagType ?? 'CUE'),
@@ -234,7 +271,14 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 			'gotoTrack',
 			[
 				TRANSPORT_OPTION,
-				{ type: 'textinput', label: 'Track name or uid', id: 'track', default: '', useVariables: true },
+				{
+					type: 'textinput',
+					label: 'Track name or uid',
+					id: 'track',
+					default: '',
+					useVariables: true,
+					tooltip: TARGET_RULE,
+				},
 				PLAYMODE_OPTION,
 			],
 			async (action, context) => {
@@ -270,8 +314,8 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 			async (action, context) => {
 				const transport = await target(instance, action, context)
 				if (!transport) return null
-				const timecode = (await context.parseVariablesInString(String(action.options.timecode ?? ''))).trim()
-				if (!timecode) return null
+				const timecode = await text(instance, action, context, 'timecode', 'Timecode')
+				if (timecode === null) return null
 				return {
 					body: transportsWith(transport, {
 						timecode,
@@ -323,20 +367,25 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 							id: 'layers',
 							default: '',
 							useVariables: true,
+							tooltip: `${TARGET_RULE} Every entry must resolve, or nothing is sent.`,
 						},
 					],
 					async (action, context) => {
 						const raw = (await context.parseVariablesInString(String(action.options.layers ?? ''))).trim()
-						if (!raw || raw.includes('$(')) {
-							instance.log('warn', `${name}: no layer given, nothing was sent`)
-							return null
+						// Each entry is checked on its own: 'Layer A,$(sel)' with the selection empty must not
+						// go out as Layer A alone, nor with a layer literally named '$NA'.
+						const targets: RestTarget[] = []
+						for (const part of raw.split(',')) {
+							const layer = isUnresolvedText(part) ? null : parseTarget(part)
+							if (!layer) {
+								instance.log(
+									'warn',
+									`${name}: a layer in '${raw}' is empty, unresolved or neither a name nor a decimal uid, nothing was sent`,
+								)
+								return null
+							}
+							targets.push(layer)
 						}
-						const targets = raw
-							.split(',')
-							.map((part) => part.trim())
-							.filter(Boolean)
-							.map(parseTarget)
-						if (!targets.length) return null
 						return { body: layersBody(targets), describe: `${name} (${raw})` }
 					},
 				),
@@ -347,7 +396,16 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 		restFailoverMachine: command(
 			'Failover: Fail over machine',
 			'failoverMachine',
-			[{ type: 'textinput', label: 'Machine name or uid', id: 'machine', default: '', useVariables: true }],
+			[
+				{
+					type: 'textinput',
+					label: 'Machine name or uid',
+					id: 'machine',
+					default: '',
+					useVariables: true,
+					tooltip: TARGET_RULE,
+				},
+			],
 			async (action, context) => {
 				const machine = await target(instance, action, context, 'machine')
 				if (!machine) return null
@@ -357,7 +415,16 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 		restRestoreMachine: command(
 			'Failover: Restore machine',
 			'restoreMachine',
-			[{ type: 'textinput', label: 'Machine name or uid', id: 'machine', default: '', useVariables: true }],
+			[
+				{
+					type: 'textinput',
+					label: 'Machine name or uid',
+					id: 'machine',
+					default: '',
+					useVariables: true,
+					tooltip: TARGET_RULE,
+				},
+			],
 			async (action, context) => {
 				const machine = await target(instance, action, context, 'machine')
 				if (!machine) return null
