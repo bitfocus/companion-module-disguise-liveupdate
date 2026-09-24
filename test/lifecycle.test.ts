@@ -466,6 +466,35 @@ test('names 1.0.2 accepted still subscribe: hyphens and a leading digit', async 
 	await inst.destroy()
 })
 
+test('a dotted variable name subscribes and the nudge guard knows it', async () => {
+	// Companion 5.0.4 defines a variable id with '.' and 1.0.2 sent any name, so a saved name keeps working
+	const director = new FakeDirector({ valueFor: () => 42 })
+	const { inst, host } = await newInstance(director, [
+		liveUpdateFeedback('t', TRACK, 'object.lengthInBeats', 'track.length'),
+	])
+	await settle(50)
+	assert.equal(director.subscribedProperties(), 1)
+	assert.equal(host.variables.get('track.length'), 42)
+	assert.ok(!host.logs.some((l) => l.message.includes('is not a valid Companion variable id')))
+	await inst.destroy()
+
+	// the subscription is confirmed but no value has arrived yet: a nudge must not be sent as an absolute value
+	const silent = new FakeDirector({ valueFor: () => undefined })
+	const second = await newInstance(silent, [
+		liveUpdateFeedback('v', 'transportManager:default', 'object.volume', 'master.volume'),
+	])
+	await settle(50)
+	const actions = dist.getActionDefinitions(second.inst)
+	const context = { parseVariablesInString: async (text: string) => text.replace(/\$\([^)]*\)/g, '') }
+	await actions.setToDisguiseNumber.callback(
+		{ options: { variableName: 'master.volume', value: '$(liveupdate:master.volume)-0.05' } },
+		context,
+	)
+	assert.equal(silent.count('set'), 0, 'no nudge is sent as an absolute value')
+	assert.ok(second.host.logs.some((l) => l.message.includes("'master.volume' has no numeric value yet")))
+	await second.inst.destroy()
+})
+
 test('setSelection treats an unresolved variable as a clear', async () => {
 	const director = new FakeDirector()
 	const { inst, host } = await newInstance(director)

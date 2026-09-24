@@ -60,10 +60,11 @@ const VERSION_OBJECT = 'subsystem:MonitoringManager'
 const VERSION_PROPERTY = 'ReleaseVersion.versionString()'
 
 /**
- * Companion variable ids: letters, digits, `_` and `-`. This is the host's own rule, and the names
- * 1.0.2 accepted without any check, so buttons saved with such a name keep working.
+ * Companion variable ids: letters, digits, `_`, `-` and `.`. This is the host's own rule (Companion
+ * 5.0.4 defines a variable only when its id matches it); 1.0.2 sent any name without a check, so every
+ * name it could get defined keeps working.
  */
-const VARIABLE_ID = /^[A-Za-z0-9_-]+$/
+const VARIABLE_ID = /^[A-Za-z0-9_.-]+$/
 
 /** Template placeholders such as <TRACK_NAME> or <OBJECT_PATH> */
 const PLACEHOLDER_TOKEN = /<[A-Z][A-Z0-9_]*>/
@@ -604,7 +605,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				this.unresolvedLogged.add(feedbackId)
 				this.log(
 					'warn',
-					`Variable name '${variableName}' of feedback ${feedbackId} is not a valid Companion variable id (letters, digits, '_' and '-' only); the subscription is skipped`,
+					`Variable name '${variableName}' of feedback ${feedbackId} is not a valid Companion variable id (letters, digits, '_', '-' and '.' only); the subscription is skipped`,
 				)
 			}
 			return

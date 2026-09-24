@@ -76,7 +76,7 @@ async function processNumberValue(
 	// Companion rewrites the label of an imported preset to the connection's own label (a second
 	// connection is liveupdate_2), so the reference is matched against that label, read here so a
 	// rename is picked up.
-	for (const match of valueStr.matchAll(/\$\(([^:$)]+):([A-Za-z0-9_-]+)\)/g)) {
+	for (const match of valueStr.matchAll(/\$\(([^:$)]+):([A-Za-z0-9_.-]+)\)/g)) {
 		if (match[1] !== instance.label) continue
 		const referenced = match[2]
 		if (isReservedVariableName(referenced)) continue
