@@ -208,13 +208,12 @@ them as they are, unformatted and without a unit, so you can read the state off 
 
 | On the button | Meaning |
 |---|---|
-| (empty) | no value yet: the connection is coming up, or the Director has not sent one |
 | `OFFLINE` | the connection to the Director is closed |
 | `ERROR` | the Director refused the object path: wrong name or type prefix, or the object does not exist |
 | `PATH_ERROR` | the object exists but the property path failed |
 | `PATH_ERROR (unsubscribed)` | the property path failed three times in a row; the subscription was dropped and is retried with a back-off |
 | `UNSET` | the path cannot be resolved yet: an empty selection or `$NA`, an unparsed `$(...)`, an empty object or property path, a bare empty name such as `track:""`, or a template placeholder such as `<OBJECT_PATH>` |
-| `$NA` | Companion's own text for a variable that does not exist: the name in the button text matches no feedback |
+| `$NA` | Companion's own text for a variable with no value. Either no value has arrived yet (the connection is coming up, or the Director has not answered the request), or this feedback shares its property with another feedback that uses a different variable name (only the first name receives the values; the log says so), or the name in the button text matches no feedback |
 
 Formatted preset texts (numbers, times, on/off words, JSON fields) format only a value of the kind they
 expect and show anything else as it is: an on/off readout shows its words (YES / no, HELD / Live,
@@ -244,7 +243,7 @@ the module reconnects on its own after the *Reconnect Interval*.
 
 On disconnect and on reconnect the module re-checks *Connection OK*, *LiveUpdate Compare*,
 *LiveUpdate Sparkline*, *Command armed* and *Last command failed*, so no state colour outlives the
-connection. After a reconnect no readout stays `OFFLINE`: each one is emptied and either subscribes
+connection. After a reconnect no readout stays `OFFLINE`: each one shows `$NA` (no value) and either subscribes
 again (its value arrives) or shows `UNSET`. Changing the host or port while connected shows `OFFLINE`
 in every readout until the new Director answers.
 
@@ -874,7 +873,7 @@ A Number value is evaluated after its variables are parsed and only a finite num
 that refers to a readout of this connection, such as `$(liveupdate:brightness)-0.05`, is not sent
 while that readout has no numeric value yet (it is empty, `OFFLINE`, `UNSET`, ...): the expression
 would reach the Director as an absolute value. The check recognises the connection's own label, so it
-works for `liveupdate_2` or a renamed connection, and for hyphenated variable names.
+works for `liveupdate_2` or a renamed connection, and for variable names that contain `-` or `.`.
 
 Writes to the same property in quick succession (a rotary encoder) are collapsed: the first goes out
 at once, then one write per 40 ms carries the latest value.
@@ -962,7 +961,12 @@ Look at the button first: a readout shows what went wrong (see *What a readout s
 
 - `UNSET`: the path cannot be resolved yet. Usually the selection the preset depends on is empty;
   fill it in. The log says "Not subscribing feedback ...: the path cannot be resolved yet".
-- `$NA`: the variable name in the button text matches no feedback.
+- `$NA`: no value yet, or no feedback feeds that name. While the connection comes up every readout
+  shows `$NA` until its first value arrives; a request that stays unanswered for the *Pending
+  Subscription Timeout* is dropped and retried with the back-off. If it stays `$NA`, check that the
+  name in the button text matches the feedback's Variable Name, and that no other feedback watches
+  the same property under a different name (the log says "Feedbacks share ... with different variable
+  names").
 - `OFFLINE`: the connection to the Director is closed; `connection_status` says `Disconnected` and
   the module reconnects on its own.
 - `ERROR`: the Director could not resolve the object path (wrong name, wrong type prefix, object does
@@ -971,8 +975,6 @@ Look at the button first: a readout shows what went wrong (see *What a readout s
 - `PATH_ERROR` / `PATH_ERROR (unsubscribed)`: the object exists but the property expression fails;
   after three errors in a row the module unsubscribes and retries with the same back-off (reset by the
   first good value or by editing the feedback).
-- Empty: no value yet. The connection is coming up, or the Director has not sent one; a request that
-  stays unanswered for the *Pending Subscription Timeout* is dropped and retried with the back-off.
 - Log says "Selection rejected": the value a *Set selection* action sent contains characters that are
   not allowed for that selection (see *Selections*), and the selection keeps its previous value.
   "Selection ignored": a value in the connection settings is invalid, and the selection counts as

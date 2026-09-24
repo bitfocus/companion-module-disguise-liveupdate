@@ -166,7 +166,7 @@
   static on `transportManager:default`, plus the GUI playhead). The Director still holds one
   subscription per property.
 - Variable definitions are sent to Companion only when they change, and a Director confirmation
-  re-runs only the feedbacks it concerns (1.0.2 re-ran every feedback on every Director message); with
+  re-runs only the feedbacks it concerns (1.0.2 re-ran every feedback on every subscriptions reply and every value update); with
   30 feedbacks placed at once that is at most three callback runs per feedback. A reconnect sends no
   definition push.
 - A burst of writes to the same property is collapsed: the first goes out at once so a single
