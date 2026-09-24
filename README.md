@@ -229,6 +229,13 @@ prints `!! SET THIS BACK BY HAND: field = wanted (the Director reports seen); ..
 192.0.2.10 and the Designer version given with `--designer` (default `r34.0.3`).
 `docs/research/rest-verification.json` is the scrubbed result of the 2026-09-04 run on r34.0.3.
 
+The script builds its own request bodies: it addresses the transport by uid and name as the Director
+reports it, and was written before the module had Go to tag. The module addresses objects by name
+unless told otherwise (`uid:` / 6+ digits), sends the section number as a string of digits, and has a
+Go to tag action, so those bodies were not the ones sent in that run. `test/rest-schema.test.ts` checks
+every body the module sends, by name and by uid, against the Director's own description of the command
+in `docs/research/rest-api.json`.
+
 ## Architecture
 
 - **subscribe / callback / unsubscribe** of the LiveUpdate Variable feedback manage the Director
