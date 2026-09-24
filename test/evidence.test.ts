@@ -1,7 +1,7 @@
 /**
- * The published research files (docs/research, docs/INVENTORY.md). What the live runs recorded must
- * carry no identity of the rig, the show it ran on or the machine the research was done on, must keep
- * Designer's own wording, and must agree with the catalog that cites it.
+ * The published research files (docs/research, docs/INVENTORY.md, docs/PHASE0_CANDIDATES.md). What
+ * the live runs recorded must carry no identity of the rig, the show it ran on or the machine the
+ * research was done on, must keep Designer's own wording, and must agree with the catalog that cites it.
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
@@ -13,7 +13,7 @@ const read = (file: string): string => readFileSync(path.join(ROOT, file), 'utf8
 const RESEARCH = readdirSync(path.join(ROOT, 'docs/research'))
 	.filter((f) => f.endsWith('.json'))
 	.map((f) => `docs/research/${f}`)
-const PUBLISHED = [...RESEARCH, 'docs/INVENTORY.md']
+const PUBLISHED = [...RESEARCH, 'docs/INVENTORY.md', 'docs/PHASE0_CANDIDATES.md']
 const EVIDENCE = [
 	'docs/research/live-verification.json',
 	'docs/research/live-verification-run2.json',
