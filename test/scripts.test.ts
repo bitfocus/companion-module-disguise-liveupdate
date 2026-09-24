@@ -407,3 +407,14 @@ test('the restore sweep is compared with the start and every difference is named
 	assert.match(source, /report\(unrestored\)/)
 	assert.match(source, /handRestoreLine\(unrestored\)/)
 })
+
+// ---------- gen-help.mjs ----------
+
+test('HELP renders angle-bracket placeholders literally', () => {
+	const help = readFileSync(path.join(ROOT, 'companion/HELP.md'), 'utf8')
+	const start = help.indexOf('<!-- PRESETS:START -->') + '<!-- PRESETS:START -->'.length
+	const block = help.slice(start, help.indexOf('<!-- PRESETS:END -->'))
+	// outside code spans a '<' starts an HTML tag, which GitHub drops and Companion mangles
+	const prose = block.replace(/`[^`\n]*`/g, '')
+	assert.ok(!prose.includes('<'), `raw '<' in the preset list: ${prose.match(/.{0,30}<.{0,30}/)?.[0]}`)
+})

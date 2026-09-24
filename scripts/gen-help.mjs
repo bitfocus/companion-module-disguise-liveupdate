@@ -35,10 +35,15 @@ const truncate = (text, max) => {
 	return cut.slice(0, Math.max(cut.lastIndexOf(' '), max - 20)).trimEnd() + '…'
 }
 
+// Text outside code spans: a placeholder such as <name> or <layer uid> would be read as an HTML tag
+// (GitHub drops it, Companion's help modal keeps only the tag name), so '<' and its closing '>' are
+// written as entities and render literally. A lone '>' (settings > Selections) is plain text already.
 const plain = (text) =>
 	String(text ?? '')
 		.replace(/\r?\n/g, ' ')
 		.replace(/\|/g, '\\|')
+		.replace(/<([^<>]*)>/g, '&lt;$1&gt;')
+		.replace(/</g, '&lt;')
 		.trim()
 
 const categories = [...new Set(catalog.rows.map((row) => row.category))].sort()
