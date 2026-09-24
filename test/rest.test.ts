@@ -11,8 +11,10 @@ import { installHarness, loadDist, ROOT, tick } from './harness'
 
 installHarness({ fakeSocket: true })
 const dist = loadDist()
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+/* eslint-disable @typescript-eslint/no-require-imports */
 const rest = require(path.join(ROOT, 'dist/rest.js'))
+const config = require(path.join(ROOT, 'dist/config.js'))
+/* eslint-enable @typescript-eslint/no-require-imports */
 
 interface Received {
 	path: string
@@ -454,4 +456,18 @@ test('go to tag carries the tag type and the global-jump flag', async () => {
 		transports: [{ transport: { name: 'default' }, type: 'CUE', value: '12', allowGlobalJump: true, playmode: 'Play' }],
 	})
 	await inst.destroy()
+})
+
+test('the Commands settings text gates exactly the destructive commands', () => {
+	const gated = new Set(
+		Object.values(rest.REST_ENDPOINTS)
+			.filter((endpoint: any) => endpoint.destructive)
+			.map((endpoint: any) => endpoint.group),
+	)
+	assert.deepEqual([...gated].sort(), ['failover', 'renderstream'])
+	const info: string = config.getConfigFields().find((field: any) => field.id === 'commandInfo').value
+	// transport commands are not destructive: the text must not promise that they are refused or armed
+	assert.doesNotMatch(info, /what the audience sees/)
+	assert.match(info, /Transport commands fire on one press/)
+	assert.match(info, /RenderStream and failover commands [^.]*refused unless you allow them/)
 })

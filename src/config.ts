@@ -182,7 +182,7 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			label: 'Commands',
 			width: 12,
 			value:
-				'LiveUpdate cannot carry transport commands, so play, stop, section and track jumps, RenderStream workload control and failover are sent over the Designer Session REST API on the same host and port. Commands that change what the audience sees or the shape of the session are refused unless you allow them below, and then need two presses of the same button.',
+				'LiveUpdate cannot carry commands, so play, stop, section and track jumps, brightness, volume, RenderStream layer control and failover are sent over the Designer Session REST API on the same host and port. Transport commands fire on one press while commands are enabled, Stop, brightness 0 and volume 0 included. The RenderStream and failover commands change the shape of the session: they are refused unless you allow them below, and then need two presses of the same button.',
 		},
 		{
 			type: 'checkbox',

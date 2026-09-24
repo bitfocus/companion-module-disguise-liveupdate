@@ -123,7 +123,7 @@ export const SELECTIONS: readonly SelectionDefinition[] = [
 		id: 'selWorkload',
 		label: 'RenderStream workload id',
 		description:
-			'Workload id as decimal digits (the [EXP] RS Layer Workload ID preset shows it as text; also Cluster Workload widget > Copy UID or REST GET /api/session/renderstream/layerstatus)',
+			'Workload id as decimal digits (the RS Layer Workload ID preset in 09 RenderStream shows it as text; also Cluster Workload widget > Copy UID or REST GET /api/session/renderstream/layerstatus)',
 		example: '1234',
 		kind: 'uid',
 		experimental: false,

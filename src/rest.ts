@@ -21,7 +21,11 @@ export interface RestEndpoint {
 	/** Path under /api/session */
 	path: string
 	group: RestGroup
-	/** A command that changes what the audience sees, or the shape of the session */
+	/**
+	 * A command that changes the shape of the session (RenderStream workloads, failover): gated behind
+	 * "Allow destructive commands" and two presses. Transport commands are not, whatever they do to the
+	 * output: they fire on one press.
+	 */
 	destructive: boolean
 	summary: string
 }

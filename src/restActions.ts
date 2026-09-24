@@ -5,10 +5,10 @@
  * RenderStream workload or fail a machine over. These actions do, against the same Director the
  * WebSocket is connected to.
  *
- * A command that changes what the audience sees or the shape of the session is marked destructive:
- * it is refused unless the connection setting allows it, and it has to be pressed twice within a
- * few seconds, the first press only arming it. Arming is per button and per target, so a button
- * cannot fire at a target the operator did not see armed.
+ * A command that changes the shape of the session (RenderStream workloads, failover) is marked
+ * destructive: it is refused unless the connection setting allows it, and it has to be pressed twice
+ * within a few seconds, the first press only arming it. Arming is per button and per target, so a
+ * button cannot fire at a target the operator did not see armed. Transport commands fire on one press.
  */
 import { CompanionActionDefinition, CompanionActionDefinitions, CompanionActionEvent } from '@companion-module/base'
 import type { DisguiseInstance } from './index'
@@ -331,7 +331,7 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 		restBrightness: withNumber('Transport: Set brightness', 'brightness', 'brightness', 'Brightness 0..1', '1'),
 		restVolume: withNumber('Transport: Set volume', 'volume', 'volume', 'Volume 0..1', '1'),
 		// Designer refuses this one unless "enableTransportSpeedControl" is on; the Director's own
-		// message is surfaced on $(…:rest_message) when it does.
+		// message is surfaced on $(…:rest_last_message) when it does.
 		restSpeed: withNumber('Transport: Set speed', 'speed', 'speed', 'Speed (1 = normal)', '1'),
 
 		restEngaged: command(
