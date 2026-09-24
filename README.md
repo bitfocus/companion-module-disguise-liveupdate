@@ -81,12 +81,15 @@ See [companion/HELP.md](companion/HELP.md) for the user documentation and
 - `selfcheck_progress`, `selfcheck_ok`, `selfcheck_failed`, `selfcheck_skipped`: the preset check
 - `rest_last_command`, `rest_last_status` (`OK` / `FAILED` / `UNSUPPORTED`), `rest_last_message`: the
   last command sent and its result
-- `rest_armed`: the most recent destructive command waiting for its second press
+- `rest_armed`: the most recent destructive command waiting for its second press (empty when none)
 - `selTrack`, `selLayer`, ...: selection variables (`$NA` while empty)
-- one variable per LiveUpdate Variable feedback. Instead of a value it can hold `OFFLINE` (no
-  connection), `ERROR` (object path refused), `PATH_ERROR` / `PATH_ERROR (unsubscribed)` (property
-  path refused) or `UNSET` (the path cannot be resolved yet, for example an empty selection); the
-  preset buttons show these words as they are
+- one variable per LiveUpdate Variable feedback. Instead of a value it can hold `PENDING` (requested,
+  no value yet), `OFFLINE` (no connection), `ERROR` (object path refused), `PATH_ERROR` /
+  `PATH_ERROR (unsubscribed)` (property path refused) or `UNSET` (the path cannot be resolved yet, for
+  example an empty selection); the preset buttons show these words as they are
+
+The module's own variables are empty until they have a value (`rest_*` until the first command,
+`selfcheck_*` until the first check); Companion shows `$NA` only for a name that is not defined.
 
 ## Development
 

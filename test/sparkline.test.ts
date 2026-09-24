@@ -410,3 +410,20 @@ test('a readout the Director refuses, or one whose path cannot be resolved, brea
 	assert.deepEqual(shown(host, 'spark'), render([58, undefined, 58, undefined]))
 	await inst.destroy()
 })
+
+test('a readout moved to another object breaks the line instead of joining the two objects', async () => {
+	const director = new FakeDirector({ valueFor: (objectPath) => (objectPath === FPS_OBJECT ? 58 : 24) })
+	const readout = liveUpdateFeedback('v', FPS_OBJECT, FPS_PROPERTY, 'fps')
+	const { inst, host } = await newInstance(director, [readout, sparklineFeedback('spark', { variableName: 'fps' })])
+	await settle(50)
+	director.hold()
+	inst.updateFeedbacks({ v: { ...readout, options: { ...readout.options, objectPath: 'track:"Track 1"' } } })
+	await settle(20)
+	// the readout says PENDING while the new object is asked for, and the line breaks there
+	assert.equal(host.variables.get('fps'), 'PENDING')
+	director.release()
+	await settle(50)
+	assert.equal(host.variables.get('fps'), 24)
+	assert.deepEqual(inst.getSparklineSamples('fps'), [58, undefined, 24])
+	await inst.destroy()
+})

@@ -285,6 +285,7 @@ test('pending requests that time out back off instead of being re-sent', async (
 	assert.ok(host.logs.some((l) => l.message.includes('timed out')))
 	const backoff = inst.subscriptionBackoff.get('t')
 	assert.ok(backoff && Date.now() < backoff.notBefore, 'the feedback is in its back-off window')
+	assert.equal(host.variables.get('len'), 'PENDING', 'the readout says it still waits, it is not blank')
 	inst.checkFeedbacks()
 	await settle(20)
 	assert.equal(director.count('subscribe'), 1, 'back-off after the timeout')
@@ -356,6 +357,38 @@ test('a disconnect replaces every readout with OFFLINE and keeps the variable de
 	assert.ok(host.definedVariables.has('brightness'), 'the variable stays defined while the feedback is placed')
 	assert.equal(host.variables.get('brightness'), 'OFFLINE', 'the stale value is replaced')
 	assert.equal(host.variables.get('connection_status'), 'Disconnected')
+	await inst.destroy()
+})
+
+test('a readout says PENDING until its value arrives, when placed and after a reconnect', async () => {
+	const director = new FakeDirector({ valueFor: () => 0.42 })
+	const { inst, host } = await newInstance(director, [], { reconnectInterval: 100 })
+	director.hold()
+	inst.updateFeedbacks({
+		b: liveUpdateFeedback('b', 'transportManager:default', 'object.brightness', 'brightness'),
+		// joins the same pair under another name, so it is never fed a value of its own
+		second: liveUpdateFeedback('second', 'transportManager:default', 'object.brightness', 'brightnessToo'),
+	})
+	await settle(20)
+	// the subscribe hook asks before the callback has defined the variable; the value must not be lost
+	assert.equal(host.variables.get('brightness'), 'PENDING', 'requested, no value yet: not a blank button')
+	assert.equal(host.variables.get('brightnessToo'), '', 'a name no value reaches stays empty')
+	director.release()
+	await settle(50)
+	assert.equal(host.variables.get('brightness'), 0.42)
+
+	director.sock!.drop()
+	await settle(20)
+	assert.equal(host.variables.get('brightness'), 'OFFLINE')
+	// the Director is back but has not answered yet
+	director.hold()
+	assert.ok(await until(() => inst.isConnectionReady()))
+	await settle(20)
+	assert.equal(host.variables.get('brightness'), 'PENDING', 'no blank readout after a reconnect either')
+	assert.equal(host.variables.get('brightnessToo'), '', 'and no PENDING for a name no value reaches')
+	director.release()
+	await settle(50)
+	assert.equal(host.variables.get('brightness'), 0.42)
 	await inst.destroy()
 })
 
@@ -902,7 +935,7 @@ test('an outage turns every state colour off and no readout stays OFFLINE once t
 	assert.equal(host.feedbackValues.get('eq'), true)
 	assert.equal(host.feedbackValues.get('ok'), true)
 	assert.equal(host.variables.get('len'), 'UNSET', 'an unresolved path says so, not OFFLINE')
-	assert.equal(host.variables.get('playingToo'), '', 'a name no value reaches is empty, not OFFLINE')
+	assert.equal(host.variables.get('playingToo'), '', 'a name no value reaches is empty, neither OFFLINE nor PENDING')
 	await inst.destroy()
 })
 

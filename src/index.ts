@@ -19,6 +19,7 @@ import {
 	OFFLINE_VALUE,
 	PATH_ERROR_UNSUBSCRIBED_VALUE,
 	PATH_ERROR_VALUE,
+	PENDING_VALUE,
 	UNSET_VALUE,
 } from './variables'
 import { upgradeScripts } from './upgrades'
@@ -650,6 +651,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 					'warn',
 					`Feedbacks share ${objectPath}.${propertyPath} with different variable names ('${pending.variableName}' and '${variableName}'); '${pending.variableName}' will receive the values`,
 				)
+				this.emptyUnfedReadout(variableName)
 			}
 			return
 		}
@@ -705,6 +707,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 						'warn',
 						`Feedbacks share ${objectPath}.${propertyPath} with different variable names ('${sub.variableName}' and '${variableName}'); '${sub.variableName}' will receive the values`,
 					)
+					this.emptyUnfedReadout(variableName)
 				}
 
 				return
@@ -737,7 +740,22 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			heldForProbe,
 		})
 
-		// Initialize the module variable as undefined until first value arrives
+		// The readout says PENDING until its first value or an error arrives: a new request, one made
+		// again at a faster rate and a retry after a back-off alike. The subscribe hook of a feedback
+		// placed while connected gets here before its callback has defined the variable, and a value
+		// written into a variable that is not defined is lost, so the request defines it first.
+		this.updateVariableDefinitions()
+		this.setVariableValues({ [variableName]: PENDING_VALUE })
+		this.recordHistory(variableName, PENDING_VALUE)
+	}
+
+	/**
+	 * A feedback that joined another feedback's property under a different name gets no values (the
+	 * log says so): its readout is emptied rather than left on the PENDING a reconnect wrote into it.
+	 */
+	private emptyUnfedReadout(variableName: string): void {
+		if (!this.isReadoutName(variableName) || this.isVariableFed(variableName)) return
+		if (this.getVariableValue(variableName) === '') return
 		this.setVariableValues({ [variableName]: undefined })
 	}
 
@@ -1092,8 +1110,8 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 
 	/**
 	 * Record a value for every Sparkline feedback that watches this variable. A sentinel the readout
-	 * shows instead of a value (OFFLINE, ERROR, PATH_ERROR, UNSET) is recorded as well: it is the gap
-	 * that breaks the line, so values from before and after it are never joined.
+	 * shows instead of a value (OFFLINE, ERROR, PATH_ERROR, UNSET, PENDING) is recorded as well: it is
+	 * the gap that breaks the line, so values from before and after it are never joined.
 	 */
 	private recordHistory(variableName: string, value: unknown): void {
 		let window = 0
@@ -1483,11 +1501,13 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				this.setVariableValues({
 					connection_status: 'Connected',
 				})
-				// No readout may keep saying OFFLINE now the Director is back: each one starts empty and
-				// its feedback re-subscribes below, or marks it UNSET when its path cannot be resolved.
-				const cleared: CompanionVariableValues = {}
-				for (const variableName of this.retainedVariables.values()) cleared[variableName] = undefined
-				this.setVariableValues(cleared)
+				// No readout may keep saying OFFLINE now the Director is back: each one says PENDING and
+				// its feedback re-subscribes below, or marks it UNSET when its path cannot be resolved; a
+				// feedback that joins another one's property under a different name is emptied again.
+				const waiting: CompanionVariableValues = {}
+				for (const variableName of this.retainedVariables.values()) waiting[variableName] = PENDING_VALUE
+				for (const variableName of Object.keys(waiting)) this.recordHistory(variableName, PENDING_VALUE)
+				this.setVariableValues(waiting)
 				this.checkFeedbacks(...STATE_FEEDBACKS)
 
 				this.subscribeFeedbacks()
@@ -1915,6 +1935,10 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 
 		for (const sub of this.subscriptions.values()) {
 			add(sub.variableName, `${sub.objectPath}.${sub.propertyPath}`)
+		}
+		// a request made from a subscribe hook, before the feedback's callback has cached its options
+		for (const pending of this.pendingSubscriptions.values()) {
+			if (pending.feedbackIds.size > 0) add(pending.variableName, `${pending.objectPath}.${pending.propertyPath}`)
 		}
 		for (const cached of this.feedbackOptionsCache.values()) {
 			add(cached.variableName, `${cached.objectPath}.${cached.propertyPath}`)

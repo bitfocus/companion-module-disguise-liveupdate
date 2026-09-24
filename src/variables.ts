@@ -11,10 +11,17 @@ export const PATH_ERROR_VALUE = 'PATH_ERROR'
 export const PATH_ERROR_UNSUBSCRIBED_VALUE = 'PATH_ERROR (unsubscribed)'
 /** The path cannot be resolved yet: an empty selection, $NA or an unparsed $(...) reference */
 export const UNSET_VALUE = 'UNSET'
+/**
+ * Requested from the Director, no value yet: written when a request is created, re-created or retried,
+ * and into every readout when the connection opens, so a readout that waits is never silently empty
+ */
+export const PENDING_VALUE = 'PENDING'
 
 /**
  * Every text the module writes into a readout variable instead of a Director value. A button shows
  * these verbatim, so the list is the one place that says what an operator can see besides a value.
+ * An empty readout is none of these: the Director sent an empty value (an empty string or None), or
+ * the feedback shares its property with another feedback under a different name and is not fed.
  */
 export const SENTINELS: readonly string[] = [
 	OFFLINE_VALUE,
@@ -22,6 +29,7 @@ export const SENTINELS: readonly string[] = [
 	PATH_ERROR_VALUE,
 	PATH_ERROR_UNSUBSCRIBED_VALUE,
 	UNSET_VALUE,
+	PENDING_VALUE,
 ]
 
 const SENTINEL_SET: ReadonlySet<string> = new Set(SENTINELS)

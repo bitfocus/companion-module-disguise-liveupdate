@@ -225,7 +225,7 @@ test('compareValues satisfies no comparison for a value whose state is unknown',
 	}
 	assert.deepEqual(
 		[...dist.SENTINELS].sort(),
-		['ERROR', 'OFFLINE', 'PATH_ERROR', 'PATH_ERROR (unsubscribed)', 'UNSET'],
+		['ERROR', 'OFFLINE', 'PATH_ERROR', 'PATH_ERROR (unsubscribed)', 'PENDING', 'UNSET'],
 		'the markers a button can show besides a value',
 	)
 	// a real value that merely contains a marker's text is still compared

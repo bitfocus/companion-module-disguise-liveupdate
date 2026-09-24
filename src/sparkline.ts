@@ -141,8 +141,8 @@ export function sparklineWindow(value: unknown): number {
 
 /**
  * The number a value is drawn at, or undefined for a gap: one of the texts a readout shows instead
- * of a Director value (OFFLINE, ERROR, PATH_ERROR, UNSET) and anything else that is not a number.
- * A numeric text counts as its number and an on/off value as 1 or 0.
+ * of a Director value (OFFLINE, ERROR, PATH_ERROR, UNSET, PENDING) and anything else that is not a
+ * number. A numeric text counts as its number and an on/off value as 1 or 0.
  */
 export function sampleOf(value: unknown): number | undefined {
 	if (typeof value === 'number') return Number.isFinite(value) ? value : undefined

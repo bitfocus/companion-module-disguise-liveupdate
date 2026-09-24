@@ -34,9 +34,9 @@
   button, so a frame rate or a latency shows its trend and not only its current number. The module
   renders the pixels itself, with no drawing dependency. Options: samples to keep (4..300, default 60,
   per feedback), automatic or fixed scale, line colour, fill and a threshold rule such as a frame
-  budget. A value the readout loses (OFFLINE, ERROR, PATH_ERROR, UNSET or anything that is not a
-  number) is drawn as a break, never joined across. On Companion 5 the line goes into an Image layer:
-  buttons placed from the presets have one, a button created by hand needs one added before the
+  budget. A value the readout loses (OFFLINE, PENDING, ERROR, PATH_ERROR, UNSET or anything that is
+  not a number) is drawn as a break, never joined across. On Companion 5 the line goes into an Image
+  layer: buttons placed from the presets have one, a button created by hand needs one added before the
   feedback (see HELP, *Seeing a trend*).
 - Command actions over Designer's Session REST API, on the same host and port. **Transport:** play,
   stop, play to end of section, loop section, return to start, next and previous section and track, go
@@ -75,10 +75,12 @@
 - `designer_version`: the Designer version of the connected Director, read on every connection. The
   log says so when the major version differs from r34, the one the catalog was verified on.
 - Readout markers. Besides `ERROR`, `PATH_ERROR` and `PATH_ERROR (unsubscribed)`, which 1.0.2 already
-  wrote, a readout can show `OFFLINE` (no connection) and the new `UNSET`: the path cannot be resolved
+  wrote, a readout can show `OFFLINE` (no connection), the new `UNSET`: the path cannot be resolved
   yet (an empty selection or `$NA`, an unparsed `$(...)`, an empty object or property path, a bare
-  empty name such as `track:""`, a template placeholder). The preset texts show these words as they
-  are, without formatting or unit. The list is exported as `SENTINELS`.
+  empty name such as `track:""`, a template placeholder), and the new `PENDING`: requested from the
+  Director, no value yet, so a readout that waits for its answer (just placed, after a reconnect,
+  during a retry) is never mistaken for a value the Director sends empty. The preset texts show these
+  words as they are, without formatting or unit. The list is exported as `SENTINELS`.
 - Connection settings for the default preset update intervals (monitoring, playhead, state, static).
 - Guard against paths that cannot be resolved: an empty path, a template placeholder, `$NA` or a raw
   `$(...)` reference, and for object paths a bare empty name (`track:""`) or a remote-monitor node
@@ -149,10 +151,10 @@
   selection id) are reserved: a feedback that uses one is not subscribed, and the log says so once.
 - When the connection drops, every readout owned by a LiveUpdate Variable feedback shows `OFFLINE`
   instead of the last value it had; 1.0.2 kept the stale value. Selections and the module's own
-  variables are left alone. After a reconnect each readout subscribes again or shows `UNSET`, and
-  saving the settings while the Director is away keeps `OFFLINE`. On disconnect and reconnect the
-  module re-checks Connection OK, LiveUpdate Compare, LiveUpdate Sparkline, Command armed and Last
-  command failed, so no state colour outlives the connection.
+  variables are left alone. After a reconnect each readout says `PENDING` until its value arrives or
+  shows `UNSET`, and saving the settings while the Director is away keeps `OFFLINE`. On disconnect
+  and reconnect the module re-checks Connection OK, LiveUpdate Compare, LiveUpdate Sparkline, Command
+  armed and Last command failed, so no state colour outlives the connection.
 - Clearing a selection or emptying a path makes the readout show `UNSET` instead of the previous
   object's value, unless another feedback still feeds the same variable name.
 - Shared subscriptions: identical object/property pairs share one Director subscription, requests are

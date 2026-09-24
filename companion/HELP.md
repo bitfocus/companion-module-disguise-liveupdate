@@ -151,10 +151,10 @@ rule such as a frame budget.
   It is held to 4..300, and a blank or unreadable value means 60. Each Sparkline draws its own number
   of samples; two Sparklines on the same variable share one history, kept for the longer window.
 - A value the readout loses shows as a break in the line and in the fill, never as a line joining the
-  values on either side: `OFFLINE` during an outage, `ERROR`, `PATH_ERROR`,
-  `PATH_ERROR (unsubscribed)`, `UNSET` and any other value that is not a number (empty text,
-  objects, arrays). An outage or an error streak of any length is one break, and the column the break
-  falls in stays empty.
+  values on either side: `OFFLINE` during an outage, `PENDING` while a request waits for its answer,
+  `ERROR`, `PATH_ERROR`, `PATH_ERROR (unsubscribed)`, `UNSET` and any other value that is not a number
+  (empty text, objects, arrays). An outage or an error streak of any length is one break, and the
+  column the break falls in stays empty.
   During an outage the button is redrawn with the break, so the line stops short of the right edge.
 - Numeric text is drawn as its number, and on/off values as 1 and 0. The fill covers every column
   under the line, also while the history is still short. With more samples than pixel columns, a
@@ -204,16 +204,19 @@ are all understood).
 
 A LiveUpdate Variable holds the Director's value: numbers, text and booleans as they are, objects and
 arrays as JSON text. In place of a value it can hold one of these words, and the preset buttons show
-them as they are, unformatted and without a unit, so you can read the state off the button itself:
+them as they are, unformatted and without a unit, so you can read the state off the button itself. The
+last two rows are not words the module writes:
 
 | On the button | Meaning |
 |---|---|
+| `PENDING` | requested from the Director, no value yet: the connection has just opened, the feedback was just placed or changed, or a request that failed or went unanswered is being made again |
 | `OFFLINE` | the connection to the Director is closed |
 | `ERROR` | the Director refused the object path: wrong name or type prefix, or the object does not exist |
 | `PATH_ERROR` | the object exists but the property path failed |
 | `PATH_ERROR (unsubscribed)` | the property path failed three times in a row; the subscription was dropped and is retried with a back-off |
 | `UNSET` | the path cannot be resolved yet: an empty selection or `$NA`, an unparsed `$(...)`, an empty object or property path, a bare empty name such as `track:""`, or a template placeholder such as `<OBJECT_PATH>` |
-| `$NA` | Companion's own text for a variable with no value. Either no value has arrived yet (the connection is coming up, or the Director has not answered the request), or this feedback shares its property with another feedback that uses a different variable name (only the first name receives the values; the log says so), or the name in the button text matches no feedback |
+| (empty) | the Director's value is empty: an empty text, or `None`. A feedback that shares its property with another feedback under a different Variable Name is empty as well: only the first name receives the values, and the log says "Feedbacks share ... with different variable names" |
+| `$NA` | Companion's own text for a variable that is not defined: the name in the button text matches no LiveUpdate Variable feedback of this connection, or the connection has not started |
 
 Formatted preset texts (numbers, times, on/off words, JSON fields) format only a value of the kind they
 expect and show anything else as it is: an on/off readout shows its words (YES / no, HELD / Live,
@@ -243,9 +246,9 @@ the module reconnects on its own after the *Reconnect Interval*.
 
 On disconnect and on reconnect the module re-checks *Connection OK*, *LiveUpdate Compare*,
 *LiveUpdate Sparkline*, *Command armed* and *Last command failed*, so no state colour outlives the
-connection. After a reconnect no readout stays `OFFLINE`: each one shows `$NA` (no value) and either subscribes
-again (its value arrives) or shows `UNSET`. Changing the host or port while connected shows `OFFLINE`
-in every readout until the new Director answers.
+connection. After a reconnect no readout stays `OFFLINE`: each one says `PENDING` until its value
+arrives, or shows `UNSET` when its path cannot be resolved. Changing the host or port while connected
+shows `OFFLINE` in every readout until the connection to the new Director opens.
 
 ## Configuration
 
@@ -829,10 +832,10 @@ equal / greater / greater or equal (numeric), is true / non-zero / non-empty, co
 any button, together with a LiveUpdate Variable feedback of the same name somewhere in the config.
 
 A value that is unknown satisfies no comparison, not even *not equal* or *is true*: no value yet,
-`null` (Python `None`), a Director error, or one of the words `OFFLINE`, `ERROR`, `PATH_ERROR`,
-`PATH_ERROR (unsubscribed)` and `UNSET`, also when the Director itself sends that text. A `PATH_ERROR`
-therefore never lights a "not equal" alarm: the button keeps its own colour and its text shows the
-word.
+`null` (Python `None`), a Director error, or one of the words `PENDING`, `OFFLINE`, `ERROR`,
+`PATH_ERROR`, `PATH_ERROR (unsubscribed)` and `UNSET`, also when the Director itself sends that text.
+A `PATH_ERROR` therefore never lights a "not equal" alarm: the button keeps its own colour and its
+text shows the word.
 
 ### LiveUpdate Sparkline
 
@@ -871,9 +874,10 @@ the connection with "Cannot convert JSON String to double" (the module reconnect
 
 A Number value is evaluated after its variables are parsed and only a finite number is sent. A value
 that refers to a readout of this connection, such as `$(liveupdate:brightness)-0.05`, is not sent
-while that readout has no numeric value yet (it is empty, `OFFLINE`, `UNSET`, ...): the expression
-would reach the Director as an absolute value. The check recognises the connection's own label, so it
-works for `liveupdate_2` or a renamed connection, and for variable names that contain `-` or `.`.
+while that readout has no numeric value yet (it is empty, `PENDING`, `OFFLINE`, `UNSET`, ...): the
+expression would reach the Director as an absolute value. The check recognises the connection's own
+label, so it works for `liveupdate_2` or a renamed connection, and for variable names that contain `-`
+or `.`.
 
 Writes to the same property in quick succession (a rotary encoder) are collapsed: the first goes out
 at once, then one write per 40 ms carries the latest value.
@@ -907,13 +911,22 @@ The *Transport:*, *RenderStream:* and *Failover:* actions and *Command: rescan t
 
 ## Variables
 
-- `connection_status`: `Connected` / `Disconnected`
-- `designer_version`: Designer version of the connected Director
+- `connection_status`: `Connected` / `Disconnected` (empty until the first connection attempt has an
+  outcome)
+- `designer_version`: Designer version of the connected Director (empty until it has been read, and
+  emptied when the host or port changes)
 - `selfcheck_progress`, `selfcheck_ok`, `selfcheck_failed`, `selfcheck_skipped`: the preset check
+  (empty until it first runs)
 - `rest_last_command`, `rest_last_status`, `rest_last_message`: the last command sent and its result
+  (empty until the first command is sent)
 - `rest_armed`: the most recent destructive command waiting for its second press (empty when none)
 - `selTrack`, `selLayer`, ...: the selections (see *Selections*), `$NA` while empty
-- one variable per placed LiveUpdate Variable feedback, named as configured
+- one variable per placed LiveUpdate Variable feedback, named as configured (see *What a readout
+  shows*)
+
+The module's own variables exist from the moment the connection starts, so a button text that uses
+one shows it empty, not `$NA`, until it has a value. The selections are the exception: an empty
+selection holds the text `$NA` itself.
 
 All of the module's own variables above, the selection ids included, are reserved and cannot be used
 as LiveUpdate Variable names. Only the exact selection ids are reserved, not every name starting with
@@ -961,12 +974,15 @@ Look at the button first: a readout shows what went wrong (see *What a readout s
 
 - `UNSET`: the path cannot be resolved yet. Usually the selection the preset depends on is empty;
   fill it in. The log says "Not subscribing feedback ...: the path cannot be resolved yet".
-- `$NA`: no value yet, or no feedback feeds that name. While the connection comes up every readout
-  shows `$NA` until its first value arrives; a request that stays unanswered for the *Pending
-  Subscription Timeout* is dropped and retried with the back-off. If it stays `$NA`, check that the
-  name in the button text matches the feedback's Variable Name, and that no other feedback watches
-  the same property under a different name (the log says "Feedbacks share ... with different variable
-  names").
+- `PENDING`: the module has asked the Director and waits for the answer; it normally lasts a moment.
+  A request that stays unanswered for the *Pending Subscription Timeout* is dropped and made again
+  with the back-off, and the readout keeps saying `PENDING` (the log says "Pending subscription timed
+  out").
+- Empty: the Director's value is empty (an empty text or `None`). If you expected a value, check that
+  no other feedback watches the same property under a different Variable Name: only the first name
+  receives the values (the log says "Feedbacks share ... with different variable names").
+- `$NA`: the variable name in the button text matches no feedback of this connection. Check the
+  spelling against the feedback's Variable Name, and the connection label (`$(liveupdate:...)`).
 - `OFFLINE`: the connection to the Director is closed; `connection_status` says `Disconnected` and
   the module reconnects on its own.
 - `ERROR`: the Director could not resolve the object path (wrong name, wrong type prefix, object does

@@ -46,8 +46,8 @@ export function isDirectorError(value: unknown): value is { errorType: unknown; 
  * everything else as text (objects and arrays as their JSON form).
  *
  * A value whose state is unknown - none yet, null, a Director error or one of the module's own
- * readout markers (OFFLINE, ERROR, PATH_ERROR, UNSET) - satisfies no comparison, including 'ne':
- * the button falls back to its base colour and its text shows the marker.
+ * readout markers (OFFLINE, ERROR, PATH_ERROR, UNSET, PENDING) - satisfies no comparison, including
+ * 'ne': the button falls back to its base colour and its text shows the marker.
  */
 export function compareValues(actual: unknown, operator: CompareOperator, expected: string): boolean {
 	if (actual === null || actual === undefined || isSentinel(actual) || isDirectorError(actual)) return false
