@@ -102,14 +102,18 @@ remembered, for example after a Designer upgrade; saving the connection settings
 
 ### Established on an r34.0.3 Director
 
-`scripts/rest-command-verify.mjs` sent the commands to a Designer r34.0.3 Director on 2026-09-04. Every
-step read the state, proved the command took effect and put it back
-(`docs/research/rest-verification.json`). Every transport command except *Go to tag* was sent and
-checked (*Set speed* was refused, see below), and so was *Sync layers*. Starting, stopping and restarting layers and
-the failover commands were not sent, because a second command does not undo them. The script sent its
-jumps with play mode `Stop`. The next / previous section and track actions now send the body the
-OpenAPI document records for them, with the play mode chosen on the button; that body has not been
-sent to a Director by the module yet.
+`scripts/rest-command-verify.mjs` sent the commands to a Designer r34.0.3 Director on 2026-09-04
+(`docs/research/rest-verification.json`). *Play*, *Stop*, *Play to end of section*, *Loop section*,
+*Return to start*, *Next section*, *Previous section*, *Go to section*, *Go to note*,
+*Go to timecode*, *Go to time*, *Set brightness*, *Set volume* and *Set engaged* were sent, checked
+and put back: each step read the state before and after the command and restored it. *Next track*,
+*Previous track* and *Go to track* were accepted but could not change the track, because the test
+project's set list had one track. *Sync layers* was accepted. *Set speed* was refused (see below) and
+*Go to tag* was not sent. Starting, stopping and restarting layers and the failover commands were not
+sent, because a second command does not undo them. The script sent its jumps with play mode `Stop`.
+The next / previous section and track actions now send the body the OpenAPI document records for
+them, with the play mode chosen on the button; that body has not been sent to a Director by the
+module yet.
 
 - *Go to section* takes the section **number**, counting from 0. The published API describes the
   field as a string, but Designer parses it as an integer and refuses a section name. To jump by the
@@ -918,7 +922,7 @@ This module sends the transport commands itself (see *Commands*), so
 [companion-module-disguise-osc](https://github.com/bitfocus/companion-module-disguise-osc) is
 optional. It can sit on the same page, for example for its fades. The transport presets use the OSC
 module's variable ids where the value matches, so button expressions can be moved between the two;
-all of these presets are in `04 Transport State`:
+all of these presets except *Connection status* (`01 Connection`) are in `04 Transport State`:
 
 | OSC module variable | LiveUpdate preset / variable | Notes |
 |---|---|---|

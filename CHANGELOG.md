@@ -102,16 +102,20 @@
   Director's OpenAPI document), `scripts/live-write-verify.mjs` and `scripts/rest-command-verify.mjs`
   (dry run without `--yes`). Their raw output goes to the git-ignored `.live/` folder, because it holds
   site data; writing into `docs/research` needs an explicit `--out` and a scrub. Exit codes: 0 clean,
-  1 a failure or something not restored or not confirmed, 2 refused before writing.
+  1 a failure or something not restored or not confirmed, 2 when a guard refused before writing;
+  `rest-command-verify.mjs` exits 1 without sending anything when the transport or the playhead cannot
+  be read, `--force` or not.
   - `live-write-verify.mjs` reads the current value, writes a small change, writes the original back
     and re-reads everything; a restore that fails stops the run, and an interrupt or a connection the
     Director closes restores the value in flight or prints `SET THIS BACK BY HAND`. The `neutral`
     group only touches a track that is not the transport's current one and the `output` group refuses
     to run while the transport plays. Both guards fail closed (a state that cannot be read refuses the
     run) and `--force` overrides them.
-  - `rest-command-verify.mjs` reads the state, sends each command, proves it took effect and puts it
-    back. It needs a stopped transport unless `--force` is given, never sends a failover command, and
-    a final sweep reports anything it could not put back.
+  - `rest-command-verify.mjs` reads the state, sends each command, reads the result back and puts it
+    back. The value, time and play / stop steps fail when the effect does not show; the section, note
+    and next / previous track jumps and RenderStream sync layers record what the Director showed and
+    pass once accepted. It needs a stopped transport unless `--force` is given, never sends a
+    failover command, and a final sweep reports anything it could not put back.
 - Live verification on Designer r34.0.3 (2026-09-04, two read-only passes): 280 of the 310
   default presets confirmed with a value; every catalog row carries its live result
   (`docs/PRESET_CATALOG.md`, column *live*). 103 experimental presets that returned a value
@@ -122,11 +126,14 @@
   the module's own actions (`test/live-write.e2e.ts`: Set Number with an expression, Toggle Boolean,
   Set JSON with a partial object). Every value came back to its original; the results are in
   `docs/research/live-write-*.json` and in the *write* column of `docs/PRESET_CATALOG.md`.
-- Command verification on the same Director (`docs/research/rest-verification.json`): every transport
-  command except go to tag, and RenderStream sync, was sent, checked and undone; set speed was refused
-  because Designer's *enableTransportSpeedControl* was off. The jumps were sent with the script's own
-  body (play mode `Stop`); the next and previous section and track steps have not been sent with the
-  body the module sends now.
+- Command verification on the same Director (`docs/research/rest-verification.json`): play, stop,
+  play to end of section, loop section, return to start, next and previous section, go to section,
+  go to note, go to timecode, go to time, brightness, volume and engaged were sent, checked and put
+  back. Next track, previous track and go to track were accepted but could not change the track,
+  because the test project's set list had one track. RenderStream sync layers was accepted. Set speed
+  was refused because Designer's *enableTransportSpeedControl* was off, and go to tag was not sent.
+  The jumps were sent with the script's own body (play mode `Stop`); the next and previous section
+  and track steps have not been sent with the body the module sends now.
 
 ### Changed
 
@@ -178,10 +185,11 @@
 - The live-verification evidence carries no identity of the rig it was recorded on. Resource uids use
   the placeholder family `0x0123456789abcdeX` (the d3net.apx uid is `0x0123456789abcde2`), the
   workload ids `1000000000000000001` to `1000000000000000003` (`1000000000000000000` where a value
-  is rounded), and addresses RFC 5737 documentation addresses. Designer's own error texts, class names, status words, version strings, machine type and
-  monitor names are kept. Per-camera monitor names, layer, cue and section lists, timecode positions,
-  graph samples, network adaptors and project and session names are redacted. The write runs' track
-  list reads demo / track 1 / track 2 / Show Track.
+  is rounded), and addresses RFC 5737 documentation addresses. Designer's own error texts, class
+  names, status words, version strings, machine type and monitor names are kept. Per-camera monitor
+  names, layer, cue and section lists, timecode positions, graph samples, network adaptors and project
+  and session names are redacted. The write runs' track list reads demo / track 1 / track 2 /
+  Show Track.
 - HELP rewritten: commands, selections, readout markers, preset list, OSC-module pairing, object path
   reference, limits.
 - Tooling aligned with the Bitfocus module template: ESLint 9 flat config, prettier, TypeScript

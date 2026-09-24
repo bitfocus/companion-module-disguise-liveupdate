@@ -191,8 +191,11 @@ before it is committed. `scripts/live-verify.config.json`, the optional selectio
 `live-verify.mjs`, is git-ignored too.
 
 The write scripts exit 0 when the run was clean, 1 on a failure or when something was not restored or
-not confirmed, and 2 when they refused before writing (or on a usage error). Their guards fail closed:
-a state they cannot read counts as the unsafe one. `--force` overrides every refusal.
+not confirmed, and 2 when a guard refused before writing (or on a usage error). Their guards fail
+closed: a state they cannot read counts as the unsafe one. `--force` overrides the track and play-state
+guards, not every refusal: `rest-command-verify.mjs` exits 1 without sending anything when the
+Director reports no active transport or the playhead cannot be read over LiveUpdate, with or without
+`--force`.
 
 `live-write-verify.mjs` changes values on the Director. It reads the original value first, restores
 it afterwards, re-reads everything at the end, stops on a failed restore and restores the value in
@@ -207,9 +210,13 @@ connection mid-run, the script restores the value in flight when it can, prints
 A final read-back that cannot read a value is recorded as `UNVERIFIED: <reason>` and counts as not
 confirmed; the verdict lists values not restored and values not confirmed separately.
 
-`rest-command-verify.mjs` sends the REST commands to the Director. Every step reads the state first,
-proves the command took effect and puts it back, and a step that is interrupted still restores. It
-never sends a failover command, and of the RenderStream commands only `synclayers`: starting or
+`rest-command-verify.mjs` sends the REST commands to the Director. Every step reads the state first
+and puts it back afterwards, and a step that is interrupted still restores. The brightness, volume,
+speed, engaged, time, timecode, return-to-start and play / stop steps fail when the read-back does not
+show the command's effect. The section and note jumps, next / previous track and `synclayers` record
+what the Director showed and pass once the command was accepted (a set list with one track cannot
+change track); go to track selects the track that is already current and fails if the track changes.
+It never sends a failover command, and of the RenderStream commands only `synclayers`: starting or
 stopping a workload is not undone by a second command. It needs a stopped transport: `--yes` is
 refused while the play mode is not Stop or cannot be read, unless `--force` is given. With `--force`,
 once the final sweep has put track, time, brightness, volume, speed and engaged back, the script
