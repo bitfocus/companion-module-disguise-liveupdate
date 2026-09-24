@@ -410,10 +410,30 @@ test('the offline renderer reproduces what Companion 5.0.4 shows', () => {
 	assert.equal(render('`x ${$(liveupdate:v)}`', {}), 'x $NA')
 	assert.equal(render('`${secondsToTimestamp($(liveupdate:v))}`', v(3725)), '01:02:05')
 	assert.equal(render('`${isNumber($(liveupdate:v))} ${isNumber("")} ${isNumber("2.5")}`', v(true)), 'false false true')
+	// == is loose: an empty value (a Director '' or None) equals 0, and toFixed formats it as 0
+	assert.equal(render("`${$(liveupdate:v) == 0 ? 'Off' : 'on'}`", v('')), 'Off')
+	assert.equal(render('`${toFixed($(liveupdate:v), 1)}`', v('')), '0.0')
 	assert.throws(() => render('`${notAFunction(1)}`'), /notAFunction/)
 })
 
-test('every expression text shows a readout marker or an undefined value as it is', () => {
+test('the check refuses a text that shows an empty value as anything but empty', () => {
+	const problems = (text: string): string[] => expression.markerProblems(text, dist.SENTINELS)
+	// the ev_dev_error text 1.1.0 was drafted with: OK for '', which a Director None becomes as well
+	const drafted =
+		"`Var ${$(liveupdate:selEvIndex)} err\n${$(liveupdate:evDevError) == '' ? 'OK' : $(liveupdate:evDevError)}`"
+	assert.match(problems(drafted).join('\n'), /liveupdate:evDevError = "" renders "Var \$NA err\\nOK"/)
+	// loose comparisons that '' satisfies: an enum word and an on/off word; both show every marker
+	assert.match(problems("`${$(liveupdate:v) == 0 ? 'Off' : $(liveupdate:v)}`").join('\n'), /renders "Off"/)
+	const onOff = "`${$(liveupdate:v) === true ? 'YES' : $(liveupdate:v) == false ? 'no' : $(liveupdate:v)}`"
+	assert.match(problems(onOff).join('\n'), /renders "no"/)
+	// a guarded text passes, also when its own title holds the words of a marker
+	assert.deepEqual(
+		problems('`OFFLINE machines\n${isNumber($(liveupdate:v)) ? round($(liveupdate:v)) : $(liveupdate:v)}`'),
+		[],
+	)
+})
+
+test('every expression text shows a readout marker, an empty value or an undefined value as it is', () => {
 	// the generator reads the markers from the source; they must be the ones the module writes
 	const fromSource = expression.readMarkers(readFileSync(path.join(ROOT, 'src/variables.ts'), 'utf8'))
 	assert.deepEqual(fromSource, [...dist.SENTINELS])
@@ -437,6 +457,16 @@ test('every expression text shows a readout marker or an undefined value as it i
 	assert.equal(render(text('fo_targets'), liveupdate({ understudyTargets: 'OFFLINE' })), 'Targets\\nOFFLINE')
 	assert.equal(render(text('rs_layer_framerate'), liveupdate({})), 'FPS Fraction\\n$NA')
 	assert.equal(render(text('stg_screen_offset'), liveupdate({ screenOffset: 'OFFLINE' })), 'Offset (m)\\nOFFLINE')
+	assert.equal(render(text('tr_speed'), liveupdate({ speed: 'PENDING' })), 'Speed\\nPENDING')
+	// an empty value stays empty: no 0, no enum word, no OK
+	assert.equal(render(text('monl_fps'), liveupdate({ fps: '' })), 'FPS\\n')
+	assert.equal(render(text('stg_screen_render_layer'), liveupdate({ screenRenderLayer: '' })), 'Layer\\n')
+	assert.equal(render(text('tr_playing'), liveupdate({ isPlaying: '' })), 'Playing\\n')
+	assert.equal(render(text('ev_dev_error'), liveupdate({ selEvIndex: '0', evDevError: '' })), 'Var 0 err\n')
+	assert.equal(
+		render(text('ev_dev_error'), liveupdate({ selEvIndex: '0', evDevError: 'duplicate' })),
+		'Var 0 err\nduplicate',
+	)
 })
 
 /** Normal values render exactly as the unguarded texts did (outputs recorded from those texts) */

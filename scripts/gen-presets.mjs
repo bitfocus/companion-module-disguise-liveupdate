@@ -70,9 +70,9 @@ function convertRow(row) {
 		throw new Error(`${id}: textExpression is set but the text is not a template literal`)
 	if (/\$\((?!liveupdate:)[a-z]+:/.test(`${row.textTemplate} ${row.objectPath} ${row.propertyPath}`))
 		throw new Error(`${id}: references a variable of another connection; presets may only use $(liveupdate:...)`)
-	// A readout holds OFFLINE, ERROR, PATH_ERROR or UNSET, or nothing yet, as often as a value: the
-	// button has to show that, not format it into NaN or a healthy-looking word (rendered the way
-	// Companion 5.0.4 does, see companion-expression.cjs)
+	// A readout holds PENDING, OFFLINE, ERROR, PATH_ERROR or UNSET, an empty value (a Director '' or
+	// None) or nothing at all as often as a value: the button has to show that, not format it into NaN
+	// or a healthy-looking word (rendered the way Companion 5.0.4 does, see companion-expression.cjs)
 	if (row.textExpression) {
 		const problems = markerProblems(row.textTemplate, markers)
 		if (problems.length) hidingTexts.push(`${id}:\n    ${problems.join('\n    ')}`)

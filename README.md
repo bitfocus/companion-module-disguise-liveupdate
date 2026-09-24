@@ -114,8 +114,9 @@ exercised, its write result. Three generators read it — `scripts/gen-presets.m
 `scripts/gen-help.mjs` refreshes the preset list in `companion/HELP.md`. `src/presets.ts` turns the
 generated catalog into Companion preset definitions at runtime, applying the connection settings and
 the connection's own label. `scripts/gen-presets.mjs` refuses to generate when a button text would
-hide one of the readout markers (`SENTINELS` in `src/variables.ts`) or an undefined value, or would
-render NaN, and when preset content carries a `<redacted` placeholder.
+hide one of the readout markers (`SENTINELS` in `src/variables.ts`) or an undefined value, would show
+an empty value (a Director `''` or `None`) as anything but empty, or would render NaN, and when preset
+content carries a `<redacted` placeholder.
 `scripts/companion-expression.cjs` renders a button text with Companion 5.0.4's expression semantics
 for that check (it uses the `typescript` devDependency).
 

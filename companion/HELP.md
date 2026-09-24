@@ -222,8 +222,9 @@ Formatted preset texts (numbers, times, on/off words, JSON fields) format only a
 expect and show anything else as it is: an on/off readout shows its words (YES / no, HELD / Live,
 RUNNING / STOPPED, ...) only for a real true or false, a numeric readout decodes only numbers, and a
 JSON readout shows the raw value when it is not JSON. A button therefore never shows NaN or a
-healthy-looking word for a value it does not have. When you edit a preset's text, keep its
-`isNumber(...)` / `jsonparse(...) === null` guard.
+healthy-looking word for a value it does not have, and an empty value stays empty (never 0, OK or an
+on/off word). When you edit a preset's text, keep its `isNumber(...)` / `jsonparse(...) === null`
+guard, and keep a comparison such as `== 0` inside it: in a Companion expression `'' == 0` is true.
 
 Clearing a selection, or emptying a path, makes the readout show `UNSET` instead of the previous
 object's value, unless another feedback still feeds the same variable name; a *LiveUpdate Compare* on
@@ -796,7 +797,7 @@ _310 presets ship by default; 25 experimental presets appear when "Show experime
 | [EXP] EV string by device+index | Value of the i-th String variable via the device-name prefix. | `expressionvariablesdevice:"$(liveupdate:selEvDevice)"` | `object.container.variables[$(liveupdate:selEvIndex)].defaultString` | `evDevString` | readout |
 | [EXP] EV name by device+index | Name of the i-th variable via the device-name prefix (dynamic button label). | `expressionvariablesdevice:"$(liveupdate:selEvDevice)"` | `object.container.variables[$(liveupdate:selEvIndex)].name` | `evDevName` | readout |
 | [EXP] EV type by device+index | Type enum of the i-th variable via the device-name prefix. | `expressionvariablesdevice:"$(liveupdate:selEvDevice)"` | `object.container.variables[$(liveupdate:selEvIndex)].type` | `evDevType` | readout |
-| [EXP] EV error text by device+index | Health readout: error text of the i-th variable (duplicate definition or bad Function expression); empty is assumed OK. | `expressionvariablesdevice:"$(liveupdate:selEvDevice)"` | `object.container.variables[$(liveupdate:selEvIndex)].errorText` | `evDevError` | readout |
+| [EXP] EV error text by device+index | Health readout: error text of the i-th variable (duplicate definition or bad Function expression); an empty line is assumed OK. | `expressionvariablesdevice:"$(liveupdate:selEvDevice)"` | `object.container.variables[$(liveupdate:selEvIndex)].errorText` | `evDevError` | readout |
 | [EXP] EV makeExpression() by index | Experiment: string returned by the variable's makeExpression() - presumably the 'name = value' / function text. | `expressionvariablesdevice:"$(liveupdate:selEvDevice)"` | `object.container.variables[$(liveupdate:selEvIndex)].makeExpression()` | `evDevExpression` | readout |
 | [EXP] EV float by variable name | Float value looked up by variable name (robust to row reordering in the device editor). | `expressionvariablesdevice:"$(liveupdate:selEvDevice)"` | `[v.defaultFloat for v in object.container.variables if v.name == "$(liveupdate:selEvName)"][0]` | `evFloatByName` | readout |
 | [EXP] EV value by variable name | Value looked up by name regardless of type (float for Float, string for String/Function). | `expressionvariablesdevice:"$(liveupdate:selEvDevice)"` | `[(v.defaultFloat if v.type == 0 else v.defaultString) for v in object.container.variables if v.name == "$(liveupdate:selEvName)"][0]` | `evValueByName` | readout |

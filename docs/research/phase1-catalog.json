@@ -12761,7 +12761,7 @@
    "homeCategory": "08 Expression Variables",
    "tier": "experimental",
    "name": "EV error text by device+index",
-   "purpose": "Health readout: error text of the i-th variable (duplicate definition or bad Function expression); empty is assumed OK.",
+   "purpose": "Health readout: error text of the i-th variable (duplicate definition or bad Function expression); an empty line is assumed OK.",
    "controlKind": "readout",
    "objectPath": "expressionvariablesdevice:\"$(liveupdate:selEvDevice)\"",
    "propertyPath": "object.container.variables[$(liveupdate:selEvIndex)].errorText",
@@ -12770,9 +12770,9 @@
    "range": "empty string = OK (assumption)",
    "writable": "no",
    "freqClass": "state",
-   "textTemplate": "`Var ${$(liveupdate:selEvIndex)} err\n${$(liveupdate:evDevError) == '' ? 'OK' : $(liveupdate:evDevError)}`",
+   "textTemplate": "`Var ${$(liveupdate:selEvIndex)} err\n${$(liveupdate:evDevError)}`",
    "textExpression": true,
-   "previewText": "Var 0 err\nOK",
+   "previewText": "Var 0 err\n",
    "bgcolor": "rgb(70,70,90)",
    "color": "rgb(220,220,220)",
    "candidateIds": [
@@ -12794,8 +12794,13 @@
    "notes": "errorText has no docstring; linking it to the help page's 'error state' message is an assumption. pyi setter exists but is never exposed.",
    "dimension": "exprvars",
    "verifierOk": true,
-   "verifierProblems": [],
-   "corrected": [],
+   "verifierProblems": [
+    "Fixed: the text showed OK for an empty value, which is also what the readout holds when the Director sends None. It now shows the error text as it is: an empty line means no error text, and the state colour turns red only for a text that is not empty."
+   ],
+   "corrected": [
+    "textTemplate",
+    "previewText"
+   ],
    "live": {
     "date": "2026-09-04",
     "probe": "sweep",
@@ -17345,7 +17350,7 @@
    "liveTestPriority": "low",
    "subscriptions": 1,
    "designerVersion": "any (module behaviour only)",
-   "notes": "Feedback: liveUpdateVariable {variableName: myValue, objectPath: <OBJECT_PATH>, propertyPath: object.<PROPERTY_PATH>, updateFrequency: presetIntervalState}. Companion substitutes $(liveupdate:myValue) in plain text mode; before the Director confirms, the variable is undefined and the text shows $NA.",
+   "notes": "Feedback: liveUpdateVariable {variableName: myValue, objectPath: <OBJECT_PATH>, propertyPath: object.<PROPERTY_PATH>, updateFrequency: presetIntervalState}. Companion substitutes $(liveupdate:myValue) in plain text mode; until the first value arrives the readout says PENDING, and a value the Director sends empty (or None) shows as an empty line.",
    "dimension": "connection_templates",
    "verifierOk": true,
    "verifierProblems": [],
@@ -17387,7 +17392,7 @@
    "liveTestPriority": "low",
    "subscriptions": 1,
    "designerVersion": "any (module behaviour only)",
-   "notes": "Expression mode, same backtick/\\n style as src/presets.ts. Swap toFixed for round, secondsToTimestamp or msToTimestamp depending on the member. The isNumber() guard shows OFFLINE, ERROR, PATH_ERROR, UNSET or $NA as it is instead of formatting it into NaN; keep it when you swap the function. Optional colour-by-value: add a liveUpdateCompare rule once extension 3 exists (no default rule shipped on the template).",
+   "notes": "Expression mode, same backtick/\\n style as src/presets.ts. Swap toFixed for round, secondsToTimestamp or msToTimestamp depending on the member. The isNumber() guard shows PENDING, OFFLINE, ERROR, PATH_ERROR, UNSET, an empty value or $NA as it is instead of formatting it into NaN or 0; keep it when you swap the function. Optional colour-by-value: add a liveUpdateCompare rule once extension 3 exists (no default rule shipped on the template).",
    "dimension": "connection_templates",
    "verifierOk": true,
    "verifierProblems": [

@@ -14,7 +14,8 @@
 // $(label:name) as a variable, so the grammar and the precedence are those of JavaScript.
 //
 // Used by scripts/gen-presets.mjs, which refuses to generate a catalog whose button text hides a
-// readout marker, and by test/catalog.test.ts, which checks the generated catalog the same way.
+// readout marker or shows an empty value as anything but empty, and by test/catalog.test.ts, which
+// checks the generated catalog the same way.
 
 'use strict'
 
@@ -321,10 +322,23 @@ function renderExpression(text, values = {}) {
  * text reads, the text is rendered with that variable holding each marker and undefined, once with
  * the other variables undefined and once with all of them holding the same value. The marker, or
  * $NA for undefined, has to reach the button, and nothing may be formatted into NaN.
+ *
+ * An empty value ('', which is also what an empty string or a None from the Director becomes) is
+ * rendered the same two ways and has to come out exactly as a marker does with the marker's own
+ * words left out: shown as it is, never turned into NaN, a formatted 0, a true / false word or an
+ * enum word (`'' == 0` is true in Companion's loose equality, `isNumber('')` is false).
  */
 function markerProblems(text, markers) {
 	const problems = []
 	const ids = referencedVariables(text)
+	const render = (context, values) => {
+		try {
+			return renderExpression(text, values)
+		} catch (error) {
+			problems.push(`${context}: ${error.message}`)
+			return undefined
+		}
+	}
 	for (const id of ids) {
 		for (const probe of [...markers, undefined]) {
 			for (const othersToo of ids.length > 1 ? [false, true] : [false]) {
@@ -333,16 +347,36 @@ function markerProblems(text, markers) {
 				values[id] = probe
 				const shown = probe === undefined ? UNKNOWN_VALUE : probe
 				const context = `${id} = ${probe === undefined ? 'undefined' : JSON.stringify(probe)}${othersToo ? ' (all variables)' : ''}`
-				let output
-				try {
-					output = renderExpression(text, values)
-				} catch (error) {
-					problems.push(`${context}: ${error.message}`)
-					continue
-				}
+				const output = render(context, values)
+				if (output === undefined) continue
 				if (!output.includes(shown)) problems.push(`${context} renders ${JSON.stringify(output)}, not ${shown}`)
 				else if (output.includes('NaN')) problems.push(`${context} renders ${JSON.stringify(output)}`)
 			}
+		}
+	}
+	// the marker an empty value is compared with: one whose words the text does not contain itself
+	const reference = markers.find((marker) => !String(text).includes(marker))
+	if (ids.length && reference === undefined) problems.push('contains every marker, so an empty value cannot be checked')
+	if (reference === undefined) return problems
+	for (const id of ids) {
+		for (const othersToo of ids.length > 1 ? [false, true] : [false]) {
+			const empty = {}
+			const marked = {}
+			for (const other of ids) {
+				empty[other] = othersToo ? '' : undefined
+				marked[other] = othersToo ? reference : undefined
+			}
+			empty[id] = ''
+			marked[id] = reference
+			const context = `${id} = ""${othersToo ? ' (all variables)' : ''}`
+			const output = render(context, empty)
+			const expected = render(`${context} (compared with ${reference})`, marked)
+			if (output === undefined || expected === undefined) continue
+			const shown = expected.replaceAll(reference, '')
+			if (output !== shown || output.includes('NaN'))
+				problems.push(
+					`${context} renders ${JSON.stringify(output)}, not the empty value as it is (${JSON.stringify(shown)})`,
+				)
 		}
 	}
 	return problems

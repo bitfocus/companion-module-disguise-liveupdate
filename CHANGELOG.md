@@ -90,8 +90,9 @@
 - `scripts/gen-presets.mjs`, `scripts/gen-help.mjs` and `scripts/render-catalog.mjs` regenerate the
   preset table, the HELP preset list and the rendered catalog from the catalog JSON.
   `scripts/gen-presets.mjs` refuses a button text that would hide a readout marker or an undefined
-  value, or render NaN, checked with `scripts/companion-expression.cjs`, which renders a text with
-  Companion 5.0.4's expression semantics.
+  value, show an empty value (a Director `''` or `None`) as anything but empty, or render NaN,
+  checked with `scripts/companion-expression.cjs`, which renders a text with Companion 5.0.4's
+  expression semantics.
 - `scripts/build-dev-module.mjs` builds a self-contained folder for Companion's Developer modules
   path, with an optional custom label and a semver version (default: the package version). It only
   ever deletes its own earlier build.
