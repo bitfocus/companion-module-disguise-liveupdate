@@ -3,33 +3,50 @@
 // This script changes values in the running project. For every target it reads the current value,
 // writes a small change, waits for the Director to report it, writes the original value back, waits
 // for that too, and finally re-reads every touched property. A restore that fails stops the run.
-// If the run is interrupted (Ctrl+C) or crashes while a value is changed, the handler writes the
-// original value back before exiting and always leaves the results file on disk.
+// If the run is interrupted (Ctrl+C), crashes or loses the connection while a value is changed, the
+// handler writes the original value back when it still can, prints "SET THIS BACK BY HAND" for what
+// it could not, exits non-zero and always leaves the results file on disk. A final read-back that
+// cannot read a value counts as not confirmed.
 //
 // Targets are grouped by their effect on the show output:
 //   neutral (default) - layer properties on a track that is NOT the transport's current track, and
-//                       that track's tc_adjust. Nothing that is on air changes.
+//                       that track's tc_adjust. Nothing that is on air changes. The script refuses
+//                       to write when the track is the current one (a single-track project, or
+//                       --track) or when the current track could not be read.
 //   output            - master brightness/volume, surface and projector master fade, hold output,
 //                       surface offset/rotation, render layer (on/off stage), Expression Variables.
 //                       These are visible on the live output for the moment between write and
-//                       restore; the script refuses to run them while the transport is playing
-//                       unless --force is given.
-// Machine.role / targets / hostname (failover topology) are never written.
+//                       restore; the script refuses to run them while the transport is playing, or
+//                       when the playing state could not be read.
+// --force skips those refusals. Machine.role / targets / hostname (failover topology) are never
+// written.
 //
 // Usage:
 //   node scripts/live-write-verify.mjs --host 192.0.2.10 [--port 80] [--group neutral|output|all]
 //        [--yes] [--force] [--track "Track 1"] [--layer "Video 1"] [--screen "surface 1"]
 //        [--projector "projector 1"] [--screen-uid 0x...] [--ev-uid 0x...] [--timeout 4000]
 //        [--only <substring of a property path or preset id>]
-//        [--out docs/research/live-write-verification.json]
+//        [--out <file, default .live/live-write-verification.json>]
 //
 // Without --yes nothing is written: the script discovers the targets, reads the current values and
-// prints the plan.
+// prints the plan. The results file is raw site data; it goes to the git-ignored .live/ folder unless
+// --out names another file.
 
-import { writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import WebSocket from 'ws'
+
+const require = createRequire(import.meta.url)
+const {
+	liveOutFile,
+	siteDataReminder,
+	writeRefusal,
+	unverifiedLabel,
+	unsettled,
+	watchClose,
+} = require('./live-safety.cjs')
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = parseArgs(process.argv.slice(2))
@@ -47,7 +64,7 @@ if (!['neutral', 'output', 'all'].includes(group)) {
 	console.error(`unknown --group ${group}`)
 	process.exit(2)
 }
-const outFile = resolve(root, args.out ?? 'docs/research/live-write-verification.json')
+const outFile = liveOutFile(root, args.out, 'live-write-verification.json')
 
 function parseArgs(argv) {
 	const out = {}
@@ -74,6 +91,9 @@ class Client {
 		this.waiters = []
 		this.errors = []
 		this.latest = new Map()
+		/** called with a reason when the Director closes the connection */
+		this.onUnexpectedClose = null
+		this.closeSocket = null
 	}
 	async connect() {
 		this.ws = new WebSocket(this.url)
@@ -83,6 +103,11 @@ class Client {
 		})
 		this.ws.on('error', (e) => this.errors.push({ at: stamp(), error: `socket: ${e.message}` }))
 		this.ws.on('message', (d) => this.onMessage(d.toString()))
+		this.closeSocket = watchClose(this.ws, (reason) => this.onUnexpectedClose?.(reason))
+	}
+	/** The script's own close, which is not an interruption */
+	close() {
+		if (this.closeSocket) this.closeSocket()
 	}
 	onMessage(text) {
 		let msg
@@ -199,6 +224,7 @@ const state = {
 function saveResults(extra = {}) {
 	const summary = {}
 	for (const e of state.results) summary[e.result] = (summary[e.result] || 0) + 1
+	mkdirSync(dirname(outFile), { recursive: true })
 	writeFileSync(
 		outFile,
 		JSON.stringify(
@@ -227,6 +253,7 @@ async function emergencyRestore(reason) {
 		try {
 			const r = await state.client.setAndWait(f.id, f.original, f.match, 3000)
 			console.error(r.ok ? '!! restored' : `!! RESTORE FAILED, the Director still reports ${short(r.value)}`)
+			if (!r.ok) console.error(`!! SET THIS BACK BY HAND: ${f.label} = ${JSON.stringify(f.original)}`)
 			saveResults({ interrupted: reason, emergencyRestore: r.ok ? 'ok' : 'failed' })
 		} catch (e) {
 			console.error(`!! could not restore: ${String(e)}`)
@@ -236,7 +263,13 @@ async function emergencyRestore(reason) {
 	} else {
 		saveResults({ interrupted: reason })
 	}
+	// values an earlier restore or the final read-back could not confirm
+	for (const e of unsettled(state.results).byHand)
+		console.error(
+			`!! SET THIS BACK BY HAND: ${e.object} / ${e.property} = ${JSON.stringify(e.restoreValue ?? e.before)}`,
+		)
 	console.error(`!! results written to ${outFile}`)
+	for (const line of siteDataReminder(root, outFile)) console.error(line)
 	process.exit(1)
 }
 
@@ -267,17 +300,21 @@ async function discover(client) {
 		'[t.description for t in resourceManager.allResources(Track)]',
 	)
 	const notes = []
+	const known = typeof current.value === 'string'
+	if (!known) notes.push(`WARNING: the transport's current track could not be read (${current.error ?? 'no value'})`)
 	if (!sel.track) {
 		const list = Array.isArray(tracks.value) ? tracks.value : []
+		if (!Array.isArray(tracks.value))
+			notes.push(`WARNING: the track list could not be read (${tracks.error ?? 'no list'})`)
 		const other = list.find((t) => t !== current.value)
-		sel.track = other ?? current.value
-		notes.push(
-			other
-				? `layer tests use track "${sel.track}", which is not the transport's current track "${current.value}"`
-				: `WARNING: only one track is available, so the layer tests run on the transport's current track "${sel.track}"`,
-		)
+		sel.track = other ?? (known ? current.value : undefined)
+		if (sel.track === undefined) notes.push('no track found; the track and layer tests are skipped')
+		else if (!known) notes.push(`layer tests would use track "${sel.track}", which may be on air`)
+		else if (other)
+			notes.push(`layer tests use track "${sel.track}", which is not the transport's current track "${current.value}"`)
+		else notes.push(`WARNING: only one track is available, and it is the transport's current track "${sel.track}"`)
 	} else if (sel.track === current.value) {
-		notes.push(`WARNING: --track is the transport's current track "${sel.track}"; layer changes are on air`)
+		notes.push(`WARNING: --track is the transport's current track "${sel.track}"; layer changes would be on air`)
 	}
 	if (!sel.layer && sel.track) {
 		const video = await read(`track:"${sel.track}"`, '[l.name for l in object.getLeafLayers(VariableVideoModule)]')
@@ -531,11 +568,13 @@ async function main() {
 	const client = new Client(`ws://${host}:${port}/api/session/liveupdate`)
 	state.client = client
 	console.log(`connecting to ${client.url}${write ? ` (group ${group}, WRITING)` : ' (dry run, nothing is written)'}`)
+	client.onUnexpectedClose = (reason) => void emergencyRestore(reason)
 	await client.connect()
 	const { sel, currentTrack, playing, tracks, notes } = await discover(client)
 	for (const n of notes) console.log('note:', n)
 	console.log('targets:', sel)
-	console.log(`transport: track "${currentTrack}", playing=${JSON.stringify(playing)}`)
+	const trackText = typeof currentTrack === 'string' ? `"${currentTrack}"` : 'unknown'
+	console.log(`transport: track ${trackText}, playing=${JSON.stringify(playing) ?? 'unknown'}`)
 	state.meta = {
 		host,
 		port,
@@ -549,15 +588,23 @@ async function main() {
 	}
 
 	const list = targets(sel)
-	const touchesOutput = list.some((t) => t.group === 'output')
-	if (write && touchesOutput && playing === true && !force) {
-		console.error(
-			'the transport is playing and this group changes the live output; re-run with --force or stop playback',
-		)
-		saveResults({ refused: 'transport playing' })
-		client.ws.close()
-		process.exitCode = 2
-		return
+	const refusal = writeRefusal({
+		neutral: list.some((t) => t.group === 'neutral'),
+		output: list.some((t) => t.group === 'output'),
+		track: sel.track,
+		currentTrack,
+		playing,
+		force,
+	})
+	if (refusal) {
+		if (write) {
+			console.error(`refusing to write: ${refusal}`)
+			saveResults({ refused: refusal })
+			client.close()
+			process.exitCode = 2
+			return
+		}
+		console.log(`note: with --yes the script would stop here - ${refusal}`)
 	}
 
 	for (const t of list) {
@@ -651,7 +698,8 @@ async function main() {
 					: e.kind === 'boolean'
 						? check.value === e.before
 						: objectMatch(e.before)(check.value)
-			e.finalCheck = same ? 'original value confirmed' : `DIFFERS: ${short(check.value)}`
+			// a value that could not be read is not confirmed: it is UNVERIFIED, never silently good
+			e.finalCheck = same ? 'original value confirmed' : (unverifiedLabel(check) ?? `DIFFERS: ${short(check.value)}`)
 			if (!same && check.id !== undefined) {
 				console.log(
 					`final    ${e.object} / ${e.property}: ${short(check.value)} differs from ${short(e.before)} - re-sending the original`,
@@ -678,18 +726,25 @@ async function main() {
 	const summary = {}
 	for (const e of state.results) summary[e.result] = (summary[e.result] || 0) + 1
 	console.log('summary', summary)
-	const bad = state.results.filter(
-		(e) => e.result === 'RESTORE FAILED' || String(e.finalCheck ?? '').startsWith('STILL DIFFERS'),
-	)
-	if (bad.length) {
-		console.error(`VERDICT: ${bad.length} value(s) could NOT be restored:`)
-		for (const e of bad) console.error(`  ${e.object} / ${e.property} should be ${JSON.stringify(e.before)}`)
-		process.exitCode = 1
-	} else if (write) {
-		console.log('VERDICT: every written value was restored and confirmed by a final read-back')
+	const { notRestored, unconfirmed, byHand } = unsettled(state.results)
+	if (notRestored.length) {
+		console.error(`VERDICT: ${notRestored.length} value(s) could NOT be restored during the run:`)
+		for (const e of notRestored)
+			console.error(`  ${e.object} / ${e.property}: final read-back ${e.finalCheck ?? 'not run'}`)
 	}
+	if (unconfirmed.length) {
+		console.error(`VERDICT: ${unconfirmed.length} value(s) could not be confirmed by the final read-back:`)
+		for (const e of unconfirmed) console.error(`  ${e.object} / ${e.property}: ${e.finalCheck}`)
+	}
+	for (const e of byHand)
+		console.error(
+			`!! SET THIS BACK BY HAND: ${e.object} / ${e.property} = ${JSON.stringify(e.restoreValue ?? e.before)}`,
+		)
+	if (notRestored.length || unconfirmed.length) process.exitCode = 1
+	else if (write) console.log('VERDICT: every written value was restored and confirmed by a final read-back')
 	console.log('wrote', outFile)
-	client.ws.close()
+	for (const line of siteDataReminder(root, outFile)) console.log(line)
+	client.close()
 }
 
 main().catch((e) => void emergencyRestore(`error: ${String(e)}`))

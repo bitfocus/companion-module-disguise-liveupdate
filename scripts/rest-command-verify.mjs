@@ -7,31 +7,53 @@
 //
 // Usage:
 //   node scripts/rest-command-verify.mjs --host 192.0.2.10 [--port 80]
-//        [--group transport|renderstream|all] [--yes] [--out docs/research/rest-verification.json]
+//        [--group transport|renderstream|all] [--yes] [--force]
+//        [--out <file, default .live/rest-verification.json>]
 //
 // Without --yes nothing is sent: the script reads the state, prints the plan and exits. With --yes
 // it sends the commands of the selected group. The default group only touches the transport and
 // every step restores itself; --group renderstream additionally syncs the RenderStream layers.
 //
+// The steps stop and rewind the transport, so --yes is refused while the transport is not stopped
+// (or its playmode cannot be read) unless --force is given. With --force the final sweep puts the
+// playhead back where it was and then resumes the original playmode from there. The sweep compares
+// the state with the start; anything it could not put back is printed as "SET THIS BACK BY HAND" and
+// the run exits 1.
+//
 // Failover commands are never sent by this script. Failing a machine over is not restorable by a
 // second command in the way the transport steps are, so it stays a human decision.
 
-import { readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import WebSocket from 'ws'
+
+const require = createRequire(import.meta.url)
+const {
+	RESUME,
+	handRestoreLine,
+	liveOutFile,
+	playmodeRefusal,
+	restoreError,
+	restoreMismatches,
+	siteDataReminder,
+	statusReason,
+	stepStatus,
+} = require('./live-safety.cjs')
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = parseArgs(process.argv.slice(2))
 const host = args.host
 if (!host) {
-	console.error('usage: node scripts/rest-command-verify.mjs --host <director> [--group all] [--yes]')
+	console.error('usage: node scripts/rest-command-verify.mjs --host <director> [--group all] [--yes] [--force]')
 	process.exit(2)
 }
 const port = Number(args.port ?? 80)
 const group = args.group ?? 'transport'
 const commit = Boolean(args.yes)
-const outFile = resolve(root, args.out ?? 'docs/research/rest-verification.json')
+const force = args.force === true
+const outFile = liveOutFile(root, args.out, 'rest-verification.json')
 const base = `http://${host}:${port}/api/session`
 
 const results = []
@@ -60,6 +82,7 @@ async function main() {
 	const origin = {
 		uid: before.uid,
 		name: before.name,
+		playmode: before.playmode,
 		time: live.value('time'),
 		timecode: live.value('timecode'),
 		beat: live.value('beat'),
@@ -72,13 +95,21 @@ async function main() {
 	}
 	console.log(`playhead  beat=${origin.beat} time=${origin.time}s timecode=${origin.timecode}`)
 
+	const refusal = playmodeRefusal(origin.playmode, force)
 	if (!commit) {
 		console.log('\ndry run - pass --yes to send the commands. Planned groups:')
 		console.log('  transport    values, playhead moves, play/stop (each step restores itself)')
 		console.log('  renderstream synclayers on the layers the Director reports')
 		console.log('  failover     never sent by this script')
+		if (refusal) console.log(`note: --yes would be refused now: ${refusal}`)
 		await live.close()
 		process.exit(0)
+	}
+	// checked before anything is sent: even a filtered (--only) run moves the playhead home at the end
+	if (refusal) {
+		console.error(`refusing to send commands: ${refusal}`)
+		await live.close()
+		process.exit(2)
 	}
 	if (origin.time === undefined) {
 		console.error('the playhead could not be read over LiveUpdate; refusing to move it blind')
@@ -86,17 +117,27 @@ async function main() {
 		process.exit(1)
 	}
 
+	let unrestored = []
 	try {
 		await verifyValues(origin)
 		await verifyPlayhead(origin)
 		await verifyPlayStop(origin)
 		if (group === 'renderstream' || group === 'all') await verifyRenderStream()
+	} catch (error) {
+		// a restore outside a step (the playhead home) failed, or a read broke: still sweep and report
+		console.error(`\nthe run stopped early: ${String(error?.message ?? error)}`)
+		results.push({
+			id: 'run',
+			summary: 'the run stopped early',
+			status: 'failed',
+			detail: String(error?.message ?? error),
+		})
 	} finally {
 		await runRestores()
-		await settleBack(origin)
+		unrestored = await settleBack(origin)
 		await live.close()
 	}
-	report()
+	report(unrestored)
 }
 
 // --- the steps -------------------------------------------------------------------------------
@@ -222,7 +263,8 @@ async function verifyPlayhead(origin) {
 	await step('transport/gototrack', 'select the track that is already current', async () => {
 		await post('/transport/gototrack', withTransport(origin, { track: origin.track, playmode: 'Stop' }))
 		const seen = (await transport())?.currentTrack
-		if (seen?.uid !== origin.track.uid) throw new Error(`current track is now ${seen?.uid}`)
+		// the results file must not carry a track uid of the site
+		if (seen?.uid !== origin.track.uid) throw new Error('the current track changed (uid withheld)')
 		return 'track unchanged'
 	})
 
@@ -261,15 +303,14 @@ async function verifyPlayStop(origin) {
 	]) {
 		await step(path.slice(1), `start with ${path.split('/').pop()} and stop again`, async () => {
 			const home = pushRestore('/transport/gototime', withTransport(origin, { time: origin.time, playmode: 'Stop' }))
-			restores.push({ path: '/transport/stop', body: transports(origin) })
+			const stop = pushRestore('/transport/stop', transports(origin))
 			await post(path, transports(origin))
 			const playing = await readBack(
 				(t) => t?.playmode,
 				(v) => wanted.includes(v),
 			)
 			await wait(400)
-			restores.pop()
-			await post('/transport/stop', transports(origin))
+			await popRestore(stop)
 			const stopped = await readBack(
 				(t) => t?.playmode,
 				(v) => v === 'Stop',
@@ -330,9 +371,12 @@ async function step(id, summary, run) {
 		const message = String(error?.message ?? error)
 		// "refused (1000)" is the Director declining a command for a reason it names: a Designer
 		// option that is off, a tag that does not exist. The command reached it and was understood.
-		const refused = /refused \(\d+\)/.test(message)
-		console.log(refused ? `refused (${message.replace(/^.*refused \(\d+\): /, '')})` : `FAILED (${message})`)
-		results.push({ id, summary, status: refused ? 'refused' : 'failed', detail: message })
+		// A refused restore is a failure: the state stays changed (see stepStatus).
+		const status = stepStatus(error)
+		console.log(
+			status === 'refused' ? `refused (${message.replace(/^.*refused \(\d+\): /, '')})` : `FAILED (${message})`,
+		)
+		results.push({ id, summary, status, detail: message })
 	}
 }
 
@@ -358,21 +402,34 @@ function pushRestore(path, body) {
 async function popRestore(entry) {
 	const at = restores.lastIndexOf(entry)
 	if (at >= 0) restores.splice(at, 1)
-	await post(entry.path, entry.body)
+	try {
+		await post(entry.path, entry.body)
+	} catch (error) {
+		// keep it for runRestores to try once more, and fail the step whatever the Director said
+		restores.push(entry)
+		throw restoreError(entry.path, error)
+	}
 }
 
+/** Send every pending restore, newest first; returns the paths that failed. */
 async function runRestores() {
+	const failed = []
 	while (restores.length > 0) {
 		const entry = restores.pop()
 		try {
 			await post(entry.path, entry.body)
 		} catch (error) {
+			failed.push(entry.path)
 			console.error(`  restore ${entry.path} FAILED: ${String(error?.message ?? error)}`)
 		}
 	}
+	return failed
 }
 
-/** Put the transport back exactly where it started, whatever the steps did. */
+/**
+ * Put the transport back where it started, whatever the steps did, then compare the state with the
+ * start. Returns what is still different ([{field, wanted, seen}]); an empty list is a clean restore.
+ */
 async function settleBack(origin) {
 	const sweep = [
 		['/transport/stop', transports(origin)],
@@ -384,7 +441,8 @@ async function settleBack(origin) {
 		['/transport/engaged', withTransport(origin, { engaged: origin.engaged })],
 	]
 	// One field the Director refuses - speed, when transport speed control is off in Designer - must
-	// not stop the rest of the sweep, so every entry is put back on its own.
+	// not stop the rest of the sweep, so every entry is put back on its own. Whether it worked is
+	// decided by the comparison below, not by the answers.
 	for (const [path, body] of sweep) {
 		try {
 			await post(path, body)
@@ -392,17 +450,39 @@ async function settleBack(origin) {
 			console.error(`  sweep ${path}: ${String(error?.message ?? error)}`)
 		}
 	}
-	const after = await transport()
+	const after = await transport().catch(() => undefined)
 	const time = await settledTime((v) => close(v, origin.time, 0.25))
+	const unrestored = restoreMismatches(origin, after, time)
+
+	// A transport that was playing (a --force run) resumes its playmode from the start position; the
+	// show does not jump to where it would be now.
+	let playmode = after?.playmode
+	if (origin.playmode !== 'Stop' && unrestored.length === 0) {
+		const resume = RESUME[origin.playmode]
+		try {
+			if (!resume) throw new Error(`no command resumes playmode ${origin.playmode}`)
+			await post(resume, transports(origin))
+			playmode = await readBack(
+				(t) => t?.playmode,
+				(v) => v === origin.playmode,
+			)
+		} catch (error) {
+			console.error(`  resume ${origin.playmode}: ${String(error?.message ?? error)}`)
+		}
+	}
+	if (playmode !== origin.playmode) unrestored.push({ field: 'playmode', wanted: origin.playmode, seen: playmode })
+
 	console.log(
-		`\nrestored  playmode=${after?.playmode} brightness=${after?.brightness} volume=${after?.volume} ` +
+		`\nrestored  playmode=${playmode} brightness=${after?.brightness} volume=${after?.volume} ` +
 			`speed=${after?.speed} engaged=${after?.engaged} time=${time}s (was ${origin.time}s)`,
 	)
+	return unrestored
 }
 
 async function bail(reason) {
 	console.error(`\n${reason} - restoring before exit`)
-	await runRestores()
+	const failed = await runRestores()
+	if (failed.length) console.error(`\n!! SET THIS BACK BY HAND: the restores of ${failed.join(', ')} failed`)
 	process.exit(1)
 }
 
@@ -422,7 +502,7 @@ async function post(path, body) {
 	if (!response.ok) throw new Error(`POST ${path} -> ${response.status} ${text.slice(0, 160)}`)
 	const answer = text ? JSON.parse(text) : {}
 	const code = answer?.status?.code
-	if (code !== undefined && code !== 0) throw new Error(`${path} refused (${code}): ${answer.status.message}`)
+	if (code !== undefined && code !== 0) throw new Error(`${path} refused (${code}): ${statusReason(answer.status)}`)
 	return answer
 }
 
@@ -534,13 +614,24 @@ async function openLiveUpdate() {
 	}
 }
 
-function report() {
+function report(unrestored) {
+	if (unrestored.length) {
+		// the file names the fields only: the values can carry a track name of the site
+		results.push({
+			id: 'restore',
+			summary: 'put the transport back where it started',
+			status: 'failed',
+			detail: `not restored: ${unrestored.map((u) => u.field).join(', ')}`,
+		})
+	}
 	const counts = { ok: 0, refused: 0, failed: 0, skipped: 0, 'not-exercised': 0 }
 	for (const r of results) counts[r.status] = (counts[r.status] ?? 0) + 1
 	console.log(
 		`\n${counts.ok} ok, ${counts.refused} refused by the Director, ${counts.failed} failed, ` +
 			`${counts.skipped} skipped, ${counts['not-exercised']} not exercised`,
 	)
+	if (unrestored.length) console.error(`\n!! ${handRestoreLine(unrestored)}\n`)
+	mkdirSync(dirname(outFile), { recursive: true })
 	writeFileSync(
 		outFile,
 		JSON.stringify(
@@ -550,6 +641,7 @@ function report() {
 		) + '\n',
 	)
 	console.log(`wrote ${outFile}`)
+	for (const line of siteDataReminder(root, outFile)) console.log(line)
 	process.exit(counts.failed > 0 ? 1 : 0)
 }
 

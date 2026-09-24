@@ -7,15 +7,21 @@
 //
 // Usage:
 //   node scripts/live-verify.mjs --host 192.0.2.10 [--port 80] [--config scripts/live-verify.config.json]
-//        [--tier normal|experimental|all] [--timeout 4000] [--out docs/research/live-verification.json]
+//        [--tier normal|experimental|all] [--timeout 4000] [--out <file, default .live/live-verification.json>]
 //
 // The config file may provide selection values ({"selections": {"selTrack": "Track 1", ...}});
-// discovered values fill in what is missing.
+// discovered values fill in what is missing. The config and the results file hold site data (names,
+// uids, the Director's address): both are git-ignored by default, and the results go to .live/ unless
+// --out names another file.
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import WebSocket from 'ws'
+
+const require = createRequire(import.meta.url)
+const { liveOutFile, siteDataReminder } = require('./live-safety.cjs')
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = parseArgs(process.argv.slice(2))
@@ -27,7 +33,7 @@ if (!host) {
 const port = Number(args.port ?? 80)
 const timeout = Number(args.timeout ?? 4000)
 const tier = args.tier ?? 'all'
-const outFile = resolve(root, args.out ?? 'docs/research/live-verification.json')
+const outFile = liveOutFile(root, args.out, 'live-verification.json')
 const configFile = resolve(root, args.config ?? 'scripts/live-verify.config.json')
 const config = existsSync(configFile) ? JSON.parse(readFileSync(configFile, 'utf8')) : {}
 const selections = { ...(config.selections ?? {}) }
@@ -355,9 +361,11 @@ async function main() {
 	const summary = {}
 	for (const r of results) summary[r.result] = (summary[r.result] || 0) + 1
 	const output = { host, port, date: new Date().toISOString(), selections, discovery, summary, results }
+	mkdirSync(dirname(outFile), { recursive: true })
 	writeFileSync(outFile, JSON.stringify(output, null, 1))
 	console.log('summary', summary)
 	console.log('wrote', outFile)
+	for (const line of siteDataReminder(root, outFile)) console.log(line)
 	client.ws.close()
 }
 

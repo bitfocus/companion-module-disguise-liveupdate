@@ -1,5 +1,7 @@
 /**
- * The safety rules of the developer scripts under scripts/. build-dev-module.mjs is run for real,
+ * The safety rules of the developer scripts under scripts/. The scripts that talk to a Director are
+ * never run here: their guards live in scripts/live-safety.cjs and are checked on their own, and a
+ * WebSocket close is exercised against a server on 127.0.0.1. build-dev-module.mjs is run for real,
  * but only from a fake checkout inside a temporary folder.
  */
 import { after, test } from 'node:test'
@@ -8,10 +10,13 @@ import { spawnSync } from 'node:child_process'
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { homedir, tmpdir } from 'node:os'
 import path from 'node:path'
+import WebSocket, { WebSocketServer } from 'ws'
 import { ROOT } from './harness'
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+/* eslint-disable @typescript-eslint/no-require-imports */
 const guard = require(path.join(ROOT, 'scripts/dev-module-guard.cjs'))
+const safety = require(path.join(ROOT, 'scripts/live-safety.cjs'))
+/* eslint-enable @typescript-eslint/no-require-imports */
 
 const temp = mkdtempSync(path.join(tmpdir(), 'liveupdate-scripts-'))
 after(() => rmSync(temp, { recursive: true, force: true }))
@@ -189,4 +194,216 @@ test('the dev build version defaults to package.json and must be semver', () => 
 	assert.ok(guard.buildVersion(true, '1.1.0').error)
 	assert.ok(guard.buildVersion('latest', '1.1.0').error)
 	assert.ok(guard.buildVersion('1.1', '1.1.0').error)
+})
+
+// ---------- raw output of the live scripts ----------
+
+test('the live scripts write their raw output to the git-ignored .live folder by default', () => {
+	assert.equal(safety.liveOutFile(ROOT, undefined, 'x.json'), path.join(ROOT, '.live', 'x.json'))
+	assert.equal(safety.liveOutFile(ROOT, true, 'x.json'), path.join(ROOT, '.live', 'x.json'))
+	assert.equal(
+		safety.liveOutFile(ROOT, 'docs/research/x.json', 'x.json'),
+		path.join(ROOT, 'docs', 'research', 'x.json'),
+	)
+
+	const ignored = readFileSync(path.join(ROOT, '.gitignore'), 'utf8').split(/\r?\n/)
+	assert.ok(ignored.includes('.live/'), '.live/ is not in .gitignore')
+	assert.ok(ignored.includes('scripts/live-verify.config.json'))
+
+	for (const script of ['live-verify.mjs', 'live-write-verify.mjs', 'rest-command-verify.mjs', 'rest-discover.mjs']) {
+		const source = readFileSync(path.join(ROOT, 'scripts', script), 'utf8')
+		assert.ok(!/args\.out \?\?/.test(source), `${script} still has its own default output path`)
+		assert.match(source, /liveOutFile\(root, args\.out, '[a-z-]+\.json'\)/, `${script} does not use liveOutFile`)
+		assert.match(source, /siteDataReminder\(root, outFile\)/, `${script} does not print the site data reminder`)
+	}
+})
+
+test('the site data reminder warns louder for a file inside the checkout', () => {
+	const tracked = safety.siteDataReminder(ROOT, path.join(ROOT, 'docs', 'research', 'x.json'))
+	assert.equal(tracked.length, 2)
+	assert.match(tracked[0], /site data/)
+	assert.match(tracked[1], /not ignored by git/)
+	assert.equal(safety.siteDataReminder(ROOT, path.join(ROOT, '.live', 'x.json')).length, 1)
+	assert.equal(safety.siteDataReminder(ROOT, path.join(temp, 'x.json')).length, 1)
+})
+
+// ---------- live-write-verify ----------
+
+test('live-write-verify refuses the neutral group on the current track or an unknown one', () => {
+	const refuse = (o: Record<string, unknown>): string | null =>
+		safety.writeRefusal({ neutral: true, output: false, force: false, ...o })
+	// a single-track project: the only track is the current one
+	assert.match(refuse({ track: 'Track 1', currentTrack: 'Track 1' }) ?? '', /current track/)
+	// the current-track read timed out or failed
+	assert.match(refuse({ track: 'Track 1', currentTrack: undefined }) ?? '', /could not be read/)
+	assert.equal(refuse({ track: 'Track 2', currentTrack: 'Track 1' }), null)
+	assert.equal(refuse({ track: undefined, currentTrack: undefined }), null, 'no track means no neutral target')
+	assert.equal(refuse({ track: 'Track 1', currentTrack: 'Track 1', force: true }), null)
+})
+
+test('live-write-verify refuses the output group unless the transport is known to be stopped', () => {
+	const refuse = (playing: unknown, force = false): string | null =>
+		safety.writeRefusal({ neutral: false, output: true, playing, force })
+	assert.match(refuse(true) ?? '', /is playing/)
+	assert.match(refuse(undefined) ?? '', /could not be read/)
+	assert.match(refuse('evaluation error') ?? '', /could not be read/)
+	assert.equal(refuse(false), null)
+	assert.equal(refuse(true, true), null)
+})
+
+test('a final read-back that cannot read the value is not confirmed', () => {
+	assert.equal(safety.unverifiedLabel({ id: 7, value: 0.5 }), null)
+	assert.equal(safety.unverifiedLabel({ id: 7, value: false }), null)
+	assert.equal(
+		safety.unverifiedLabel({ error: 'timeout waiting for the subscription answer' }),
+		'UNVERIFIED: timeout waiting for the subscription answer',
+	)
+	assert.equal(
+		safety.unverifiedLabel({ id: 7, error: 'no value within the timeout' }),
+		'UNVERIFIED: no value within the timeout',
+	)
+
+	const results = [
+		{ object: 'a', property: 'p', result: 'write-accepted-and-restored', finalCheck: 'original value confirmed' },
+		{ object: 'b', property: 'p', result: 'write-accepted-and-restored', finalCheck: 'UNVERIFIED: timeout' },
+		{ object: 'c', property: 'p', result: 'write-accepted-and-restored', finalCheck: 'DIFFERS: undefined' },
+		{
+			object: 'd',
+			property: 'p',
+			result: 'RESTORE FAILED',
+			finalCheck: 'original value restored on the second attempt',
+		},
+		{ object: 'e', property: 'p', result: 'RESTORE FAILED', finalCheck: 'STILL DIFFERS: 0.55' },
+		{ object: 'f', property: 'p', result: 'skipped: could not read the current value' },
+	]
+	const { notRestored, unconfirmed, byHand } = safety.unsettled(results)
+	assert.deepEqual(
+		notRestored.map((e: any) => e.object),
+		['d', 'e'],
+	)
+	assert.deepEqual(
+		unconfirmed.map((e: any) => e.object),
+		['b', 'c'],
+	)
+	assert.deepEqual(byHand.map((e: any) => e.object).sort(), ['b', 'c', 'e'])
+	assert.equal(safety.unsettled(results.slice(0, 1)).unconfirmed.length, 0)
+})
+
+test('a WebSocket closed by the Director is reported, a close by the script is not', async () => {
+	const server = new WebSocketServer({ host: '127.0.0.1', port: 0 })
+	await new Promise<void>((resolve) => server.once('listening', resolve))
+	const { port } = server.address() as { port: number }
+	server.on('connection', (socket, request) => {
+		if (request.url === '/drop') socket.terminate()
+	})
+	const connect = async (url: string): Promise<WebSocket> => {
+		const ws = new WebSocket(`ws://127.0.0.1:${port}${url}`)
+		await new Promise((resolve, reject) => {
+			ws.once('open', resolve)
+			ws.once('error', reject)
+		})
+		return ws
+	}
+	const closed = async (ws: WebSocket): Promise<void> =>
+		new Promise((resolve) => (ws.readyState === WebSocket.CLOSED ? resolve() : ws.once('close', () => resolve())))
+	try {
+		const reasons: string[] = []
+		const dropped = await connect('/drop')
+		safety.watchClose(dropped, (reason: string) => reasons.push(reason))
+		await closed(dropped)
+		assert.equal(reasons.length, 1)
+		assert.match(reasons[0], /closed the connection/)
+
+		const own: string[] = []
+		const kept = await connect('/keep')
+		const close = safety.watchClose(kept, (reason: string) => own.push(reason))
+		close()
+		await closed(kept)
+		assert.deepEqual(own, [])
+	} finally {
+		await new Promise((resolve) => server.close(resolve))
+	}
+})
+
+test('live-write-verify reports a dropped connection and closes only through the watched close', () => {
+	const source = readFileSync(path.join(ROOT, 'scripts', 'live-write-verify.mjs'), 'utf8')
+	assert.match(source, /watchClose\(this\.ws/)
+	assert.match(source, /client\.onUnexpectedClose = \(reason\) => void emergencyRestore\(reason\)/)
+	assert.ok(!source.includes('client.ws.close()'), 'a raw close would be reported as an interruption')
+	assert.match(source, /writeRefusal\(/)
+	assert.match(source, /unverifiedLabel\(check\)/)
+	assert.ok(!source.includes("startsWith('STILL DIFFERS')"), 'the verdict still counts only STILL DIFFERS')
+})
+
+// ---------- rest-command-verify ----------
+
+test('rest-command-verify refuses to run while the transport is not stopped', () => {
+	assert.equal(safety.playmodeRefusal('Stop', false), null)
+	assert.match(safety.playmodeRefusal('Play', false) ?? '', /is Play/)
+	assert.match(safety.playmodeRefusal('Loop', false) ?? '', /--force/)
+	assert.match(safety.playmodeRefusal(undefined, false) ?? '', /could not be read/)
+	assert.equal(safety.playmodeRefusal('Play', true), null)
+	assert.deepEqual(safety.RESUME, {
+		Play: '/transport/play',
+		PlaySection: '/transport/playsection',
+		Loop: '/transport/playloopsection',
+	})
+	const source = readFileSync(path.join(ROOT, 'scripts', 'rest-command-verify.mjs'), 'utf8')
+	assert.match(source, /playmode: before\.playmode/)
+	assert.ok(
+		source.indexOf('playmodeRefusal(origin.playmode, force)') < source.indexOf('await verifyValues(origin)'),
+		'the playing guard must run before the first command',
+	)
+})
+
+test('a refused restore fails its step, a refused command does not', () => {
+	const refused = new Error('/transport/speed refused (1000): Transport speed control is disabled.')
+	assert.equal(safety.stepStatus(refused), 'refused')
+	const restore = safety.restoreError('/transport/brightness', new Error('/transport/brightness refused (1000): '))
+	assert.match(restore.message, /refused \(1000\)/, 'the message keeps the Director answer')
+	assert.equal(safety.stepStatus(restore), 'failed')
+	assert.equal(safety.stepStatus(new Error('fetch failed')), 'failed')
+
+	assert.equal(safety.statusReason({ code: 1000, message: 'said here' }), 'said here')
+	assert.equal(
+		safety.statusReason({ code: 1000, message: '', details: [{}, { message: 'in a detail' }] }),
+		'in a detail',
+	)
+	assert.equal(safety.statusReason(undefined), '')
+})
+
+test('the restore sweep is compared with the start and every difference is named', () => {
+	const origin = {
+		track: { uid: '0x0123456789abcdef', name: 'Track 1' },
+		brightness: 0.5,
+		volume: 1,
+		speed: 1,
+		engaged: true,
+		time: 12,
+	}
+	const same = {
+		currentTrack: { uid: '0x0123456789abcdef', name: 'Track 1' },
+		brightness: 0.50000001,
+		volume: 1,
+		speed: 1,
+		engaged: true,
+	}
+	assert.deepEqual(safety.restoreMismatches(origin, same, 12.1), [])
+
+	const left = { ...same, brightness: 0.9, engaged: false, currentTrack: { uid: '0x1', name: 'Other' } }
+	assert.deepEqual(
+		safety.restoreMismatches(origin, left, 40).map((m: any) => m.field),
+		['track', 'brightness', 'engaged', 'time'],
+	)
+	// the state could not be read after the sweep: nothing is confirmed
+	assert.deepEqual(
+		safety.restoreMismatches(origin, undefined, undefined).map((m: any) => m.field),
+		['track', 'brightness', 'volume', 'speed', 'engaged', 'time'],
+	)
+	const line = safety.handRestoreLine([{ field: 'brightness', wanted: 0.5, seen: 0.9 }])
+	assert.match(line, /^SET THIS BACK BY HAND: brightness = 0\.5 \(the Director reports 0\.9\)$/)
+
+	const source = readFileSync(path.join(ROOT, 'scripts', 'rest-command-verify.mjs'), 'utf8')
+	assert.match(source, /report\(unrestored\)/)
+	assert.match(source, /handRestoreLine\(unrestored\)/)
 })

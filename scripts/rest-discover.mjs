@@ -5,11 +5,18 @@
 // instead of being taken on trust. Every request is a GET: nothing here changes the session.
 //
 // Usage:
-//   node scripts/rest-discover.mjs --host 192.0.2.10 [--port 80] [--out docs/research/rest-api.json]
+//   node scripts/rest-discover.mjs --host 192.0.2.10 [--port 80] [--out <file, default .live/rest-api.json>]
+//
+// The result records the Director's address, so it goes to the git-ignored .live/ folder unless --out
+// names another file.
 
-import { writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+const require = createRequire(import.meta.url)
+const { liveOutFile, siteDataReminder } = require('./live-safety.cjs')
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = {}
@@ -96,7 +103,8 @@ for (const command of commands) {
 	console.log(`      ${command.body}`)
 }
 
-const outFile = resolve(root, args.out ?? 'docs/research/rest-api.json')
+const outFile = liveOutFile(root, args.out, 'rest-api.json')
+mkdirSync(dirname(outFile), { recursive: true })
 writeFileSync(
 	outFile,
 	JSON.stringify(
@@ -106,3 +114,4 @@ writeFileSync(
 	),
 )
 console.log(`\nwrote ${outFile}`)
+for (const line of siteDataReminder(root, outFile)) console.log(line)
