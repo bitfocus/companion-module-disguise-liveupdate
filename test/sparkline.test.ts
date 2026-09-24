@@ -2,11 +2,23 @@
  * The trend line drawn on the button: the pixels it produces, the history it keeps, and the wiring
  * that feeds it from the Director's values.
  */
-import { test } from 'node:test'
+import { afterEach, test } from 'node:test'
 import assert from 'node:assert/strict'
-import { FakeDirector, liveUpdateFeedback, loadDist, newInstance, settle } from './harness'
+import {
+	destroyInstances,
+	FakeDirector,
+	type FeedbackInstance,
+	liveUpdateFeedback,
+	loadDist,
+	newInstance,
+	settle,
+	until,
+} from './harness'
 
 const dist = loadDist()
+
+// a failing test must not leave timers running into the next one
+afterEach(destroyInstances)
 // eslint-disable-next-line @typescript-eslint/no-require-imports -- the built module is plain CommonJS
 const sparkline = require(require('node:path').join(__dirname, '..', 'dist', 'sparkline.js')) as {
 	drawSparkline: (options: Record<string, unknown>) => Uint8Array
@@ -15,6 +27,7 @@ const sparkline = require(require('node:path').join(__dirname, '..', 'dist', 'sp
 		samples: (number | undefined)[]
 		resize: (n: number) => void
 	}
+	sparklineWindow: (value: unknown) => number
 }
 
 const pixel = (buffer: Uint8Array, width: number, x: number, y: number): [number, number, number, number] => {
@@ -130,5 +143,270 @@ test('a sparkline without a button size returns nothing rather than guessing', a
 	const feedbacks = dist.getFeedbackDefinitions(inst)
 	const result = feedbacks.liveUpdateSparkline.callback({ id: 's', options: { variableName: 'len', window: 10 } })
 	assert.deepEqual(result, {})
+	await inst.destroy()
+})
+
+/** The 72x58 image Companion 5 asks a feedback for on a button with its top bar */
+const WIDTH = 72
+const HEIGHT = 58
+
+/** Pixels drawn at full opacity: the line (the fill is drawn at 90, the threshold rule at 160) */
+const linePixels = (buffer: Uint8Array): [number, number][] => {
+	const lit: [number, number][] = []
+	for (let y = 0; y < HEIGHT; y++)
+		for (let x = 0; x < WIDTH; x++) if (pixel(buffer, WIDTH, x, y)[3] === 255) lit.push([x, y])
+	return lit
+}
+
+/** Groups of pixels that touch, diagonals included */
+const strokes = (lit: [number, number][]): number => {
+	const unseen = new Set(lit.map(([x, y]) => `${x},${y}`))
+	let groups = 0
+	for (const start of unseen) {
+		groups++
+		const queue = [start]
+		unseen.delete(start)
+		while (queue.length) {
+			const [x, y] = queue.pop()!.split(',').map(Number)
+			for (let dx = -1; dx <= 1; dx++)
+				for (let dy = -1; dy <= 1; dy++) {
+					const next = `${x + dx},${y + dy}`
+					if (unseen.delete(next)) queue.push(next)
+				}
+		}
+	}
+	return groups
+}
+
+test('a steep line stays one stroke instead of breaking into dots', () => {
+	const series = {
+		wave: Array.from({ length: 60 }, (_v, i) => 10 + 8 * Math.sin(i / 3)),
+		// a frame rate that flickers between 60 and the float32 of 59.94
+		flicker: Array.from({ length: 60 }, (_v, i) => (i % 2 ? 60 : Math.fround(59.94))),
+		dips: Array.from({ length: 60 }, (_v, i) => (i === 20 || i === 40 ? 58 : 60)),
+	}
+	for (const [name, samples] of Object.entries(series)) {
+		const buffer = sparkline.drawSparkline({ width: WIDTH, height: HEIGHT, samples, line: [255, 255, 255] })
+		const lit = linePixels(buffer)
+		assert.equal(strokes(lit), 1, `${name}: the line is one connected stroke`)
+		assert.equal(new Set(lit.map(([x]) => x)).size, WIDTH, `${name}: across every column`)
+	}
+})
+
+test('the fill covers every column under the line, also while the history is short', () => {
+	for (const count of [3, 10, 60]) {
+		const samples = Array.from({ length: count }, (_v, i) => 30 + 5 * Math.sin(i / 6))
+		const buffer = sparkline.drawSparkline({
+			width: WIDTH,
+			height: HEIGHT,
+			samples,
+			line: [120, 255, 220],
+			fill: [120, 255, 220],
+		})
+		const empty = []
+		for (let x = 0; x < WIDTH; x++) if (pixel(buffer, WIDTH, x, HEIGHT - 1)[3] === 0) empty.push(x)
+		assert.deepEqual(empty, [], `${count} samples: no unfilled column on the bottom row`)
+	}
+})
+
+test('the threshold rule stays visible on a filled line, and the line crosses over it', () => {
+	// a frame rate at 60 with one dip to 45, and a frame budget at 50: the usual case, line above the rule
+	const samples = Array.from({ length: 60 }, (_v, i) => (i === 30 ? 45 : 60))
+	const buffer = sparkline.drawSparkline({
+		width: WIDTH,
+		height: HEIGHT,
+		samples,
+		line: [120, 255, 220],
+		fill: [120, 255, 220],
+		threshold: 50,
+		thresholdColour: [200, 80, 80],
+	})
+	// scaled from 45 (bottom) to 60 (top): 50 sits on row 38
+	const row = Math.round((1 - 5 / 15) * (HEIGHT - 1))
+	let rule = 0
+	for (let x = 0; x < WIDTH; x += 2) {
+		const [r, g, b, a] = pixel(buffer, WIDTH, x, row)
+		if (a === 255) {
+			assert.deepEqual([r, g, b], [120, 255, 220], `column ${x}: the line is drawn over the rule`)
+			continue
+		}
+		assert.deepEqual([r, g, b, a], [200, 80, 80, 160], `column ${x}: the rule, not the fill`)
+		rule++
+	}
+	assert.ok(rule >= WIDTH / 2 - 4, `the rule shows in ${rule} of ${WIDTH / 2} columns`)
+})
+
+test('a gap shows as a break even when there are more samples than columns', () => {
+	const samples: (number | undefined)[] = Array.from({ length: 300 }, (_v, i) => 30 + 5 * Math.sin(i / 10))
+	samples[150] = undefined
+	const buffer = sparkline.drawSparkline({
+		width: WIDTH,
+		height: HEIGHT,
+		samples,
+		line: [120, 255, 220],
+		fill: [120, 255, 220],
+	})
+	const blank = []
+	for (let x = 0; x < WIDTH; x++) {
+		let drawn = false
+		for (let y = 0; y < HEIGHT; y++) if (pixel(buffer, WIDTH, x, y)[3] !== 0) drawn = true
+		if (!drawn) blank.push(x)
+	}
+	assert.deepEqual(blank, [Math.round((150 / 299) * (WIDTH - 1))], 'the column of the gap is left empty')
+})
+
+test('every text a readout shows instead of a value is a gap, and a run of them is one break', () => {
+	const history = new sparkline.ValueHistory(40)
+	history.push('OFFLINE')
+	assert.deepEqual(history.samples, [], 'a history does not start with a gap')
+	for (const sentinel of dist.SENTINELS) {
+		history.push(1)
+		history.push(sentinel)
+		history.push(sentinel)
+	}
+	assert.deepEqual(
+		history.samples,
+		dist.SENTINELS.flatMap(() => [1, undefined]),
+		'each sentinel is one gap, however often it is written',
+	)
+	history.push(2)
+	for (const value of ['', '  ', null, { errorType: 'X' }, [5], Number.NaN, Number.POSITIVE_INFINITY])
+		history.push(value)
+	history.push('12.5')
+	history.push(true)
+	history.push(false)
+	assert.deepEqual(history.samples.slice(-5), [2, undefined, 12.5, 1, 0], 'any other non-number is a gap too')
+})
+
+test('the window of a sparkline is held to the range of its field', () => {
+	assert.equal(sparkline.sparklineWindow(10), 10)
+	assert.equal(sparkline.sparklineWindow('25'), 25)
+	assert.equal(sparkline.sparklineWindow(1), 4)
+	assert.equal(sparkline.sparklineWindow(1000), 300)
+	for (const blank of [undefined, null, '', 'abc', 0, Number.NaN]) assert.equal(sparkline.sparklineWindow(blank), 60)
+})
+
+const FPS_OBJECT = 'subsystem:MonitoringManager.findLocalMonitor("fps")'
+const FPS_PROPERTY = 'object.seriesAverage("Actual", 1)'
+
+/** A Sparkline feedback on a Companion 5 button: the host passes the size of the image it wants */
+const sparklineFeedback = (id: string, options: Record<string, unknown>): FeedbackInstance =>
+	({
+		id,
+		feedbackId: 'liveUpdateSparkline',
+		controlId: 'ctl_' + id,
+		options,
+		upgradeIndex: null,
+		disabled: false,
+		image: { width: WIDTH, height: HEIGHT },
+	}) as FeedbackInstance
+
+/** What the Sparkline feedback draws for these samples with its default options */
+const render = (samples: (number | undefined)[]): Uint8Array =>
+	sparkline.drawSparkline({ width: WIDTH, height: HEIGHT, samples, line: [120, 255, 220], fill: [120, 255, 220] })
+
+/** The image a feedback last sent to its button */
+const shown = (host: { feedbackValues: Map<string, unknown> }, id: string): Uint8Array | undefined =>
+	(host.feedbackValues.get(id) as { imageBuffer?: Uint8Array } | undefined)?.imageBuffer
+
+test('two sparklines on one variable each draw the number of samples they keep', async () => {
+	let value = 50
+	const director = new FakeDirector({ valueFor: () => value })
+	const { inst, host } = await newInstance(director, [
+		liveUpdateFeedback('v', FPS_OBJECT, FPS_PROPERTY, 'fps'),
+		sparklineFeedback('short', { variableName: 'fps', window: 4 }),
+		sparklineFeedback('long', { variableName: 'fps', window: 20 }),
+		sparklineFeedback('blank', { variableName: 'fps', window: '' }),
+	])
+	await settle(50)
+	for (let i = 0; i < 25; i++) {
+		value = 30 + ((i * 37) % 50)
+		director.pushValueForPair(FPS_OBJECT, FPS_PROPERTY, value)
+		await settle(5)
+	}
+	await settle(20)
+	const history = [...inst.getSparklineSamples('fps')]
+	assert.equal(history.length, 26, 'one history, kept for the longest window (60)')
+	assert.deepEqual(shown(host, 'short'), render(history.slice(-4)), 'the short one draws its last 4 samples')
+	assert.deepEqual(shown(host, 'long'), render(history.slice(-20)), 'the long one its last 20')
+	assert.deepEqual(shown(host, 'blank'), render(history), 'and a blank window is the default of 60')
+	assert.notDeepEqual(render(history.slice(-4)), render(history.slice(-20)))
+	assert.notDeepEqual(render(history.slice(-20)), render(history))
+	await inst.destroy()
+})
+
+test('an outage breaks the line instead of joining the values on either side of it', async () => {
+	let value = 58
+	const director = new FakeDirector({ valueFor: () => value })
+	const { inst, host } = await newInstance(
+		director,
+		[liveUpdateFeedback('v', FPS_OBJECT, FPS_PROPERTY, 'fps'), sparklineFeedback('spark', { variableName: 'fps' })],
+		{ reconnectInterval: 100 },
+	)
+	await settle(50)
+	value = 57
+	director.pushValueForPair(FPS_OBJECT, FPS_PROPERTY, 57)
+	await settle(20)
+	assert.deepEqual(inst.getSparklineSamples('fps'), [58, 57])
+
+	director.sock!.drop()
+	await settle(20)
+	assert.deepEqual(inst.getSparklineSamples('fps'), [58, 57, undefined], 'the outage is a gap')
+	assert.deepEqual(shown(host, 'spark'), render([58, 57, undefined]), 'and the button shows it during the outage')
+
+	assert.ok(await until(() => inst.isConnectionReady()))
+	await settle(50)
+	value = 31
+	director.pushValueForPair(FPS_OBJECT, FPS_PROPERTY, 31)
+	await settle(20)
+	const after = inst.getSparklineSamples('fps')
+	assert.deepEqual(after.slice(0, 3), [58, 57, undefined], 'the values before and after are not joined')
+	assert.ok(
+		after.slice(3).every((sample: unknown) => typeof sample === 'number'),
+		'and the line resumes after it',
+	)
+	assert.equal(after[after.length - 1], 31)
+	await inst.destroy()
+})
+
+test('a property error between two values breaks the line', async () => {
+	const director = new FakeDirector({ valueFor: () => 58 })
+	const { inst, host } = await newInstance(director, [
+		liveUpdateFeedback('v', FPS_OBJECT, FPS_PROPERTY, 'fps'),
+		sparklineFeedback('spark', { variableName: 'fps' }),
+	])
+	await settle(50)
+	director.pushValueForPair(FPS_OBJECT, FPS_PROPERTY, { errorType: 'AttributeError', message: 'no such attribute' })
+	await settle(20)
+	assert.equal(host.variables.get('fps'), 'PATH_ERROR')
+	assert.deepEqual(shown(host, 'spark'), render([58, undefined]), 'the button shows the break at once')
+	director.pushValueForPair(FPS_OBJECT, FPS_PROPERTY, 60)
+	await settle(20)
+	assert.deepEqual(inst.getSparklineSamples('fps'), [58, undefined, 60])
+	await inst.destroy()
+})
+
+test('a readout the Director refuses, or one whose path cannot be resolved, breaks the line', async () => {
+	const director = new FakeDirector({
+		valueFor: () => 58,
+		errorFor: (o, p) => (o === 'track:"Gone"' ? `Unable to subscribe to ${o} / ${p} - object not found` : null),
+	})
+	const readout = liveUpdateFeedback('v', FPS_OBJECT, FPS_PROPERTY, 'fps')
+	const { inst, host } = await newInstance(director, [readout, sparklineFeedback('spark', { variableName: 'fps' })])
+	await settle(50)
+	inst.updateFeedbacks({ v: { ...readout, options: { ...readout.options, objectPath: 'track:"Gone"' } } })
+	await settle(50)
+	assert.equal(host.variables.get('fps'), 'ERROR')
+	assert.deepEqual(inst.getSparklineSamples('fps'), [58, undefined])
+	assert.deepEqual(shown(host, 'spark'), render([58, undefined]), 'the button is redrawn with the break')
+
+	inst.updateFeedbacks({ v: readout })
+	await settle(50)
+	assert.deepEqual(inst.getSparklineSamples('fps'), [58, undefined, 58])
+	inst.updateFeedbacks({ v: { ...readout, options: { ...readout.options, objectPath: 'track:"$NA"' } } })
+	await settle(50)
+	assert.equal(host.variables.get('fps'), 'UNSET')
+	assert.deepEqual(inst.getSparklineSamples('fps'), [58, undefined, 58, undefined])
+	assert.deepEqual(shown(host, 'spark'), render([58, undefined, 58, undefined]))
 	await inst.destroy()
 })

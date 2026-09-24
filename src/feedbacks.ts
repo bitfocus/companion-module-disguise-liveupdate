@@ -1,6 +1,6 @@
 import { CompanionFeedbackDefinitions, combineRgb, splitRgb } from '@companion-module/base'
 import type { DisguiseInstance } from './index'
-import { drawSparkline } from './sparkline'
+import { drawSparkline, sparklineWindow } from './sparkline'
 import { isSentinel } from './variables'
 
 type DisguiseFeedbackDefinitions = CompanionFeedbackDefinitions
@@ -205,7 +205,7 @@ export function getFeedbackDefinitions(instance: DisguiseInstance): DisguiseFeed
 			type: 'advanced',
 			name: 'LiveUpdate Sparkline',
 			description:
-				'Draws the recent values of a LiveUpdate Variable as a line on the button. Put it on the same button as the LiveUpdate Variable feedback that owns the value; the number stays readable on top of it.',
+				'Draws the recent values of a LiveUpdate Variable as a line on the button. Put it on the same button as the LiveUpdate Variable feedback that owns the value. On Companion 5 the line is drawn into an Image layer of the button: add one below the Text layer before adding this feedback (buttons placed from presets have one), so the number stays readable on top of it.',
 			options: [
 				{
 					type: 'textinput',
@@ -280,7 +280,7 @@ export function getFeedbackDefinitions(instance: DisguiseInstance): DisguiseFeed
 				instance.registerSparkline(
 					feedback.id,
 					String(feedback.options.variableName || ''),
-					Number(feedback.options.window ?? 60),
+					sparklineWindow(feedback.options.window),
 				)
 			},
 			unsubscribe: (feedback) => {
@@ -288,10 +288,12 @@ export function getFeedbackDefinitions(instance: DisguiseInstance): DisguiseFeed
 			},
 			callback: (feedback) => {
 				const variableName = String(feedback.options.variableName || '')
-				instance.registerSparkline(feedback.id, variableName, Number(feedback.options.window ?? 60))
+				const window = sparklineWindow(feedback.options.window)
+				instance.registerSparkline(feedback.id, variableName, window)
 				const size = feedback.image
 				if (!size || !size.width || !size.height) return {}
-				const samples = instance.getSparklineSamples(variableName)
+				// the history is shared by every Sparkline of the variable; this one draws its own window of it
+				const samples = instance.getSparklineSamples(variableName, window)
 				if (!samples.length) return {}
 				const autoScale = feedback.options.autoScale !== false
 				const rgb = splitRgb(Number(feedback.options.lineColour ?? combineRgb(120, 255, 220)))

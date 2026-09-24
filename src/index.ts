@@ -25,7 +25,7 @@ import { upgradeScripts } from './upgrades'
 import { RestClient, RestCommand, REST_ENDPOINTS } from './rest'
 import { getRestActionDefinitions } from './restActions'
 import { choicesFrom, DISCOVERY_SOURCES } from './discovery'
-import { ValueHistory } from './sparkline'
+import { sparklineWindow, ValueHistory } from './sparkline'
 import { PRESET_CATALOG } from './presetCatalog'
 
 export { OFFLINE_VALUE, SENTINELS, isSentinel } from './variables'
@@ -567,6 +567,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	private markUnset(variableName: string): void {
 		if (!this.connectionReady || !this.isReadoutName(variableName) || this.isVariableFed(variableName)) return
 		this.setVariableValues({ [variableName]: UNSET_VALUE })
+		this.recordHistory(variableName, UNSET_VALUE)
 	}
 
 	/**
@@ -1065,19 +1066,27 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		if (!variableName) {
 			this.sparklines.delete(feedbackId)
 		} else {
-			this.sparklines.set(feedbackId, { variableName, window: Math.max(4, Math.min(300, window || 60)) })
+			this.sparklines.set(feedbackId, { variableName, window: sparklineWindow(window) })
 		}
 		// keep only the histories something still watches
 		const wanted = new Set([...this.sparklines.values()].map((entry) => entry.variableName))
 		for (const name of [...this.histories.keys()]) if (!wanted.has(name)) this.histories.delete(name)
 	}
 
-	/** The recent values of one variable, oldest first */
-	getSparklineSamples(variableName: string): (number | undefined)[] {
-		return this.histories.get(variableName)?.samples ?? []
+	/**
+	 * The recent values of one variable, oldest first; a gap is undefined. The history is kept for the
+	 * longest window any Sparkline of the variable asks for, so each one passes its own to get its share.
+	 */
+	getSparklineSamples(variableName: string, window?: number): (number | undefined)[] {
+		const samples = this.histories.get(variableName)?.samples ?? []
+		return window === undefined ? samples : samples.slice(-sparklineWindow(window))
 	}
 
-	/** Record a value for every Sparkline feedback that watches this variable */
+	/**
+	 * Record a value for every Sparkline feedback that watches this variable. A sentinel the readout
+	 * shows instead of a value (OFFLINE, ERROR, PATH_ERROR, UNSET) is recorded as well: it is the gap
+	 * that breaks the line, so values from before and after it are never joined.
+	 */
 	private recordHistory(variableName: string, value: unknown): void {
 		let window = 0
 		for (const entry of this.sparklines.values())
@@ -1423,6 +1432,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		for (const variableName of this.retainedVariables.values()) {
 			if (this.isReadoutName(variableName)) offline[variableName] = OFFLINE_VALUE
 		}
+		for (const variableName of this.histories.keys()) this.recordHistory(variableName, OFFLINE_VALUE)
 		this.updateVariableDefinitions()
 		this.setVariableValues(offline)
 		this.checkFeedbacks(...STATE_FEEDBACKS)
@@ -1632,6 +1642,9 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		}
 		// Set error message in the variable so user knows it failed
 		this.setVariableValues({ [pending.variableName]: ERROR_VALUE })
+		this.recordHistory(pending.variableName, ERROR_VALUE)
+		const stale = this.stateFeedbacksOf(new Set([pending.variableName]))
+		if (stale.length) this.checkFeedbacksById(...stale)
 	}
 
 	private handleSubscriptionsUpdate(subscriptions: any[]): void {
@@ -1813,6 +1826,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				} else {
 					changedVars[subscription.variableName] = PATH_ERROR_VALUE
 				}
+				this.recordHistory(subscription.variableName, changedVars[subscription.variableName])
 				affected.add(subscription.variableName)
 
 				continue

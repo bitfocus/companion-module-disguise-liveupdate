@@ -6,6 +6,7 @@
  * feedback return a raw pixel buffer for the button, so the module draws the line itself: no drawing
  * dependency, a few hundred bytes of history per feedback.
  */
+import { isSentinel } from './variables'
 
 export interface SparklineOptions {
 	width: number
@@ -65,16 +66,20 @@ export function drawSparkline(options: SparklineOptions): Uint8Array {
 		buffer[index + 3] = alpha
 	}
 
-	const toY = (value: number): number => {
+	/** The row of a value, not yet rounded, kept inside the image */
+	const rowOf = (value: number): number => {
 		const ratio = (value - low) / (high - low)
-		const y = Math.round((1 - ratio) * (height - 1))
-		return Math.min(height - 1, Math.max(0, y))
+		return Math.min(height - 1, Math.max(0, (1 - ratio) * (height - 1)))
 	}
 
-	if (options.threshold !== undefined && options.thresholdColour) {
-		const y = toY(options.threshold)
-		for (let x = 0; x < width; x += 2) plot(x, y, options.thresholdColour, 160)
+	// The line is collected first as vertical runs of rows per column, so the fill, the threshold
+	// rule and the line can be drawn in that order: the rule stays visible on the fill, the line on both
+	const runs: [number, number][][] = Array.from({ length: width }, () => [])
+	const mark = (x: number, from: number, to: number): void => {
+		if (x >= 0 && x < width) runs[x].push([Math.round(Math.min(from, to)), Math.round(Math.max(from, to))])
 	}
+	/** Columns a gap falls in: nothing is drawn there, so the break shows however dense the samples are */
+	const broken = new Set<number>()
 
 	// one column per sample, oldest on the left
 	const count = samples.length
@@ -83,28 +88,68 @@ export function drawSparkline(options: SparklineOptions): Uint8Array {
 	let previous: { x: number; y: number } | undefined
 	for (let index = 0; index < count; index++) {
 		const value = samples[index]
+		const x = columnX(index)
 		if (typeof value !== 'number' || !Number.isFinite(value)) {
+			broken.add(x)
 			previous = undefined
 			continue
 		}
-		const x = columnX(index)
-		const y = toY(value)
-		if (options.fill) {
-			for (let fillY = y; fillY < height; fillY++) plot(x, fillY, options.fill, 90)
-		}
-		if (previous && x !== previous.x) {
-			// straight segment between the two samples so the line reads as continuous
-			const steps = Math.abs(x - previous.x)
-			for (let step = 1; step < steps; step++) {
-				const interpolatedX = previous.x + Math.sign(x - previous.x) * step
-				const interpolatedY = Math.round(previous.y + ((y - previous.y) * step) / steps)
-				plot(interpolatedX, interpolatedY, options.line)
+		const y = rowOf(value)
+		if (!previous) {
+			mark(x, y, y)
+		} else if (x === previous.x) {
+			// more samples than columns: the column shows the range they span
+			mark(x, previous.y, y)
+		} else {
+			// straight segment between the two samples: every column it crosses gets the rows from where
+			// the segment enters the column to where it leaves, so a steep step stays one stroke
+			const slope = (y - previous.y) / (x - previous.x)
+			for (let column = previous.x; column <= x; column++) {
+				const enter = previous.y + slope * (Math.max(previous.x, column - 0.5) - previous.x)
+				const leave = previous.y + slope * (Math.min(x, column + 0.5) - previous.x)
+				mark(column, enter, leave)
 			}
 		}
-		plot(x, y, options.line)
 		previous = { x, y }
 	}
+	for (const x of broken) runs[x] = []
+
+	if (options.fill) {
+		for (let x = 0; x < width; x++) {
+			if (!runs[x].length) continue
+			const top = Math.min(...runs[x].map(([from]) => from))
+			for (let y = top; y < height; y++) plot(x, y, options.fill, 90)
+		}
+	}
+	if (options.threshold !== undefined && options.thresholdColour) {
+		const y = Math.round(rowOf(options.threshold))
+		for (let x = 0; x < width; x += 2) plot(x, y, options.thresholdColour, 160)
+	}
+	for (let x = 0; x < width; x++) {
+		for (const [from, to] of runs[x]) for (let y = from; y <= to; y++) plot(x, y, options.line)
+	}
 	return buffer
+}
+
+/**
+ * The 'Samples to keep' of a Sparkline feedback, held to the range of its field (4 to 300); a
+ * blank or unreadable value is the field's default of 60.
+ */
+export function sparklineWindow(value: unknown): number {
+	return Math.max(4, Math.min(300, Math.round(Number(value)) || 60))
+}
+
+/**
+ * The number a value is drawn at, or undefined for a gap: one of the texts a readout shows instead
+ * of a Director value (OFFLINE, ERROR, PATH_ERROR, UNSET) and anything else that is not a number.
+ * A numeric text counts as its number and an on/off value as 1 or 0.
+ */
+export function sampleOf(value: unknown): number | undefined {
+	if (typeof value === 'number') return Number.isFinite(value) ? value : undefined
+	if (typeof value === 'boolean') return value ? 1 : 0
+	if (typeof value !== 'string' || value.trim() === '' || isSentinel(value)) return undefined
+	const numeric = Number(value)
+	return Number.isFinite(numeric) ? numeric : undefined
 }
 
 /** A bounded history of the values of one variable */
@@ -116,9 +161,15 @@ export class ValueHistory {
 		this.capacity = Math.max(2, capacity)
 	}
 
+	/**
+	 * Keep a value, or a gap for one that is not a number (see sampleOf). A run of gaps is kept as one
+	 * break, so an outage the module keeps retrying does not push the values out of the window, and a
+	 * history never starts with a gap.
+	 */
 	push(value: unknown): void {
-		const numeric = typeof value === 'number' ? value : Number(value)
-		this.values.push(Number.isFinite(numeric) ? numeric : undefined)
+		const sample = sampleOf(value)
+		if (sample === undefined && this.values[this.values.length - 1] === undefined) return
+		this.values.push(sample)
 		while (this.values.length > this.capacity) this.values.shift()
 	}
 
