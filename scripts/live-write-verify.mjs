@@ -600,6 +600,8 @@ async function main() {
 		if (write) {
 			console.error(`refusing to write: ${refusal}`)
 			saveResults({ refused: refusal })
+			console.error(`results written to ${outFile}`)
+			for (const line of siteDataReminder(root, outFile)) console.error(line)
 			client.close()
 			process.exitCode = 2
 			return

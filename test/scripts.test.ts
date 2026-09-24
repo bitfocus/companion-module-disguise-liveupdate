@@ -335,6 +335,29 @@ test('live-write-verify reports a dropped connection and closes only through the
 	assert.ok(!source.includes("startsWith('STILL DIFFERS')"), 'the verdict still counts only STILL DIFFERS')
 })
 
+test('live-write-verify prints the site data reminder on every way out that wrote the results file', () => {
+	const source = readFileSync(path.join(ROOT, 'scripts', 'live-write-verify.mjs'), 'utf8')
+	const lineOf = (offset: number): number => source.slice(0, offset).split('\n').length
+	// the ways out: the emergency restore, a refusal and the normal end (usage errors write nothing)
+	let checked = 0
+	let previous = 0
+	for (const exit of [...source.matchAll(/client\.close\(\)|process\.exit\(/g)].map((m) => m.index)) {
+		const save = source.lastIndexOf('saveResults(', exit)
+		if (save >= previous) {
+			assert.ok(
+				source.slice(save, exit).includes('siteDataReminder(root, outFile)'),
+				`line ${lineOf(exit)} leaves after writing the results without the site data reminder`,
+			)
+			checked++
+		}
+		previous = exit
+	}
+	assert.ok(checked >= 3, `only ${checked} way(s) out were checked`)
+	const refusal = source.indexOf('saveResults({ refused: refusal })')
+	assert.ok(refusal >= 0)
+	assert.match(source.slice(refusal, source.indexOf('client.close()', refusal)), /siteDataReminder\(root, outFile\)/)
+})
+
 // ---------- rest-command-verify ----------
 
 test('rest-command-verify refuses to run while the transport is not stopped', () => {
