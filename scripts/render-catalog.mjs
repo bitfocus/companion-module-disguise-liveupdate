@@ -284,6 +284,10 @@ for (const d of catalog.decisions || []) md.push('- ' + esc(d))
 md.push('')
 md.push('## Drafter and verifier notes per dimension')
 md.push('')
+md.push(
+	'_The notes and the critique below are the Phase 1 review records, kept as written. They describe the drafts, not the shipped module: gaps they name may have been closed since, for example the transport commands, which the module now sends as its Transport: actions (see the HELP)._',
+)
+md.push('')
 for (const d of catalog.perDim || []) {
 	md.push(`### ${d.key}`)
 	md.push('')
