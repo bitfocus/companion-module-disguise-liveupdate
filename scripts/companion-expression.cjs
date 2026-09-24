@@ -10,8 +10,8 @@
 // Only the builtin functions the catalog uses are implemented, each copied from Companion's function
 // table; any other call is refused, so a text can only use functions that exist in Companion 5.0.4.
 // The texts are parsed with the TypeScript parser once every $(label:name) is replaced by an
-// identifier: Companion's parser (jsep with its template-literal and variable plugins) reads the
-// same JavaScript subset with the same precedence.
+// identifier: Companion parses them with acorn (ecmaVersion latest) and a plugin that reads
+// $(label:name) as a variable, so the grammar and the precedence are those of JavaScript.
 //
 // Used by scripts/gen-presets.mjs, which refuses to generate a catalog whose button text hides a
 // readout marker, and by test/catalog.test.ts, which checks the generated catalog the same way.
