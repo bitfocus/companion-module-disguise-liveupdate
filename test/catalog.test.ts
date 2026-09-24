@@ -3,11 +3,13 @@
  * (docs/research/phase1-catalog.json) row for row, and every preset must reference only defined
  * actions, feedbacks and option ids with values of the declared types.
  */
-import { test } from 'node:test'
+import { afterEach, test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
-import { loadDist, ROOT } from './harness'
+import { destroyInstances, FakeDirector, loadDist, newInstance, ROOT } from './harness'
+
+afterEach(destroyInstances)
 
 const dist = loadDist()
 const catalog = JSON.parse(readFileSync(path.join(ROOT, 'docs/research/phase1-catalog.json'), 'utf8'))
@@ -473,4 +475,38 @@ test('guarded expression texts render normal values exactly as before', () => {
 		expression.renderExpression(dictionary.text, liveupdate({ selEvName: 'speed', evDevAllDict: '{"speed":0.5}' })),
 		'speed\n0.5',
 	)
+})
+
+test('preset feedback paths carry the label of the connection they are built for', () => {
+	// Companion 5.0.4 relabels $(liveupdate:...) in a preset's text and actions but not in its feedbacks
+	const config = { host: '192.0.2.10', port: 80, showExperimentalPresets: true }
+	const labelled = dist.getPresetDefinitions({ label: 'd3_b', config })
+	const carrier = (all: Record<string, any>, id: string) =>
+		all[id].feedbacks.find((f: any) => f.feedbackId === 'liveUpdateVariable').options
+	assert.equal(carrier(labelled, 'trk_track_name').objectPath, 'track:"$(d3_b:selTrack)"')
+	assert.equal(
+		carrier(labelled, 'rs_inst_running').propertyPath,
+		'object.getWorkloadInstance($(d3_b:selWorkload), $(d3_b:selInstance)).isProcessRunning',
+	)
+	for (const [id, preset] of Object.entries(labelled)) {
+		for (const feedback of preset.feedbacks ?? [])
+			assert.ok(!JSON.stringify(feedback.options).includes('$(liveupdate:'), `${id}: feedback keeps $(liveupdate:`)
+	}
+	// the catalog's own label, and a connection without one, keep the paths as they are
+	assert.equal(carrier(presets, 'trk_track_name').objectPath, 'track:"$(liveupdate:selTrack)"')
+	const unlabelled = dist.getPresetDefinitions({ label: '', config })
+	assert.equal(carrier(unlabelled, 'trk_track_name').objectPath, 'track:"$(liveupdate:selTrack)"')
+})
+
+test('renaming the connection publishes presets with the new label', async () => {
+	const { inst, host } = await newInstance(new FakeDirector())
+	const objectPath = () => {
+		const preset = host.presetDefinitions.trk_track_name as any
+		return preset.feedbacks.find((f: any) => f.feedbackId === 'liveUpdateVariable').options.objectPath
+	}
+	assert.equal(objectPath(), 'track:"$(liveupdate:selTrack)"')
+	// module-base sets the new label and calls configUpdated with the unchanged config
+	inst.label = 'd3_b'
+	await inst.configUpdated({ ...inst.config })
+	assert.equal(objectPath(), 'track:"$(d3_b:selTrack)"')
 })

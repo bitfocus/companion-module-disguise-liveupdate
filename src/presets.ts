@@ -28,11 +28,21 @@ import type { PresetCatalogEntry, PresetCatalogText, RGB } from './presetTypes'
  * - The update interval of each feedback comes from the connection settings (per value class).
  * - Experimental rows (undocumented object paths, read-only) are only emitted when enabled in the
  *   connection settings; they live in "99 Experimental", prefixed "[EXP]", grouped by home category.
+ * - The catalog writes the module's own variables as $(liveupdate:...). Companion 5.0.4 rewrites that
+ *   label to the connection's own in a preset's button text and action options, but not in its
+ *   feedback options, so the feedback paths get the connection's label here. A rename reaches
+ *   configUpdated, which publishes the presets again.
  */
 
 const EXPERIMENTAL_CATEGORY = '99 Experimental'
 const EXPERIMENTAL_NAME_PREFIX = '[EXP] '
 const CONNECTION_STATUS_PRESET_ID = 'conn_status'
+/** The connection label the catalog is written for (the module's shortname) */
+const CATALOG_LABEL = 'liveupdate'
+
+/** Point the catalog's $(liveupdate:...) references at the connection with this label */
+const ownVariables = (text: string, label: string): string =>
+	label === CATALOG_LABEL ? text : text.replace(/\$\(liveupdate:/g, () => `$(${label}:`)
 
 const rgb = (colour: RGB): number => combineRgb(colour[0], colour[1], colour[2])
 
@@ -61,7 +71,7 @@ function buildStyle(entry: PresetCatalogEntry): CompanionButtonStyleProps {
 	}
 }
 
-function buildFeedbacks(entry: PresetCatalogEntry, config: DisguiseConfig): CompanionPresetFeedback[] {
+function buildFeedbacks(entry: PresetCatalogEntry, config: DisguiseConfig, label: string): CompanionPresetFeedback[] {
 	const feedbacks: CompanionPresetFeedback[] = []
 
 	if (entry.objectPath) {
@@ -69,8 +79,8 @@ function buildFeedbacks(entry: PresetCatalogEntry, config: DisguiseConfig): Comp
 			feedbackId: 'liveUpdateVariable',
 			options: {
 				variableName: entry.variableName,
-				objectPath: entry.objectPath,
-				propertyPath: entry.propertyPath,
+				objectPath: ownVariables(entry.objectPath, label),
+				propertyPath: ownVariables(entry.propertyPath, label),
 				updateFrequency: getPresetInterval(config, entry.freqClass),
 			},
 		})
@@ -82,7 +92,7 @@ function buildFeedbacks(entry: PresetCatalogEntry, config: DisguiseConfig): Comp
 			options: {
 				variableName: entry.variableName,
 				operator: entry.stateColour.operator,
-				value: String(entry.stateColour.value),
+				value: ownVariables(String(entry.stateColour.value), label),
 			},
 			style: {
 				bgcolor: rgb(entry.stateColour.bgcolor),
@@ -136,7 +146,11 @@ function buildSteps(entry: PresetCatalogEntry): { steps: CompanionButtonStepActi
 	return { steps: [step], rotary }
 }
 
-function buildButtonPreset(entry: PresetCatalogEntry, config: DisguiseConfig): CompanionButtonPresetDefinition {
+function buildButtonPreset(
+	entry: PresetCatalogEntry,
+	config: DisguiseConfig,
+	label: string,
+): CompanionButtonPresetDefinition {
 	const experimental = entry.tier === 'experimental'
 	const style = buildStyle(entry)
 	const { steps, rotary } = buildSteps(entry)
@@ -146,7 +160,7 @@ function buildButtonPreset(entry: PresetCatalogEntry, config: DisguiseConfig): C
 		category: entry.category,
 		name: (experimental ? EXPERIMENTAL_NAME_PREFIX : '') + entry.name,
 		style,
-		feedbacks: buildFeedbacks(entry, config),
+		feedbacks: buildFeedbacks(entry, config, label),
 		steps,
 	}
 
@@ -165,6 +179,7 @@ function buildButtonPreset(entry: PresetCatalogEntry, config: DisguiseConfig): C
 
 export function getPresetDefinitions(instance: DisguiseInstance): CompanionPresetDefinitions {
 	const config: DisguiseConfig = instance.config ?? { host: '', port: 80 }
+	const label = instance.label || CATALOG_LABEL
 	const showExperimental = !!config.showExperimentalPresets
 	const presets: CompanionPresetDefinitions = {}
 
@@ -174,7 +189,7 @@ export function getPresetDefinitions(instance: DisguiseInstance): CompanionPrese
 	}
 
 	for (const entry of PRESET_CATALOG) {
-		if (entry.tier === 'normal') presets[entry.id] = buildButtonPreset(entry, config)
+		if (entry.tier === 'normal') presets[entry.id] = buildButtonPreset(entry, config, label)
 	}
 
 	if (showExperimental) {
@@ -193,7 +208,7 @@ export function getPresetDefinitions(instance: DisguiseInstance): CompanionPrese
 				text: `Read-only presets whose object path is not documented for LiveUpdate. They belong to "${home}" once verified on a Director.`,
 			}
 			for (const entry of experimental) {
-				if (entry.homeCategory === home) presets[entry.id] = buildButtonPreset(entry, config)
+				if (entry.homeCategory === home) presets[entry.id] = buildButtonPreset(entry, config, label)
 			}
 		}
 	}
