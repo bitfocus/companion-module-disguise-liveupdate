@@ -1815,3 +1815,97 @@ test('another Director does not inherit the selection lists or version of the pr
 	assert.equal(host.variables.get('designer_version'), '')
 	await inst.destroy()
 })
+
+test('an object path built on a readout that has no value yet is not sent', async () => {
+	const director = new FakeDirector({ valueFor: () => 1 })
+	const { inst, host } = await newInstance(director, [
+		liveUpdateFeedback('a', 'track:"PENDING"', 'object.lengthInBeats', 'len'),
+	])
+	await settle(50)
+	assert.equal(director.count('subscribe'), 0, 'no show object is called PENDING')
+	assert.equal(host.variables.get('len'), 'UNSET')
+	await inst.destroy()
+})
+
+test('a selection does not take a readout marker as a name', async () => {
+	const director = new FakeDirector()
+	const { inst, host } = await newInstance(director, [], { selTrack: 'Track 2' })
+	for (const marker of ['PENDING', ' OFFLINE ', 'UNSET']) {
+		inst.setSelection('selTrack', marker)
+		assert.equal(host.variables.get('selTrack'), 'Track 2', `'${marker}' leaves the selection as it was`)
+	}
+	assert.equal(host.savedConfigs.length, 0, 'nothing is saved')
+	assert.equal(host.logs.filter((l) => l.message.includes('is what a readout shows')).length, 3)
+	await inst.destroy()
+})
+
+test('Set to Disguise (String) does not write a readout marker into the show', async () => {
+	const director = new FakeDirector({ valueFor: () => 'Intro' })
+	const { inst, host } = await newInstance(director, [liveUpdateFeedback('a', TRACK, 'object.description', 'desc')])
+	await settle(50)
+	const actions = dist.getActionDefinitions(inst)
+	const context = { parseVariablesInString: async (text: string) => text }
+	await actions.setToDisguiseString.callback({ options: { variableName: 'desc', value: 'PENDING' } }, context)
+	assert.equal(director.count('set'), 0, 'the marker is not sent')
+	assert.ok(host.logs.some((l) => l.message.includes('is what a readout shows')))
+	await actions.setToDisguiseString.callback({ options: { variableName: 'desc', value: 'PENDING list' } }, context)
+	assert.equal(director.count('set'), 1, 'a text that merely contains the word is sent')
+	await inst.destroy()
+})
+
+test('a read of a pair given up earlier gets its own time and its own answer', async () => {
+	const director = new FakeDirector({ refCount: true, valueFor: () => 3 })
+	const { inst } = await newInstance(director)
+	director.hold()
+	assert.equal(await inst.probeValue(TRACK, 'object.lengthInBeats', 50), undefined, 'the first read runs out of time')
+	const second = inst.probeValue(TRACK, 'object.lengthInBeats', 3000)
+	await settle()
+	director.release()
+	assert.equal(await second, 3, "the second read gets the Director's answer")
+	const frames = director.received.filter((m) => m.subscribe?.object === TRACK).length
+	assert.equal(frames, 1, 'one request between them')
+	await settle(50)
+	assert.equal(director.refs(TRACK, 'object.lengthInBeats'), 0, 'and no reference left behind')
+	await inst.destroy()
+})
+
+test('a second read of a pair the Director never answers ends at its own timeout', async () => {
+	const director = new FakeDirector({ refCount: true, valueFor: () => 3 })
+	const { inst } = await newInstance(director, [], { pendingSubscriptionTimeout: 5000 })
+	director.hold()
+	assert.equal(await inst.probeValue(TRACK, 'object.lengthInBeats', 50), undefined)
+	const started = Date.now()
+	assert.equal(await inst.probeValue(TRACK, 'object.lengthInBeats', 300), undefined)
+	const took = Date.now() - started
+	assert.ok(took < 1500, `it waited ${took} ms, not the 5000 ms pending timeout`)
+	director.release()
+	await settle(50)
+	await inst.destroy()
+})
+
+test('a confirmed subscription keeps the faster rate after the faster button goes, until a reconnect', async () => {
+	const director = new FakeDirector({ refCount: true, valueFor: () => 0.5 })
+	const pair = ['transportManager:default', 'object.brightness'] as const
+	const { inst } = await newInstance(
+		director,
+		[liveUpdateFeedback('fast', ...pair, 'brightness', 250), liveUpdateFeedback('slow', ...pair, 'brightness', 5000)],
+		{ reconnectInterval: 100 },
+	)
+	await settle(50)
+	assert.equal(inst.getSubscriptionByVariableName('brightness').updateFrequencyMs, 250)
+	inst.updateFeedbacks({ fast: null })
+	await settle(50)
+	assert.equal(inst.getSubscriptionByVariableName('brightness').updateFrequencyMs, 250, 'not slowed down')
+	director.sock!.drop()
+	assert.ok(await until(() => inst.isConnectionReady()))
+	await settle(50)
+	assert.deepEqual(
+		director.subs.map((s) => s.updateFrequencyMs),
+		[5000],
+		'a reconnect subscribes at the rate of the buttons still placed',
+	)
+	inst.updateFeedbacks({ slow: null })
+	await settle(50)
+	assert.equal(director.refs(...pair), 0, 'gone with the last button')
+	await inst.destroy()
+})

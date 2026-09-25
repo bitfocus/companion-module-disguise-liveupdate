@@ -8,6 +8,7 @@ import {
 import type { DisguiseInstance } from './index'
 import type { LiveUpdateSubscription } from './index'
 import { SELECTIONS } from './selections'
+import { isSentinel } from './variables'
 
 export interface DisguiseActionDefinitions extends CompanionActionDefinitions {
 	setToDisguiseString: CompanionActionDefinition
@@ -231,6 +232,16 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
 				if (!subscription) return
 
 				const value = await processStringValue(context, valueStr)
+				// A value that is exactly a readout marker came from a readout with no value yet
+				// ($(liveupdate:x) while x says PENDING or OFFLINE); writing the word into the show would
+				// replace the property with a status text.
+				if (isSentinel(value.trim())) {
+					instance.log(
+						'warn',
+						`Set to Disguise (String) for '${variableName}' not sent: '${value.trim()}' is what a readout shows while it has no value`,
+					)
+					return
+				}
 				instance.setProperty(subscription.id, value)
 			},
 		},

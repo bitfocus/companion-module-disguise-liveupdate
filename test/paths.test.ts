@@ -182,6 +182,13 @@ test('an object path is refused only for a bare empty name or a remote node with
 		"track:''",
 		' screen2 : "" ',
 		'subsystem:MonitoringManager.findRemoteMonitor(":d3", "fps")',
+		// an object path built on another readout while that readout has no value yet
+		'track:"PENDING"',
+		"track:'OFFLINE'",
+		'track:"demo".findLayerByName("UNSET")',
+		'track:"PATH_ERROR (unsubscribed)"',
+		'track:PENDING',
+		'track:ERROR.layers',
 	]
 	for (const path of unresolved) assert.equal(dist.isUnresolvedObjectPath(path), true, `unresolved: ${path}`)
 
@@ -191,6 +198,10 @@ test('an object path is refused only for a bare empty name or a remote node with
 		'track:"".layers',
 		'subsystem:MonitoringManager.findRemoteMonitor("ACTOR01:d3", "fps")',
 		'subsystem:MonitoringManager',
+		// a name that merely contains a marker word is a real name
+		'track:"PENDING list"',
+		'track:"Error screen"',
+		'track:track_1',
 	]
 	for (const path of resolved) assert.equal(dist.isUnresolvedObjectPath(path), false, `resolved: ${path}`)
 })

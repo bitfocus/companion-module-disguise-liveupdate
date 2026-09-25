@@ -89,7 +89,10 @@
   empty name such as `track:""`, a template placeholder), and the new `PENDING`: requested from the
   Director, no value yet, so a readout that waits for its answer (just placed, after a reconnect,
   during a retry) is never mistaken for a value the Director sends empty. The preset texts show these
-  words as they are, without formatting or unit. The list is exported as `SENTINELS`.
+  words as they are, without formatting or unit. The list is exported as `SENTINELS`. A readout word
+  is never taken for a name or a value: an object path whose object name is one (`track:"PENDING"`,
+  built on a readout that has no value yet) shows `UNSET` instead of being sent, and *Set selection*
+  and *Set to Disguise (String)* refuse a value that is exactly one.
 - Connection settings for the default preset update intervals (monitoring, playhead, state, static).
 - Guard against paths that cannot be resolved: an empty path, a template placeholder, `$NA` or a raw
   `$(...)` reference, and for object paths a bare empty name (`track:""`) or a remote-monitor node

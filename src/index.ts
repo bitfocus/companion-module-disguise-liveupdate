@@ -16,7 +16,9 @@ import {
 	ERROR_VALUE,
 	getVariableDefinitions,
 	isReservedVariableName,
+	isSentinel,
 	OFFLINE_VALUE,
+	SENTINELS,
 	PATH_ERROR_UNSUBSCRIBED_VALUE,
 	PATH_ERROR_VALUE,
 	PENDING_VALUE,
@@ -119,13 +121,25 @@ export function isUnresolvedPath(path: string): boolean {
 	return false
 }
 
+/** A quoted name in an object path that is exactly a readout marker, e.g. `track:"PENDING"` */
+const MARKER_NAME = new RegExp(
+	`(["'])(?:${SENTINELS.map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\1`,
+)
+
 /**
  * An object path that must not be sent: everything isUnresolvedPath refuses, a bare empty name such
- * as `track:""`, and the remote-monitor node form without a hostname (`":d3"`).
+ * as `track:""`, the remote-monitor node form without a hostname (`":d3"`), and a name that is a
+ * readout marker. The last one is an object path built on another readout (`track:"$(liveupdate:x)"`)
+ * while that readout still says PENDING or OFFLINE: no show object has that name, so the request
+ * would only come back as ERROR.
  */
 export function isUnresolvedObjectPath(path: string): boolean {
 	const trimmed = path.trim()
-	return isUnresolvedPath(trimmed) || EMPTY_OBJECT_NAME.test(trimmed) || /"\s*:d3"/.test(trimmed)
+	if (isUnresolvedPath(trimmed) || EMPTY_OBJECT_NAME.test(trimmed) || /"\s*:d3"/.test(trimmed)) return true
+	if (MARKER_NAME.test(trimmed)) return true
+	// the unquoted form, e.g. track:PENDING
+	const bare = /^[A-Za-z_][A-Za-z0-9_]*\s*:\s*([^"'.(]+?)\s*(?:$|\.)/.exec(trimmed)
+	return bare !== null && isSentinel(bare[1])
 }
 
 /** The major version in a Designer version string such as `r34.0.3` or `34.0.3.258249` */
@@ -1639,6 +1653,16 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		// The action ran the value through the host parser, so an unknown variable arrives as $NA and
 		// a nested reference as a raw $(...). Both mean "no value", which is a clear, not a rejection.
 		const raw = value.trim()
+		// A readout marker is not a name: the value followed a readout that has no value yet (PENDING,
+		// OFFLINE, ...). Storing it would point every preset at an object called PENDING, and clearing
+		// the selection would blank them all, so the selection keeps what it had.
+		if (SENTINELS.includes(raw)) {
+			this.log(
+				'warn',
+				`Selection ${selectionId} not changed: '${raw}' is what a readout shows while it has no value, not a name`,
+			)
+			return
+		}
 		const trimmed = raw === UNSET_SELECTION || raw.includes('$(') ? '' : raw
 		const problem = validateSelection(selectionId, trimmed)
 		if (problem) {
