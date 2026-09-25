@@ -300,6 +300,8 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	public discoveryChoices: Map<string, string[]> = new Map()
 	/** Value history per variable, kept only while a Sparkline feedback asks for it */
 	private histories: Map<string, ValueHistory> = new Map()
+	/** The pair whose values each history holds */
+	private historyPairs: Map<string, string> = new Map()
 	/** Which variable each Sparkline feedback watches, and how much history it wants */
 	private sparklines: Map<string, { variableName: string; window: number }> = new Map()
 	/** The variable definitions last sent to the host, so an unchanged list is not sent again */
@@ -502,6 +504,8 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				if (cached.variableName !== variableName) this.markUnset(cached.variableName)
 			}
 			const names = new Set([variableName, cached.variableName])
+			// a Sparkline does not join the previous object's values to the new one's
+			for (const name of names) this.forgetStaleHistory(name)
 			const stale = this.stateFeedbacksOf(names)
 			if (stale.length) this.checkFeedbacksById(...stale)
 			return
@@ -1244,7 +1248,11 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		}
 		// keep only the histories something still watches
 		const wanted = new Set([...this.sparklines.values()].map((entry) => entry.variableName))
-		for (const name of [...this.histories.keys()]) if (!wanted.has(name)) this.histories.delete(name)
+		for (const name of [...this.histories.keys()]) {
+			if (wanted.has(name)) continue
+			this.histories.delete(name)
+			this.historyPairs.delete(name)
+		}
 	}
 
 	/**
@@ -1259,13 +1267,19 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	/**
 	 * Record a value for every Sparkline feedback that watches this variable. A sentinel the readout
 	 * shows instead of a value (OFFLINE, ERROR, PATH_ERROR, UNSET, PENDING) is recorded as well: it is
-	 * the gap that breaks the line, so values from before and after it are never joined.
+	 * the gap that breaks the line, so values from before and after it are never joined. A value from
+	 * the Director names its pair: one from another pair than the values before it starts a new line,
+	 * so two objects are never joined either.
 	 */
-	private recordHistory(variableName: string, value: unknown): void {
+	private recordHistory(variableName: string, value: unknown, pair?: string): void {
 		let window = 0
 		for (const entry of this.sparklines.values())
 			if (entry.variableName === variableName) window = Math.max(window, entry.window)
 		if (!window) return
+		if (pair !== undefined && this.historyPairs.get(variableName) !== pair) {
+			this.histories.delete(variableName)
+			this.historyPairs.set(variableName, pair)
+		}
 		let history = this.histories.get(variableName)
 		if (!history) {
 			history = new ValueHistory(window)
@@ -1274,6 +1288,30 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			history.resize(window)
 		}
 		history.push(value)
+	}
+
+	/**
+	 * Drop the history of a variable when the pair its values came from no longer feeds it: the
+	 * readout was moved to another object or property, renamed, given a path that cannot be resolved,
+	 * or removed. The next value starts a new line, and the old object's values stop setting the
+	 * scale. True when a history was dropped; the caller redraws the Sparklines of the variable.
+	 */
+	private forgetStaleHistory(variableName: string): boolean {
+		const pair = this.historyPairs.get(variableName)
+		if (pair === undefined || pair === this.pairOfVariable(variableName)) return false
+		this.histories.delete(variableName)
+		this.historyPairs.delete(variableName)
+		return true
+	}
+
+	/** The pair a variable is fed from: its confirmed subscription, or the request made for it */
+	private pairOfVariable(variableName: string): string | undefined {
+		for (const subscription of this.subscriptions.values())
+			if (subscription.variableName === variableName) return pairKey(subscription.objectPath, subscription.propertyPath)
+		for (const pending of this.pendingSubscriptions.values())
+			if (pending.variableName === variableName && pending.feedbackIds.size > 0)
+				return pairKey(pending.objectPath, pending.propertyPath)
+		return undefined
 	}
 
 	/** Remember which variable a Compare feedback watches (undefined removes it) */
@@ -1381,7 +1419,11 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	 */
 	unsubscribeFromVariable(feedbackId: string): void {
 		const subscriptionId = this.feedbackIdToSubscriptionId.get(feedbackId)
-		if (!this.feedbackOptionsCache.has(feedbackId)) this.retainedVariables.delete(feedbackId)
+		// A feedback that is removed takes the history of its readout with it (see forgetStaleHistory)
+		const removedReadout = this.feedbackOptionsCache.has(feedbackId)
+			? undefined
+			: this.retainedVariables.get(feedbackId)
+		if (removedReadout !== undefined) this.retainedVariables.delete(feedbackId)
 
 		// A removed or edited feedback starts over without back-off
 		this.clearBackoff(feedbackId)
@@ -1394,6 +1436,12 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			pending.rates.delete(feedbackId)
 		}
 
+		this.releaseFeedbackSubscription(feedbackId, subscriptionId)
+		if (removedReadout !== undefined && this.forgetStaleHistory(removedReadout)) this.recheckStateOf(removedReadout)
+	}
+
+	/** The part of unsubscribeFromVariable that concerns the confirmed subscription the feedback held */
+	private releaseFeedbackSubscription(feedbackId: string, subscriptionId: number | undefined): void {
 		if (subscriptionId === undefined) {
 			this.updateVariableDefinitions()
 			return
@@ -2117,7 +2165,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				} else {
 					changedVars[subscription.variableName] = PATH_ERROR_VALUE
 				}
-				this.recordHistory(subscription.variableName, changedVars[subscription.variableName])
+				this.recordHistory(subscription.variableName, changedVars[subscription.variableName], key)
 				affected.add(subscription.variableName)
 
 				continue
@@ -2145,7 +2193,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			// Update the module variable
 			// This makes the value available as $(liveupdate:variable_name) throughout Companion
 			changedVars[subscription.variableName] = displayValue
-			this.recordHistory(subscription.variableName, valueUpdate.value)
+			this.recordHistory(subscription.variableName, valueUpdate.value, key)
 			affected.add(subscription.variableName)
 		}
 

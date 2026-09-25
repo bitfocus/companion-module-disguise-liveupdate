@@ -386,7 +386,7 @@ test('a property error between two values breaks the line', async () => {
 	await inst.destroy()
 })
 
-test('a readout the Director refuses, or one whose path cannot be resolved, breaks the line', async () => {
+test('a readout moved to an object the Director refuses, or to a path that cannot be resolved, starts over', async () => {
 	const director = new FakeDirector({
 		valueFor: () => 58,
 		errorFor: (o, p) => (o === 'track:"Gone"' ? `Unable to subscribe to ${o} / ${p} - object not found` : null),
@@ -394,36 +394,74 @@ test('a readout the Director refuses, or one whose path cannot be resolved, brea
 	const readout = liveUpdateFeedback('v', FPS_OBJECT, FPS_PROPERTY, 'fps')
 	const { inst, host } = await newInstance(director, [readout, sparklineFeedback('spark', { variableName: 'fps' })])
 	await settle(50)
+	assert.deepEqual(inst.getSparklineSamples('fps'), [58])
 	inst.updateFeedbacks({ v: { ...readout, options: { ...readout.options, objectPath: 'track:"Gone"' } } })
 	await settle(50)
 	assert.equal(host.variables.get('fps'), 'ERROR')
-	assert.deepEqual(inst.getSparklineSamples('fps'), [58, undefined])
-	assert.deepEqual(shown(host, 'spark'), render([58, undefined]), 'the button is redrawn with the break')
+	assert.deepEqual(inst.getSparklineSamples('fps'), [], 'the values of the previous object are dropped')
+	assert.equal(shown(host, 'spark'), undefined, 'and the button is redrawn without them')
 
 	inst.updateFeedbacks({ v: readout })
 	await settle(50)
-	assert.deepEqual(inst.getSparklineSamples('fps'), [58, undefined, 58])
+	assert.deepEqual(inst.getSparklineSamples('fps'), [58])
 	inst.updateFeedbacks({ v: { ...readout, options: { ...readout.options, objectPath: 'track:"$NA"' } } })
 	await settle(50)
 	assert.equal(host.variables.get('fps'), 'UNSET')
-	assert.deepEqual(inst.getSparklineSamples('fps'), [58, undefined, 58, undefined])
-	assert.deepEqual(shown(host, 'spark'), render([58, undefined, 58, undefined]))
+	assert.deepEqual(inst.getSparklineSamples('fps'), [])
+	assert.equal(shown(host, 'spark'), undefined)
 	await inst.destroy()
 })
 
-test('a readout moved to another object breaks the line instead of joining the two objects', async () => {
-	const director = new FakeDirector({ valueFor: (objectPath) => (objectPath === FPS_OBJECT ? 58 : 24) })
+test('a readout moved to another object starts a new line instead of joining the two objects', async () => {
+	const director = new FakeDirector({ valueFor: (objectPath) => (objectPath === FPS_OBJECT ? 58 : 5000) })
 	const readout = liveUpdateFeedback('v', FPS_OBJECT, FPS_PROPERTY, 'fps')
 	const { inst, host } = await newInstance(director, [readout, sparklineFeedback('spark', { variableName: 'fps' })])
 	await settle(50)
 	director.hold()
 	inst.updateFeedbacks({ v: { ...readout, options: { ...readout.options, objectPath: 'track:"Track 1"' } } })
 	await settle(20)
-	// the readout says PENDING while the new object is asked for, and the line breaks there
+	// the readout says PENDING while the new object is asked for; the old object's line is gone already
 	assert.equal(host.variables.get('fps'), 'PENDING')
+	assert.deepEqual(inst.getSparklineSamples('fps'), [])
+	assert.equal(shown(host, 'spark'), undefined)
 	director.release()
 	await settle(50)
-	assert.equal(host.variables.get('fps'), 24)
-	assert.deepEqual(inst.getSparklineSamples('fps'), [58, undefined, 24])
+	assert.equal(host.variables.get('fps'), 5000)
+	assert.deepEqual(inst.getSparklineSamples('fps'), [5000], 'the scale is set by the new object alone')
+
+	// only the property that feeds the readout counts: a new interval keeps the line
+	inst.updateFeedbacks({
+		v: { ...readout, options: { ...readout.options, objectPath: 'track:"Track 1"', updateFrequency: 500 } },
+	})
+	await settle(50)
+	assert.deepEqual(inst.getSparklineSamples('fps'), [5000, undefined, 5000])
+	await inst.destroy()
+})
+
+test('a readout removed and placed again starts a new line; one another feedback still feeds keeps it', async () => {
+	let value = 10
+	const director = new FakeDirector({ refCount: true, valueFor: () => value })
+	const readout = liveUpdateFeedback('v', FPS_OBJECT, FPS_PROPERTY, 'fps')
+	const { inst, host } = await newInstance(director, [
+		readout,
+		liveUpdateFeedback('twin', FPS_OBJECT, FPS_PROPERTY, 'fps'),
+		sparklineFeedback('spark', { variableName: 'fps' }),
+	])
+	await settle(50)
+	value = 20
+	director.pushValueForPair(FPS_OBJECT, FPS_PROPERTY, 20)
+	await settle(20)
+	inst.updateFeedbacks({ twin: null })
+	await settle(50)
+	assert.deepEqual(inst.getSparklineSamples('fps'), [10, 20], 'the other feedback still feeds the readout')
+
+	inst.updateFeedbacks({ v: null })
+	await settle(50)
+	assert.deepEqual(inst.getSparklineSamples('fps'), [], 'the removed readout takes its line with it')
+	assert.equal(shown(host, 'spark'), undefined)
+	value = 30
+	inst.updateFeedbacks({ v: readout })
+	await settle(50)
+	assert.deepEqual(inst.getSparklineSamples('fps'), [30])
 	await inst.destroy()
 })

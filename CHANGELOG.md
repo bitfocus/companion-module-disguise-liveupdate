@@ -40,9 +40,9 @@
   renders the pixels itself, with no drawing dependency. Options: samples to keep (4..300, default 60,
   per feedback), automatic or fixed scale, line colour, fill and a threshold rule such as a frame
   budget. A value the readout loses (OFFLINE, PENDING, ERROR, PATH_ERROR, UNSET or anything that is
-  not a number) is drawn as a break, never joined across. On Companion 5 the line goes into an Image
-  layer: buttons placed from the presets have one, a button created by hand needs one added before the
-  feedback (see HELP, *Seeing a trend*).
+  not a number) is drawn as a break, never joined across; a readout moved to another object or removed
+  starts a new line. On Companion 5 the line goes into an Image layer: buttons placed from the presets
+  have one, a button created by hand needs one added before the feedback (see HELP, *Seeing a trend*).
 - Command actions over Designer's Session REST API, on the same host and port. **Transport:** play,
   stop, play to end of section, loop section, return to start, next and previous section and track, go
   to section (by number), note, tag, track, timecode and time, brightness, volume, speed and engaged.

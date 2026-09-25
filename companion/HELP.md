@@ -165,6 +165,10 @@ rule such as a frame budget.
   (empty text, objects, arrays). An outage or an error streak of any length is one break, and the
   column the break falls in stays empty.
   During an outage the button is redrawn with the break, so the line stops short of the right edge.
+- The line belongs to the object the readout watches. When the readout is moved to another object or
+  property (a selection re-pointed, the path edited), renamed, given a path that cannot be resolved,
+  or removed, its values are dropped and the next value starts a new line, so two objects are never
+  joined and the old one no longer sets the scale. Changing only its *Update Frequency* keeps the line.
 - Numeric text is drawn as its number, and on/off values as 1 and 0. The fill covers every column
   under the line, also while the history is still short. With more samples than pixel columns, a
   column shows the range of the samples in it. The threshold rule is drawn over the fill, and the line
