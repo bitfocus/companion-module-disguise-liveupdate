@@ -218,6 +218,56 @@ test('the live scripts write their raw output to the git-ignored .live folder by
 	}
 })
 
+test('the live-write e2e writes to .live by default and prints the site data reminder', () => {
+	const source = readFileSync(path.join(ROOT, 'test', 'live-write.e2e.ts'), 'utf8')
+	assert.ok(!/'docs', 'research'/.test(source), 'the e2e still writes over the scrubbed evidence by default')
+	assert.match(source, /liveOutFile\(ROOT, arg\('out'\), 'live-write-e2e\.json'\)/)
+	// the reminder follows the last save, which the finally block makes on every way out that saved
+	const last = source.lastIndexOf('save()')
+	assert.ok(last > source.lastIndexOf('} finally {'), 'the last save is not in the finally block')
+	assert.match(source.slice(last), /siteDataReminder\(ROOT, outFile\)/)
+})
+
+test('the live-write e2e refuses its writes on the current track or a transport that may be playing', () => {
+	const source = readFileSync(path.join(ROOT, 'test', 'live-write.e2e.ts'), 'utf8')
+	// the layer step is a neutral write, the brightness and offset steps are output writes
+	const guard = source.indexOf('writeRefusal({ neutral: true, output: true, track, currentTrack, playing, force })')
+	assert.ok(guard >= 0, 'the e2e does not apply the write guard to both groups')
+	assert.ok(guard < source.indexOf('.callback('), 'the write guard must run before the first write')
+	assert.match(source, /process\.exitCode = 2/)
+	assert.match(source, /handRestoreLine\(items\)/)
+	assert.match(source, /readoutValue\(vars\.get\('currentTrack'\), dist\.SENTINELS\)/)
+	assert.match(source, /readoutValue\(vars\.get\('playing'\), dist\.SENTINELS\)/)
+
+	// the module's readouts hold '' or a marker until the Director answers: neither is a track or a play state
+	const sentinels = ['PENDING', 'OFFLINE', 'ERROR', 'UNSET']
+	for (const unknown of ['', 'PENDING', 'OFFLINE']) {
+		assert.equal(safety.readoutValue(unknown, sentinels), undefined)
+		const refusal = safety.writeRefusal({
+			neutral: true,
+			output: true,
+			track: 'demo',
+			currentTrack: safety.readoutValue(unknown, sentinels),
+			playing: safety.readoutValue(unknown, sentinels),
+			force: false,
+		})
+		assert.match(refusal ?? '', /could not be read/)
+	}
+	assert.equal(safety.readoutValue('Show Track', sentinels), 'Show Track')
+	assert.equal(safety.readoutValue(false, sentinels), false)
+	assert.equal(
+		safety.writeRefusal({
+			neutral: true,
+			output: true,
+			track: 'demo',
+			currentTrack: 'Show Track',
+			playing: false,
+			force: false,
+		}),
+		null,
+	)
+})
+
 test('the site data reminder warns louder for a file inside the checkout', () => {
 	const tracked = safety.siteDataReminder(ROOT, path.join(ROOT, 'docs', 'research', 'x.json'))
 	assert.equal(tracked.length, 2)

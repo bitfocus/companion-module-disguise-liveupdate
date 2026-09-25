@@ -178,9 +178,10 @@ folder can be deleted.
 
 ### Scripts that talk to a Director
 
-Four scripts talk to a real Director and are not part of `yarn test`. `rest-discover.mjs` and
-`live-verify.mjs` only read; `live-write-verify.mjs` and `rest-command-verify.mjs` change the Director
-when run with `--yes` and print their plan (a dry run) without it:
+Four scripts and one end-to-end test talk to a real Director; none of them is part of `yarn test`.
+`rest-discover.mjs` and `live-verify.mjs` only read; `live-write-verify.mjs`, `rest-command-verify.mjs`
+and `test/live-write.e2e.ts` change the Director when run with `--yes` and print their plan (a dry run)
+without it:
 
 ```bash
 node scripts/rest-discover.mjs --host <director>            # read-only: read the Director's own OpenAPI document
@@ -189,18 +190,19 @@ node scripts/live-write-verify.mjs --host <director>        # dry run: print the
 node scripts/live-write-verify.mjs --host <director> --yes  # write and restore each target
 node scripts/rest-command-verify.mjs --host <director>      # dry run: print the command plan
 node scripts/rest-command-verify.mjs --host <director> --yes --group all
+yarn tsx test/live-write.e2e.ts --host <director> --track <name> --layer <name> --screen <name>  # dry run
 ```
 
 They write their raw output to `.live/` at the repository root, which git ignores:
-`.live/rest-api.json`, `.live/live-verification.json`, `.live/live-write-verification.json` and
-`.live/rest-verification.json`. That output holds site data (the Director's address, project, track,
+`.live/rest-api.json`, `.live/live-verification.json`, `.live/live-write-verification.json`,
+`.live/rest-verification.json` and `.live/live-write-e2e.json`. That output holds site data (the Director's address, project, track,
 layer, screen and machine names, uids), and every run that writes it prints a reminder, louder when an
 `--out` puts it inside the checkout but outside `.live/`. The files under `docs/research` are the
 committed, scrubbed evidence: writing there needs an explicit `--out`, and the file must be scrubbed
 before it is committed. `scripts/live-verify.config.json`, the optional selection values for
 `live-verify.mjs`, is git-ignored too.
 
-The write scripts exit 0 when the run was clean, 1 on a failure or when something was not restored or
+The write scripts and the end-to-end test exit 0 when the run was clean, 1 on a failure or when something was not restored or
 not confirmed, and 2 when a guard refused before writing (or on a usage error). Their guards fail
 closed: a state they cannot read counts as the unsafe one. `--force` overrides the track and play-state
 guards, not every refusal: `rest-command-verify.mjs` exits 1 without sending anything when the
@@ -219,6 +221,17 @@ connection mid-run, the script restores the value in flight when it can, prints
 `SET THIS BACK BY HAND: <object> / <property> = <value>` for anything it could not restore and exits 1.
 A final read-back that cannot read a value is recorded as `UNVERIFIED: <reason>` and counts as not
 confirmed; the verdict lists values not restored and values not confirmed separately.
+
+`test/live-write.e2e.ts` drives the built module's own actions the way Companion does: Set Number
+with an expression on the master brightness, Toggle Boolean on the enable of a layer of `--track` and
+Set JSON with a partial object on a surface offset. Each value is put back with an absolute write,
+and a restore that is not confirmed stops the run. It has the guards of `live-write-verify.mjs` for
+both groups, read through the module's own readouts (a readout that is still empty or says `PENDING`
+or `OFFLINE` counts as not read): `--yes` is refused when `--track` is the transport's current track
+or the current track cannot be read, and while the transport is playing or its playing state cannot be
+read. A value that did not come back prints `SET THIS BACK BY HAND: ...` and the run exits 1; Ctrl+C
+lets the step in flight restore and stops before the next write, and a run that could not read the
+values writes no results file.
 
 `rest-command-verify.mjs` sends the REST commands to the Director. Every step reads the state first
 and puts it back afterwards, and a step that is interrupted still restores. The brightness, volume,

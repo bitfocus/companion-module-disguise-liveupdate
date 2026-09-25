@@ -1,6 +1,7 @@
 // Safety rules shared by the scripts that talk to a real Director (live-verify, live-write-verify,
-// rest-command-verify, rest-discover). They live here so test/scripts.test.ts can check them without
-// a Director: the scripts themselves are never run by the tests.
+// rest-command-verify, rest-discover, and test/live-write.e2e.ts). They live here so
+// test/scripts.test.ts can check them without a Director: the scripts themselves are never run by the
+// tests.
 //
 // Every guard fails closed: a state the script could not read counts as the unsafe one.
 
@@ -65,6 +66,16 @@ function writeRefusal({ neutral, output, track, currentTrack, playing, force }) 
 			)
 	}
 	return null
+}
+
+/**
+ * A readout of the built module as a value for writeRefusal (test/live-write.e2e.ts reads the current
+ * track and the playing state through the module): undefined while it holds no Director value, that
+ * is the '' a defined variable starts with or a readout marker (`sentinels`, the module's SENTINELS),
+ * so a guard never takes PENDING or OFFLINE for a track name.
+ */
+function readoutValue(value, sentinels) {
+	return value === '' || (typeof value === 'string' && sentinels.includes(value)) ? undefined : value
 }
 
 const FINAL_OK = ['original value confirmed', 'original value restored on the second attempt']
@@ -193,6 +204,7 @@ module.exports = {
 	liveOutFile,
 	siteDataReminder,
 	writeRefusal,
+	readoutValue,
 	FINAL_OK,
 	unverifiedLabel,
 	unsettled,

@@ -109,18 +109,22 @@
   (subscribe, set, toggle, JSON merge, reconnect).
 - Scripts that talk to a real Director, none of them part of `yarn test`: `scripts/live-verify.mjs`
   (read-only verification of every catalog pair), `scripts/rest-discover.mjs` (read-only, the
-  Director's OpenAPI document), `scripts/live-write-verify.mjs` and `scripts/rest-command-verify.mjs`
-  (dry run without `--yes`). Their raw output goes to the git-ignored `.live/` folder, because it holds
-  site data; writing into `docs/research` needs an explicit `--out` and a scrub. Exit codes: 0 clean,
-  1 a failure or something not restored or not confirmed, 2 when a guard refused before writing;
-  `rest-command-verify.mjs` exits 1 without sending anything when the transport or the playhead cannot
-  be read, `--force` or not.
+  Director's OpenAPI document), `scripts/live-write-verify.mjs`, `scripts/rest-command-verify.mjs` and
+  `test/live-write.e2e.ts` (dry run without `--yes`). Their raw output goes to the git-ignored `.live/`
+  folder, because it holds site data; writing into `docs/research` needs an explicit `--out` and a
+  scrub. Exit codes: 0 clean, 1 a failure or something not restored or not confirmed, 2 when a guard
+  refused before writing or on a usage error; `rest-command-verify.mjs` exits 1 without sending
+  anything when the transport or the playhead cannot be read, `--force` or not.
   - `live-write-verify.mjs` reads the current value, writes a small change, writes the original back
     and re-reads everything; a restore that fails stops the run, and an interrupt or a connection the
     Director closes restores the value in flight or prints `SET THIS BACK BY HAND`. The `neutral`
     group only touches a track that is not the transport's current one and the `output` group refuses
     to run while the transport plays. Both guards fail closed (a state that cannot be read refuses the
     run) and `--force` overrides them.
+  - `test/live-write.e2e.ts` drives the module's own write actions and has the same guards for both
+    groups (the layer step is neutral, the brightness and surface offset steps are output), read
+    through the module's readouts, so `PENDING` or `OFFLINE` counts as not read. A value that did not
+    come back prints `SET THIS BACK BY HAND` and exits 1; Ctrl+C stops before the next write.
   - `rest-command-verify.mjs` reads the state, sends each command, reads the result back and puts it
     back. The value, time and play / stop steps fail when the effect does not show; the section, note
     and next / previous track jumps and RenderStream sync layers record what the Director showed and
