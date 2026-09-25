@@ -162,7 +162,7 @@ frequency class across the library (§5).
 | controlKind | feedbacks | actions |
 |---|---|---|
 | readout | `liveUpdateVariable` | none |
-| nudge | `liveUpdateVariable` | `setToDisguiseNumber` with `$(liveupdate:<var>)+<step>` on `down`; optional `rotate_left` / `rotate_right` with ∓/±step |
+| nudge | `liveUpdateVariable` | `nudgeDisguiseNumber` with `delta: '<step>'` on `down`, and `min: '0'`, `max: '1'` where the documented range is 0..1 (empty otherwise); optional `rotate_left` / `rotate_right` with ∓/±step. Never `setToDisguiseNumber` with `$(liveupdate:<var>)+<step>`: Companion substitutes the readout before the action runs, so an empty readout leaves the step to be written as an absolute value (`scripts/gen-presets.mjs` refuses it) |
 | setValue | `liveUpdateVariable` | `setToDisguiseNumber` / `setToDisguiseString` with a literal value |
 | onOff | `liveUpdateVariable` | `setToDisguiseBoolean` with `value: true` or `false` (one preset each) |
 | toggle | `liveUpdateVariable` | `setToDisguiseToggle` (extension 4, implemented); the onOff pair stays available as explicit ON / OFF buttons |
@@ -207,3 +207,4 @@ given instead of hashes, which do not survive a rebase or a squash merge.
 7. Selection variables ("feat: add selection variables and Set selection action", validation in "fix: de-duplicate subscriptions, retry on a timer and validate selections"): module variables `selTrack`, `selLayer`, `selLayerIndex`, `selSection`, `selBeat`, `selScreen`, `selProjector`, `selScreenUid`, `selMachine`, `selHost`, `selWorkload`, `selInstance`, `selEvUid`, `selEvIndex`, `selLedScreen`, `selStageUid`, `selRsLayer` (plus the experimental set) fed from a "Selections" block of the connection settings and from the `setSelection` action; values are validated by kind, persisted with `saveConfig`, and published as `$NA` while unset. The selection ids and the module's other own variables (`connection_status`, `designer_version`, `selfcheck_*`, `rest_*`) are reserved variable names.
 8. `configUpdated` keeps the WebSocket when only preset settings or selections changed ("feat: add selection variables and Set selection action").
 9. Every variable owned by a placed LiveUpdate Variable feedback stays defined, the Connection OK feedback is re-evaluated on connect/disconnect, and editing Update Frequency re-subscribes ("fix: de-duplicate subscriptions, retry on a timer and validate selections").
+10. `nudgeDisguiseNumber` action ("feat(actions): add Nudge Disguise Number, which adds the step in the module", presets moved in "fix(catalog): nudge presets add their step in the module and stay within 0..1"): adds `delta` to the value the Director sent, within the optional `min` / `max`, and refuses while the property has no number.

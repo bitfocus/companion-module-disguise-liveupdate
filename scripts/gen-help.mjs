@@ -20,7 +20,7 @@ if (startIndex < 0 || endIndex < 0 || endIndex < startIndex) throw new Error('HE
 
 const KIND_LABEL = {
 	readout: 'readout',
-	nudge: 'nudge (Set to Disguise Number)',
+	nudge: 'nudge (Nudge Disguise Number)',
 	setValue: 'set value',
 	onOff: 'set on/off',
 	toggle: 'toggle',

@@ -33,7 +33,8 @@
 - *Nudge Disguise Number* action: adds a step to the current value of a numeric property in the
   module, keeps the result within an optional minimum and maximum, and writes nothing while the
   property has no number. The detents of a rotary encoder add up, also before the Director has
-  reported the previous write.
+  reported the previous write. The nudge and knob presets use it; brightness, volume and the master
+  fades stay within their documented 0..1.
 - *LiveUpdate Sparkline* feedback: draws the recent values of a LiveUpdate Variable as a line on the
   button, so a frame rate or a latency shows its trend and not only its current number. The module
   renders the pixels itself, with no drawing dependency. Options: samples to keep (4..300, default 60,
@@ -225,8 +226,8 @@
 - A step written as a Number expression, such as `$(liveupdate:brightness)-0.05` on a 1.0.2 button,
   is no longer written as an absolute value. Companion substitutes the readout before the action runs,
   so while the readout was empty the module received `-0.05` and sent it. A Number value that starts
-  with an operator is now refused while the property has no numeric value. *Nudge Disguise Number*
-  adds a step to the value the Director sent instead.
+  with an operator is now refused while the property has no numeric value, and the presets nudge with
+  *Nudge Disguise Number*, which adds the step to the value the Director sent.
 - Set to Disguise (JSON) forwards a deliberate JSON `null` and drops only genuine parse failures.
 - The Connection OK feedback refreshes on connect and disconnect.
 - A subscription the Director reports that no feedback owns is released instead of forgotten.

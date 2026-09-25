@@ -2441,31 +2441,37 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "brightness",
-      "value": "$(liveupdate:brightness)+0.05"
+      "delta": "0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "brightness",
-      "value": "$(liveupdate:brightness)+0.05"
+      "delta": "0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "brightness",
-      "value": "$(liveupdate:brightness)-0.05"
+      "delta": "-0.05",
+      "min": "0",
+      "max": "1"
      }
     }
    ],
    "designerVersion": "r34.0.3",
-   "notes": "No clamp: a value above 1.0 is sent as-is (Designer behaviour untested). The module evaluates the Number value with new Function, so 'Math.min(1, $(liveupdate:brightness)+0.05)' would clamp if the lead engineer allows it. Float accumulation (0.15000000000000002) is harmless. Whether a LiveUpdate set equals TransportCommand.makeBrightness (propagation to actors, undo) is undocumented - REST POST /api/session/transport/brightness is the documented command path.",
+   "notes": "Nudge Disguise Number adds the step in the module and keeps the result within the documented 0..1; it writes nothing while the readout has no number. Whether a LiveUpdate set equals TransportCommand.makeBrightness (propagation to actors, undo) is undocumented - REST POST /api/session/transport/brightness is the documented command path.",
    "dimension": "transport",
    "verifierOk": true,
    "verifierProblems": [],
@@ -2530,31 +2536,37 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "brightness",
-      "value": "$(liveupdate:brightness)-0.05"
+      "delta": "-0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "brightness",
-      "value": "$(liveupdate:brightness)-0.05"
+      "delta": "-0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "brightness",
-      "value": "$(liveupdate:brightness)+0.05"
+      "delta": "0.05",
+      "min": "0",
+      "max": "1"
      }
     }
    ],
    "designerVersion": "r34.0.3",
-   "notes": "No clamp: a value below 0.0 is sent as-is. Same set-semantics caveat as tr_brightness_up.",
+   "notes": "Kept within 0..1 by Nudge Disguise Number. Same set-semantics caveat as tr_brightness_up.",
    "dimension": "transport",
    "verifierOk": true,
    "verifierProblems": [],
@@ -2826,31 +2838,37 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "volume",
-      "value": "$(liveupdate:volume)+0.05"
+      "delta": "0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "volume",
-      "value": "$(liveupdate:volume)+0.05"
+      "delta": "0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "volume",
-      "value": "$(liveupdate:volume)-0.05"
+      "delta": "-0.05",
+      "min": "0",
+      "max": "1"
      }
     }
    ],
    "designerVersion": "r34.0.3",
-   "notes": "No clamp above 1.0 (Designer behaviour untested; Math.min(1,...) is possible because the module evaluates the value with new Function). Set-semantics caveat as for brightness; REST POST /api/session/transport/volume is the documented command.",
+   "notes": "Kept within the documented 0..1 by Nudge Disguise Number. Set-semantics caveat as for brightness; REST POST /api/session/transport/volume is the documented command.",
    "dimension": "transport",
    "verifierOk": true,
    "verifierProblems": [],
@@ -2908,31 +2926,37 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "volume",
-      "value": "$(liveupdate:volume)-0.05"
+      "delta": "-0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "volume",
-      "value": "$(liveupdate:volume)-0.05"
+      "delta": "-0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "volume",
-      "value": "$(liveupdate:volume)+0.05"
+      "delta": "0.05",
+      "min": "0",
+      "max": "1"
      }
     }
    ],
    "designerVersion": "r34.0.3",
-   "notes": "No clamp below 0.0.",
+   "notes": "Kept within 0..1 by Nudge Disguise Number.",
    "dimension": "transport",
    "verifierOk": true,
    "verifierProblems": [],
@@ -4867,26 +4891,32 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "trackTcAdjust",
-      "value": "$(liveupdate:trackTcAdjust)+0.1"
+      "delta": "0.1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "trackTcAdjust",
-      "value": "$(liveupdate:trackTcAdjust)+0.1"
+      "delta": "0.1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "trackTcAdjust",
-      "value": "$(liveupdate:trackTcAdjust)-0.1"
+      "delta": "-0.1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -4948,10 +4978,12 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "trackTcAdjust",
-      "value": "$(liveupdate:trackTcAdjust)-0.1"
+      "delta": "-0.1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -6156,26 +6188,32 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "layerTStart",
-      "value": "$(liveupdate:layerTStart)+1"
+      "delta": "1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "layerTStart",
-      "value": "$(liveupdate:layerTStart)+1"
+      "delta": "1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "layerTStart",
-      "value": "$(liveupdate:layerTStart)-1"
+      "delta": "-1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -6239,10 +6277,12 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "layerTStart",
-      "value": "$(liveupdate:layerTStart)-1"
+      "delta": "-1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -6306,26 +6346,32 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "layerTLength",
-      "value": "$(liveupdate:layerTLength)+1"
+      "delta": "1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "layerTLength",
-      "value": "$(liveupdate:layerTLength)+1"
+      "delta": "1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "layerTLength",
-      "value": "$(liveupdate:layerTLength)-1"
+      "delta": "-1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -6389,10 +6435,12 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "layerTLength",
-      "value": "$(liveupdate:layerTLength)-1"
+      "delta": "-1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -6456,26 +6504,32 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyPosX",
-      "value": "$(liveupdate:keyPosX)+1"
+      "delta": "1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyPosX",
-      "value": "$(liveupdate:keyPosX)+1"
+      "delta": "1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyPosX",
-      "value": "$(liveupdate:keyPosX)-1"
+      "delta": "-1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -6539,10 +6593,12 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyPosX",
-      "value": "$(liveupdate:keyPosX)-1"
+      "delta": "-1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -6673,26 +6729,32 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyPosY",
-      "value": "$(liveupdate:keyPosY)+1"
+      "delta": "1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyPosY",
-      "value": "$(liveupdate:keyPosY)+1"
+      "delta": "1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyPosY",
-      "value": "$(liveupdate:keyPosY)-1"
+      "delta": "-1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -6756,10 +6818,12 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyPosY",
-      "value": "$(liveupdate:keyPosY)-1"
+      "delta": "-1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -6890,26 +6954,32 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyScale",
-      "value": "$(liveupdate:keyScale)+0.1"
+      "delta": "0.1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyScale",
-      "value": "$(liveupdate:keyScale)+0.1"
+      "delta": "0.1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyScale",
-      "value": "$(liveupdate:keyScale)-0.1"
+      "delta": "-0.1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -6974,26 +7044,32 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyScaleY",
-      "value": "$(liveupdate:keyScaleY)+0.1"
+      "delta": "0.1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyScaleY",
-      "value": "$(liveupdate:keyScaleY)+0.1"
+      "delta": "0.1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyScaleY",
-      "value": "$(liveupdate:keyScaleY)-0.1"
+      "delta": "-0.1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -7059,10 +7135,12 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyScale",
-      "value": "$(liveupdate:keyScale)-0.1"
+      "delta": "-0.1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -7127,10 +7205,12 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyScaleY",
-      "value": "$(liveupdate:keyScaleY)-0.1"
+      "delta": "-0.1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -7333,26 +7413,32 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyBrightness",
-      "value": "$(liveupdate:keyBrightness)+0.1"
+      "delta": "0.1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyBrightness",
-      "value": "$(liveupdate:keyBrightness)+0.1"
+      "delta": "0.1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyBrightness",
-      "value": "$(liveupdate:keyBrightness)-0.1"
+      "delta": "-0.1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -7415,10 +7501,12 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "keyBrightness",
-      "value": "$(liveupdate:keyBrightness)-0.1"
+      "delta": "-0.1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -9160,26 +9248,32 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "screenOffsetX",
-      "value": "$(liveupdate:screenOffsetX)+0.1"
+      "delta": "0.1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "screenOffsetX",
-      "value": "$(liveupdate:screenOffsetX)+0.1"
+      "delta": "0.1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "screenOffsetX",
-      "value": "$(liveupdate:screenOffsetX)-0.1"
+      "delta": "-0.1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -9238,26 +9332,32 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "screenOffsetX",
-      "value": "$(liveupdate:screenOffsetX)-0.1"
+      "delta": "-0.1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "screenOffsetX",
-      "value": "$(liveupdate:screenOffsetX)+0.1"
+      "delta": "0.1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "screenOffsetX",
-      "value": "$(liveupdate:screenOffsetX)-0.1"
+      "delta": "-0.1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -9439,26 +9539,32 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "screenMasterFade",
-      "value": "$(liveupdate:screenMasterFade)+0.05"
+      "delta": "0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "screenMasterFade",
-      "value": "$(liveupdate:screenMasterFade)+0.05"
+      "delta": "0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "screenMasterFade",
-      "value": "$(liveupdate:screenMasterFade)-0.05"
+      "delta": "-0.05",
+      "min": "0",
+      "max": "1"
      }
     }
    ],
@@ -9471,7 +9577,7 @@
    "status": "live-verified",
    "liveTestPriority": "high",
    "subscriptions": 1,
-   "notes": "No clamping in the expression; Designer is expected to clamp to 0..1 (unverified).",
+   "notes": "Kept within the documented 0..1 by Nudge Disguise Number.",
    "dimension": "stage",
    "verifierOk": true,
    "verifierProblems": [],
@@ -9519,26 +9625,32 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "screenMasterFade",
-      "value": "$(liveupdate:screenMasterFade)-0.05"
+      "delta": "-0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "screenMasterFade",
-      "value": "$(liveupdate:screenMasterFade)+0.05"
+      "delta": "0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "screenMasterFade",
-      "value": "$(liveupdate:screenMasterFade)-0.05"
+      "delta": "-0.05",
+      "min": "0",
+      "max": "1"
      }
     }
    ],
@@ -10409,26 +10521,32 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "projectorMasterFade",
-      "value": "$(liveupdate:projectorMasterFade)+0.05"
+      "delta": "0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "projectorMasterFade",
-      "value": "$(liveupdate:projectorMasterFade)+0.05"
+      "delta": "0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "projectorMasterFade",
-      "value": "$(liveupdate:projectorMasterFade)-0.05"
+      "delta": "-0.05",
+      "min": "0",
+      "max": "1"
      }
     }
    ],
@@ -10443,7 +10561,7 @@
    "status": "live-verified",
    "liveTestPriority": "high",
    "subscriptions": 1,
-   "notes": "No clamping in the expression; Designer is expected to clamp to 0..1 (unverified). Display.master_fade on the documented projector: path (stage-007 notes: the property lives on Display, so Projector has it).",
+   "notes": "Kept within the documented 0..1 by Nudge Disguise Number. Display.master_fade on the documented projector: path (stage-007 notes: the property lives on Display, so Projector has it).",
    "dimension": "stage",
    "verifierOk": true,
    "verifierProblems": [],
@@ -10491,26 +10609,32 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "projectorMasterFade",
-      "value": "$(liveupdate:projectorMasterFade)-0.05"
+      "delta": "-0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "projectorMasterFade",
-      "value": "$(liveupdate:projectorMasterFade)+0.05"
+      "delta": "0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "projectorMasterFade",
-      "value": "$(liveupdate:projectorMasterFade)-0.05"
+      "delta": "-0.05",
+      "min": "0",
+      "max": "1"
      }
     }
    ],
@@ -11071,26 +11195,32 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "uidMasterFade",
-      "value": "$(liveupdate:uidMasterFade)+0.05"
+      "delta": "0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "uidMasterFade",
-      "value": "$(liveupdate:uidMasterFade)+0.05"
+      "delta": "0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "uidMasterFade",
-      "value": "$(liveupdate:uidMasterFade)-0.05"
+      "delta": "-0.05",
+      "min": "0",
+      "max": "1"
      }
     }
    ],
@@ -11103,7 +11233,7 @@
    "status": "live-verified",
    "liveTestPriority": "high",
    "subscriptions": 1,
-   "notes": "No clamping in the expression; Designer is expected to clamp to 0..1 (unverified). Rename-proof getByUID path; store the UID with its 0x prefix in $(liveupdate:selScreenUid).",
+   "notes": "Kept within the documented 0..1 by Nudge Disguise Number. Rename-proof getByUID path; store the UID with its 0x prefix in $(liveupdate:selScreenUid).",
    "dimension": "stage",
    "verifierOk": true,
    "verifierProblems": [],
@@ -11151,26 +11281,32 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "uidMasterFade",
-      "value": "$(liveupdate:uidMasterFade)-0.05"
+      "delta": "-0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "uidMasterFade",
-      "value": "$(liveupdate:uidMasterFade)+0.05"
+      "delta": "0.05",
+      "min": "0",
+      "max": "1"
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "uidMasterFade",
-      "value": "$(liveupdate:uidMasterFade)-0.05"
+      "delta": "-0.05",
+      "min": "0",
+      "max": "1"
      }
     }
    ],
@@ -17828,32 +17964,38 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "tplNudgeUp",
-      "value": "$(liveupdate:tplNudgeUp)+1"
+      "delta": "1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "tplNudgeUp",
-      "value": "$(liveupdate:tplNudgeUp)+1"
+      "delta": "1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "tplNudgeUp",
-      "value": "$(liveupdate:tplNudgeUp)-1"
+      "delta": "-1",
+      "min": "",
+      "max": ""
      }
     }
    ],
    "designerVersion": "any (module behaviour only)",
-   "range": "step 1; edit the +1 in all three actions to change the step",
-   "notes": "Same mechanism as the upstream screenOffsetSetPlus preset: the value expression is substituted then evaluated as JS. Generator sets options.rotaryActions: true so the rotate_left / rotate_right sets are active. While the variable is undefined ($NA) or holds ERROR / PATH_ERROR the evaluated expression throws or yields NaN, which processNumberValue catches and logs as a warning (no write). Medium test priority because it exercises the read-modify-write path once for all nudge rows.",
+   "range": "step 1; edit the Step of all three actions to change it (the rotate-left action carries the negative step)",
+   "notes": "The Nudge Disguise Number action adds the Step to the value the Director last sent (the upstream screenOffsetSetPlus preset wrote a '$(liveupdate:x)+1' expression instead, which Companion turns into an absolute +1 while the readout is empty). Generator sets options.rotaryActions: true so the rotate_left / rotate_right sets are active. While the readout holds no number (empty, PENDING, OFFLINE, ERROR, PATH_ERROR, UNSET) the action logs a warning and writes nothing. Medium test priority because it exercises the read-modify-write path once for all nudge rows.",
    "dimension": "connection_templates",
    "verifierOk": true,
    "verifierProblems": [
@@ -17904,31 +18046,37 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "tplNudgeDown",
-      "value": "$(liveupdate:tplNudgeDown)-1"
+      "delta": "-1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "tplNudgeDown",
-      "value": "$(liveupdate:tplNudgeDown)-1"
+      "delta": "-1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "tplNudgeDown",
-      "value": "$(liveupdate:tplNudgeDown)+1"
+      "delta": "1",
+      "min": "",
+      "max": ""
      }
     }
    ],
    "designerVersion": "any (module behaviour only)",
-   "range": "step 1; edit the -1 in all three actions to change the step",
+   "range": "step 1; edit the Step of all three actions to change it (the rotate-right action carries the positive step)",
    "notes": "Mirror of tpl_nudge_up (upstream screenOffsetSetMinus mechanism); generator sets options.rotaryActions: true so the rotary sets are active.",
    "dimension": "connection_templates",
    "verifierOk": true,
@@ -18334,26 +18482,32 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "evFloat",
-      "value": "$(liveupdate:evFloat)+0.1"
+      "delta": "0.1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_right",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "evFloat",
-      "value": "$(liveupdate:evFloat)+0.1"
+      "delta": "0.1",
+      "min": "",
+      "max": ""
      }
     },
     {
      "set": "rotate_left",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "evFloat",
-      "value": "$(liveupdate:evFloat)-0.1"
+      "delta": "-0.1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -18401,10 +18555,12 @@
    "actions": [
     {
      "set": "down",
-     "actionId": "setToDisguiseNumber",
+     "actionId": "nudgeDisguiseNumber",
      "options": {
       "variableName": "evFloat",
-      "value": "$(liveupdate:evFloat)-0.1"
+      "delta": "-0.1",
+      "min": "",
+      "max": ""
      }
     }
    ],
@@ -18567,7 +18723,7 @@
    "presetId": "tpl_setup",
    "category": "11 Templates",
    "name": "Setup: how to use templates",
-   "text": "Templates are generic buttons with literal placeholders; they do nothing until edited (the module does not subscribe while a path still contains a placeholder such as <OBJECT_PATH>; the readout shows UNSET). After dragging one: (1) open the LiveUpdate Variable feedback and replace <OBJECT_PATH> with a Designer object expression (e.g. track:\"Track 1\", screen2:\"LED Wall\", transportManager:default, subsystem:MonitoringManager.findLocalMonitor(\"fps\")) and object.<PROPERTY_PATH> with the Python member path (e.g. object.description, object.lengthInBeats, object.player.tRender); (2) each template carries its own variable name (tplString, tplSetNumber, ...); rename it to something meaningful for that object/property pair (letters, digits, '_', '-' and '.') and change every $(liveupdate:...) in the button text and in the actions to the new name. One variable name must watch exactly one object/property pair: the module refuses a second subscription for a name that is already bound elsewhere and says so in the log, because the Set / Toggle actions find their subscription by variable name; two buttons watching the same path must use the same variable name, and their shared subscription runs at the fastest Update Frequency any of them asks for; (3) keep Update Frequency above 0 (prefilled from the State interval setting, 500 ms). Set / Nudge / Toggle actions do not take paths: they write to the subscription that owns the variable name, which is why each control template carries the matching feedback. Number values are JavaScript expressions evaluated after variable substitution ($(liveupdate:myValue)+1 works; the result must be a finite number); Boolean is a checkbox; JSON is a partial object merged into the property ({\"x\": 0.0} changes only x of a vector); String is sent verbatim. Object, array and resource values ({uid, path, type}) arrive as JSON strings, so use jsonparse / jsonpath in expressions (see Watch: JSON field x). A readout shows ERROR or PATH_ERROR when the Director rejects the path; fix the path, the module resubscribes on its own. The button texts show such a marker (and OFFLINE or UNSET) as it is rather than formatting it: keep the isNumber(...) / jsonparse(...) === null guard when you edit a text.",
+   "text": "Templates are generic buttons with literal placeholders; they do nothing until edited (the module does not subscribe while a path still contains a placeholder such as <OBJECT_PATH>; the readout shows UNSET). After dragging one: (1) open the LiveUpdate Variable feedback and replace <OBJECT_PATH> with a Designer object expression (e.g. track:\"Track 1\", screen2:\"LED Wall\", transportManager:default, subsystem:MonitoringManager.findLocalMonitor(\"fps\")) and object.<PROPERTY_PATH> with the Python member path (e.g. object.description, object.lengthInBeats, object.player.tRender); (2) each template carries its own variable name (tplString, tplSetNumber, ...); rename it to something meaningful for that object/property pair (letters, digits, '_', '-' and '.') and change every $(liveupdate:...) in the button text and the Variable Name of every action to the new name. One variable name must watch exactly one object/property pair: the module refuses a second subscription for a name that is already bound elsewhere and says so in the log, because the Set / Toggle actions find their subscription by variable name; two buttons watching the same path must use the same variable name, and their shared subscription runs at the fastest Update Frequency any of them asks for; (3) keep Update Frequency above 0 (prefilled from the State interval setting, 500 ms). Set / Nudge / Toggle actions do not take paths: they write to the subscription that owns the variable name, which is why each control template carries the matching feedback. Number values are JavaScript expressions evaluated after variable substitution (the result must be a finite number); a step from the current value is Nudge Disguise Number, which adds its Step in the module and writes nothing while the readout has no number; Boolean is a checkbox; JSON is a partial object merged into the property ({\"x\": 0.0} changes only x of a vector); String is sent verbatim. Object, array and resource values ({uid, path, type}) arrive as JSON strings, so use jsonparse / jsonpath in expressions (see Watch: JSON field x). A readout shows ERROR or PATH_ERROR when the Director rejects the path; fix the path, the module resubscribes on its own. The button texts show such a marker (and OFFLINE or UNSET) as it is rather than formatting it: keep the isNumber(...) / jsonparse(...) === null guard when you edit a text.",
    "dimension": "connection_templates"
   },
   {
@@ -18717,7 +18873,8 @@
   "review fixes: failover expression texts wrapped as template literals; transport brightness/volume nudges bind both rotary directions; stale Phase-1 wording (proposed toggle/compare, d3_* custom variables, \"until the guard lands\") replaced",
   "drop fo_health_worst (live)",
   "drop fo_health_states (live)",
-  "promote 103 live-verified experimental rows to their home categories (user decision 2026-09-04)"
+  "promote 103 live-verified experimental rows to their home categories (user decision 2026-09-04)",
+  "nudges run on the Nudge Disguise Number action instead of a $(liveupdate:x)+step Number expression, which Companion 5.0.4 substitutes before the action runs (an empty readout left the step to be written as an absolute value); brightness, volume and the master fades are kept within their documented 0..1"
  ],
  "issues": [],
  "perDim": [

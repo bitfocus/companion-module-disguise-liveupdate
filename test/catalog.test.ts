@@ -165,6 +165,35 @@ test('control presets carry the LiveUpdate Variable feedback of the variable the
 	}
 })
 
+test('nudge presets add their step in the module, within the documented 0..1 where there is one', () => {
+	let nudges = 0
+	for (const row of catalog.rows) {
+		for (const action of row.actions ?? []) {
+			// Companion substitutes the readout before the action runs: '$(liveupdate:x)-0.05' arrives as
+			// '-0.05' while the readout is empty and would be written as an absolute value
+			if (action.actionId === 'setToDisguiseNumber')
+				assert.ok(!String(action.options.value).includes('$('), `${row.presetId}: a step in a Number expression`)
+		}
+		if (row.controlKind !== 'nudge') continue
+		nudges++
+		const zeroToOne = /^0(\.0)?\s*(\.\.|-)\s*1(\.0)?$/.test(String(row.range ?? '').trim())
+		const direction = /([+-])\d/.exec(row.name)?.[1]
+		assert.ok(direction, `${row.presetId}: the name says which way it goes`)
+		assert.ok(row.actions.length > 0, `${row.presetId}: no action`)
+		for (const action of row.actions) {
+			const what = `${row.presetId} ${action.set}`
+			assert.equal(action.actionId, 'nudgeDisguiseNumber', what)
+			assert.equal(action.options.variableName, row.variableName, what)
+			const delta = Number(action.options.delta)
+			assert.ok(Number.isFinite(delta) && delta !== 0, `${what}: step ${action.options.delta}`)
+			const upward: boolean = action.set === 'rotate_right' || (action.set === 'down' && direction === '+')
+			assert.equal(delta > 0, upward, `${what}: step ${delta} goes the wrong way`)
+			assert.deepEqual([action.options.min, action.options.max], zeroToOne ? ['0', '1'] : ['', ''], what)
+		}
+	}
+	assert.ok(nudges > 0, 'the catalog has nudge rows')
+})
+
 test('variable names are valid, not reserved, and unique per object/property pair', () => {
 	const pairToVariable = new Map<string, string>()
 	const variableToPair = new Map<string, string>()

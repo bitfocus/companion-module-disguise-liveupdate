@@ -760,6 +760,39 @@ test('a nudge after the window builds on the value sent until the Director repor
 	await inst.destroy()
 })
 
+test('the brightness knob preset turns by its step through the nudge action and stops at 0 and 1', async () => {
+	const director = new FakeDirector({ valueFor: () => 0.9 })
+	const { inst, host } = await newInstance(director, [
+		liveUpdateFeedback('b', 'transportManager:default', 'object.brightness', 'brightness'),
+	])
+	await settle(50)
+	const preset = dist.getPresetDefinitions(inst).tr_brightness_up
+	assert.equal(preset.options?.rotaryActions, true)
+	const actions = dist.getActionDefinitions(inst)
+	const turn = async (set: 'rotate_left' | 'rotate_right' | 'down'): Promise<void> => {
+		for (const action of preset.steps[0][set]) await actions[action.actionId].callback(action, parsedContext)
+	}
+
+	// a quick spin to the right: 0.95, 1, then held at 1
+	for (let i = 0; i < 4; i++) await turn('rotate_right')
+	await tick(100)
+	await settle()
+	assert.deepEqual(setValues(director), [0.95, 1])
+	assert.equal(host.variables.get('brightness'), 1)
+
+	// two detents back and a press
+	await turn('rotate_left')
+	await turn('rotate_left')
+	await tick(100)
+	await settle()
+	await turn('down')
+	await tick(100)
+	await settle()
+	assert.deepEqual(setValues(director), [0.95, 1, 0.95, 0.9, 0.95])
+	assert.equal(host.variables.get('brightness'), 0.95)
+	await inst.destroy()
+})
+
 test('setSelection treats an unresolved variable as a clear', async () => {
 	const director = new FakeDirector()
 	const { inst, host } = await newInstance(director)

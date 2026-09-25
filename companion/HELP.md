@@ -476,13 +476,13 @@ _310 presets ship by default; 25 experimental presets appear when "Show experime
 | Track loaded | True when a track is loaded in the player; guard lamp - every object.track.* row fails while this is false. | `transportManager:default` | `object.player.hasTrack` | `hasTrack` | readout |
 | Playback speed | Playback speed ratio of the track player (1 = normal). | `transportManager:default` | `object.player.speed` | `speed` | readout |
 | Master brightness | Master brightness / opacity of the transport manager (0..1). Mirrors the OSC module's brightness variable. | `transportManager:default` | `object.brightness` | `brightness` | readout |
-| Brightness +5% | Nudge master brightness up by 0.05 (press or rotate right). | `transportManager:default` | `object.brightness` | `brightness` | nudge (Set to Disguise Number) |
-| Brightness -5% | Nudge master brightness down by 0.05 (press or rotate left). | `transportManager:default` | `object.brightness` | `brightness` | nudge (Set to Disguise Number) |
+| Brightness +5% | Nudge master brightness up by 0.05 (press or rotate right). | `transportManager:default` | `object.brightness` | `brightness` | nudge (Nudge Disguise Number) |
+| Brightness -5% | Nudge master brightness down by 0.05 (press or rotate left). | `transportManager:default` | `object.brightness` | `brightness` | nudge (Nudge Disguise Number) |
 | Brightness FULL | Set master brightness to 1.0. | `transportManager:default` | `object.brightness` | `brightness` | set value |
 | Brightness ZERO | Set master brightness to 0.0 (video blackout). | `transportManager:default` | `object.brightness` | `brightness` | set value |
 | Master volume | Master audio volume of the transport manager (0..1). Mirrors the OSC module's volume variable. | `transportManager:default` | `object.volume` | `volume` | readout |
-| Volume +5% | Nudge master volume up by 0.05 (press or rotate right). | `transportManager:default` | `object.volume` | `volume` | nudge (Set to Disguise Number) |
-| Volume -5% | Nudge master volume down by 0.05 (press or rotate left). | `transportManager:default` | `object.volume` | `volume` | nudge (Set to Disguise Number) |
+| Volume +5% | Nudge master volume up by 0.05 (press or rotate right). | `transportManager:default` | `object.volume` | `volume` | nudge (Nudge Disguise Number) |
+| Volume -5% | Nudge master volume down by 0.05 (press or rotate left). | `transportManager:default` | `object.volume` | `volume` | nudge (Nudge Disguise Number) |
 | Volume FULL | Set master volume to 1.0. | `transportManager:default` | `object.volume` | `volume` | set value |
 | Volume MUTE | Set master volume to 0.0. | `transportManager:default` | `object.volume` | `volume` | set value |
 | Engaged state | Whether the transport manager honours external (remote) transport control; when disengaged all external control signals are ignored. | `transportManager:default` | `object.engaged` | `engaged` | readout |
@@ -527,8 +527,8 @@ _310 presets ship by default; 25 experimental presets appear when "Show experime
 | Note at beat | Cue note text at beat $(liveupdate:selBeat) (empty string when no note). | `track:"$(liveupdate:selTrack)"` | `object.noteAtBeat($(liveupdate:selBeat))` | `noteAtBeat` | readout |
 | Beat to time | Converts beat $(liveupdate:selBeat) of the inspected track to seconds (hh:mm:ss). | `track:"$(liveupdate:selTrack)"` | `object.beatToTime($(liveupdate:selBeat))` | `beatToSec` | readout |
 | TC adjust readout | Timecode-chase offset of the track (positive = play earlier). | `track:"$(liveupdate:selTrack)"` | `object.tc_adjust` | `trackTcAdjust` | readout |
-| TC adjust +0.1 (knob) | Nudge tc_adjust up by 0.1; rotary right/left = +/-0.1. | `track:"$(liveupdate:selTrack)"` | `object.tc_adjust` | `trackTcAdjust` | nudge (Set to Disguise Number) |
-| TC adjust -0.1 | Nudge tc_adjust down by 0.1. | `track:"$(liveupdate:selTrack)"` | `object.tc_adjust` | `trackTcAdjust` | nudge (Set to Disguise Number) |
+| TC adjust +0.1 (knob) | Nudge tc_adjust up by 0.1; rotary right/left = +/-0.1. | `track:"$(liveupdate:selTrack)"` | `object.tc_adjust` | `trackTcAdjust` | nudge (Nudge Disguise Number) |
+| TC adjust -0.1 | Nudge tc_adjust down by 0.1. | `track:"$(liveupdate:selTrack)"` | `object.tc_adjust` | `trackTcAdjust` | nudge (Nudge Disguise Number) |
 | TC adjust reset 0 | Set tc_adjust back to 0. | `track:"$(liveupdate:selTrack)"` | `object.tc_adjust` | `trackTcAdjust` | set value |
 | Layer name | Sanity probe that the findLayerByName object path resolved; echoes the layer name. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.name` | `layerName` | readout |
 | Layer enabled | Enable flag of the layer; green when enabled. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.enabled` | `layerEnabled` | readout |
@@ -574,24 +574,24 @@ _310 presets ship by default; 25 experimental presets appear when "Show experime
 | Layer enable | Enable the layer (setToDisguiseBoolean true). | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.enabled` | `layerEnabled` | set on/off |
 | Layer disable | Disable the layer (setToDisguiseBoolean false). | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.enabled` | `layerEnabled` | set on/off |
 | Layer enable toggle | Toggle the layer enable flag (Toggle Disguise Boolean action); green while enabled. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.enabled` | `layerEnabled` | toggle |
-| Layer start +1 beat (knob) | Move the layer start later by one beat; rotary right/left = +/-1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.tStart` | `layerTStart` | nudge (Set to Disguise Number) |
-| Layer start -1 beat | Move the layer start earlier by one beat. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.tStart` | `layerTStart` | nudge (Set to Disguise Number) |
-| Layer length +1 beat (knob) | Lengthen the layer by one beat; rotary right/left = +/-1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.tLength` | `layerTLength` | nudge (Set to Disguise Number) |
-| Layer length -1 beat | Shorten the layer by one beat. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.tLength` | `layerTLength` | nudge (Set to Disguise Number) |
-| Layer Pos X +1 (knob) | Nudge pos.x key 0 up by 1; rotary right/left = +/-1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("pos.x").sequence.key(0).v` | `keyPosX` | nudge (Set to Disguise Number) |
-| Layer Pos X -1 | Nudge pos.x key 0 down by 1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("pos.x").sequence.key(0).v` | `keyPosX` | nudge (Set to Disguise Number) |
+| Layer start +1 beat (knob) | Move the layer start later by one beat; rotary right/left = +/-1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.tStart` | `layerTStart` | nudge (Nudge Disguise Number) |
+| Layer start -1 beat | Move the layer start earlier by one beat. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.tStart` | `layerTStart` | nudge (Nudge Disguise Number) |
+| Layer length +1 beat (knob) | Lengthen the layer by one beat; rotary right/left = +/-1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.tLength` | `layerTLength` | nudge (Nudge Disguise Number) |
+| Layer length -1 beat | Shorten the layer by one beat. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.tLength` | `layerTLength` | nudge (Nudge Disguise Number) |
+| Layer Pos X +1 (knob) | Nudge pos.x key 0 up by 1; rotary right/left = +/-1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("pos.x").sequence.key(0).v` | `keyPosX` | nudge (Nudge Disguise Number) |
+| Layer Pos X -1 | Nudge pos.x key 0 down by 1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("pos.x").sequence.key(0).v` | `keyPosX` | nudge (Nudge Disguise Number) |
 | Layer Pos X = 0 | Set pos.x key 0 to 0 (setToDisguiseNumber literal). | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("pos.x").sequence.key(0).v` | `keyPosX` | set value |
-| Layer Pos Y +1 (knob) | Nudge pos.y key 0 up by 1; rotary right/left = +/-1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("pos.y").sequence.key(0).v` | `keyPosY` | nudge (Set to Disguise Number) |
-| Layer Pos Y -1 | Nudge pos.y key 0 down by 1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("pos.y").sequence.key(0).v` | `keyPosY` | nudge (Set to Disguise Number) |
+| Layer Pos Y +1 (knob) | Nudge pos.y key 0 up by 1; rotary right/left = +/-1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("pos.y").sequence.key(0).v` | `keyPosY` | nudge (Nudge Disguise Number) |
+| Layer Pos Y -1 | Nudge pos.y key 0 down by 1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("pos.y").sequence.key(0).v` | `keyPosY` | nudge (Nudge Disguise Number) |
 | Layer Pos Y = 0 | Set pos.y key 0 to 0 (setToDisguiseNumber literal). | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("pos.y").sequence.key(0).v` | `keyPosY` | set value |
-| Layer Scale X +0.1 (knob) | Nudge scale.x key 0 up by 0.1; rotary right/left = +/-0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale.x").sequence.key(0).v` | `keyScale` | nudge (Set to Disguise Number) |
-| Layer Scale Y +0.1 (knob) | Nudge scale.y key 0 up by 0.1; rotary right/left = +/-0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale.y").sequence.key(0).v` | `keyScaleY` | nudge (Set to Disguise Number) |
-| Layer Scale X -0.1 | Nudge scale.x key 0 down by 0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale.x").sequence.key(0).v` | `keyScale` | nudge (Set to Disguise Number) |
-| Layer Scale Y -0.1 | Nudge scale.y key 0 down by 0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale.y").sequence.key(0).v` | `keyScaleY` | nudge (Set to Disguise Number) |
+| Layer Scale X +0.1 (knob) | Nudge scale.x key 0 up by 0.1; rotary right/left = +/-0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale.x").sequence.key(0).v` | `keyScale` | nudge (Nudge Disguise Number) |
+| Layer Scale Y +0.1 (knob) | Nudge scale.y key 0 up by 0.1; rotary right/left = +/-0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale.y").sequence.key(0).v` | `keyScaleY` | nudge (Nudge Disguise Number) |
+| Layer Scale X -0.1 | Nudge scale.x key 0 down by 0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale.x").sequence.key(0).v` | `keyScale` | nudge (Nudge Disguise Number) |
+| Layer Scale Y -0.1 | Nudge scale.y key 0 down by 0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale.y").sequence.key(0).v` | `keyScaleY` | nudge (Nudge Disguise Number) |
 | Layer Scale X = 1 | Set scale.x key 0 to 1 (setToDisguiseNumber literal). | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale.x").sequence.key(0).v` | `keyScale` | set value |
 | Layer Scale Y = 1 | Set scale.y key 0 to 1 (setToDisguiseNumber literal). | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("scale.y").sequence.key(0).v` | `keyScaleY` | set value |
-| Layer Bright +0.1 (knob) | Nudge brightness key 0 up by 0.1; rotary right/left = +/-0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("brightness").sequence.key(0).v` | `keyBrightness` | nudge (Set to Disguise Number) |
-| Layer Bright -0.1 | Nudge brightness key 0 down by 0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("brightness").sequence.key(0).v` | `keyBrightness` | nudge (Set to Disguise Number) |
+| Layer Bright +0.1 (knob) | Nudge brightness key 0 up by 0.1; rotary right/left = +/-0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("brightness").sequence.key(0).v` | `keyBrightness` | nudge (Nudge Disguise Number) |
+| Layer Bright -0.1 | Nudge brightness key 0 down by 0.1. | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("brightness").sequence.key(0).v` | `keyBrightness` | nudge (Nudge Disguise Number) |
 | Layer Bright = 1 | Set brightness key 0 to 1 (setToDisguiseNumber literal). | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("brightness").sequence.key(0).v` | `keyBrightness` | set value |
 | Layer Bright = 0 (black) | Set brightness key 0 to 0 (fully transparent in alpha mode). | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("brightness").sequence.key(0).v` | `keyBrightness` | set value |
 | Brightness constant ON | Set disableSequencing = true on brightness so key 0 acts as a constant (guide recipe). | `track:"$(liveupdate:selTrack)".findLayerByName("$(liveupdate:selLayer)")` | `object.findSequence("brightness").disableSequencing` | `brightnessConstant` | set on/off |
@@ -609,12 +609,12 @@ _310 presets ship by default; 25 experimental presets appear when "Show experime
 | Screen offset XYZ | Surface position in metres relative to its parent (Vec as JSON). | `screen2:"$(liveupdate:selScreen)"` | `object.offset` | `screenOffset` | readout |
 | Screen offset reset 0,0,0 | Move the surface back to its parent origin with one documented partial-JSON set. | `screen2:"$(liveupdate:selScreen)"` | `object.offset` | `screenOffset` | set JSON |
 | Screen offset X | Surface position X in metres relative to its parent. | `screen2:"$(liveupdate:selScreen)"` | `object.offset.x` | `screenOffsetX` | readout |
-| Screen X +0.1 m | Nudge surface X by +0.1 m (rotary: right = +, left = -). | `screen2:"$(liveupdate:selScreen)"` | `object.offset.x` | `screenOffsetX` | nudge (Set to Disguise Number) |
-| Screen X -0.1 m | Nudge surface X by -0.1 m (rotary: right = +, left = -). | `screen2:"$(liveupdate:selScreen)"` | `object.offset.x` | `screenOffsetX` | nudge (Set to Disguise Number) |
+| Screen X +0.1 m | Nudge surface X by +0.1 m (rotary: right = +, left = -). | `screen2:"$(liveupdate:selScreen)"` | `object.offset.x` | `screenOffsetX` | nudge (Nudge Disguise Number) |
+| Screen X -0.1 m | Nudge surface X by -0.1 m (rotary: right = +, left = -). | `screen2:"$(liveupdate:selScreen)"` | `object.offset.x` | `screenOffsetX` | nudge (Nudge Disguise Number) |
 | Screen rotation XYZ | Euler rotation of the surface in degrees relative to its parent. | `screen2:"$(liveupdate:selScreen)"` | `object.rotation` | `screenRotation` | readout |
 | Screen master fade | Output brightness of the screen (0..1, applied at Feed level, not shown in the visualiser). | `screen2:"$(liveupdate:selScreen)"` | `object.master_fade` | `screenMasterFade` | readout |
-| Screen fade +0.05 | Raise master fade by 0.05 (rotary: right = up, left = down). | `screen2:"$(liveupdate:selScreen)"` | `object.master_fade` | `screenMasterFade` | nudge (Set to Disguise Number) |
-| Screen fade -0.05 | Lower master fade by 0.05 (rotary: right = up, left = down). | `screen2:"$(liveupdate:selScreen)"` | `object.master_fade` | `screenMasterFade` | nudge (Set to Disguise Number) |
+| Screen fade +0.05 | Raise master fade by 0.05 (rotary: right = up, left = down). | `screen2:"$(liveupdate:selScreen)"` | `object.master_fade` | `screenMasterFade` | nudge (Nudge Disguise Number) |
+| Screen fade -0.05 | Lower master fade by 0.05 (rotary: right = up, left = down). | `screen2:"$(liveupdate:selScreen)"` | `object.master_fade` | `screenMasterFade` | nudge (Nudge Disguise Number) |
 | Screen fade 1.0 | Set master fade to full brightness. | `screen2:"$(liveupdate:selScreen)"` | `object.master_fade` | `screenMasterFade` | set value |
 | Screen fade 0.0 | Black out this display at the Feed output (content keeps running). | `screen2:"$(liveupdate:selScreen)"` | `object.master_fade` | `screenMasterFade` | set value |
 | Screen hold output | Whether the screen output is frozen (per-display Hold). | `screen2:"$(liveupdate:selScreen)"` | `object.holdOutput` | `screenHoldOutput` | readout |
@@ -629,8 +629,8 @@ _310 presets ship by default; 25 experimental presets appear when "Show experime
 | Projector in error | Resource health of the projector (bad, incomplete or not found locally). | `projector:"$(liveupdate:selProjector)"` | `object.isInError` | `projectorInError` | readout |
 | Projector has feed | Whether the projector has a feed rectangle assigned. | `projector:"$(liveupdate:selProjector)"` | `object.hasFeedAssigned()` | `projectorHasFeed` | readout |
 | Projector master fade | Output brightness of the projector (0..1, applied at Feed level, not shown in the visualiser). | `projector:"$(liveupdate:selProjector)"` | `object.master_fade` | `projectorMasterFade` | readout |
-| Projector fade +0.05 | Raise master fade by 0.05 (rotary: right = up, left = down). | `projector:"$(liveupdate:selProjector)"` | `object.master_fade` | `projectorMasterFade` | nudge (Set to Disguise Number) |
-| Projector fade -0.05 | Lower master fade by 0.05 (rotary: right = up, left = down). | `projector:"$(liveupdate:selProjector)"` | `object.master_fade` | `projectorMasterFade` | nudge (Set to Disguise Number) |
+| Projector fade +0.05 | Raise master fade by 0.05 (rotary: right = up, left = down). | `projector:"$(liveupdate:selProjector)"` | `object.master_fade` | `projectorMasterFade` | nudge (Nudge Disguise Number) |
+| Projector fade -0.05 | Lower master fade by 0.05 (rotary: right = up, left = down). | `projector:"$(liveupdate:selProjector)"` | `object.master_fade` | `projectorMasterFade` | nudge (Nudge Disguise Number) |
 | Projector fade 1.0 | Set master fade to full brightness. | `projector:"$(liveupdate:selProjector)"` | `object.master_fade` | `projectorMasterFade` | set value |
 | Projector fade 0.0 | Black out this display at the Feed output (content keeps running). | `projector:"$(liveupdate:selProjector)"` | `object.master_fade` | `projectorMasterFade` | set value |
 | Projector hold output | Whether the projector output is frozen (per-display Hold). | `projector:"$(liveupdate:selProjector)"` | `object.holdOutput` | `projectorHoldOutput` | readout |
@@ -639,8 +639,8 @@ _310 presets ship by default; 25 experimental presets appear when "Show experime
 | Projector hold toggle | Toggle the per-display Hold with one button (needs the Toggle Disguise Boolean action). | `projector:"$(liveupdate:selProjector)"` | `object.holdOutput` | `projectorHoldOutput` | toggle |
 | Display (UID) name | Name of the display addressed by UID; confirms that $(liveupdate:selScreenUid) points at the right object. | `getByUID($(liveupdate:selScreenUid))` | `object.description` | `uidName` | readout |
 | Display (UID) master fade | Output brightness of the display addressed by UID (0..1, applied at Feed level, not shown in the visualiser). | `getByUID($(liveupdate:selScreenUid))` | `object.master_fade` | `uidMasterFade` | readout |
-| Display (UID) fade +0.05 | Raise master fade by 0.05 (rotary: right = up, left = down). | `getByUID($(liveupdate:selScreenUid))` | `object.master_fade` | `uidMasterFade` | nudge (Set to Disguise Number) |
-| Display (UID) fade -0.05 | Lower master fade by 0.05 (rotary: right = up, left = down). | `getByUID($(liveupdate:selScreenUid))` | `object.master_fade` | `uidMasterFade` | nudge (Set to Disguise Number) |
+| Display (UID) fade +0.05 | Raise master fade by 0.05 (rotary: right = up, left = down). | `getByUID($(liveupdate:selScreenUid))` | `object.master_fade` | `uidMasterFade` | nudge (Nudge Disguise Number) |
+| Display (UID) fade -0.05 | Lower master fade by 0.05 (rotary: right = up, left = down). | `getByUID($(liveupdate:selScreenUid))` | `object.master_fade` | `uidMasterFade` | nudge (Nudge Disguise Number) |
 | Display (UID) fade 1.0 | Set master fade to full brightness. | `getByUID($(liveupdate:selScreenUid))` | `object.master_fade` | `uidMasterFade` | set value |
 | Display (UID) fade 0.0 | Black out this display at the Feed output (content keeps running). | `getByUID($(liveupdate:selScreenUid))` | `object.master_fade` | `uidMasterFade` | set value |
 | Display (UID) hold output | Whether the display addressed by UID is frozen (per-display Hold). | `getByUID($(liveupdate:selScreenUid))` | `object.holdOutput` | `uidHoldOutput` | readout |
@@ -672,8 +672,8 @@ _310 presets ship by default; 25 experimental presets appear when "Show experime
 | EV name by UID+index | Show the name of the i-th variable; cheapest smoke test that getByUID resolves the device and the index is right. | `getByUID($(liveupdate:selEvUid))` | `object.container.variables[$(liveupdate:selEvIndex)].name` | `evName` | readout |
 | EV type by UID+index | Show whether the i-th variable is Float, String or Function so the operator knows which value readout applies. | `getByUID($(liveupdate:selEvUid))` | `object.container.variables[$(liveupdate:selEvIndex)].type` | `evType` | readout |
 | EV device name (by UID) | Index-independent smoke test that selEvUid points at the intended device. | `getByUID($(liveupdate:selEvUid))` | `object.description` | `evDeviceName` | readout |
-| EV float +0.1 (by UID+index) | Nudge the selected float expression variable up by 0.1. | `getByUID($(liveupdate:selEvUid))` | `object.container.variables[$(liveupdate:selEvIndex)].defaultFloat` | `evFloat` | nudge (Set to Disguise Number) |
-| EV float -0.1 (by UID+index) | Nudge the selected float expression variable down by 0.1. | `getByUID($(liveupdate:selEvUid))` | `object.container.variables[$(liveupdate:selEvIndex)].defaultFloat` | `evFloat` | nudge (Set to Disguise Number) |
+| EV float +0.1 (by UID+index) | Nudge the selected float expression variable up by 0.1. | `getByUID($(liveupdate:selEvUid))` | `object.container.variables[$(liveupdate:selEvIndex)].defaultFloat` | `evFloat` | nudge (Nudge Disguise Number) |
+| EV float -0.1 (by UID+index) | Nudge the selected float expression variable down by 0.1. | `getByUID($(liveupdate:selEvUid))` | `object.container.variables[$(liveupdate:selEvIndex)].defaultFloat` | `evFloat` | nudge (Nudge Disguise Number) |
 
 ### 09 RenderStream
 
@@ -765,7 +765,7 @@ _310 presets ship by default; 25 experimental presets appear when "Show experime
 
 ### 11 Templates
 
-> Templates are generic buttons with literal placeholders; they do nothing until edited (the module does not subscribe while a path still contains a placeholder such as &lt;OBJECT_PATH&gt;; the readout shows UNSET). After dragging one: (1) open the LiveUpdate Variable feedback and replace &lt;OBJECT_PATH&gt; with a Designer object expression (e.g. track:"Track 1", screen2:"LED Wall", transportManager:default, subsystem:MonitoringManager.findLocalMonitor("fps")) and object.&lt;PROPERTY_PATH&gt; with the Python member path (e.g. object.description, object.lengthInBeats, object.player.tRender); (2) each template carries its own variable name (tplString, tplSetNumber, ...); rename it to something meaningful for that object/property pair (letters, digits, '_', '-' and '.') and change every $(liveupdate:...) in the button text and in the actions to the new name. One variable name must watch exactly one object/property pair: the module refuses a second subscription for a name that is already bound elsewhere and says so in the log, because the Set / Toggle actions find their subscription by variable name; two buttons watching the same path must use the same variable name, and their shared subscription runs at the fastest Update Frequency any of them asks for; (3) keep Update Frequency above 0 (prefilled from the State interval setting, 500 ms). Set / Nudge / Toggle actions do not take paths: they write to the subscription that owns the variable name, which is why each control template carries the matching feedback. Number values are JavaScript expressions evaluated after variable substitution ($(liveupdate:myValue)+1 works; the result must be a finite number); Boolean is a checkbox; JSON is a partial object merged into the property ({"x": 0.0} changes only x of a vector); String is sent verbatim. Object, array and resource values ({uid, path, type}) arrive as JSON strings, so use jsonparse / jsonpath in expressions (see Watch: JSON field x). A readout shows ERROR or PATH_ERROR when the Director rejects the path; fix the path, the module resubscribes on its own. The button texts show such a marker (and OFFLINE or UNSET) as it is rather than formatting it: keep the isNumber(...) / jsonparse(...) === null guard when you edit a text.
+> Templates are generic buttons with literal placeholders; they do nothing until edited (the module does not subscribe while a path still contains a placeholder such as &lt;OBJECT_PATH&gt;; the readout shows UNSET). After dragging one: (1) open the LiveUpdate Variable feedback and replace &lt;OBJECT_PATH&gt; with a Designer object expression (e.g. track:"Track 1", screen2:"LED Wall", transportManager:default, subsystem:MonitoringManager.findLocalMonitor("fps")) and object.&lt;PROPERTY_PATH&gt; with the Python member path (e.g. object.description, object.lengthInBeats, object.player.tRender); (2) each template carries its own variable name (tplString, tplSetNumber, ...); rename it to something meaningful for that object/property pair (letters, digits, '_', '-' and '.') and change every $(liveupdate:...) in the button text and the Variable Name of every action to the new name. One variable name must watch exactly one object/property pair: the module refuses a second subscription for a name that is already bound elsewhere and says so in the log, because the Set / Toggle actions find their subscription by variable name; two buttons watching the same path must use the same variable name, and their shared subscription runs at the fastest Update Frequency any of them asks for; (3) keep Update Frequency above 0 (prefilled from the State interval setting, 500 ms). Set / Nudge / Toggle actions do not take paths: they write to the subscription that owns the variable name, which is why each control template carries the matching feedback. Number values are JavaScript expressions evaluated after variable substitution (the result must be a finite number); a step from the current value is Nudge Disguise Number, which adds its Step in the module and writes nothing while the readout has no number; Boolean is a checkbox; JSON is a partial object merged into the property ({"x": 0.0} changes only x of a vector); String is sent verbatim. Object, array and resource values ({uid, path, type}) arrive as JSON strings, so use jsonparse / jsonpath in expressions (see Watch: JSON field x). A readout shows ERROR or PATH_ERROR when the Director rejects the path; fix the path, the module resubscribes on its own. The button texts show such a marker (and OFFLINE or UNSET) as it is rather than formatting it: keep the isNumber(...) / jsonparse(...) === null guard when you edit a text.
 
 | Preset | What it does | Object path | Property path | Variable | Kind |
 |---|---|---|---|---|---|
@@ -778,8 +778,8 @@ _310 presets ship by default; 25 experimental presets appear when "Show experime
 | Set Boolean false | Generic disable button: writes false to the watched boolean property. | `<OBJECT_PATH>` | `object.<PROPERTY_PATH>` | `tplBoolFalse` | set on/off |
 | Toggle Boolean | Generic toggle for a boolean property: the Toggle Disguise Boolean action writes the opposite of the current value. | `<OBJECT_PATH>` | `object.<PROPERTY_PATH>` | `tplToggle` | toggle |
 | Set JSON {x: 0} | Generic partial-object write: sets only field x of a vector/object property (the Director merges partial JSON) and shows the current x. | `<OBJECT_PATH>` | `object.<PROPERTY_PATH>` | `tplSetJson` | set JSON |
-| Nudge +1 | Generic increment: adds 1 to the current numeric value on press; rotary right +1 / left -1 when rotary actions are enabled. | `<OBJECT_PATH>` | `object.<PROPERTY_PATH>` | `tplNudgeUp` | nudge (Set to Disguise Number) |
-| Nudge -1 | Generic decrement: subtracts 1 from the current numeric value on press; rotary left -1 / right +1 when rotary actions are enabled. | `<OBJECT_PATH>` | `object.<PROPERTY_PATH>` | `tplNudgeDown` | nudge (Set to Disguise Number) |
+| Nudge +1 | Generic increment: adds 1 to the current numeric value on press; rotary right +1 / left -1 when rotary actions are enabled. | `<OBJECT_PATH>` | `object.<PROPERTY_PATH>` | `tplNudgeUp` | nudge (Nudge Disguise Number) |
+| Nudge -1 | Generic decrement: subtracts 1 from the current numeric value on press; rotary left -1 / right +1 when rotary actions are enabled. | `<OBJECT_PATH>` | `object.<PROPERTY_PATH>` | `tplNudgeDown` | nudge (Nudge Disguise Number) |
 
 ### 99 Experimental
 
@@ -891,11 +891,13 @@ at once, then one write per 40 ms carries the latest value.
 
 ### Nudge Disguise Number
 
-Adds a step to the current value of a numeric property and writes the result.
+Adds a step to the current value of a numeric property and writes the result. The nudge and knob
+presets use it.
 
 - **Variable Name**: the variable of the LiveUpdate Variable feedback whose subscription is written
 - **Step**: added to the current value, negative to go down (`0.05`, `-1`); variables are allowed
-- **Minimum**, **Maximum**: the result is kept within them; leave a field empty for no limit
+- **Minimum**, **Maximum**: the result is kept within them; leave a field empty for no limit. The
+  brightness, volume and master fade presets use 0 and 1.
 
 Nothing is written while the property has no number (the readout is empty, `PENDING`, `ERROR`,
 `PATH_ERROR` or a text): the log says "Not writing: '...' has no numeric value yet". A Step or a

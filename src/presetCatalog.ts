@@ -69,7 +69,7 @@ export const PRESET_TEXTS: readonly PresetCatalogText[] = [
 		id: 'tpl_setup',
 		category: '11 Templates',
 		name: 'Setup: how to use templates',
-		text: 'Templates are generic buttons with literal placeholders; they do nothing until edited (the module does not subscribe while a path still contains a placeholder such as <OBJECT_PATH>; the readout shows UNSET). After dragging one: (1) open the LiveUpdate Variable feedback and replace <OBJECT_PATH> with a Designer object expression (e.g. track:"Track 1", screen2:"LED Wall", transportManager:default, subsystem:MonitoringManager.findLocalMonitor("fps")) and object.<PROPERTY_PATH> with the Python member path (e.g. object.description, object.lengthInBeats, object.player.tRender); (2) each template carries its own variable name (tplString, tplSetNumber, ...); rename it to something meaningful for that object/property pair (letters, digits, \'_\', \'-\' and \'.\') and change every $(liveupdate:...) in the button text and in the actions to the new name. One variable name must watch exactly one object/property pair: the module refuses a second subscription for a name that is already bound elsewhere and says so in the log, because the Set / Toggle actions find their subscription by variable name; two buttons watching the same path must use the same variable name, and their shared subscription runs at the fastest Update Frequency any of them asks for; (3) keep Update Frequency above 0 (prefilled from the State interval setting, 500 ms). Set / Nudge / Toggle actions do not take paths: they write to the subscription that owns the variable name, which is why each control template carries the matching feedback. Number values are JavaScript expressions evaluated after variable substitution ($(liveupdate:myValue)+1 works; the result must be a finite number); Boolean is a checkbox; JSON is a partial object merged into the property ({"x": 0.0} changes only x of a vector); String is sent verbatim. Object, array and resource values ({uid, path, type}) arrive as JSON strings, so use jsonparse / jsonpath in expressions (see Watch: JSON field x). A readout shows ERROR or PATH_ERROR when the Director rejects the path; fix the path, the module resubscribes on its own. The button texts show such a marker (and OFFLINE or UNSET) as it is rather than formatting it: keep the isNumber(...) / jsonparse(...) === null guard when you edit a text.',
+		text: 'Templates are generic buttons with literal placeholders; they do nothing until edited (the module does not subscribe while a path still contains a placeholder such as <OBJECT_PATH>; the readout shows UNSET). After dragging one: (1) open the LiveUpdate Variable feedback and replace <OBJECT_PATH> with a Designer object expression (e.g. track:"Track 1", screen2:"LED Wall", transportManager:default, subsystem:MonitoringManager.findLocalMonitor("fps")) and object.<PROPERTY_PATH> with the Python member path (e.g. object.description, object.lengthInBeats, object.player.tRender); (2) each template carries its own variable name (tplString, tplSetNumber, ...); rename it to something meaningful for that object/property pair (letters, digits, \'_\', \'-\' and \'.\') and change every $(liveupdate:...) in the button text and the Variable Name of every action to the new name. One variable name must watch exactly one object/property pair: the module refuses a second subscription for a name that is already bound elsewhere and says so in the log, because the Set / Toggle actions find their subscription by variable name; two buttons watching the same path must use the same variable name, and their shared subscription runs at the fastest Update Frequency any of them asks for; (3) keep Update Frequency above 0 (prefilled from the State interval setting, 500 ms). Set / Nudge / Toggle actions do not take paths: they write to the subscription that owns the variable name, which is why each control template carries the matching feedback. Number values are JavaScript expressions evaluated after variable substitution (the result must be a finite number); a step from the current value is Nudge Disguise Number, which adds its Step in the module and writes nothing while the readout has no number; Boolean is a checkbox; JSON is a partial object merged into the property ({"x": 0.0} changes only x of a vector); String is sent verbatim. Object, array and resource values ({uid, path, type}) arrive as JSON strings, so use jsonparse / jsonpath in expressions (see Watch: JSON field x). A readout shows ERROR or PATH_ERROR when the Director rejects the path; fix the path, the module resubscribes on its own. The button texts show such a marker (and OFFLINE or UNSET) as it is rather than formatting it: keep the isNumber(...) / jsonparse(...) === null guard when you edit a text.',
 	},
 	{
 		id: 'exp_setup',
@@ -1117,26 +1117,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'brightness',
-					value: '$(liveupdate:brightness)+0.05',
+					delta: '0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'brightness',
-					value: '$(liveupdate:brightness)+0.05',
+					delta: '0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'brightness',
-					value: '$(liveupdate:brightness)-0.05',
+					delta: '-0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 		],
@@ -1161,26 +1167,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'brightness',
-					value: '$(liveupdate:brightness)-0.05',
+					delta: '-0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'brightness',
-					value: '$(liveupdate:brightness)-0.05',
+					delta: '-0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'brightness',
-					value: '$(liveupdate:brightness)+0.05',
+					delta: '0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 		],
@@ -1285,26 +1297,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'volume',
-					value: '$(liveupdate:volume)+0.05',
+					delta: '0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'volume',
-					value: '$(liveupdate:volume)+0.05',
+					delta: '0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'volume',
-					value: '$(liveupdate:volume)-0.05',
+					delta: '-0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 		],
@@ -1329,26 +1347,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'volume',
-					value: '$(liveupdate:volume)-0.05',
+					delta: '-0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'volume',
-					value: '$(liveupdate:volume)-0.05',
+					delta: '-0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'volume',
-					value: '$(liveupdate:volume)+0.05',
+					delta: '0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 		],
@@ -2152,26 +2176,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'trackTcAdjust',
-					value: '$(liveupdate:trackTcAdjust)+0.1',
+					delta: '0.1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'trackTcAdjust',
-					value: '$(liveupdate:trackTcAdjust)+0.1',
+					delta: '0.1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'trackTcAdjust',
-					value: '$(liveupdate:trackTcAdjust)-0.1',
+					delta: '-0.1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -2196,10 +2226,12 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'trackTcAdjust',
-					value: '$(liveupdate:trackTcAdjust)-0.1',
+					delta: '-0.1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -2645,26 +2677,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'layerTStart',
-					value: '$(liveupdate:layerTStart)+1',
+					delta: '1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'layerTStart',
-					value: '$(liveupdate:layerTStart)+1',
+					delta: '1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'layerTStart',
-					value: '$(liveupdate:layerTStart)-1',
+					delta: '-1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -2689,10 +2727,12 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'layerTStart',
-					value: '$(liveupdate:layerTStart)-1',
+					delta: '-1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -2717,26 +2757,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'layerTLength',
-					value: '$(liveupdate:layerTLength)+1',
+					delta: '1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'layerTLength',
-					value: '$(liveupdate:layerTLength)+1',
+					delta: '1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'layerTLength',
-					value: '$(liveupdate:layerTLength)-1',
+					delta: '-1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -2761,10 +2807,12 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'layerTLength',
-					value: '$(liveupdate:layerTLength)-1',
+					delta: '-1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -2789,26 +2837,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyPosX',
-					value: '$(liveupdate:keyPosX)+1',
+					delta: '1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyPosX',
-					value: '$(liveupdate:keyPosX)+1',
+					delta: '1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyPosX',
-					value: '$(liveupdate:keyPosX)-1',
+					delta: '-1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -2833,10 +2887,12 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyPosX',
-					value: '$(liveupdate:keyPosX)-1',
+					delta: '-1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -2889,26 +2945,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyPosY',
-					value: '$(liveupdate:keyPosY)+1',
+					delta: '1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyPosY',
-					value: '$(liveupdate:keyPosY)+1',
+					delta: '1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyPosY',
-					value: '$(liveupdate:keyPosY)-1',
+					delta: '-1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -2933,10 +2995,12 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyPosY',
-					value: '$(liveupdate:keyPosY)-1',
+					delta: '-1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -2989,26 +3053,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyScale',
-					value: '$(liveupdate:keyScale)+0.1',
+					delta: '0.1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyScale',
-					value: '$(liveupdate:keyScale)+0.1',
+					delta: '0.1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyScale',
-					value: '$(liveupdate:keyScale)-0.1',
+					delta: '-0.1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -3033,26 +3103,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyScaleY',
-					value: '$(liveupdate:keyScaleY)+0.1',
+					delta: '0.1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyScaleY',
-					value: '$(liveupdate:keyScaleY)+0.1',
+					delta: '0.1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyScaleY',
-					value: '$(liveupdate:keyScaleY)-0.1',
+					delta: '-0.1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -3077,10 +3153,12 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyScale',
-					value: '$(liveupdate:keyScale)-0.1',
+					delta: '-0.1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -3105,10 +3183,12 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyScaleY',
-					value: '$(liveupdate:keyScaleY)-0.1',
+					delta: '-0.1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -3189,26 +3269,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyBrightness',
-					value: '$(liveupdate:keyBrightness)+0.1',
+					delta: '0.1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyBrightness',
-					value: '$(liveupdate:keyBrightness)+0.1',
+					delta: '0.1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyBrightness',
-					value: '$(liveupdate:keyBrightness)-0.1',
+					delta: '-0.1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -3233,10 +3319,12 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'keyBrightness',
-					value: '$(liveupdate:keyBrightness)-0.1',
+					delta: '-0.1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -3902,26 +3990,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'screenOffsetX',
-					value: '$(liveupdate:screenOffsetX)+0.1',
+					delta: '0.1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'screenOffsetX',
-					value: '$(liveupdate:screenOffsetX)+0.1',
+					delta: '0.1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'screenOffsetX',
-					value: '$(liveupdate:screenOffsetX)-0.1',
+					delta: '-0.1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -3946,26 +4040,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'screenOffsetX',
-					value: '$(liveupdate:screenOffsetX)-0.1',
+					delta: '-0.1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'screenOffsetX',
-					value: '$(liveupdate:screenOffsetX)+0.1',
+					delta: '0.1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'screenOffsetX',
-					value: '$(liveupdate:screenOffsetX)-0.1',
+					delta: '-0.1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -4033,26 +4133,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'screenMasterFade',
-					value: '$(liveupdate:screenMasterFade)+0.05',
+					delta: '0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'screenMasterFade',
-					value: '$(liveupdate:screenMasterFade)+0.05',
+					delta: '0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'screenMasterFade',
-					value: '$(liveupdate:screenMasterFade)-0.05',
+					delta: '-0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 		],
@@ -4077,26 +4183,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'screenMasterFade',
-					value: '$(liveupdate:screenMasterFade)-0.05',
+					delta: '-0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'screenMasterFade',
-					value: '$(liveupdate:screenMasterFade)+0.05',
+					delta: '0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'screenMasterFade',
-					value: '$(liveupdate:screenMasterFade)-0.05',
+					delta: '-0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 		],
@@ -4484,26 +4596,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'projectorMasterFade',
-					value: '$(liveupdate:projectorMasterFade)+0.05',
+					delta: '0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'projectorMasterFade',
-					value: '$(liveupdate:projectorMasterFade)+0.05',
+					delta: '0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'projectorMasterFade',
-					value: '$(liveupdate:projectorMasterFade)-0.05',
+					delta: '-0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 		],
@@ -4528,26 +4646,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'projectorMasterFade',
-					value: '$(liveupdate:projectorMasterFade)-0.05',
+					delta: '-0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'projectorMasterFade',
-					value: '$(liveupdate:projectorMasterFade)+0.05',
+					delta: '0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'projectorMasterFade',
-					value: '$(liveupdate:projectorMasterFade)-0.05',
+					delta: '-0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 		],
@@ -4783,26 +4907,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'uidMasterFade',
-					value: '$(liveupdate:uidMasterFade)+0.05',
+					delta: '0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'uidMasterFade',
-					value: '$(liveupdate:uidMasterFade)+0.05',
+					delta: '0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'uidMasterFade',
-					value: '$(liveupdate:uidMasterFade)-0.05',
+					delta: '-0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 		],
@@ -4827,26 +4957,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'uidMasterFade',
-					value: '$(liveupdate:uidMasterFade)-0.05',
+					delta: '-0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'uidMasterFade',
-					value: '$(liveupdate:uidMasterFade)+0.05',
+					delta: '0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'uidMasterFade',
-					value: '$(liveupdate:uidMasterFade)-0.05',
+					delta: '-0.05',
+					min: '0',
+					max: '1',
 				},
 			},
 		],
@@ -7607,26 +7743,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'tplNudgeUp',
-					value: '$(liveupdate:tplNudgeUp)+1',
+					delta: '1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'tplNudgeUp',
-					value: '$(liveupdate:tplNudgeUp)+1',
+					delta: '1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'tplNudgeUp',
-					value: '$(liveupdate:tplNudgeUp)-1',
+					delta: '-1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -7651,26 +7793,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'tplNudgeDown',
-					value: '$(liveupdate:tplNudgeDown)-1',
+					delta: '-1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'tplNudgeDown',
-					value: '$(liveupdate:tplNudgeDown)-1',
+					delta: '-1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'tplNudgeDown',
-					value: '$(liveupdate:tplNudgeDown)+1',
+					delta: '1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -7856,26 +8004,32 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'evFloat',
-					value: '$(liveupdate:evFloat)+0.1',
+					delta: '0.1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_right',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'evFloat',
-					value: '$(liveupdate:evFloat)+0.1',
+					delta: '0.1',
+					min: '',
+					max: '',
 				},
 			},
 			{
 				set: 'rotate_left',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'evFloat',
-					value: '$(liveupdate:evFloat)-0.1',
+					delta: '-0.1',
+					min: '',
+					max: '',
 				},
 			},
 		],
@@ -7900,10 +8054,12 @@ export const PRESET_CATALOG: readonly PresetCatalogEntry[] = [
 		actions: [
 			{
 				set: 'down',
-				actionId: 'setToDisguiseNumber',
+				actionId: 'nudgeDisguiseNumber',
 				options: {
 					variableName: 'evFloat',
-					value: '$(liveupdate:evFloat)-0.1',
+					delta: '-0.1',
+					min: '',
+					max: '',
 				},
 			},
 		],

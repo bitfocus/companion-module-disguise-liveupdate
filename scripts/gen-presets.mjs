@@ -61,6 +61,21 @@ function convertRow(row) {
 			if (!['string', 'number', 'boolean'].includes(typeof value))
 				throw new Error(`${id}: option ${key} has type ${typeof value}`)
 		}
+		// A step written as '$(liveupdate:x)+0.05' reaches the Director as the absolute value 0.05 while
+		// the readout is empty: Companion substitutes the readout before the action runs. The nudge
+		// action adds the step in the module and refuses while there is no number to add it to.
+		if (action.actionId === 'setToDisguiseNumber' && String(action.options.value).includes('$('))
+			throw new Error(`${id}: a Number value that reads a variable; a step belongs on nudgeDisguiseNumber`)
+		if (row.controlKind === 'nudge' && action.actionId !== 'nudgeDisguiseNumber')
+			throw new Error(`${id}: a nudge row writes through nudgeDisguiseNumber, not ${action.actionId}`)
+		if (action.actionId === 'nudgeDisguiseNumber') {
+			const isNumber = (text) => String(text).trim() !== '' && Number.isFinite(Number(text))
+			if (!isNumber(action.options.delta) || Number(action.options.delta) === 0)
+				throw new Error(`${id}: the nudge step must be a number other than 0`)
+			for (const limit of ['min', 'max'])
+				if (action.options[limit] !== '' && !isNumber(action.options[limit]))
+					throw new Error(`${id}: the nudge ${limit} must be empty or a number`)
+		}
 		return { set: action.set, actionId: action.actionId, options: action.options }
 	})
 	if (row.tier === 'experimental' && actions.length) throw new Error(`${id}: experimental row with actions`)
