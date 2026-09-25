@@ -990,8 +990,9 @@ Look at the button first: a readout shows what went wrong (see *What a readout s
   receives the values (the log says "Feedbacks share ... with different variable names").
 - `$NA`: the variable name in the button text matches no feedback of this connection. Check the
   spelling against the feedback's Variable Name, and the connection label (`$(liveupdate:...)`).
-- `OFFLINE`: the connection to the Director is closed; `connection_status` says `Disconnected` and
-  the module reconnects on its own.
+- `OFFLINE`: the connection to the Director is closed or not open yet; `connection_status` says
+  `Disconnected` once a connection attempt has failed (it is empty until the first attempt has an
+  outcome), and the module reconnects on its own.
 - `ERROR`: the Director could not resolve the object path (wrong name, wrong type prefix, object does
   not exist). The subscription is retried with a growing back-off (2 s doubling up to 60 s) until you
   fix the path.
