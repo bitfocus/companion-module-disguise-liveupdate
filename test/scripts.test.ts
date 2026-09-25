@@ -481,7 +481,7 @@ test('the restore sweep is compared with the start and every difference is named
 	assert.match(source, /handRestoreLine\(unrestored\)/)
 })
 
-test('an interrupted rest-command-verify ends like a normal run once a command has gone out', () => {
+test('an interrupted rest-command-verify ends like a normal run once a command has gone out', async () => {
 	const act = (o: Record<string, boolean>): string =>
 		safety.interruptAction({ sending: false, settling: false, halted: false, ...o })
 	assert.equal(act({}), 'exit', 'nothing was sent: nothing to put back')
@@ -515,6 +515,55 @@ test('an interrupted rest-command-verify ends like a normal run once a command h
 		'the interrupt must run the restores, the sweep with its comparison and resume, then the report',
 	)
 	assert.match(bail, /handRestoreLine\(unsweptFields\(origin, unchanged\)\)/)
+
+	// run bail itself against stand-ins for the script's state and plumbing
+	const AsyncFunction = Object.getPrototypeOf(async () => undefined).constructor
+	const scope = ['sending', 'settling', 'halted', 'origin', 'unchanged', 'results', 'live', 'process', 'console']
+	const plumbing = ['interruptAction', 'handRestoreLine', 'unsweptFields', 'runRestores', 'settleBack', 'report']
+	const runBail = new AsyncFunction(
+		'reason',
+		...scope,
+		...plumbing,
+		bail.slice(bail.indexOf('{') + 1, bail.lastIndexOf('}')),
+	)
+	const interrupt = async (state: { sending: boolean; settling: boolean }) => {
+		const calls: string[] = []
+		const results: any[] = []
+		const proc = { exitCode: undefined as number | undefined, exit: (code: number) => calls.push(`exit ${code}`) }
+		await runBail(
+			'SIGINT',
+			state.sending,
+			state.settling,
+			false,
+			origin,
+			[],
+			results,
+			{ close: async () => calls.push('close') },
+			proc,
+			{ error: () => undefined, log: () => undefined },
+			safety.interruptAction,
+			safety.handRestoreLine,
+			safety.unsweptFields,
+			async () => calls.push('restores'),
+			async () => (calls.push('sweep'), []),
+			() => calls.push('report'),
+		)
+		return { calls, results: results.map((r) => `${r.id} ${r.status}`), exitCode: proc.exitCode }
+	}
+	// during the steps: the interrupt runs the restores, the sweep and the report itself
+	assert.deepEqual(await interrupt({ sending: true, settling: false }), {
+		calls: ['restores', 'sweep', 'close', 'report'],
+		results: ['run failed'],
+		exitCode: undefined,
+	})
+	// during main's own sweep: main's report() ends the run, and it must count the interrupt as a failure,
+	// or it exits 0 with no trace of the interrupt in the results file
+	assert.deepEqual(await interrupt({ sending: true, settling: true }), {
+		calls: [],
+		results: ['run failed'],
+		exitCode: 1,
+	})
+
 	// main hands the end of the run to the interrupt, and sends nothing after it
 	assert.match(source, /if \(!halted\) \{\s*settling = true/)
 	assert.match(source, /async function step\(id, summary, run\) \{\s*if \(halted \|\|/)

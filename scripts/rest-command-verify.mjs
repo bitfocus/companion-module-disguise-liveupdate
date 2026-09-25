@@ -539,8 +539,9 @@ async function settleBack(origin) {
 /**
  * An interrupt or a crash. Once a command has gone out it ends the run the way main does: the steps
  * send nothing more, the queued restores and the sweep run, the state is compared with the start (a
- * --force run resumes its playmode) and the results are written; the run exits 1. What is still
- * different is decided by that comparison, not by the answers to the restores.
+ * --force run resumes its playmode) and the results are written; the run exits 1. An interrupt while
+ * main's own sweep runs lets that sweep finish, and its report records the interrupt and exits 1 too.
+ * What is still different is decided by that comparison, not by the answers to the restores.
  */
 async function bail(reason) {
 	const action = interruptAction({ sending, settling, halted })
@@ -550,19 +551,21 @@ async function bail(reason) {
 		await live?.close()
 		process.exit(1)
 	}
-	if (action === 'wait') {
-		console.error(`\n${reason} - the restore sweep is running and reports when it is done (again to leave now)`)
-		// report() sets the exit code; should a crash keep it from running, the run still does not exit 0
-		process.exitCode = 1
-		return
-	}
 	if (action === 'force') {
 		console.error(`\n${reason} - leaving before the restore sweep has confirmed the state`)
 		console.error(`\n!! ${handRestoreLine(unsweptFields(origin, unchanged))}\n`)
 		process.exit(1)
 	}
-	console.error(`\n${reason} - restoring before exit (again to leave now)`)
+	// whichever sweep ends the run, its report counts this entry and exits 1
 	results.push({ id: 'run', summary: 'the run was interrupted', status: 'failed', detail: reason })
+	if (action === 'wait') {
+		// main's own sweep has started: it finishes, then its report() writes the file and exits
+		console.error(`\n${reason} - the restore sweep is running and reports when it is done (again to leave now)`)
+		// should a crash keep report() from running, the run still does not exit 0
+		process.exitCode = 1
+		return
+	}
+	console.error(`\n${reason} - restoring before exit (again to leave now)`)
 	await runRestores()
 	const unrestored = await settleBack(origin)
 	await live.close()
