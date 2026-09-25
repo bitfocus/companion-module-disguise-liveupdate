@@ -60,9 +60,9 @@ const refuse = (
 }
 
 /**
- * A free-text option after variable parsing. Empty text, the host's '$NA' and a reference left
- * unparsed are refused with one warning, so a button whose variable or selection is not set yet
- * sends nothing rather than a literal '$NA' or an empty value.
+ * A free-text option after variable parsing. Empty text, the host's '$NA', a reference left unparsed
+ * and a readout marker such as PENDING are refused with one warning, so a button whose variable or
+ * selection is not set yet sends nothing rather than a literal '$NA', a marker or an empty value.
  */
 const text = async (
 	instance: DisguiseInstance,

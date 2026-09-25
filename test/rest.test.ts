@@ -315,6 +315,45 @@ test('a text parameter that is empty or unresolved is refused with one warning, 
 	await inst.destroy()
 })
 
+test('a text parameter that is a readout marker is refused like $NA, for every command', async () => {
+	// Companion puts a readout's text into the option before the action runs. A readout that waits for
+	// its value says PENDING, one without a usable path UNSET, and so on: none of them is a name to send.
+	const inst = await connected({ restAllowDestructive: true })
+	const actions = dist.getActionDefinitions(inst)
+	const cases: [string, Record<string, unknown>, string][] = [
+		['restPlay', { transport: 'PENDING' }, 'transport'],
+		['restGotoTrack', { transport: 'default', track: ' PENDING ' }, 'track'],
+		['restGotoNote', { transport: 'default', note: 'PENDING', playmode: 'Play' }, 'Note'],
+		['restGotoTag', { transport: 'default', tagType: 'CUE', value: 'PENDING' }, 'Tag value'],
+	]
+	for (const marker of dist.SENTINELS) {
+		cases.push(['restFailoverMachine', { machine: marker }, 'machine'])
+		cases.push(['restRsRestart', { layers: `Layer A, ${marker}` }, 'a layer'])
+	}
+	for (const [actionId, options, field] of cases) {
+		const from = inst.host.logs.length
+		await actions[actionId].callback({ actionId, options, controlId: 'bank7' }, context)
+		const logged = warningsSince(inst, from)
+		const what = `${actionId} ${JSON.stringify(options)}`
+		assert.equal(logged.length, 1, `${what} logs one warning: ${logged.join(' | ')}`)
+		assert.ok(logged[0].includes(field) && logged[0].includes('nothing was sent'), logged[0])
+		assert.equal(inst.host.variables.get('rest_armed'), '', `${what} does not arm`)
+	}
+	assert.equal(received.length, 0)
+
+	// only the whole text is a marker, and name: still reaches an object that is named like one
+	assert.equal(rest.isUnresolvedText('ERROR_LOG_LAYER'), false)
+	assert.equal(rest.isUnresolvedText('Layer PENDING'), false)
+	await actions.restGotoTrack.callback(
+		{ options: { transport: 'default', track: 'name:PENDING' }, controlId: 'bank7' },
+		context,
+	)
+	assert.deepEqual(received[0].body, {
+		transports: [{ transport: { name: 'default' }, track: { name: 'PENDING' }, playmode: 'NotSet' }],
+	})
+	await inst.destroy()
+})
+
 test('name: and uid: choose how a reference is sent, over the 6-digit rule', async () => {
 	assert.deepEqual(rest.parseTarget('1234567890123456789'), { uid: '1234567890123456789' })
 	assert.deepEqual(rest.parseTarget('20250914'), { uid: '20250914' }, 'the default rule is unchanged')

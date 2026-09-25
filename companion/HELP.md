@@ -92,6 +92,11 @@ remembered, for example after a Designer upgrade; saving the connection settings
   after its variables are parsed. When it is empty, contains `$NA` (an unknown variable or an empty
   selection) or still holds a `$(...)` reference, the command is refused with one warning and nothing
   is sent. An empty number field is never sent as 0.
+- A parameter that is exactly one of the readout words (`PENDING`, `UNSET`, `OFFLINE`, `ERROR`,
+  `PATH_ERROR`, `PATH_ERROR (unsubscribed)`, see *What a readout shows*) is refused the same way: it
+  comes from a readout that has no value, for example one still waiting for the Director. A text that
+  only contains such a word is sent, and a transport, track, machine or layer named exactly like one
+  is reached with `name:` (`name:PENDING`).
 - A RenderStream layer list is comma separated and every entry must resolve. An empty entry (a
   trailing or double comma included) or an unresolved one refuses the whole command: no partial list
   is sent, and a destructive command is not armed.

@@ -8,6 +8,7 @@
  *
  * Everything is POST with a JSON body under the same host and port as the WebSocket connection.
  */
+import { isSentinel } from './variables'
 
 /** A Designer object is addressed by uid or by name; the module sends the name the operator chose. */
 export interface RestTarget {
@@ -140,12 +141,15 @@ export const machineBody = (target: RestTarget): unknown => ({ machine: target }
 
 /**
  * Text a command must not carry: empty, or still holding the host's '$NA' (an unknown variable, or a
- * selection the module publishes while it is empty) or a $(...) reference the host left unparsed.
- * Every free-text command parameter goes through this one test before anything is sent.
+ * selection the module publishes while it is empty) or a $(...) reference the host left unparsed, or
+ * exactly one of the readout markers (PENDING, UNSET, OFFLINE, ...): a readout that has no value. Only
+ * the whole text counts as a marker, so a name that contains one is sent, and 'name:' still reaches an
+ * object named like one. Every free-text command parameter goes through this one test before anything
+ * is sent.
  */
 export function isUnresolvedText(text: string): boolean {
 	const trimmed = text.trim()
-	return !trimmed || trimmed.includes('$NA') || trimmed.includes('$(')
+	return !trimmed || trimmed.includes('$NA') || trimmed.includes('$(') || isSentinel(trimmed)
 }
 
 /**

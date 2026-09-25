@@ -60,9 +60,10 @@
     and a button saved without the option leaves the play state as it is.
   - Object references are a name or, with 6 or more digits, a uid; `name:` or `uid:` chooses
     explicitly (`name:20250914` for a date-stamped track).
-  - A free-text parameter that is empty, contains `$NA` or an unparsed `$(...)` refuses the command
-    with one warning; an empty number field is never sent as 0, and a RenderStream layer list is sent
-    only when every entry resolves.
+  - A free-text parameter that is empty, contains `$NA` or an unparsed `$(...)`, or is exactly one of
+    the readout words (`PENDING`, `UNSET`, `OFFLINE`, ...) refuses the command with one warning; an
+    empty number field is never sent as 0, and a RenderStream layer list is sent only when every entry
+    resolves.
   - A command the Director answers 404 or 405 for is reported `UNSUPPORTED` and not sent again;
     *Command: rescan the command API* forgets that, for example after a Designer upgrade. A reply that
     stalls or breaks after its headers counts as a failure.
