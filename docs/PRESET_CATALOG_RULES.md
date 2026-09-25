@@ -36,8 +36,9 @@ transport's current track, `output` touches master fades, hold and stage flags a
 while the transport plays. Both guards fail closed: `neutral` is refused when the track it would use
 is the current one or the current track cannot be read, `output` when the playing state cannot be
 read. `--force` overrides them. Failover topology (Machine role / targets / hostname) is never
-written. A row that was written and restored carries a `write` object, rendered in the *write* column
-of PRESET_CATALOG.md.
+written. `test/live-write.e2e.ts` drives the module's own Set Number, Toggle Boolean and Set JSON
+actions on three of those rows under the same guards. A row that was written and restored carries a
+`write` object, rendered in the *write* column of PRESET_CATALOG.md.
 
 ## 2. Categories
 
@@ -58,9 +59,11 @@ Companion 5 sorts categories by name, so every category carries a numeric prefix
 | `11 Templates` | `tpl_` | generic watch / set presets with literal placeholders |
 | `99 Experimental` | home prefix | inferred read-only rows from any category |
 
-Each category starts with one `type: 'text'` preset (id `<prefix>_setup`) whose text lists the
-custom variables to create and what the presets show. Categories 02–10 may add further text
-headings to separate readouts from controls.
+Each category starts with one `type: 'text'` preset (id `<prefix>_setup`) whose text names the
+selection variables the category needs and where to fill them in (connection settings > Selections,
+or a *Set selection* action), or says that it needs none, and what the presets show. No shipped
+preset carries a `$(custom:...)` reference (§4). Categories 02–10 may add further text headings to
+separate readouts from controls.
 
 ## 3. Preset ids and names
 

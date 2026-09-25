@@ -44,7 +44,7 @@ export const PRESET_TEXTS: readonly PresetCatalogText[] = [
 	{
 		id: 'ev_setup',
 		category: '08 Expression Variables',
-		name: 'EV setup: custom variables',
+		name: 'Setup: Expression Variables',
 		text: 'Expression Variables device readouts. Fill these selections in first (connection settings > Selections, or the "Set selection" action): selEvUid = the device UID as an unquoted hex literal (Designer: right-click the Expression Variables device editor title bar > Copy UID, e.g. 0x0123456789abcdef); selEvIndex = zero-based row index of the variable in the device editor (plain integer, no quotes; rows can be drag-reordered so re-check after edits). Presets in this category read the i-th variable through getByUID(selEvUid).container.variables[selEvIndex]: defaultFloat (value of a Float variable), defaultString (value of a String variable), name and type (0 Float, 1 String, 2 Function). The readouts are read-only. Two knobs (EV float +/-0.1) write defaultFloat through the list subscript; that write is the one part of this category that could not be tested on the verification rig, because the test project had no Expression Variables device. Try them on a spare variable before using them in a show. Experimental rows (see 99 Experimental) additionally need selEvDevice (device name = filename part of objects/ExpressionVariablesDevice/<name>.apx), selEvName (variable name, case-sensitive) and selEvLayer (name of an ExpressionVariables layer currently under the playhead). None of the Expression Variables rows could be checked live: the test project has no Expression Variables device.',
 	},
 	{

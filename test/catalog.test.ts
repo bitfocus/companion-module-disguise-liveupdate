@@ -625,6 +625,12 @@ test("setup texts send commands to this module's REST actions, not to another mo
 		assert.ok(connection.includes(`'${prefix}'`), `conn_setup does not name the ${prefix} actions`)
 })
 
+test('no text preset asks the operator for Companion custom variables', () => {
+	// the presets address the show through the module's selection variables (PRESET_CATALOG_RULES §2, §4)
+	for (const text of dist.PRESET_TEXTS)
+		assert.ok(!/custom variable/i.test(`${text.name}\n${text.text}`), `${text.id} (${text.name})`)
+})
+
 test('no preset carries a redaction placeholder and the catalog cites no local file', () => {
 	for (const [id, preset] of Object.entries(presets))
 		assert.ok(!JSON.stringify(preset).includes('<redacted'), `${id} carries a redaction placeholder`)

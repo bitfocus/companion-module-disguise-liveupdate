@@ -79,7 +79,8 @@ See [companion/HELP.md](companion/HELP.md) for the user documentation and
 ## Variables
 
 - `connection_status`: `Connected` / `Disconnected`
-- `designer_version`: Designer version of the connected Director, read on every connection
+- `designer_version`: Designer version of the connected Director, read on every connection and
+  emptied, with the selection lists, when the host or port changes
 - `selfcheck_progress`, `selfcheck_ok`, `selfcheck_failed`, `selfcheck_skipped`: the preset check
 - `rest_last_command`, `rest_last_status` (`OK` / `FAILED` / `UNSUPPORTED`), `rest_last_message`: the
   last command sent and its result
@@ -124,7 +125,7 @@ for that check (it uses the `typescript` devDependency).
 
 ### Tests
 
-`yarn test` runs the whole suite in about 18 s; nothing in it talks to a real Director. The
+`yarn test` runs the whole suite in about 25 s; nothing in it talks to a real Director. The
 lifecycle tests load the built `dist/` through `test/harness.ts`, which replaces
 `@companion-module/base` with a stub host that drives the real module-base FeedbackManager, and `ws`
 with an in-process fake socket connected to a `FakeDirector`:
@@ -195,19 +196,19 @@ yarn tsx test/live-write.e2e.ts --host <director> --track <name> --layer <name> 
 
 They write their raw output to `.live/` at the repository root, which git ignores:
 `.live/rest-api.json`, `.live/live-verification.json`, `.live/live-write-verification.json`,
-`.live/rest-verification.json` and `.live/live-write-e2e.json`. That output holds site data (the Director's address, project, track,
-layer, screen and machine names, uids), and every run that writes it prints a reminder, louder when an
-`--out` puts it inside the checkout but outside `.live/`. The files under `docs/research` are the
-committed, scrubbed evidence: writing there needs an explicit `--out`, and the file must be scrubbed
-before it is committed. `scripts/live-verify.config.json`, the optional selection values for
-`live-verify.mjs`, is git-ignored too.
+`.live/rest-verification.json` and `.live/live-write-e2e.json`. That output holds site data (the
+Director's address, project, track, layer, screen and machine names, uids), and every run that writes
+it prints a reminder, louder when an `--out` puts it inside the checkout but outside `.live/`. The
+files under `docs/research` are the committed, scrubbed evidence: writing there needs an explicit
+`--out`, and the file must be scrubbed before it is committed. `scripts/live-verify.config.json`, the
+optional selection values for `live-verify.mjs`, is git-ignored too.
 
-The write scripts and the end-to-end test exit 0 when the run was clean, 1 on a failure or when something was not restored or
-not confirmed, and 2 when a guard refused before writing (or on a usage error). Their guards fail
-closed: a state they cannot read counts as the unsafe one. `--force` overrides the track and play-state
-guards, not every refusal: `rest-command-verify.mjs` exits 1 without sending anything when the
-Director reports no active transport or the playhead cannot be read over LiveUpdate, with or without
-`--force`.
+The write scripts and the end-to-end test exit 0 when the run was clean, 1 on a failure or when
+something was not restored or not confirmed, and 2 when a guard refused before writing (or on a usage
+error). Their guards fail closed: a state they cannot read counts as the unsafe one. `--force`
+overrides the track and play-state guards, not every refusal: `rest-command-verify.mjs` exits 1
+without sending anything when the Director reports no active transport or the playhead cannot be read
+over LiveUpdate, with or without `--force`.
 
 `live-write-verify.mjs` changes values on the Director. It reads the original value first, restores
 it afterwards, re-reads everything at the end, stops on a failed restore and restores the value in

@@ -24,8 +24,10 @@
   a mistyped name can no longer be the reason a preset shows PATH_ERROR. The lists are read once per
   connection (*Read selection lists on connect*, on by default) and on demand with the 'Refresh
   selection lists' action; a name can still be typed. Any answer from the Director replaces a list,
-  even an empty one; a failed read keeps the previous list. A 'Set selection profile' action applies
-  several selections with one press, so a button re-points a whole page at another part of the show.
+  even an empty one; a failed read keeps the list read from the same Director. Changing the host or
+  port empties the lists and `designer_version`, so no action offers the previous show's names. A
+  'Set selection profile' action applies several selections with one press, so a button re-points a
+  whole page at another part of the show.
 - *LiveUpdate Compare* boolean feedback (state colours for any LiveUpdate Variable). A value that is
   unknown (none yet, `null`, a Director error or one of the readout markers, also when the Director
   sends that text itself) satisfies no comparison, including *not equal* and *is true*.
@@ -78,8 +80,9 @@
   `selfcheck_skipped` counts the ones whose selection is empty. A property a placed button holds is
   read from that button. It answers "which of these presets work on this Designer and this show file"
   without touching the subscriptions the buttons already hold.
-- `designer_version`: the Designer version of the connected Director, read on every connection. The
-  log says so when the major version differs from r34, the one the catalog was verified on.
+- `designer_version`: the Designer version of the connected Director, read on every connection and
+  emptied when the host or port changes. The log says so when the major version differs from r34, the
+  one the catalog was verified on.
 - Readout markers. Besides `ERROR`, `PATH_ERROR` and `PATH_ERROR (unsubscribed)`, which 1.0.2 already
   wrote, a readout can show `OFFLINE` (no connection), the new `UNSET`: the path cannot be resolved
   yet (an empty selection or `$NA`, an unparsed `$(...)`, an empty object or property path, a bare
@@ -143,12 +146,14 @@
   the module's own actions (`test/live-write.e2e.ts`: Set Number with an expression, Toggle Boolean,
   Set JSON with a partial object). Every value came back to its original; the results are in
   `docs/research/live-write-*.json` and in the *write* column of `docs/PRESET_CATALOG.md`.
-- Command verification on the same Director (`docs/research/rest-verification.json`): play, stop,
-  play to end of section, loop section, return to start, next and previous section, go to section,
-  go to note, go to timecode, go to time, brightness, volume and engaged were sent, checked and put
-  back. Next track, previous track and go to track were accepted but could not change the track,
-  because the test project's set list had one track. RenderStream sync layers was accepted. Set speed
-  was refused because Designer's *enableTransportSpeedControl* was off, and go to tag was not sent.
+- Command verification on the same Director (`docs/research/rest-verification.json`): brightness,
+  volume and engaged were set, read back and put back; go to time, go to timecode and return to start
+  moved the playhead where they should; play, play to end of section and loop section started
+  playback and stop stopped it. Next and previous section, go to section and go to note were accepted
+  and the beat they landed on was recorded, not checked. Next track, previous track and go to track
+  were accepted but could not change the track, because the test project's set list had one track.
+  RenderStream sync layers was accepted. Set speed was refused because Designer's
+  *enableTransportSpeedControl* was off, and go to tag was not sent.
   The jumps were sent with the script's own body (play mode `Stop`); the next and previous section
   and track steps have not been sent with the body the module sends now.
 
@@ -183,9 +188,9 @@
   static on `transportManager:default`, plus the GUI playhead). The Director still holds one
   subscription per property.
 - Variable definitions are sent to Companion only when they change, and a Director confirmation
-  re-runs only the feedbacks it concerns (1.0.2 re-ran every feedback on every subscriptions reply and every value update); with
-  30 feedbacks placed at once that is at most three callback runs per feedback. A reconnect sends no
-  definition push.
+  re-runs only the feedbacks it concerns (1.0.2 re-ran every feedback on every subscriptions reply and
+  every value update); with 30 feedbacks placed at once that is at most three callback runs per
+  feedback. A reconnect sends no definition push.
 - A burst of writes to the same property is collapsed: the first goes out at once so a single
   press stays instant, and a fast rotary spin becomes one write per 40 ms window carrying the value
   the operator stopped on, instead of one write per detent.

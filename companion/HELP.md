@@ -112,14 +112,17 @@ upgrade; saving the connection settings does too.
 ### Established on an r34.0.3 Director
 
 `scripts/rest-command-verify.mjs` sent the commands to a Designer r34.0.3 Director on 2026-09-04
-(`docs/research/rest-verification.json`). *Play*, *Stop*, *Play to end of section*, *Loop section*,
-*Return to start*, *Next section*, *Previous section*, *Go to section*, *Go to note*,
-*Go to timecode*, *Go to time*, *Set brightness*, *Set volume* and *Set engaged* were sent, checked
-and put back: each step read the state before and after the command and restored it. *Next track*,
-*Previous track* and *Go to track* were accepted but could not change the track, because the test
-project's set list had one track. *Sync layers* was accepted. *Set speed* was refused (see below) and
-*Go to tag* was not sent. Starting, stopping and restarting layers and the failover commands were not
-sent, because a second command does not undo them. The script sent its jumps with play mode `Stop`.
+(`docs/research/rest-verification.json`). For these it read the effect back and would have failed
+the step without it: *Set brightness*, *Set volume* and *Set engaged* showed the new value and were
+put back, *Go to time*, *Go to timecode* and *Return to start* moved the playhead where they should,
+and *Play*, *Play to end of section* and *Loop section* started playback, which *Stop* stopped again.
+*Next section*, *Previous section*, *Go to section* and *Go to note* were only accepted: the script
+recorded the beat the playhead landed on but did not check it against the section it should reach. *Next track*, *Previous track* and *Go to track* were accepted but could not
+change the track, because the test project's set list had one track. *Sync layers* was accepted.
+*Set speed* was refused (see below) and *Go to tag* was not sent. The playhead was put back after the
+jumps, and the transport's values after each value step. Starting, stopping and restarting layers and
+the failover commands were not sent, because a second command does not undo them. The script sent its
+jumps with play mode `Stop`.
 The next / previous section and track actions now send the body the OpenAPI document records for
 them, with the play mode chosen on the button; that body has not been sent to a Director by the
 module yet.
@@ -140,9 +143,14 @@ has, read when the connection comes up (*Read selection lists on connect*, on by
 the *Refresh selection lists* action runs. A name can still be typed.
 
 Any answer from the Director replaces a list, even an empty one; the action then falls back to a text
-field. A read that fails (an error or no answer) keeps the previous list, and a list that needs a
-selection that is empty (the layer list needs `selTrack`) is left as it is. A list whose property a
-placed button already holds is read from that button.
+field. A read that fails (an error or no answer) keeps the list already read from this Director, and
+a list that needs a selection that is empty (the layer list needs `selTrack`) is left as it is. A
+list whose property a placed button already holds is read from that button.
+
+The lists belong to the Director they were read from. Changing the host or port empties every list,
+and `designer_version`, so no action offers the previous show's names: the actions show a text field
+until the new Director's lists are read (on connect when *Read selection lists on connect* is on,
+otherwise with *Refresh selection lists*), and the version is read again when it connects.
 
 *Set selection profile* applies several selections (track, layer, surface, projector, machine,
 RenderStream workload) with one press, so one button re-points a whole page at another part of the
@@ -209,16 +217,17 @@ not touch the subscriptions your buttons hold; a button removed while the check 
 leaves the property to the check, which still gets the answer. A button placed on a property the check
 is reading asks for it once the Director has answered the check's request, also when the check stopped
 waiting for it (a Director that never answers holds the button back for the *Pending Subscription
-Timeout* after that, no longer), so the property keeps one Director subscription. Run it when you arrive on site: it tells you which presets work with this Designer build
-and this show file.
+Timeout* after that, no longer), so the property keeps one Director subscription. Run it when you
+arrive on site: it tells you which presets work with this Designer build and this show file.
 
 ## Designer version
 
 `$(liveupdate:designer_version)` holds the version of the connected Director
 (`ReleaseVersion.versionString()`, for example `r34.0.3, rev 258249`). It is read on every connection,
-whatever *Read selection lists on connect* says. The log warns when the major version differs from
-r34, the version the preset catalog was verified against (`r34.0.3`, `34.0.3.258249` and `d3 r34.0.3`
-are all understood).
+whatever *Read selection lists on connect* says, and emptied when the host or port changes, so it
+never names the previous Director. The log warns when the major version differs from r34, the version
+the preset catalog was verified against (`r34.0.3`, `34.0.3.258249` and `d3 r34.0.3` are all
+understood).
 
 ## What a readout shows
 
@@ -270,7 +279,9 @@ On disconnect and on reconnect the module re-checks *Connection OK*, *LiveUpdate
 *LiveUpdate Sparkline*, *Command armed* and *Last command failed*, so no state colour outlives the
 connection. After a reconnect no readout stays `OFFLINE`: each one says `PENDING` until its value
 arrives, or shows `UNSET` when its path cannot be resolved. Changing the host or port while connected
-shows `OFFLINE` in every readout until the connection to the new Director opens.
+shows `OFFLINE` in every readout until the connection to the new Director opens; it also empties the
+selection lists and `designer_version` and drops a pending arm, all of which belong to the previous
+Director. The selections themselves keep their values.
 
 ## Configuration
 
@@ -298,9 +309,10 @@ any placed feedback asks for; `0` beats any number. When a faster feedback joins
 again at the faster rate, also when the first request is still on its way. The subscription keeps the
 Variable Name that received the values, and that readout keeps its value until the new subscription
 sends one; when the Director does not answer within the *Pending Subscription Timeout*, it says
-`PENDING` until a retry is answered. A slower feedback joins without a new request. Removing the faster button does not slow a
-confirmed subscription down again straight away, but a faster button removed before the Director has
-answered the first request takes its rate with it. The intervals are remembered across reconnects.
+`PENDING` until a retry is answered. A slower feedback joins without a new request. Removing the
+faster button does not slow a confirmed subscription down again straight away, but a faster button
+removed before the Director has answered the first request takes its rate with it. The intervals are
+remembered across reconnects.
 
 ### Commands
 
