@@ -58,6 +58,22 @@ test('a flat line stays visible instead of collapsing', () => {
 	for (let y = 0; y < height; y++) if (pixel(buffer, width, 0, y)[3] === 255) drawn.push(y)
 	assert.equal(drawn.length, 1, 'exactly one row is drawn')
 	assert.ok(drawn[0] > 0 && drawn[0] < height - 1, 'and it is not pinned to an edge')
+
+	// 1 either side of a value this large is the same number, which left no band to draw in
+	const large: [string, Record<string, unknown>][] = [
+		['1e17', { samples: [1e17, 1e17, 1e17] }],
+		['-1e17', { samples: [-1e17, -1e17] }],
+		['2^53', { samples: [2 ** 53, 2 ** 53] }],
+		['a uint64 none value', { samples: [Number('18446744073709551615'), Number('18446744073709551615')] }],
+		['a fixed scale of one value', { samples: [1e17, 1e17], min: 1e17, max: 1e17 }],
+	]
+	for (const [what, options] of large) {
+		const flat = sparkline.drawSparkline({ width, height, line: [0, 255, 0], ...options })
+		const rows = []
+		for (let y = 0; y < height; y++) if (pixel(flat, width, width - 1, y)[3] === 255) rows.push(y)
+		assert.equal(rows.length, 1, `${what}: one row is drawn`)
+		assert.ok(rows[0] > 0 && rows[0] < height - 1, `${what}: not pinned to an edge (row ${rows[0]})`)
+	}
 })
 
 test('a gap in the values breaks the line instead of inventing one', () => {

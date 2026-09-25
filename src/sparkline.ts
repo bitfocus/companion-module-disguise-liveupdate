@@ -51,10 +51,12 @@ export function drawSparkline(options: SparklineOptions): Uint8Array {
 		high = Math.max(high, options.threshold)
 	}
 	if (!(high > low)) {
-		// a flat line still deserves to be visible: give it a band around the value
+		// a flat line still deserves to be visible: give it a band around the value, wide enough to
+		// survive the rounding of a large one (1 either side of 1e17 is the same number)
 		const centre = high
-		low = centre - 1
-		high = centre + 1
+		const pad = Math.max(1, Math.abs(centre) * 1e-9)
+		low = centre - pad
+		high = centre + pad
 	}
 
 	const plot = (x: number, y: number, colour: [number, number, number], alpha = 255): void => {
@@ -66,9 +68,10 @@ export function drawSparkline(options: SparklineOptions): Uint8Array {
 		buffer[index + 3] = alpha
 	}
 
-	/** The row of a value, not yet rounded, kept inside the image */
+	/** The row of a value, not yet rounded, kept inside the image; the middle when the range has no width */
 	const rowOf = (value: number): number => {
-		const ratio = (value - low) / (high - low)
+		const span = high - low
+		const ratio = span > 0 && Number.isFinite(span) ? (value - low) / span : 0.5
 		return Math.min(height - 1, Math.max(0, (1 - ratio) * (height - 1)))
 	}
 
