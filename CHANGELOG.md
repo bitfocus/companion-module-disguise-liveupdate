@@ -129,7 +129,10 @@
     back. The value, time and play / stop steps fail when the effect does not show; the section, note
     and next / previous track jumps and RenderStream sync layers record what the Director showed and
     pass once accepted. It needs a stopped transport unless `--force` is given, never sends a
-    failover command, and a final sweep reports anything it could not put back.
+    failover command, and a final sweep reports anything it could not put back. An interrupt or a
+    crash ends the run the same way (queued restores, sweep, comparison with the start, resume, exit
+    1), a value the Director refused to change is never reported as one to set back, and an unknown
+    `--group` is a usage error.
 - Live verification on Designer r34.0.3 (2026-09-04, two read-only passes): 280 of the 310
   default presets confirmed with a value; every catalog row carries its live result
   (`docs/PRESET_CATALOG.md`, column *live*). 103 experimental presets that returned a value

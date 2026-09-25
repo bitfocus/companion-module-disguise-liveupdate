@@ -233,22 +233,28 @@ read. A value that did not come back prints `SET THIS BACK BY HAND: ...` and the
 lets the step in flight restore and stops before the next write, and a run that could not read the
 values writes no results file.
 
-`rest-command-verify.mjs` sends the REST commands to the Director. Every step reads the state first
-and puts it back afterwards, and a step that is interrupted still restores. The brightness, volume,
-speed, engaged, time, timecode, return-to-start and play / stop steps fail when the read-back does not
-show the command's effect. The section and note jumps, next / previous track and `synclayers` record
-what the Director showed and pass once the command was accepted (a set list with one track cannot
-change track); go to track selects the track that is already current and fails if the track changes.
-It never sends a failover command, and of the RenderStream commands only `synclayers`: starting or
-stopping a workload is not undone by a second command. It needs a stopped transport: `--yes` is
-refused while the play mode is not Stop or cannot be read, unless `--force` is given. With `--force`,
-once the final sweep has put track, time, brightness, volume, speed and engaged back, the script
-resumes the original play mode from the start position (`/transport/play`, `/transport/playsection`
-or `/transport/playloopsection`). A refused or failed restore fails its step. The final sweep compares
-track, brightness, volume, speed, engaged, playhead time and play mode with the start; any difference
-prints `!! SET THIS BACK BY HAND: field = wanted (the Director reports seen); ...`, adds a failed
-`restore` entry to the results file and makes the run exit 1. The results record the host as
-192.0.2.10 and the Designer version given with `--designer` (default `r34.0.3`).
+`rest-command-verify.mjs` sends the REST commands to the Director. It reads the state first and puts
+back what the steps change: a value step restores its value itself, the playhead goes home once after
+the jumps and a track change is undone at the end. The brightness, volume, speed, engaged, time,
+timecode, return-to-start and play / stop steps fail when the read-back does not show the command's
+effect. The section and note jumps, next / previous track and `synclayers` record what the Director
+showed and pass once the command was accepted (a set list with one track cannot change track); go to
+track selects the track that is already current and fails if the track changes. It never sends a
+failover command, and of the RenderStream commands only `synclayers`: starting or stopping a workload
+is not undone by a second command. `--group` is `transport` (the default), `renderstream` or `all`;
+any other value is a usage error. It needs a stopped transport: `--yes` is refused while the play mode
+is not Stop or cannot be read, unless `--force` is given. With `--force`, once the final sweep has put
+track, time, brightness, volume, speed and engaged back, the script resumes the original play mode
+from the start position (`/transport/play`, `/transport/playsection` or `/transport/playloopsection`).
+A refused or failed restore fails its step; a command the Director refuses (speed, while transport
+speed control is off in Designer) changed nothing and leaves nothing to put back. The final sweep
+compares track, brightness, volume, speed, engaged, playhead time and play mode with the start; any
+difference prints `!! SET THIS BACK BY HAND: field = wanted (the Director reports seen); ...`, adds a
+failed `restore` entry to the results file and makes the run exit 1. An interrupt (Ctrl+C, SIGTERM)
+or a crash after the first command stops the steps and ends the run the same way, with a failed `run`
+entry: the queued restores, the final sweep, its comparison and resume, the results file, exit 1. A
+second interrupt leaves at once and prints every field the sweep had not confirmed yet. The results
+record the host as 192.0.2.10 and the Designer version given with `--designer` (default `r34.0.3`).
 `docs/research/rest-verification.json` is the scrubbed result of the 2026-09-04 run on r34.0.3.
 
 The script builds its own request bodies: it addresses the transport by uid and name as the Director

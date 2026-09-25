@@ -481,6 +481,89 @@ test('the restore sweep is compared with the start and every difference is named
 	assert.match(source, /handRestoreLine\(unrestored\)/)
 })
 
+test('an interrupted rest-command-verify ends like a normal run once a command has gone out', () => {
+	const act = (o: Record<string, boolean>): string =>
+		safety.interruptAction({ sending: false, settling: false, halted: false, ...o })
+	assert.equal(act({}), 'exit', 'nothing was sent: nothing to put back')
+	assert.equal(act({ sending: true }), 'sweep')
+	assert.equal(act({ sending: true, settling: true }), 'wait', "main's own sweep is running and reports")
+	assert.equal(act({ sending: true, halted: true }), 'force', 'a second interrupt leaves at once')
+	assert.equal(act({ sending: true, settling: true, halted: true }), 'force')
+
+	// leaving before the sweep confirmed anything names every field, less the ones the Director refused
+	const origin = {
+		playmode: 'Play',
+		track: { uid: '0x0123456789abcdef', name: 'Track 1' },
+		brightness: 0.5,
+		volume: 1,
+		speed: 1,
+		engaged: true,
+		time: 12,
+	}
+	assert.deepEqual(
+		safety.unsweptFields(origin, ['speed']).map((i: any) => i.field),
+		['track', 'brightness', 'volume', 'engaged', 'time', 'playmode'],
+	)
+	assert.match(safety.handRestoreLine(safety.unsweptFields(origin)), /playmode = "Play"/)
+
+	const source = readFileSync(path.join(ROOT, 'scripts', 'rest-command-verify.mjs'), 'utf8')
+	const bail = source.slice(source.indexOf('async function bail('), source.indexOf('async function get('))
+	assert.match(bail, /interruptAction\(\{ sending, settling, halted \}\)/)
+	assert.ok(
+		bail.indexOf('await runRestores()') < bail.indexOf('settleBack(origin)') &&
+			bail.indexOf('settleBack(origin)') < bail.indexOf('report(unrestored)'),
+		'the interrupt must run the restores, the sweep with its comparison and resume, then the report',
+	)
+	assert.match(bail, /handRestoreLine\(unsweptFields\(origin, unchanged\)\)/)
+	// main hands the end of the run to the interrupt, and sends nothing after it
+	assert.match(source, /if \(!halted\) \{\s*settling = true/)
+	assert.match(source, /async function step\(id, summary, run\) \{\s*if \(halted \|\|/)
+	assert.match(source, /async function popRestore\(entry\) \{[^}]*if \(halted\) return/)
+	const steps = source.slice(source.indexOf('// --- the steps'), source.indexOf('// --- plumbing'))
+	assert.ok(!steps.includes('await post('), 'a step sends through post(), which an interrupt does not stop')
+	// the track restore is queued before the jump, so no interrupt can fall between the two
+	assert.ok(
+		steps.indexOf("pushRestore('/transport/gototrack'") < steps.indexOf('await send(path, withTransport'),
+		'the gototrack restore is queued after the next / previous track jump',
+	)
+})
+
+test('a probe the Director refused leaves no restore behind, a probe that may have landed does', () => {
+	const refused = new Error('/transport/speed refused (1000): Transport speed control is disabled.')
+	const other = { path: '/transport/gototime' }
+	const speed = { path: '/transport/speed' }
+	const restores = [other, speed]
+	assert.equal(safety.dropRefusedProbe(restores, speed, refused), true)
+	assert.deepEqual(restores, [other], 'the refused probe changed nothing, so its restore is not sent')
+
+	// no answer, or an HTTP error: the probe may have been applied, so the restore stays queued
+	for (const error of [new Error('fetch failed'), new Error('POST /transport/speed -> 500 ')]) {
+		const queue = [other, speed]
+		assert.equal(safety.dropRefusedProbe(queue, speed, error), false)
+		assert.deepEqual(queue, [other, speed])
+	}
+
+	const source = readFileSync(path.join(ROOT, 'scripts', 'rest-command-verify.mjs'), 'utf8')
+	assert.match(source, /if \(dropRefusedProbe\(restores, restore, error\)\) unchanged\.push\(field\)/)
+	assert.match(source, /await sendProbe\(field, restore, `\/transport\/\$\{field\}`/)
+	assert.match(source, /await sendProbe\('engaged', restore, '\/transport\/engaged'/)
+})
+
+test('rest-command-verify refuses an unknown --group before it talks to the Director', () => {
+	const groups = ['transport', 'renderstream', 'all']
+	assert.equal(safety.groupProblem('transport', groups), null)
+	assert.equal(safety.groupProblem('all', groups), null)
+	assert.match(safety.groupProblem('renderstrem', groups) ?? '', /unknown --group renderstrem/)
+	// a bare --group is parsed as true
+	assert.match(safety.groupProblem(String(true), groups) ?? '', /unknown --group true/)
+
+	const source = readFileSync(path.join(ROOT, 'scripts', 'rest-command-verify.mjs'), 'utf8')
+	const check = source.indexOf("groupProblem(group, ['transport', 'renderstream', 'all'])")
+	assert.ok(check >= 0, 'the group is not checked')
+	assert.ok(check < source.indexOf('await main()'), 'the group must be checked before the first request')
+	assert.match(source.slice(check, source.indexOf('await main()')), /process\.exit\(2\)/)
+})
+
 // ---------- gen-help.mjs ----------
 
 test('HELP renders angle-bracket placeholders literally', () => {

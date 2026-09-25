@@ -9,6 +9,16 @@
 
 const path = require('node:path')
 
+// ---------- arguments ----------
+
+/**
+ * The usage error for a --group that is not one of `groups`, or null. A typo must not run another
+ * group than the one asked for, and a bare --group (parsed as true) names none.
+ */
+function groupProblem(group, groups) {
+	return groups.includes(group) ? null : `unknown --group ${group}; use ${groups.join(', ')}`
+}
+
 // ---------- output files ----------
 
 /** Raw output goes here unless --out says otherwise; the folder is in .gitignore */
@@ -199,7 +209,45 @@ function handRestoreLine(items) {
 	return `SET THIS BACK BY HAND: ${text.join('; ')}`
 }
 
+/**
+ * A probe the Director refused ("refused (N)", a non-zero status.code) changed nothing, so its restore
+ * comes off the queue unsent: sent later it is refused as well (speed while transport speed control is
+ * off) and would read as a failed restore. Any other error leaves the restore queued, because the probe
+ * may have been applied with its answer lost. Returns whether the restore was taken off.
+ */
+function dropRefusedProbe(restores, entry, error) {
+	if (stepStatus(error) !== 'refused') return false
+	const at = restores.lastIndexOf(entry)
+	if (at >= 0) restores.splice(at, 1)
+	return at >= 0
+}
+
+/**
+ * What an interrupt (a signal, or a crash) does, from where the run is: 'exit' when no command has been
+ * sent, 'sweep' to stop the steps and end like a normal run (queued restores, sweep, comparison with
+ * the start, resume), 'wait' when the run's own sweep is already under way and will report, and
+ * 'force' for a second interrupt, which leaves at once.
+ */
+function interruptAction({ sending, settling, halted }) {
+	if (!sending) return 'exit'
+	if (halted) return 'force'
+	return settling ? 'wait' : 'sweep'
+}
+
+/**
+ * The hand-restore items of a run that left before its sweep could compare anything: every field the
+ * sweep checks, and the playmode. `unchanged` are the fields the Director refused to change, which the
+ * run never moved.
+ */
+function unsweptFields(origin, unchanged = []) {
+	return [
+		...restoreMismatches(origin, undefined, undefined),
+		{ field: 'playmode', wanted: origin.playmode, seen: undefined },
+	].filter((i) => !unchanged.includes(i.field))
+}
+
 module.exports = {
+	groupProblem,
 	LIVE_DIR,
 	liveOutFile,
 	siteDataReminder,
@@ -216,4 +264,7 @@ module.exports = {
 	stepStatus,
 	restoreMismatches,
 	handRestoreLine,
+	dropRefusedProbe,
+	interruptAction,
+	unsweptFields,
 }
