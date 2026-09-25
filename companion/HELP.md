@@ -194,8 +194,12 @@ a property are checked once, so every count is of distinct properties:
 
 Template rows and rows without a path (the connection indicator) are not counted. A property a placed
 button already holds is read from that button, without a subscription of its own, so the check does
-not touch the subscriptions your buttons hold. Run it when you arrive on site: it tells you which
-presets work with this Designer build and this show file.
+not touch the subscriptions your buttons hold; a button removed while the check waits for its value
+leaves the property to the check, which still gets the answer. A button placed on a property the check
+is reading asks for it once the Director has answered the check's request, also when the check stopped
+waiting for it (at most the *Pending Subscription Timeout* later), so the property keeps one Director
+subscription. Run it when you arrive on site: it tells you which presets work with this Designer build
+and this show file.
 
 ## Designer version
 

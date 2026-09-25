@@ -231,6 +231,11 @@ interface Probe {
 	sent: boolean
 	/** The id the Director confirmed for the probe's own subscribe */
 	id?: number
+	/**
+	 * When the read ran out of time before the Director confirmed its own subscribe. Its callers have
+	 * their answer; the probe stays until that subscribe is answered (see timeoutProbe).
+	 */
+	abandonedAt?: number
 }
 
 interface ArmedCommand {
@@ -959,11 +964,17 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			const running = this.probes.get(key)
 			if (running) {
 				running.resolvers.push(resolve)
+				if (running.abandonedAt !== undefined) {
+					// a read that ran out of time still waits for its subscribe: this one gets its own time
+					running.abandonedAt = undefined
+					running.timer = setTimeout(() => this.timeoutProbe(key), timeoutMs)
+					if (typeof running.timer.unref === 'function') running.timer.unref()
+				}
 				return
 			}
 			// held without a value yet, or on its way for a feedback: wait for that feedback's value
 			const sent = !held && !this.pendingSubscriptions.has(key)
-			const timer = setTimeout(() => this.finishProbe(key, undefined), timeoutMs)
+			const timer = setTimeout(() => this.timeoutProbe(key), timeoutMs)
 			if (typeof timer.unref === 'function') timer.unref()
 			this.probes.set(key, { objectPath, propertyPath, resolvers: [resolve], timer, sent })
 			if (sent) {
@@ -1004,6 +1015,26 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				pending.timestamp = Date.now()
 			}
 		}
+	}
+
+	/**
+	 * A one-shot read ran out of time: its callers get no value. When the Director has not confirmed
+	 * the probe's own subscribe yet, the probe stays until it does: released now, that late
+	 * confirmation would be taken for the request of a button that waits for the pair, and the
+	 * button's own frame would add a second reference that nothing releases. The confirmation, an
+	 * error or the Pending Subscription Timeout ends it (see handleSubscriptionsUpdate).
+	 */
+	private timeoutProbe(key: string): void {
+		const probe = this.probes.get(key)
+		if (!probe) return
+		if (!probe.sent || probe.id !== undefined) {
+			this.finishProbe(key, undefined)
+			return
+		}
+		const resolvers = probe.resolvers
+		probe.resolvers = []
+		probe.abandonedAt = Date.now()
+		for (const resolve of resolvers) resolve(undefined)
 	}
 
 	/** Answer a probe that waits for a feedback's value on this pair */
@@ -1385,11 +1416,24 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			return
 		}
 
-		this.log('info', `Unsubscribing from ${subscription?.objectPath}.${subscription?.propertyPath}`)
-		this.send({ unsubscribe: { id: subscriptionId } })
+		// A one-shot read waits for this subscription's first value: it takes the Director reference
+		// over and releases it once, when the value arrives or its time runs out, instead of being left
+		// to answer 'no value' for a property the Director holds.
+		const waiting = subscription && this.probes.get(pairKey(subscription.objectPath, subscription.propertyPath))
+		if (waiting && !waiting.sent) {
+			this.log(
+				'debug',
+				`The one-shot read of ${waiting.objectPath}.${waiting.propertyPath} takes over ${subscriptionId}`,
+			)
+			waiting.sent = true
+			waiting.id = subscriptionId
+		} else {
+			this.log('info', `Unsubscribing from ${subscription?.objectPath}.${subscription?.propertyPath}`)
+			this.send({ unsubscribe: { id: subscriptionId } })
+			this.releasedSubscriptionIds.set(subscriptionId, Date.now())
+		}
 
 		this.subscriptions.delete(subscriptionId)
-		this.releasedSubscriptionIds.set(subscriptionId, Date.now())
 		this.updateVariableDefinitions()
 		this.recheckStateOf(subscription?.variableName)
 	}
@@ -1896,18 +1940,33 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			// A probe's own subscribe is tracked by its pair, whichever branch below the id ends up in;
 			// an id the module has just released is the echo of an earlier subscription, not the probe's
 			const probe = this.probes.get(key)
-			if (probe?.sent && probe.id === undefined && !this.releasedSubscriptionIds.has(sub.id)) probe.id = sub.id
+			if (probe?.sent && probe.id === undefined && !this.releasedSubscriptionIds.has(sub.id)) {
+				probe.id = sub.id
+				if (probe.abandonedAt !== undefined) {
+					// The late answer to a read that ran out of time: its reference is released now, and a
+					// button that waits for the pair sends a request of its own at its own rate.
+					this.log('debug', `Releasing subscription ${sub.id} of a one-shot read that ran out of time`)
+					this.finishProbe(key, undefined)
+					continue
+				}
+			}
 
 			// only a request that has left can be answered; an earlier listing of the pair is an echo
 			if (pending?.sent) {
 				this.pendingSubscriptions.delete(key)
 
 				if (pending.feedbackIds.size === 0) {
-					// Everybody lost interest while the request was in flight: release it again
+					// Everybody lost interest while the request was in flight. A one-shot read that waits
+					// for the pair takes the reference over and releases it once it has its value;
+					// otherwise it is released again at once.
+					if (probe && !probe.sent) {
+						probe.sent = true
+						probe.id = sub.id
+						continue
+					}
 					this.log('debug', `Releasing subscription ${sub.id} nobody is waiting for any more`)
 					this.send({ unsubscribe: { id: sub.id } })
 					this.releasedSubscriptionIds.set(sub.id, Date.now())
-					this.settleWaitingProbe(key, undefined)
 					continue
 				}
 
@@ -2148,6 +2207,14 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	private cleanupPendingSubscriptions(): void {
 		const now = Date.now()
 		const timeout = this.config.pendingSubscriptionTimeout ?? 30000
+
+		// A read that ran out of time holds a button's request back until the Director answers its own
+		// subscribe; a Director that never does must not hold the button for good.
+		for (const [key, probe] of [...this.probes.entries()]) {
+			if (probe.abandonedAt === undefined || now - probe.abandonedAt <= timeout) continue
+			this.log('warn', `No answer to the one-shot read of ${probe.objectPath}.${probe.propertyPath}; giving up on it`)
+			this.finishProbe(key, undefined)
+		}
 
 		for (const [key, pending] of [...this.pendingSubscriptions.entries()]) {
 			// a request held back for a one-shot read goes out when the read ends, which has its own timeout

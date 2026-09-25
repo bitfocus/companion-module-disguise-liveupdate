@@ -1061,6 +1061,87 @@ test('a button placed while a one-shot read holds its pair waits for it and keep
 	await inst.destroy()
 })
 
+/** Subscribe frames for Track 1 at the 250 ms of the button in the tests below (a one-shot read asks at 1000) */
+const buttonFrames = (director: FakeDirector): number =>
+	director.received.filter((m) => m.subscribe?.object === TRACK && m.subscribe.configuration?.updateFrequencyMs === 250)
+		.length
+
+test('a one-shot read that runs out of time before the Director answers holds the button back until it does', async () => {
+	const director = new FakeDirector({ refCount: true, valueFor: () => 3 })
+	const { inst, host } = await newInstance(director)
+	director.hold()
+	const read = inst.probeValue(TRACK, 'object.lengthInBeats', 50)
+	inst.updateFeedbacks({ a: liveUpdateFeedback('a', TRACK, 'object.lengthInBeats', 'len', 250) })
+	assert.equal(await read, undefined, 'the read runs out of time')
+	await settle()
+	assert.equal(buttonFrames(director), 0, "the button's request waits for the answer to the read's")
+	director.release()
+	await settle(80)
+	assert.equal(director.refs(TRACK, 'object.lengthInBeats'), 1, 'one reference, the button')
+	assert.deepEqual(
+		director.subs.map((s) => s.updateFrequencyMs),
+		[250],
+		"at the button's rate",
+	)
+	assert.equal(inst.getSubscriptionByVariableName('len').updateFrequencyMs, 250)
+	assert.equal(host.variables.get('len'), 3)
+	inst.updateFeedbacks({ a: null })
+	await settle(50)
+	assert.equal(director.refs(TRACK, 'object.lengthInBeats'), 0, 'removing the button leaves nothing behind')
+	await inst.destroy()
+})
+
+test('a one-shot read the Director never answers holds a button back no longer than the pending timeout', async () => {
+	const director = new FakeDirector({ refCount: true, valueFor: () => 3 })
+	const { inst } = await newInstance(director, [], { pendingSubscriptionTimeout: 200 })
+	director.hold()
+	const read = inst.probeValue(TRACK, 'object.lengthInBeats', 50)
+	inst.updateFeedbacks({ a: liveUpdateFeedback('a', TRACK, 'object.lengthInBeats', 'len', 250) })
+	assert.equal(await read, undefined)
+	await settle()
+	assert.equal(buttonFrames(director), 0)
+	assert.ok(
+		await until(() => buttonFrames(director) === 1, 2000),
+		"the button's request goes out once the read is given up",
+	)
+	await inst.destroy()
+})
+
+test('a one-shot read that waits for a button gets its value when the button leaves first', async () => {
+	// the button's request is still on its way when it is removed
+	let director = new FakeDirector({ refCount: true, valueFor: () => 3 })
+	let { inst } = await newInstance(director)
+	director.hold()
+	inst.updateFeedbacks({ a: liveUpdateFeedback('a', TRACK, 'object.lengthInBeats', 'len') })
+	await settle()
+	let read = inst.probeValue(TRACK, 'object.lengthInBeats', 3000)
+	inst.updateFeedbacks({ a: null })
+	await settle()
+	director.release()
+	assert.equal(await read, 3, 'the Director accepted the request: its value is the answer')
+	await settle(50)
+	assert.equal(director.refs(TRACK, 'object.lengthInBeats'), 0)
+	assert.equal(director.count('unsubscribe'), 1, 'released once')
+	await inst.destroy()
+
+	// the button's subscription is confirmed and has no value yet when it is removed
+	director = new FakeDirector({ refCount: true })
+	;({ inst } = await newInstance(director, [liveUpdateFeedback('a', TRACK, 'object.lengthInBeats', 'len')]))
+	await settle(50)
+	const id = director.subs[0].id
+	const started = Date.now()
+	read = inst.probeValue(TRACK, 'object.lengthInBeats', 1500)
+	inst.updateFeedbacks({ a: null })
+	await settle()
+	assert.equal(director.refs(TRACK, 'object.lengthInBeats'), 1, 'the read holds the reference now')
+	director.pushValue(id, 7)
+	assert.equal(await read, 7)
+	assert.ok(Date.now() - started < 1000, 'answered by the value, not by the timeout')
+	await settle(50)
+	assert.equal(director.refs(TRACK, 'object.lengthInBeats'), 0, 'and released after it')
+	await inst.destroy()
+})
+
 test('a refused one-shot read is never blamed on a button request in flight', async () => {
 	const forms = [
 		(o: string, p: string) => `Unable to subscribe to ${o} / ${p} - Name 'Missing' not found`,
