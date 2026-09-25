@@ -9,6 +9,7 @@ import {
 	destroyInstances,
 	FakeDirector,
 	type FeedbackInstance,
+	type HostRecord,
 	liveUpdateFeedback,
 	loadDist,
 	newInstance,
@@ -462,49 +463,83 @@ test('an error that names no path fails the only request in flight', async () =>
 	await inst.destroy()
 })
 
-test('a nudge does not write before the first value has arrived', async () => {
-	// the subscription is confirmed but the Director has not sent a value yet
-	const director = new FakeDirector({ valueFor: () => undefined })
+/**
+ * What Companion 5.0.4 hands an action: it substitutes every variable in a text option before the
+ * callback runs, '' for a defined variable that holds no value and $NA for a name that is not defined
+ */
+function hostParsed(host: HostRecord, text: string): string {
+	return text.replace(/\$\([^:)]+:([^)]+)\)/g, (_match, name: string) => {
+		// the module writes primitives into its variables (objects arrive as JSON text)
+		const value = host.variables.get(name) as string | number | boolean | null | undefined
+		return host.definedVariables.has(name) ? String(value ?? '') : '$NA'
+	})
+}
+
+/** The action context once Companion has parsed the options: nothing is left to substitute */
+const parsedContext = { parseVariablesInString: async (text: string) => text }
+
+/** Values of the set frames the Director received, in order */
+const setValues = (director: FakeDirector): unknown[] =>
+	director.received.filter((m: { set?: unknown }) => m.set).map((m: { set: { value: unknown }[] }) => m.set[0].value)
+
+test('a step typed into Set to Disguise (Number) is not written as an absolute value while the readout is empty', async () => {
+	// the Director sends None for the property: the readout holds '' and Companion hands over '-0.05'
+	const director = new FakeDirector({ valueFor: () => null })
 	const { inst, host } = await newInstance(director, [
 		liveUpdateFeedback('n', 'transportManager:default', 'object.brightness', 'brightness'),
 	])
 	await settle(50)
+	assert.equal(host.variables.get('brightness'), '')
 	const actions = dist.getActionDefinitions(inst)
-	const context = { parseVariablesInString: async (text: string) => text.replace('$(liveupdate:brightness)', '') }
-	await actions.setToDisguiseNumber.callback(
-		{ options: { variableName: 'brightness', value: '$(liveupdate:brightness)-0.05' } },
-		context,
-	)
+	for (const template of ['$(liveupdate:brightness)-0.05', '$(liveupdate:brightness)+0.05']) {
+		const value = hostParsed(host, template)
+		assert.ok(!value.includes('$('), 'the action never sees the reference')
+		await actions.setToDisguiseNumber.callback({ options: { variableName: 'brightness', value } }, parsedContext)
+	}
 	assert.equal(director.count('set'), 0, 'no absolute value is written')
-	assert.ok(host.logs.some((l) => l.message.includes('has no numeric value yet')))
+	assert.equal(host.logs.filter((l) => l.message.includes('has no numeric value yet')).length, 2)
 	await inst.destroy()
 })
 
-test('the nudge guard knows the connection by its own label and hyphenated names', async () => {
-	// Companion rewrites the label of an imported preset: a second connection is liveupdate_2
+test('the Number guard reads the property, not a reference: any label, hyphens and dots', async () => {
+	// Companion rewrites the label of an imported preset (a second connection is liveupdate_2), and the
+	// reference is gone by the time the action runs anyway
 	const director = new FakeDirector({ valueFor: () => undefined })
 	const { inst, host } = await newInstance(director, [
 		liveUpdateFeedback('n', 'transportManager:default', 'object.brightness', 'brightness'),
 		liveUpdateFeedback('v', 'transportManager:default', 'object.volume', 'master-volume'),
+		liveUpdateFeedback('d', TRACK, 'object.tc_adjust', 'track.tcAdjust'),
 	])
 	inst.label = 'liveupdate_2'
 	await settle(50)
+	assert.equal(host.variables.get('brightness'), 'PENDING', 'confirmed, no value yet')
 	const actions = dist.getActionDefinitions(inst)
-	// the host substitutes an empty string for a variable it has no value for
-	const context = { parseVariablesInString: async (text: string) => text.replace(/\$\([^)]*\)/g, '') }
+	// a readout that waits for its value shows PENDING, which does not evaluate; one that was empty a
+	// moment before, or a host that substitutes '', leaves the bare step
 	for (const [variableName, value] of [
-		['brightness', '$(liveupdate_2:brightness)-0.05'],
-		['brightness', '$(liveupdate_2:brightness)+0.05'],
-		['master-volume', '$(liveupdate_2:master-volume)-0.05'],
+		['brightness', hostParsed(host, '$(liveupdate_2:brightness)-0.05')],
+		['brightness', '-0.05'],
+		['brightness', '+0.05'],
+		['master-volume', '-0.05'],
+		['track.tcAdjust', ' - 0.1'],
 	]) {
-		await actions.setToDisguiseNumber.callback({ options: { variableName, value } }, context)
+		await actions.setToDisguiseNumber.callback({ options: { variableName, value } }, parsedContext)
 	}
-	assert.equal(director.count('set'), 0, 'no nudge is sent as an absolute value')
-	assert.equal(host.logs.filter((l) => l.message.includes('has no numeric value yet')).length, 3)
+	assert.equal(director.count('set'), 0, 'no step is sent as an absolute value')
+	assert.ok(host.logs.some((l) => l.message.includes('Could not evaluate expression: PENDING-0.05')))
+	assert.equal(host.logs.filter((l) => l.message.includes('has no numeric value yet')).length, 4)
 
 	// a plain value needs no current value and is written
-	await actions.setToDisguiseNumber.callback({ options: { variableName: 'brightness', value: '0.5' } }, context)
+	await actions.setToDisguiseNumber.callback({ options: { variableName: 'brightness', value: '0.5' } }, parsedContext)
 	assert.equal(director.count('set'), 1, 'a plain value is still written')
+	// once the property has a number, a leading sign is an ordinary negative value
+	director.pushValueForPair('transportManager:default', 'object.volume', 0.8)
+	await settle()
+	await actions.setToDisguiseNumber.callback(
+		{ options: { variableName: 'master-volume', value: '-0.5' } },
+		parsedContext,
+	)
+	assert.deepEqual(setValues(director), [0.5, -0.5])
 	await inst.destroy()
 })
 
@@ -533,7 +568,7 @@ test('names 1.0.2 accepted still subscribe: hyphens and a leading digit', async 
 	await inst.destroy()
 })
 
-test('a dotted variable name subscribes and the nudge guard knows it', async () => {
+test('a dotted variable name subscribes, and a nudge on it waits for its number', async () => {
 	// Companion 5.0.4 defines a variable id with '.' and 1.0.2 sent any name, so a saved name keeps working
 	const director = new FakeDirector({ valueFor: () => 42 })
 	const { inst, host } = await newInstance(director, [
@@ -545,21 +580,184 @@ test('a dotted variable name subscribes and the nudge guard knows it', async () 
 	assert.ok(!host.logs.some((l) => l.message.includes('is not a valid Companion variable id')))
 	await inst.destroy()
 
-	// the subscription is confirmed but no value has arrived yet: a nudge must not be sent as an absolute value
+	// the subscription is confirmed but no value has arrived yet
 	const silent = new FakeDirector({ valueFor: () => undefined })
 	const second = await newInstance(silent, [
 		liveUpdateFeedback('v', 'transportManager:default', 'object.volume', 'master.volume'),
 	])
 	await settle(50)
 	const actions = dist.getActionDefinitions(second.inst)
-	const context = { parseVariablesInString: async (text: string) => text.replace(/\$\([^)]*\)/g, '') }
-	await actions.setToDisguiseNumber.callback(
-		{ options: { variableName: 'master.volume', value: '$(liveupdate:master.volume)-0.05' } },
-		context,
+	await actions.nudgeDisguiseNumber.callback(
+		{ options: { variableName: 'master.volume', delta: '-0.05', min: '0', max: '1' } },
+		parsedContext,
 	)
-	assert.equal(silent.count('set'), 0, 'no nudge is sent as an absolute value')
+	assert.equal(silent.count('set'), 0, 'no nudge without a value to add the step to')
 	assert.ok(second.host.logs.some((l) => l.message.includes("'master.volume' has no numeric value yet")))
 	await second.inst.destroy()
+})
+
+/** Press Nudge Disguise Number on one variable, the way a button does */
+function nudger(inst: any, variableName: string) {
+	const actions = dist.getActionDefinitions(inst)
+	return async (delta: string, min = '', max = ''): Promise<void> =>
+		actions.nudgeDisguiseNumber.callback({ options: { variableName, delta, min, max } }, parsedContext)
+}
+
+test('Nudge Disguise Number writes nothing while the property holds no number, with one warning a press', async () => {
+	const director = new FakeDirector({
+		valueFor: (_objectPath, propertyPath) =>
+			propertyPath === 'object.volume' ? null : propertyPath === 'object.description' ? 'Track 1' : undefined,
+		errorValueFor: (_objectPath, propertyPath) =>
+			propertyPath === 'object.broken' ? { errorType: 'AttributeError', message: "no attribute 'broken'" } : undefined,
+	})
+	const { inst, host } = await newInstance(director, [
+		// confirmed, no value yet (PENDING)
+		liveUpdateFeedback('b', 'transportManager:default', 'object.brightness', 'brightness'),
+		// the Director sent None (an empty readout)
+		liveUpdateFeedback('v', 'transportManager:default', 'object.volume', 'volume'),
+		// a text, not a number
+		liveUpdateFeedback('s', TRACK, 'object.description', 'trackName'),
+		// the property path fails (PATH_ERROR)
+		liveUpdateFeedback('e', TRACK, 'object.broken', 'broken'),
+	])
+	await settle(50)
+	assert.equal(host.variables.get('broken'), 'PATH_ERROR')
+	for (const variableName of ['brightness', 'volume', 'trackName', 'broken']) {
+		const before = host.logs.filter((l) => l.level === 'warn').length
+		await nudger(inst, variableName)('0.05', '0', '1')
+		const warnings = host.logs.filter((l) => l.level === 'warn').slice(before)
+		assert.equal(warnings.length, 1, `${variableName}: one warning`)
+		assert.ok(warnings[0].message.includes(`'${variableName}' has no numeric value yet`), warnings[0].message)
+	}
+	assert.equal(director.count('set'), 0)
+	await inst.destroy()
+})
+
+test('Nudge Disguise Number refuses a Step or a limit that is not a number, with one warning each', async () => {
+	const director = new FakeDirector({ valueFor: () => 0.5 })
+	const { inst, host } = await newInstance(director, [
+		liveUpdateFeedback('b', 'transportManager:default', 'object.brightness', 'brightness'),
+	])
+	await settle(50)
+	const nudge = nudger(inst, 'brightness')
+	for (const [delta, min, max, expected] of [
+		['', '', '', 'the Step for'],
+		['  ', '', '', 'the Step for'],
+		['abc', '', '', "is not a number: 'abc'"],
+		// a variable in the Step that is not defined
+		['$NA', '', '', "is not a number: '$NA'"],
+		['Infinity', '', '', "is not a number: 'Infinity'"],
+		['0.05', 'x', '', "the Minimum for 'brightness' is not a number"],
+		['0.05', '', '1,0', "the Maximum for 'brightness' is not a number"],
+		['0.05', '1', '0', 'is above the Maximum'],
+	]) {
+		const before = host.logs.filter((l) => l.level === 'warn').length
+		await nudge(delta, min, max)
+		const warnings = host.logs.filter((l) => l.level === 'warn').slice(before)
+		assert.equal(warnings.length, 1, `'${delta}' '${min}' '${max}': one warning`)
+		assert.ok(warnings[0].message.includes(expected), warnings[0].message)
+	}
+	assert.equal(director.count('set'), 0)
+	await inst.destroy()
+})
+
+test('Nudge Disguise Number adds its step to the current value and keeps the result within the limits', async () => {
+	const director = new FakeDirector({ valueFor: () => 0.1 })
+	const { inst, host } = await newInstance(director, [
+		liveUpdateFeedback('b', 'transportManager:default', 'object.brightness', 'brightness'),
+	])
+	await settle(50)
+	const nudge = nudger(inst, 'brightness')
+	// each press waits out the coalescing window and the Director's report
+	const press = async (delta: string, min = '', max = ''): Promise<void> => {
+		await nudge(delta, min, max)
+		await tick(60)
+		await settle()
+	}
+
+	await press('0.2')
+	assert.equal(host.variables.get('brightness'), 0.3, 'the step is added, without the binary noise of 0.1 + 0.2')
+	await press('+0.5')
+	await press('0.3', '0', '1')
+	assert.equal(host.variables.get('brightness'), 1, 'kept at the maximum')
+	await press('0.05', '0', '1')
+	await press('-2', '0', '1')
+	assert.equal(host.variables.get('brightness'), 0, 'kept at the minimum')
+	await press('-0.1', '0', '')
+	await press('-0.1', '', '')
+	assert.deepEqual(setValues(director), [0.3, 0.8, 1, 0, -0.1])
+	assert.ok(
+		host.logs.some((l) => l.level === 'debug' && l.message.includes("Nudge of 'brightness' stays at")),
+		'a nudge at a limit is not written: it would only add a step to the undo history',
+	)
+	await inst.destroy()
+})
+
+test('nudges inside the coalescing window add up from the last value sent', async () => {
+	const director = new FakeDirector({ valueFor: () => 0.5 })
+	const { inst, host } = await newInstance(director, [
+		liveUpdateFeedback('b', 'transportManager:default', 'object.brightness', 'brightness'),
+	])
+	await settle(50)
+	const nudge = nudger(inst, 'brightness')
+
+	// a rotary spin: five detents before the Director has reported anything
+	for (let i = 0; i < 5; i++) await nudge('0.05', '0', '1')
+	assert.deepEqual(setValues(director), [0.55], 'the first detent goes out at once')
+	await tick(100)
+	await settle()
+	assert.deepEqual(setValues(director), [0.55, 0.75], 'and the window sends the sum of all five, not 0.55 again')
+	assert.equal(host.variables.get('brightness'), 0.75)
+	await inst.destroy()
+})
+
+test('a nudge after the window builds on the value sent until the Director reports it', async () => {
+	const director = new FakeDirector({ valueFor: () => 0.5 })
+	const { inst } = await newInstance(director, [
+		liveUpdateFeedback('b', 'transportManager:default', 'object.brightness', 'brightness'),
+	])
+	await settle(50)
+	const id = director.subs.find((s) => s.propertyPath === 'object.brightness')!.id
+	// the Director reports a change once per update interval, much later than the coalescing window:
+	// its reports are held here and sent by hand
+	const report = director.pushValue.bind(director)
+	director.pushValue = () => {}
+	const nudge = nudger(inst, 'brightness')
+	const press = async (delta: string): Promise<void> => {
+		await nudge(delta)
+		await tick(60)
+	}
+	const reported = async (value: number): Promise<void> => {
+		report(id, value)
+		await settle()
+	}
+
+	await press('0.05')
+	await press('0.05')
+	assert.deepEqual(setValues(director), [0.55, 0.6], 'the second detent builds on 0.55, which is not reported yet')
+	// the report of the first write arrives after the second has left: the next step builds on 0.6
+	await reported(0.55)
+	await press('0.05')
+	// the report of the newest write: from here the Director's value counts again
+	await reported(0.65)
+	await press('0.05')
+	assert.deepEqual(setValues(director), [0.55, 0.6, 0.65, 0.7])
+
+	// a value the module did not write (changed in Designer, or clamped by it) counts at once
+	await reported(0.2)
+	await press('0.05')
+	assert.deepEqual(setValues(director).slice(-1), [0.25])
+
+	// no report for longer than the hold (a refused write): the Director's last value counts again
+	const realNow = Date.now
+	Date.now = () => realNow() + 60000
+	try {
+		await press('0.1')
+	} finally {
+		Date.now = realNow
+	}
+	assert.deepEqual(setValues(director).slice(-1), [0.3], 'built on the reported 0.2, not on the unconfirmed 0.25')
+	await inst.destroy()
 })
 
 test('setSelection treats an unresolved variable as a clear', async () => {

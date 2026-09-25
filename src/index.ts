@@ -53,6 +53,22 @@ const RELEASED_ID_GRACE_MS = 5000
  */
 const WRITE_COALESCE_MS = 40
 
+/**
+ * How long a number the module wrote stays the base of the next nudge while the Director has not
+ * reported it back, on top of the subscription's own update interval: the Director publishes a change
+ * at most once per interval (500 ms for the presets' State class). A rotary spin writes again long
+ * before that, and building on the Director's older value would lose the detents in between.
+ */
+const NUDGE_HOLD_MS = 1000
+
+/** The writes of one burst kept to recognise the Director's echoes of the earlier ones */
+const NUDGE_WRITES_KEPT = 64
+
+/** Two numbers the Director may have stored with less precision (a float32 property) */
+function sameNumber(a: number, b: number): boolean {
+	return Math.abs(a - b) <= 1e-6 * Math.max(1, Math.abs(a), Math.abs(b))
+}
+
 /** The Designer major version every catalog row was verified against */
 const CATALOG_DESIGNER_MAJOR = '34'
 
@@ -158,6 +174,11 @@ export interface LiveUpdateSubscription {
 	changeTimestamp?: number
 	messageTimestamp?: number
 	errorCount?: number
+	/**
+	 * The numbers the module has written since the Director last reported one of its own, newest last,
+	 * and when the newest was written: the base of the next nudge (see nudgeProperty)
+	 */
+	written?: { values: number[]; at: number }
 }
 
 /**
@@ -1303,10 +1324,12 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			return
 		}
 
-		if (!this.subscriptions.has(id)) {
+		const subscription = this.subscriptions.get(id)
+		if (!subscription) {
 			this.log('warn', `Subscription ID ${id} does not exist`)
 			return
 		}
+		this.noteWrite(subscription, value)
 
 		const waiting = this.pendingWrites.get(id)
 		if (waiting) {
@@ -1332,6 +1355,73 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		}
 		if (typeof entry.timer.unref === 'function') entry.timer.unref()
 		this.pendingWrites.set(id, entry)
+	}
+
+	/**
+	 * Add a step to the current value of a property and write the result, kept within min and max
+	 * (Nudge Disguise Number). The step is added here, not in a `$(liveupdate:x)+step` expression:
+	 * Companion substitutes the readout before the action runs, and an empty readout would leave the
+	 * step to be written as an absolute value. Nothing is written until the Director has sent a number.
+	 *
+	 * The base is the number the module wrote last while the Director has not reported it back (see
+	 * NUDGE_HOLD_MS), so the detents of a rotary spin add up, inside the coalescing window and after it.
+	 */
+	nudgeProperty(id: number, delta: number, min?: number, max?: number): void {
+		const subscription = this.subscriptions.get(id)
+		if (!subscription) {
+			this.log('warn', `Subscription ID ${id} does not exist`)
+			return
+		}
+
+		const current = subscription.value
+		if (typeof current !== 'number' || !Number.isFinite(current)) {
+			this.log(
+				'warn',
+				`Not writing: '${subscription.variableName}' has no numeric value yet (${JSON.stringify(current)}), so there is nothing to nudge`,
+			)
+			return
+		}
+
+		const written = subscription.written
+		const holding =
+			written !== undefined && Date.now() - written.at < NUDGE_HOLD_MS + (subscription.updateFrequencyMs ?? 0)
+		const base = holding ? written.values[written.values.length - 1] : current
+
+		// toPrecision drops the binary noise of the sum (0.1 + 0.2 is 0.30000000000000004), which a readout would show
+		let next = Number((base + delta).toPrecision(15))
+		if (min !== undefined) next = Math.max(min, next)
+		if (max !== undefined) next = Math.min(max, next)
+		if (next === base) {
+			// at a limit already: a write would change nothing but still add a step to Designer's undo history
+			this.log('debug', `Nudge of '${subscription.variableName}' stays at ${base}`)
+			return
+		}
+
+		this.setProperty(id, next)
+	}
+
+	/** Remember a number written to a property: the next nudge builds on it until the Director reports it */
+	private noteWrite(subscription: LiveUpdateSubscription, value: unknown): void {
+		if (typeof value !== 'number' || !Number.isFinite(value)) {
+			subscription.written = undefined
+			return
+		}
+		const values = [...(subscription.written?.values ?? []), value].slice(-NUDGE_WRITES_KEPT)
+		subscription.written = { values, at: Date.now() }
+	}
+
+	/**
+	 * A value from the Director ends the hold on the written numbers, unless it is the echo of an earlier
+	 * write of the same burst (the newer ones are still on their way). A value the module did not write
+	 * (Designer clamped or refused it, or someone changed it) ends it too: the Director's value counts.
+	 */
+	private settleWrite(subscription: LiveUpdateSubscription, value: unknown): void {
+		const written = subscription.written
+		if (!written) return
+		const newest = written.values[written.values.length - 1]
+		const earlier = written.values.slice(0, -1)
+		if (typeof value === 'number' && !sameNumber(value, newest) && earlier.some((w) => sameNumber(value, w))) return
+		subscription.written = undefined
 	}
 
 	/**
@@ -1852,6 +1942,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				// the value is unknown now; the error is kept apart so nothing compares against it
 				subscription.value = undefined
 				subscription.error = valueUpdate.value
+				subscription.written = undefined
 				this.settleWaitingProbe(key, valueUpdate.value)
 
 				// Track consecutive errors
@@ -1894,6 +1985,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 
 			subscription.value = valueUpdate.value
 			subscription.error = undefined
+			this.settleWrite(subscription, valueUpdate.value)
 			this.settleWaitingProbe(key, valueUpdate.value)
 
 			// Reset error count on successful value update; the subscription has proven itself

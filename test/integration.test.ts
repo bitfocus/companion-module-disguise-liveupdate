@@ -104,6 +104,14 @@ test('subscribes over ws, receives values, sets and toggles properties', async (
 		value: 0.95,
 	})
 
+	// Nudge Disguise Number adds the step to the value the Director reported
+	await actions.nudgeDisguiseNumber.callback(
+		{ options: { variableName: 'brightness', delta: '-0.1', min: '0', max: '1' } },
+		context,
+	)
+	await waitFor(() => host.variables.get('brightness') === 0.85)
+	assert.equal(director.sets.at(-1)?.value, 0.85)
+
 	// Toggle Disguise Boolean
 	await actions.setToDisguiseToggle.callback({ options: { variableName: 'engaged' } }, context)
 	await waitFor(() => host.variables.get('engaged') === false)

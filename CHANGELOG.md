@@ -30,6 +30,10 @@
   unknown (none yet, `null`, a Director error or one of the readout markers, also when the Director
   sends that text itself) satisfies no comparison, including *not equal* and *is true*.
 - *Toggle Disguise Boolean* action.
+- *Nudge Disguise Number* action: adds a step to the current value of a numeric property in the
+  module, keeps the result within an optional minimum and maximum, and writes nothing while the
+  property has no number. The detents of a rotary encoder add up, also before the Director has
+  reported the previous write.
 - *LiveUpdate Sparkline* feedback: draws the recent values of a LiveUpdate Variable as a line on the
   button, so a frame rate or a latency shows its trend and not only its current number. The module
   renders the pixels itself, with no drawing dependency. Options: samples to keep (4..300, default 60,
@@ -217,10 +221,12 @@
 - One variable name can no longer be bound to two different properties: the Set and Toggle actions
   find their subscription by name, so the second button wrote to the first button's property. The
   second subscription is refused with a log message.
-- Set to Disguise (Number) sends only finite numbers (Infinity reached the Director as `null`), and a
-  nudge such as `$(liveupdate:brightness)-0.05` is not sent while that readout has no numeric value;
-  it would have been written as the absolute value -0.05. The check follows the connection's own label
-  and hyphenated names.
+- Set to Disguise (Number) sends only finite numbers (Infinity reached the Director as `null`).
+- A step written as a Number expression, such as `$(liveupdate:brightness)-0.05` on a 1.0.2 button,
+  is no longer written as an absolute value. Companion substitutes the readout before the action runs,
+  so while the readout was empty the module received `-0.05` and sent it. A Number value that starts
+  with an operator is now refused while the property has no numeric value. *Nudge Disguise Number*
+  adds a step to the value the Director sent instead.
 - Set to Disguise (JSON) forwards a deliberate JSON `null` and drops only genuine parse failures.
 - The Connection OK feedback refreshes on connect and disconnect.
 - A subscription the Director reports that no feedback owns is released instead of forgotten.

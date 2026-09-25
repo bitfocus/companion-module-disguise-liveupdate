@@ -873,21 +873,39 @@ True while the WebSocket to the Director is open.
 Write a value to the property behind a LiveUpdate Variable.
 
 - **Variable Name**: the variable of the LiveUpdate Variable feedback whose subscription is written
-- **Value**: string, number expression (`$(liveupdate:brightness)+0.05`), boolean checkbox or JSON
-  text. JSON objects are merged: sending `{"x": 4.0}` to `object.offset` keeps `y` and `z`.
+- **Value**: string, number expression (`$(liveupdate:fps)*2`), boolean checkbox or JSON text. JSON
+  objects are merged: sending `{"x": 4.0}` to `object.offset` keeps `y` and `z`.
 
 Use the type that matches the property; a string sent to a float property makes the Director close
 the connection with "Cannot convert JSON String to double" (the module reconnects).
 
-A Number value is evaluated after its variables are parsed and only a finite number is sent. A value
-that refers to a readout of this connection, such as `$(liveupdate:brightness)-0.05`, is not sent
-while that readout has no numeric value yet (it is empty, `PENDING`, `OFFLINE`, `UNSET`, ...): the
-expression would reach the Director as an absolute value. The check recognises the connection's own
-label, so it works for `liveupdate_2` or a renamed connection, and for variable names that contain `-`
-or `.`.
+A Number value is evaluated after its variables are substituted and only a finite number is sent.
+Companion substitutes every `$(...)` in the Value before the module sees it, so a step written as
+`$(liveupdate:brightness)-0.05` arrives as `-0.05` while that readout is empty. A Number value that
+starts with an operator (`+`, `-`, `*`, `/`, `%`) is therefore not sent while the property has no
+numeric value yet; once it has one, `-0.5` is an ordinary negative value. For a step, use *Nudge
+Disguise Number*.
 
 Writes to the same property in quick succession (a rotary encoder) are collapsed: the first goes out
 at once, then one write per 40 ms carries the latest value.
+
+### Nudge Disguise Number
+
+Adds a step to the current value of a numeric property and writes the result.
+
+- **Variable Name**: the variable of the LiveUpdate Variable feedback whose subscription is written
+- **Step**: added to the current value, negative to go down (`0.05`, `-1`); variables are allowed
+- **Minimum**, **Maximum**: the result is kept within them; leave a field empty for no limit
+
+Nothing is written while the property has no number (the readout is empty, `PENDING`, `ERROR`,
+`PATH_ERROR` or a text): the log says "Not writing: '...' has no numeric value yet". A Step or a
+limit that is not a number is refused with a warning as well, and a press that a limit stops sends
+nothing.
+
+Each press builds on the value the module wrote last until the Director reports that value back (for
+at most the feedback's Update Frequency plus one second), so the detents of a fast spin add up rather
+than repeat one step from the Director's older value. A value the module did not write, such as a
+change made in Designer, counts at once.
 
 ### Toggle Disguise Boolean
 

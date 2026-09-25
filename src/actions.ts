@@ -3,15 +3,16 @@ import {
 	CompanionActionDefinitions,
 	CompanionActionEvent,
 	CompanionActionContext,
+	InputValue,
 } from '@companion-module/base'
 import type { DisguiseInstance } from './index'
 import type { LiveUpdateSubscription } from './index'
 import { SELECTIONS } from './selections'
-import { isReservedVariableName } from './variables'
 
 export interface DisguiseActionDefinitions extends CompanionActionDefinitions {
 	setToDisguiseString: CompanionActionDefinition
 	setToDisguiseNumber: CompanionActionDefinition
+	nudgeDisguiseNumber: CompanionActionDefinition
 	setToDisguiseBoolean: CompanionActionDefinition
 	setToDisguiseJSON: CompanionActionDefinition
 	setToDisguiseToggle: CompanionActionDefinition
@@ -63,33 +64,35 @@ async function processStringValue(context: CompanionActionContext, valueStr: str
 }
 
 /**
+ * A Number value that starts with an operator once its variables are substituted: what a step such as
+ * `$(liveupdate:brightness)-0.05` becomes while that readout is empty. Companion 5.0.4 substitutes the
+ * Value option before the action runs, so the reference itself never reaches the module.
+ */
+const LEADING_OPERATOR = /^\s*[-+*/%]/
+
+/**
  * Process a numeric value (parse variables and evaluate expression)
  */
 async function processNumberValue(
 	instance: DisguiseInstance,
 	context: CompanionActionContext,
+	subscription: LiveUpdateSubscription,
 	valueStr: string,
 ): Promise<number | null> {
-	// A nudge such as "$(liveupdate:brightness)-0.05" must not fire before the first value has
-	// arrived: the host substitutes an empty string for a variable it has no value for, the
-	// expression collapses to "-0.05" and the Director would receive that as an absolute value.
-	// Companion rewrites the label of an imported preset to the connection's own label (a second
-	// connection is liveupdate_2), so the reference is matched against that label, read here so a
-	// rename is picked up.
-	for (const match of valueStr.matchAll(/\$\(([^:$)]+):([A-Za-z0-9_.-]+)\)/g)) {
-		if (match[1] !== instance.label) continue
-		const referenced = match[2]
-		if (isReservedVariableName(referenced)) continue
-		const current = instance.getSubscriptionByVariableName(referenced)?.value
-		if (typeof current === 'number' && Number.isFinite(current)) continue
+	// Companion has substituted the variables already; a host that passes the raw text gets them
+	// substituted here, so the check below sees the same text either way
+	const parsedValue = await context.parseVariablesInString(valueStr)
+
+	// '-0.05' may be meant as -0.05 or be a step whose base was empty; while the property has no number
+	// it cannot be told apart, and writing a step as an absolute value is what must not happen
+	const current = subscription.value
+	if (LEADING_OPERATOR.test(parsedValue) && !(typeof current === 'number' && Number.isFinite(current))) {
 		instance.log(
 			'warn',
-			`Not writing: '${referenced}' has no numeric value yet (${JSON.stringify(current)}), so '${valueStr}' would be sent as an absolute value`,
+			`Not writing: '${subscription.variableName}' has no numeric value yet (${JSON.stringify(current)}) and '${parsedValue}' starts with an operator, so it may be a step from an empty readout (Nudge Disguise Number writes steps)`,
 		)
 		return null
 	}
-
-	const parsedValue = await context.parseVariablesInString(valueStr)
 
 	try {
 		// Evaluate mathematical expressions like "5+1", "10*2", "$(var)+1"
@@ -108,6 +111,27 @@ async function processNumberValue(
 		instance.log('warn', `Could not evaluate expression: ${parsedValue} (from: ${valueStr})`)
 		return null
 	}
+}
+
+/**
+ * Read a number option of Nudge Disguise Number: undefined when it is empty, null (logged) when it is
+ * not a finite number. A typo is refused rather than read as "no limit" or as a step of 0.
+ */
+async function readNumberOption(
+	instance: DisguiseInstance,
+	context: CompanionActionContext,
+	variableName: string,
+	raw: InputValue | undefined,
+	label: string,
+): Promise<number | undefined | null> {
+	const text = (await context.parseVariablesInString(String(raw ?? ''))).trim()
+	if (text === '') return undefined
+	const value = Number(text)
+	if (!Number.isFinite(value)) {
+		instance.log('warn', `Not writing: the ${label} for '${variableName}' is not a number: '${text}'`)
+		return null
+	}
+	return value
 }
 
 /**
@@ -230,7 +254,7 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
 					default: '0',
 					useVariables: true,
 					tooltip:
-						'The numeric value or expression to set (e.g., "5", "$(liveupdate:screen_x)+1", "$(liveupdate:fps)*2")',
+						'The numeric value or expression to set (e.g., "5", "$(liveupdate:fps)*2"). To step from the current value, use Nudge Disguise Number.',
 				},
 			],
 			callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
@@ -240,10 +264,70 @@ export function getActionDefinitions(instance: DisguiseInstance): DisguiseAction
 				const subscription = getSubscriptionForAction(instance, variableName)
 				if (!subscription) return
 
-				const value = await processNumberValue(instance, context, valueStr)
+				const value = await processNumberValue(instance, context, subscription, valueStr)
 				if (value === null) return
 
 				instance.setProperty(subscription.id, value)
+			},
+		},
+
+		nudgeDisguiseNumber: {
+			name: 'Nudge Disguise Number',
+			description:
+				'Add a step to the current value of a numeric Disguise property, optionally kept within a minimum and a maximum. Nothing is written while its LiveUpdate Variable has no number.',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Variable Name',
+					id: 'variableName',
+					default: '',
+					useVariables: false,
+					tooltip: 'The variable name from your LiveUpdate Variable feedback (e.g., "brightness")',
+				},
+				{
+					type: 'textinput',
+					label: 'Step',
+					id: 'delta',
+					default: '1',
+					useVariables: true,
+					tooltip: 'Added to the current value; negative to go down (e.g., "0.05", "-1")',
+				},
+				{
+					type: 'textinput',
+					label: 'Minimum',
+					id: 'min',
+					default: '',
+					useVariables: true,
+					tooltip: 'The result is never written below this; leave empty for no minimum',
+				},
+				{
+					type: 'textinput',
+					label: 'Maximum',
+					id: 'max',
+					default: '',
+					useVariables: true,
+					tooltip: 'The result is never written above this; leave empty for no maximum',
+				},
+			],
+			callback: async (action: CompanionActionEvent, context: CompanionActionContext) => {
+				const variableName = String(action.options.variableName || '')
+
+				const subscription = getSubscriptionForAction(instance, variableName)
+				if (!subscription) return
+
+				const delta = await readNumberOption(instance, context, variableName, action.options.delta, 'Step')
+				if (delta === undefined) instance.log('warn', `Not writing: the Step for '${variableName}' is empty`)
+				if (delta === undefined || delta === null) return
+				const min = await readNumberOption(instance, context, variableName, action.options.min, 'Minimum')
+				if (min === null) return
+				const max = await readNumberOption(instance, context, variableName, action.options.max, 'Maximum')
+				if (max === null) return
+				if (min !== undefined && max !== undefined && min > max) {
+					instance.log('warn', `Not writing: the Minimum ${min} for '${variableName}' is above the Maximum ${max}`)
+					return
+				}
+
+				instance.nudgeProperty(subscription.id, delta, min, max)
 			},
 		},
 

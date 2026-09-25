@@ -61,6 +61,8 @@ See [companion/HELP.md](companion/HELP.md) for the user documentation and
 
 - **Set to Disguise (String / Number / Boolean / JSON)**: write a value through the subscription of a LiveUpdate Variable
 - **Toggle Disguise Boolean**: flip a boolean property
+- **Nudge Disguise Number**: add a step to a numeric property, within an optional minimum and maximum;
+  nothing is written while the property has no number
 - **Set selection** and one action per selection with the names read from the Director; **Set
   selection profile** applies several at once, **Refresh selection lists** re-reads them
 - **Check presets against this Director**: subscribes once to every preset property whose selections
