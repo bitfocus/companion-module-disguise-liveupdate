@@ -169,7 +169,9 @@ rule such as a frame budget.
   property (a selection re-pointed, the path edited), renamed, given a path that cannot be resolved,
   or removed, its values are dropped and the next value starts a new line, so two objects are never
   joined and the old one no longer sets the scale. Changing only its *Update Frequency* keeps the line,
-  also while the Director is away.
+  also while the Director is away. So does removing or renaming one of two LiveUpdate Variable
+  feedbacks that share the name and the object (the same preset placed twice): the other still owns
+  the readout.
 - Numeric text is drawn as its number, and on/off values as 1 and 0. The fill covers every column
   under the line, also while the history is still short. With more samples than pixel columns, a
   column shows the range of the samples in it. The threshold rule is drawn over the fill, and the line

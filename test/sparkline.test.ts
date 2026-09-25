@@ -472,6 +472,50 @@ test('a new interval set while the Director is away keeps the line', async () =>
 	await inst.destroy()
 })
 
+for (const change of ['removed', 'renamed']) {
+	test(`a second feedback of a readout ${change} while the Director is away leaves the line of the first`, async () => {
+		const director = new FakeDirector({ refCount: true, valueFor: () => 10 })
+		const twin = liveUpdateFeedback('twin', FPS_OBJECT, FPS_PROPERTY, 'fps')
+		const { inst, host } = await newInstance(director, [
+			liveUpdateFeedback('v', FPS_OBJECT, FPS_PROPERTY, 'fps'),
+			twin,
+			sparklineFeedback('spark', { variableName: 'fps' }),
+		])
+		await settle(50)
+		assert.deepEqual(inst.getSparklineSamples('fps'), [10])
+		director.sock!.drop()
+		await settle(20)
+		assert.deepEqual(inst.getSparklineSamples('fps'), [10, undefined])
+		// nothing feeds 'fps' during the outage, yet v still watches the same object under that name
+		if (change === 'removed') inst.updateFeedbacks({ twin: null })
+		else inst.updateFeedbacks({ twin: { ...twin, options: { ...twin.options, variableName: 'other' } } })
+		await settle(20)
+		assert.equal(host.variables.get('fps'), 'OFFLINE')
+		assert.deepEqual(inst.getSparklineSamples('fps'), [10, undefined], 'the line of v is kept')
+		assert.deepEqual(shown(host, 'spark'), render([10, undefined]))
+		await inst.destroy()
+	})
+}
+
+for (const change of ['moved', 'removed']) {
+	test(`a readout ${change} while the Director is away still starts over`, async () => {
+		const director = new FakeDirector({ valueFor: () => 10 })
+		const readout = liveUpdateFeedback('v', FPS_OBJECT, FPS_PROPERTY, 'fps')
+		const { inst, host } = await newInstance(director, [readout, sparklineFeedback('spark', { variableName: 'fps' })])
+		await settle(50)
+		director.sock!.drop()
+		await settle(20)
+		assert.deepEqual(inst.getSparklineSamples('fps'), [10, undefined])
+		// no placed feedback of the name watches the old object any more, so none keeps its line
+		if (change === 'removed') inst.updateFeedbacks({ v: null })
+		else inst.updateFeedbacks({ v: { ...readout, options: { ...readout.options, objectPath: 'track:"Track 1"' } } })
+		await settle(20)
+		assert.deepEqual(inst.getSparklineSamples('fps'), [], 'the line of the old object is dropped')
+		assert.equal(shown(host, 'spark'), undefined)
+		await inst.destroy()
+	})
+}
+
 test('a readout removed and placed again starts a new line; one another feedback still feeds keeps it', async () => {
 	let value = 10
 	const director = new FakeDirector({ refCount: true, valueFor: () => value })

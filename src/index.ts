@@ -1312,11 +1312,20 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	 * Drop the history of a variable when the pair its values came from no longer feeds it: the
 	 * readout was moved to another object or property, renamed, given a path that cannot be resolved,
 	 * or removed. The next value starts a new line, and the old object's values stop setting the
-	 * scale. True when a history was dropped; the caller redraws the Sparklines of the variable.
+	 * scale. While nothing feeds the name (the Director is away, or every feedback of it backs off),
+	 * a placed feedback of the name that still watches the pair keeps the line: the readout another
+	 * feedback owns on the same object has not moved. True when a history was dropped; the caller
+	 * redraws the Sparklines of the variable.
 	 */
 	private forgetStaleHistory(variableName: string): boolean {
 		const pair = this.historyPairs.get(variableName)
-		if (pair === undefined || pair === this.pairOfVariable(variableName)) return false
+		if (pair === undefined) return false
+		const fed = this.pairOfVariable(variableName)
+		if (fed === pair) return false
+		if (fed === undefined) {
+			for (const entry of this.feedbackOptionsCache.values())
+				if (entry.variableName === variableName && pairKey(entry.objectPath, entry.propertyPath) === pair) return false
+		}
 		this.histories.delete(variableName)
 		this.historyPairs.delete(variableName)
 		return true
