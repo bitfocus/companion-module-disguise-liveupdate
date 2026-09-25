@@ -168,7 +168,8 @@ rule such as a frame budget.
 - The line belongs to the object the readout watches. When the readout is moved to another object or
   property (a selection re-pointed, the path edited), renamed, given a path that cannot be resolved,
   or removed, its values are dropped and the next value starts a new line, so two objects are never
-  joined and the old one no longer sets the scale. Changing only its *Update Frequency* keeps the line.
+  joined and the old one no longer sets the scale. Changing only its *Update Frequency* keeps the line,
+  also while the Director is away.
 - Numeric text is drawn as its number, and on/off values as 1 and 0. The fill covers every column
   under the line, also while the history is still short. With more samples than pixel columns, a
   column shows the range of the samples in it. The threshold rule is drawn over the fill, and the line
@@ -205,8 +206,8 @@ button already holds is read from that button, without a subscription of its own
 not touch the subscriptions your buttons hold; a button removed while the check waits for its value
 leaves the property to the check, which still gets the answer. A button placed on a property the check
 is reading asks for it once the Director has answered the check's request, also when the check stopped
-waiting for it (at most the *Pending Subscription Timeout* later), so the property keeps one Director
-subscription. Run it when you arrive on site: it tells you which presets work with this Designer build
+waiting for it (a Director that never answers holds the button back for the *Pending Subscription
+Timeout* after that, no longer), so the property keeps one Director subscription. Run it when you arrive on site: it tells you which presets work with this Designer build
 and this show file.
 
 ## Designer version
@@ -294,7 +295,8 @@ Buttons that share one property share one Director subscription, which runs at t
 any placed feedback asks for; `0` beats any number. When a faster feedback joins, the module subscribes
 again at the faster rate, also when the first request is still on its way. The subscription keeps the
 Variable Name that received the values, and that readout keeps its value until the new subscription
-sends one. A slower feedback joins without a new request. Removing the faster button does not slow a
+sends one; when the Director does not answer within the *Pending Subscription Timeout*, it says
+`PENDING` until a retry is answered. A slower feedback joins without a new request. Removing the faster button does not slow a
 confirmed subscription down again straight away, but a faster button removed before the Director has
 answered the first request takes its rate with it. The intervals are remembered across reconnects.
 

@@ -226,6 +226,7 @@ interface Probe {
 	objectPath: string
 	propertyPath: string
 	resolvers: ((value: unknown) => void)[]
+	/** The read's own time, or once it has run out, the Pending Subscription Timeout of its subscribe */
 	timer: NodeJS.Timeout
 	/** True when the probe sent its own subscribe and so holds one Director reference */
 	sent: boolean
@@ -233,7 +234,8 @@ interface Probe {
 	id?: number
 	/**
 	 * When the read ran out of time before the Director confirmed its own subscribe. Its callers have
-	 * their answer; the probe stays until that subscribe is answered (see timeoutProbe).
+	 * their answer; the probe stays until that subscribe is answered, at most the Pending Subscription
+	 * Timeout longer (see timeoutProbe).
 	 */
 	abandonedAt?: number
 }
@@ -504,8 +506,12 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				if (cached.variableName !== variableName) this.markUnset(cached.variableName)
 			}
 			const names = new Set([variableName, cached.variableName])
-			// a Sparkline does not join the previous object's values to the new one's
-			for (const name of names) this.forgetStaleHistory(name)
+			// A Sparkline does not join the previous object's values to the new one's. Only a readout that
+			// was moved or renamed loses its line: a new interval alone keeps it, also while the Director
+			// is away and nothing feeds the name (a value from another pair still starts a new line).
+			const retargeted =
+				cached.objectPath !== objectPath || cached.propertyPath !== propertyPath || cached.variableName !== variableName
+			if (retargeted) for (const name of names) this.forgetStaleHistory(name)
 			const stale = this.stateFeedbacksOf(names)
 			if (stale.length) this.checkFeedbacksById(...stale)
 			return
@@ -973,6 +979,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				if (running.abandonedAt !== undefined) {
 					// a read that ran out of time still waits for its subscribe: this one gets its own time
 					running.abandonedAt = undefined
+					clearTimeout(running.timer)
 					running.timer = setTimeout(() => this.timeoutProbe(key), timeoutMs)
 					if (typeof running.timer.unref === 'function') running.timer.unref()
 				}
@@ -1028,7 +1035,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	 * the probe's own subscribe yet, the probe stays until it does: released now, that late
 	 * confirmation would be taken for the request of a button that waits for the pair, and the
 	 * button's own frame would add a second reference that nothing releases. The confirmation, an
-	 * error or the Pending Subscription Timeout ends it (see handleSubscriptionsUpdate).
+	 * error or, at the latest, the Pending Subscription Timeout ends it (see handleSubscriptionsUpdate).
 	 */
 	private timeoutProbe(key: string): void {
 		const probe = this.probes.get(key)
@@ -1040,7 +1047,18 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		const resolvers = probe.resolvers
 		probe.resolvers = []
 		probe.abandonedAt = Date.now()
+		// a Director that never answers must not hold a button back for good
+		probe.timer = setTimeout(() => this.giveUpProbe(key), this.config.pendingSubscriptionTimeout ?? 30000)
+		if (typeof probe.timer.unref === 'function') probe.timer.unref()
 		for (const resolve of resolvers) resolve(undefined)
+	}
+
+	/** The subscribe of a read that ran out of time was never answered: the button waiting for it goes ahead */
+	private giveUpProbe(key: string): void {
+		const probe = this.probes.get(key)
+		if (probe?.abandonedAt === undefined) return
+		this.log('warn', `No answer to the one-shot read of ${probe.objectPath}.${probe.propertyPath}; giving up on it`)
+		this.finishProbe(key, undefined)
 	}
 
 	/** Answer a probe that waits for a feedback's value on this pair */
@@ -2258,16 +2276,8 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		const now = Date.now()
 		const timeout = this.config.pendingSubscriptionTimeout ?? 30000
 
-		// A read that ran out of time holds a button's request back until the Director answers its own
-		// subscribe; a Director that never does must not hold the button for good.
-		for (const [key, probe] of [...this.probes.entries()]) {
-			if (probe.abandonedAt === undefined || now - probe.abandonedAt <= timeout) continue
-			this.log('warn', `No answer to the one-shot read of ${probe.objectPath}.${probe.propertyPath}; giving up on it`)
-			this.finishProbe(key, undefined)
-		}
-
 		for (const [key, pending] of [...this.pendingSubscriptions.entries()]) {
-			// a request held back for a one-shot read goes out when the read ends, which has its own timeout
+			// a request held back for a one-shot read goes out when the read ends, which has its own timers
 			if (pending.heldForProbe) continue
 			if (now - pending.timestamp > timeout) {
 				this.log('warn', `Pending subscription timed out: ${pending.objectPath}.${pending.propertyPath}`)
@@ -2277,11 +2287,29 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 					this.recheckVariable(pending.variableName)
 					continue
 				}
+				this.showUnanswered(pending.variableName)
 				for (const feedbackId of pending.feedbackIds) {
 					this.noteSubscriptionFailure(feedbackId, 'no answer from the Director')
 				}
 			}
 		}
+	}
+
+	/**
+	 * A request the Director never answered leaves its readout on PENDING until the retry is answered.
+	 * A subscription asked for again at a faster rate kept its last value while it waited; with no
+	 * answer nothing feeds that value any more, so the readout and its Compare and Sparkline feedbacks
+	 * must not go on showing it. A readout that already says PENDING is left alone, so the line gets
+	 * no second gap.
+	 */
+	private showUnanswered(variableName: string): void {
+		if (!this.isReadoutName(variableName)) return
+		const current = this.getVariableValue(variableName)
+		// a name with no value is not defined: a write would reach Companion as a delete
+		if (current === undefined || current === PENDING_VALUE) return
+		this.setVariableValues({ [variableName]: PENDING_VALUE })
+		this.recordHistory(variableName, PENDING_VALUE)
+		this.recheckStateOf(variableName)
 	}
 
 	/**

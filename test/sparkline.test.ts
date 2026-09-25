@@ -454,6 +454,24 @@ test('a readout moved to another object starts a new line instead of joining the
 	await inst.destroy()
 })
 
+test('a new interval set while the Director is away keeps the line', async () => {
+	const director = new FakeDirector({ valueFor: () => 10 })
+	const readout = liveUpdateFeedback('v', FPS_OBJECT, FPS_PROPERTY, 'fps', 1000)
+	const { inst, host } = await newInstance(director, [readout, sparklineFeedback('spark', { variableName: 'fps' })])
+	await settle(50)
+	assert.deepEqual(inst.getSparklineSamples('fps'), [10])
+	director.sock!.drop()
+	await settle(20)
+	assert.deepEqual(inst.getSparklineSamples('fps'), [10, undefined])
+	// nothing feeds the readout during the outage, yet it still watches the same object
+	inst.updateFeedbacks({ v: { ...readout, options: { ...readout.options, updateFrequency: 500 } } })
+	await settle(20)
+	assert.equal(host.variables.get('fps'), 'OFFLINE')
+	assert.deepEqual(inst.getSparklineSamples('fps'), [10, undefined], 'the line is kept')
+	assert.deepEqual(shown(host, 'spark'), render([10, undefined]))
+	await inst.destroy()
+})
+
 test('a readout removed and placed again starts a new line; one another feedback still feeds keeps it', async () => {
 	let value = 10
 	const director = new FakeDirector({ refCount: true, valueFor: () => value })

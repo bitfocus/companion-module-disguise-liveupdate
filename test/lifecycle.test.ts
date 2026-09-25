@@ -1092,17 +1092,34 @@ test('a one-shot read that runs out of time before the Director answers holds th
 })
 
 test('a one-shot read the Director never answers holds a button back no longer than the pending timeout', async () => {
+	const timeout = 400
 	const director = new FakeDirector({ refCount: true, valueFor: () => 3 })
-	const { inst } = await newInstance(director, [], { pendingSubscriptionTimeout: 200 })
+	const { inst } = await newInstance(director, [], { pendingSubscriptionTimeout: timeout })
+	// The read starts just after a periodic cleanup of the pending requests: a read given up by the
+	// next cleanup that finds it older than the timeout would hold the button back for almost twice it.
+	const cleanup = inst.cleanupPendingSubscriptions.bind(inst)
+	let cleanups = 0
+	inst.cleanupPendingSubscriptions = () => {
+		cleanups++
+		cleanup()
+	}
+	assert.ok(await until(() => cleanups === 1, 2000))
 	director.hold()
 	const read = inst.probeValue(TRACK, 'object.lengthInBeats', 50)
 	inst.updateFeedbacks({ a: liveUpdateFeedback('a', TRACK, 'object.lengthInBeats', 'len', 250) })
 	assert.equal(await read, undefined)
+	const ranOut = Date.now()
 	await settle()
 	assert.equal(buttonFrames(director), 0)
 	assert.ok(
 		await until(() => buttonFrames(director) === 1, 2000),
 		"the button's request goes out once the read is given up",
+	)
+	const waited = Date.now() - ranOut
+	assert.ok(waited > timeout - 50, `the button waited ${waited} ms: the Director gets the whole timeout to answer`)
+	assert.ok(
+		waited < timeout + 150,
+		`the button waited ${waited} ms after the read ran out, not up to twice the timeout`,
 	)
 	await inst.destroy()
 })
@@ -1380,6 +1397,31 @@ test('a faster feedback that joins under another name keeps the name and the rea
 	director.pushValueForPair(TRACK, 'object.tStart', 7)
 	await settle()
 	assert.equal(host.variables.get('first'), 7)
+	await inst.destroy()
+})
+
+test('a readout asked for again at a faster rate says PENDING when the Director never answers', async () => {
+	const director = new FakeDirector({ refCount: true, valueFor: () => 1 })
+	const { inst, host } = await newInstance(
+		director,
+		[liveUpdateFeedback('first', TRACK, 'object.tStart', 'first', 1000), compareFeedback('eq', 'first', 'eq', '1')],
+		{ pendingSubscriptionTimeout: 200 },
+	)
+	await settle(50)
+	assert.equal(host.feedbackValues.get('eq'), true)
+
+	director.opts.silent = true
+	inst.updateFeedbacks({ fast: liveUpdateFeedback('fast', TRACK, 'object.tStart', 'first', 0) })
+	await settle(50)
+	assert.equal(director.count('unsubscribe'), 1, 'asked again at the faster rate')
+	assert.equal(host.variables.get('first'), 1, 'the readout keeps its value while it waits for the answer')
+	assert.equal(inst.getSubscriptionByVariableName('first'), undefined)
+
+	// the old subscription is gone and the new one never came: the last value is fed by nothing
+	assert.ok(await until(() => host.variables.get('first') === 'PENDING', 2000), 'the timeout turns it PENDING')
+	await settle()
+	assert.equal(host.feedbackValues.get('eq'), false, 'and its state colour off')
+	assert.equal(host.logs.filter((l) => l.message.includes('Pending subscription timed out')).length, 1)
 	await inst.destroy()
 })
 
