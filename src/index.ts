@@ -193,8 +193,11 @@ interface PendingSubscription {
 	timestamp: number
 	/** The interval the frame carries (undefined = the Director default) */
 	updateFrequencyMs: number | undefined
-	/** The fastest interval any feedback that joined the request asks for */
-	wantedFrequencyMs: number | undefined
+	/**
+	 * The interval each feedback in feedbackIds asks for; a feedback that leaves before the answer
+	 * takes its rate with it (see wantedInterval)
+	 */
+	rates: Map<string, number | undefined>
 	/** The frame has left: only now can a `subscriptions` reply be the answer to it */
 	sent: boolean
 	/** A one-shot read holds the pair; the frame goes out when the read has finished */
@@ -673,13 +676,14 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			return
 		}
 
-		// A request for this pair is already on its way: join it instead of sending it again
+		// A request for this pair is already on its way for another feedback: join it instead of sending
+		// it again. It keeps the name of the feedback that asked first.
 		const key = pairKey(objectPath, propertyPath)
 		const pending = this.pendingSubscriptions.get(key)
-		if (pending) {
+		if (pending && pending.feedbackIds.size > 0) {
 			pending.feedbackIds.add(feedbackId)
 			// a faster joiner is served when the request is confirmed (see handleSubscriptionsUpdate)
-			pending.wantedFrequencyMs = fasterInterval(pending.wantedFrequencyMs, updateFrequencyMs)
+			pending.rates.set(feedbackId, updateFrequencyMs)
 			if (pending.variableName !== variableName) {
 				this.log(
 					'warn',
@@ -692,19 +696,8 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 
 		// One variable name must not be bound to two different properties: the Set / Toggle actions
 		// look the subscription up by variable name, so the second button would write to the first
-		// button's property. This is the out-of-the-box case for two dragged Templates presets. A
-		// request nobody waits for any more (its feedback moved to another path while it was in
-		// flight) does not count: it is released when it is answered.
-		const conflicting =
-			[...this.subscriptions.values()].find(
-				(sub) => sub.variableName === variableName && pairKey(sub.objectPath, sub.propertyPath) !== key,
-			) ??
-			[...this.pendingSubscriptions.values()].find(
-				(sub) =>
-					sub.feedbackIds.size > 0 &&
-					sub.variableName === variableName &&
-					pairKey(sub.objectPath, sub.propertyPath) !== key,
-			)
+		// button's property. This is the out-of-the-box case for two dragged Templates presets.
+		const conflicting = this.nameWatchingOtherPair(variableName, key)
 		if (conflicting) {
 			this.log(
 				'warn',
@@ -713,42 +706,63 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			return
 		}
 
+		if (pending) {
+			// Nobody waits for this request any more: its feedback moved to another path or name while it
+			// was in flight. The name it carries may watch another property by now, so the feedback that
+			// takes it over gives it its own name, which the check above has just cleared.
+			const previousName = pending.variableName
+			pending.variableName = variableName
+			pending.feedbackIds.add(feedbackId)
+			pending.rates.set(feedbackId, updateFrequencyMs)
+			this.log('debug', `Feedback ${feedbackId} takes over the request for ${objectPath}.${propertyPath}`)
+			this.showPending(variableName)
+			if (previousName !== variableName) this.recheckVariable(previousName)
+			return
+		}
+
 		// The interval the pair must run at: the fastest any placed feedback asks for
 		const wanted = this.effectiveInterval(objectPath, propertyPath, updateFrequencyMs)
 
-		// Check if we already have a subscription for this object/property
-		for (const [subId, sub] of this.subscriptions.entries()) {
-			if (pairKey(sub.objectPath, sub.propertyPath) === key) {
-				if (wanted !== sub.updateFrequencyMs) {
-					// A feedback asks for a faster rate than the one this subscription runs at; the
-					// Director has no way to change it, so the old id is released and asked again.
-					this.log(
-						'debug',
-						`Re-subscribing ${objectPath}.${propertyPath} at ${wanted ?? 'the Director default'} ms (was ${sub.updateFrequencyMs ?? 'the Director default'} ms)`,
-					)
-					this.releaseSubscription(subId)
-					break
+		// The name and the feedbacks of a subscription that is asked for again at a faster rate
+		let carried: { variableName: string; feedbackIds: string[]; updateFrequencyMs: number | undefined } | undefined
+		const existing = this.subscriptionOfPair(key)
+		if (existing) {
+			if (wanted !== existing.updateFrequencyMs && fasterInterval(wanted, existing.updateFrequencyMs) === wanted) {
+				// A feedback asks for a faster rate than the one this subscription runs at; the Director has
+				// no way to change it, so the old id is released and asked again. A slower one simply joins:
+				// the subscription is not slowed down for it.
+				this.log(
+					'debug',
+					`Re-subscribing ${objectPath}.${propertyPath} at ${wanted ?? 'the Director default'} ms (was ${existing.updateFrequencyMs ?? 'the Director default'} ms)`,
+				)
+				carried = {
+					variableName: existing.variableName,
+					feedbackIds: this.feedbacksOfSubscription(existing.id),
+					updateFrequencyMs: existing.updateFrequencyMs,
 				}
+				this.releaseSubscription(existing.id)
+			} else {
 				// Reuse existing subscription, just update the feedback mapping
-				this.log('debug', `Reusing existing subscription ${subId} for feedback ${feedbackId}`)
-				this.feedbackIdToSubscriptionId.set(feedbackId, subId)
+				this.log('debug', `Reusing existing subscription ${existing.id} for feedback ${feedbackId}`)
+				this.feedbackIdToSubscriptionId.set(feedbackId, existing.id)
 
 				// Keep the name of the feedback that created the subscription, exactly as the pending
 				// branch above does: overwriting it would silently freeze the first feedback's variable
 				// and break every action bound to it.
-				if (sub.variableName !== variableName) {
+				if (existing.variableName !== variableName) {
 					this.log(
 						'warn',
-						`Feedbacks share ${objectPath}.${propertyPath} with different variable names ('${sub.variableName}' and '${variableName}'); '${sub.variableName}' will receive the values`,
+						`Feedbacks share ${objectPath}.${propertyPath} with different variable names ('${existing.variableName}' and '${variableName}'); '${existing.variableName}' will receive the values`,
 					)
 					this.emptyUnfedReadout(variableName)
 				}
-
 				return
 			}
 		}
 
-		this.log('info', `Subscribing to ${objectPath}.${propertyPath} as variable '${variableName}'`)
+		// A subscription asked for again keeps its name and every feedback that shared it
+		const requestName = carried?.variableName ?? variableName
+		this.log('info', `Subscribing to ${objectPath}.${propertyPath} as variable '${requestName}'`)
 
 		// A one-shot read holds this pair at the Director right now. The request waits until it has
 		// finished, so a pair never has two requests in flight and the read's release cannot take the
@@ -762,25 +776,83 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			return
 		}
 
+		const rates = new Map<string, number | undefined>()
+		for (const sharer of carried?.feedbackIds ?? []) {
+			const cachedOptions = this.feedbackOptionsCache.get(sharer)
+			rates.set(sharer, cachedOptions ? cachedOptions.updateFrequency : carried?.updateFrequencyMs)
+		}
+		rates.set(feedbackId, updateFrequencyMs)
 		this.pendingSubscriptions.set(key, {
 			objectPath,
 			propertyPath,
-			variableName,
-			feedbackIds: new Set([feedbackId]),
+			variableName: requestName,
+			feedbackIds: new Set(rates.keys()),
+			rates,
 			timestamp: Date.now(),
 			updateFrequencyMs: wanted,
-			wantedFrequencyMs: wanted,
 			sent: false,
 			heldForProbe,
 		})
 
-		// The readout says PENDING until its first value or an error arrives: a new request, one made
-		// again at a faster rate and a retry after a back-off alike. The subscribe hook of a feedback
-		// placed while connected gets here before its callback has defined the variable, and a value
-		// written into a variable that is not defined is lost, so the request defines it first.
+		if (!carried) {
+			this.showPending(variableName)
+		} else if (carried.variableName !== variableName) {
+			// the readout of the subscription keeps its last value until the new one sends one
+			this.log(
+				'warn',
+				`Feedbacks share ${objectPath}.${propertyPath} with different variable names ('${carried.variableName}' and '${variableName}'); '${carried.variableName}' will receive the values`,
+			)
+			this.emptyUnfedReadout(variableName)
+		}
+	}
+
+	/**
+	 * The subscription or request that already binds this variable name to another pair. A request
+	 * nobody waits for any more (its feedback moved away while it was in flight) does not count: it is
+	 * released when it is answered, unless a feedback takes it over under its own name.
+	 */
+	private nameWatchingOtherPair(
+		variableName: string,
+		key: string,
+	): { objectPath: string; propertyPath: string } | undefined {
+		return (
+			[...this.subscriptions.values()].find(
+				(sub) => sub.variableName === variableName && pairKey(sub.objectPath, sub.propertyPath) !== key,
+			) ??
+			[...this.pendingSubscriptions.values()].find(
+				(sub) =>
+					sub.feedbackIds.size > 0 &&
+					sub.variableName === variableName &&
+					pairKey(sub.objectPath, sub.propertyPath) !== key,
+			)
+		)
+	}
+
+	/**
+	 * The readout of a new request says PENDING until its first value or an error arrives: a new
+	 * request and a retry after a back-off alike. The subscribe hook of a feedback placed while
+	 * connected gets here before its callback has defined the variable, and a value written into a
+	 * variable that is not defined is lost, so the request defines it first.
+	 */
+	private showPending(variableName: string): void {
 		this.updateVariableDefinitions()
 		this.setVariableValues({ [variableName]: PENDING_VALUE })
 		this.recordHistory(variableName, PENDING_VALUE)
+	}
+
+	/**
+	 * The interval a request must run at for the feedbacks that still wait for it: one that left
+	 * before the answer takes its rate with it (undefined = the Director default)
+	 */
+	private wantedInterval(pending: PendingSubscription): number | undefined {
+		let wanted = pending.updateFrequencyMs
+		let first = true
+		for (const feedbackId of pending.feedbackIds) {
+			const rate = pending.rates.has(feedbackId) ? pending.rates.get(feedbackId) : pending.updateFrequencyMs
+			wanted = first ? rate : fasterInterval(wanted, rate)
+			first = false
+		}
+		return this.effectiveInterval(pending.objectPath, pending.propertyPath, wanted)
 	}
 
 	/**
@@ -923,7 +995,12 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 			pending.heldForProbe = false
 			if (pending.feedbackIds.size === 0) {
 				this.pendingSubscriptions.delete(key)
-			} else if (this.queueSubscribe(pending.objectPath, pending.propertyPath, pending.updateFrequencyMs)) {
+				return
+			}
+			// at the rate the feedbacks that still wait for it ask for, so it is not asked again at once
+			const wanted = this.wantedInterval(pending)
+			if (this.queueSubscribe(pending.objectPath, pending.propertyPath, wanted)) {
+				pending.updateFrequencyMs = wanted
 				pending.timestamp = Date.now()
 			}
 		}
@@ -1217,18 +1294,19 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 	}
 
 	/**
-	 * Drop one Director subscription and every local trace of it. The id is remembered briefly so a
-	 * `subscriptions` message that was already in flight is not answered with a second unsubscribe.
+	 * Drop one Director subscription that is about to be asked for again at a faster rate, and every
+	 * local trace of it. The id is remembered briefly so a `subscriptions` message that was already in
+	 * flight is not answered with a second unsubscribe. The new request carries the name and the
+	 * feedbacks, so the readout and its Compare and Sparkline feedbacks are left as they are until the
+	 * new subscription sends its first value.
 	 */
 	private releaseSubscription(subscriptionId: number): void {
-		const variableName = this.subscriptions.get(subscriptionId)?.variableName
 		this.send({ unsubscribe: { id: subscriptionId } })
 		this.subscriptions.delete(subscriptionId)
 		for (const [feedbackId, id] of this.feedbackIdToSubscriptionId.entries()) {
 			if (id === subscriptionId) this.feedbackIdToSubscriptionId.delete(feedbackId)
 		}
 		this.releasedSubscriptionIds.set(subscriptionId, Date.now())
-		this.recheckStateOf(variableName)
 	}
 
 	/**
@@ -1280,6 +1358,7 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 		// interested any more the confirmation is answered with an unsubscribe.
 		for (const pending of this.pendingSubscriptions.values()) {
 			pending.feedbackIds.delete(feedbackId)
+			pending.rates.delete(feedbackId)
 		}
 
 		if (subscriptionId === undefined) {
@@ -1833,8 +1912,9 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				}
 
 				// A faster feedback joined while the request was in flight: the Director cannot change the
-				// interval of a subscription, so it is released and asked again at the faster rate.
-				const wanted = this.effectiveInterval(objectPath, propertyPath, pending.wantedFrequencyMs)
+				// interval of a subscription, so it is released and asked again at the faster rate. A
+				// feedback that left before the answer does not count.
+				const wanted = this.wantedInterval(pending)
 				if (wanted !== pending.updateFrequencyMs && fasterInterval(wanted, pending.updateFrequencyMs) === wanted) {
 					this.log(
 						'debug',
@@ -1847,7 +1927,6 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 							...pending,
 							timestamp: Date.now(),
 							updateFrequencyMs: wanted,
-							wantedFrequencyMs: wanted,
 							sent: false,
 						})
 					}

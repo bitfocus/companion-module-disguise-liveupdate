@@ -280,9 +280,11 @@ shows `OFFLINE` in every readout until the connection to the new Director opens.
 
 Buttons that share one property share one Director subscription, which runs at the fastest interval
 any placed feedback asks for; `0` beats any number. When a faster feedback joins, the module subscribes
-again at the faster rate, also when the first request is still on its way. Removing the faster button
-does not slow the subscription down again straight away. The intervals are remembered across
-reconnects.
+again at the faster rate, also when the first request is still on its way. The subscription keeps the
+Variable Name that received the values, and that readout keeps its value until the new subscription
+sends one. A slower feedback joins without a new request. Removing the faster button does not slow a
+confirmed subscription down again straight away, but a faster button removed before the Director has
+answered the first request takes its rate with it. The intervals are remembered across reconnects.
 
 ### Commands
 

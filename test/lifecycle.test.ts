@@ -1164,6 +1164,192 @@ test('a faster feedback that joins a request in flight gets its rate', async () 
 	await inst.destroy()
 })
 
+/** Every confirmed subscription of an instance as 'object path -> variable name' */
+const bindings = (inst: any): string[] =>
+	[...inst.getSubscriptions().values()].map((s: any) => `${s.objectPath} -> ${s.variableName}`).sort()
+
+test('a request whose feedback moved away is taken over under the new feedback name, never a second pair', async () => {
+	const T2 = 'track:"Track 2"'
+	const director = new FakeDirector({ refCount: true, valueFor: (o) => (o === TRACK ? 111 : 222) })
+	const { inst, host } = await newInstance(director)
+	const f = liveUpdateFeedback('f', TRACK, 'object.lengthInBeats', 'a')
+
+	// f moves to Track 2 while its first request is on its way; g asks for Track 1 under its own name
+	director.hold()
+	inst.updateFeedbacks({ f })
+	await settle()
+	inst.updateFeedbacks({ f: { ...f, options: { ...f.options, objectPath: T2 } } })
+	await settle()
+	inst.updateFeedbacks({ g: liveUpdateFeedback('g', TRACK, 'object.lengthInBeats', 'g') })
+	await settle()
+	assert.equal(host.variables.get('g'), 'PENDING', 'the new name waits like a new request')
+	director.release()
+	await settle(80)
+	assert.deepEqual(bindings(inst), [`${TRACK} -> g`, `${T2} -> a`], 'one pair per name')
+	assert.equal(inst.getSubscriptionByVariableName('a').objectPath, T2, 'the actions of f write to Track 2')
+	assert.equal(host.variables.get('a'), 222)
+	assert.equal(host.variables.get('g'), 111)
+	director.pushValueForPair(TRACK, 'object.lengthInBeats', 333)
+	await settle()
+	assert.equal(host.variables.get('a'), 222, "Track 1 never reaches f's readout")
+	assert.equal(host.variables.get('g'), 333)
+
+	// under the name that already watches Track 2, the request is not taken over but refused
+	inst.updateFeedbacks({ g: null })
+	await settle(50)
+	director.hold()
+	const h = liveUpdateFeedback('h', TRACK, 'object.lengthInBeats', 'h')
+	inst.updateFeedbacks({ h })
+	await settle()
+	inst.updateFeedbacks({ h: { ...h, options: { ...h.options, objectPath: 'track:"Track 3"' } } })
+	await settle()
+	inst.updateFeedbacks({ second: liveUpdateFeedback('second', TRACK, 'object.lengthInBeats', 'a') })
+	await settle()
+	director.release()
+	await settle(80)
+	assert.deepEqual(bindings(inst), [`${T2} -> a`, 'track:"Track 3" -> h'])
+	assert.ok(host.logs.some((l) => l.message.includes('Variable \'a\' is already watching track:"Track 2"')))
+	assert.equal(director.refs(TRACK, 'object.lengthInBeats'), 0, 'the request nobody took over is released')
+	await inst.destroy()
+})
+
+test('a readout renamed while its first request is on its way is fed under the new name', async () => {
+	const director = new FakeDirector({ refCount: true, valueFor: () => 240 })
+	const { inst, host } = await newInstance(director)
+	const f = liveUpdateFeedback('f', TRACK, 'object.lengthInBeats', 'before')
+	director.hold()
+	inst.updateFeedbacks({ f })
+	await settle()
+	inst.updateFeedbacks({ f: { ...f, options: { ...f.options, variableName: 'after' } } })
+	await settle()
+	director.release()
+	await settle(80)
+	assert.deepEqual(bindings(inst), [`${TRACK} -> after`])
+	assert.equal(host.variables.get('after'), 240)
+	assert.ok(!host.definedVariables.has('before'), 'the old name is not left behind')
+	await inst.destroy()
+})
+
+test('a refusal of a request taken over is written into the new name only', async () => {
+	const T2 = 'track:"Track 2"'
+	const director = new FakeDirector({
+		refCount: true,
+		errorFor: (o, p) => (o === TRACK ? `Unable to subscribe to ${o} / ${p} - Name 'Track 1' not found` : null),
+		valueFor: () => 222,
+	})
+	const { inst, host } = await newInstance(director)
+	const writes: unknown[] = []
+	const setVariableValues = inst.setVariableValues.bind(inst)
+	inst.setVariableValues = (values: Record<string, unknown>) => {
+		if ('a' in values) writes.push(values.a)
+		setVariableValues(values)
+	}
+	const f = liveUpdateFeedback('f', TRACK, 'object.lengthInBeats', 'a')
+	director.hold()
+	inst.updateFeedbacks({ f })
+	await settle()
+	inst.updateFeedbacks({ f: { ...f, options: { ...f.options, objectPath: T2 } } })
+	await settle()
+	inst.updateFeedbacks({ g: liveUpdateFeedback('g', TRACK, 'object.lengthInBeats', 'g') })
+	await settle()
+	director.release()
+	await settle(80)
+	assert.equal(host.variables.get('g'), 'ERROR', 'the feedback that waits for Track 1 is told')
+	assert.ok(!writes.includes('ERROR'), `f's readout never says ERROR (${JSON.stringify(writes)})`)
+	assert.equal(host.variables.get('a'), 222)
+	await inst.destroy()
+})
+
+test('a faster feedback that joins under another name keeps the name and the readout of the first', async () => {
+	const director = new FakeDirector({ refCount: true, valueFor: () => 1 })
+	const { inst, host } = await newInstance(director, [
+		liveUpdateFeedback('first', TRACK, 'object.tStart', 'first', 1000),
+		compareFeedback('eq', 'first', 'eq', '1'),
+	])
+	await settle(50)
+	assert.equal(host.feedbackValues.get('eq'), true)
+
+	director.hold()
+	inst.updateFeedbacks({ second: liveUpdateFeedback('second', TRACK, 'object.tStart', 'second', 0) })
+	await settle(50)
+	assert.equal(director.count('unsubscribe'), 1, 'asked again at the faster rate')
+	assert.equal(host.variables.get('first'), 1, 'the readout keeps its value while it is asked again')
+	assert.equal(host.feedbackValues.get('eq'), true, 'and so does its state colour')
+	director.release()
+	await settle(80)
+	assert.deepEqual(
+		director.subs.map((s) => s.updateFrequencyMs),
+		[undefined],
+		'the Director runs the pair at its default',
+	)
+	assert.deepEqual(bindings(inst), [`${TRACK} -> first`], 'the subscription keeps the first name')
+	assert.ok(host.logs.some((l) => l.message.includes("('first' and 'second'); 'first' will receive the values")))
+	director.pushValueForPair(TRACK, 'object.tStart', 5)
+	await settle()
+	assert.equal(host.variables.get('first'), 5)
+	assert.equal(host.variables.get('second'), '')
+
+	// removing the fast feedback leaves the first one fed, and a slower one joins without a new request
+	inst.updateFeedbacks({ second: null })
+	await settle(50)
+	inst.updateFeedbacks({ slow: liveUpdateFeedback('slow', TRACK, 'object.tStart', 'slow', 2000) })
+	await settle(50)
+	assert.equal(director.count('unsubscribe'), 1, 'a slower feedback is not a reason to ask again')
+	assert.deepEqual(bindings(inst), [`${TRACK} -> first`])
+	director.pushValueForPair(TRACK, 'object.tStart', 7)
+	await settle()
+	assert.equal(host.variables.get('first'), 7)
+	await inst.destroy()
+})
+
+test('a faster feedback that leaves a request before its answer takes its rate with it', async () => {
+	for (const fast of [0, 250]) {
+		const director = new FakeDirector({ refCount: true, valueFor: () => 1 })
+		const { inst } = await newInstance(director)
+		director.hold()
+		inst.updateFeedbacks({ slow: liveUpdateFeedback('slow', TRACK, 'object.tStart', 'tStart', 5000) })
+		await settle()
+		inst.updateFeedbacks({ fast: liveUpdateFeedback('fast', TRACK, 'object.tStart', 'tStart', fast) })
+		await settle()
+		inst.updateFeedbacks({ fast: null })
+		await settle()
+		director.release()
+		await settle(50)
+		assert.equal(director.count('subscribe'), 1, `${fast} ms: asked once`)
+		assert.equal(director.count('unsubscribe'), 0, `${fast} ms: never asked again`)
+		assert.deepEqual(
+			director.subs.map((s) => s.updateFrequencyMs),
+			[5000],
+			`${fast} ms: at the rate of the feedback that stayed`,
+		)
+		assert.equal(inst.getSubscriptionByVariableName('tStart').updateFrequencyMs, 5000)
+		await inst.destroy()
+	}
+})
+
+test('a request held for a one-shot read is sent at the fastest rate of the feedbacks waiting for it', async () => {
+	const director = new FakeDirector({ refCount: true, valueFor: () => 1 })
+	const { inst } = await newInstance(director)
+	director.hold()
+	const read = inst.probeValue(TRACK, 'object.tStart', 3000)
+	inst.updateFeedbacks({ slow: liveUpdateFeedback('slow', TRACK, 'object.tStart', 'tStart', 5000) })
+	await settle()
+	inst.updateFeedbacks({ fast: liveUpdateFeedback('fast', TRACK, 'object.tStart', 'tStart', 250) })
+	await settle()
+	director.release()
+	assert.equal(await read, 1)
+	await settle(50)
+	const rates = director.received
+		.filter((m) => m.subscribe?.object === TRACK)
+		.map((m) => m.subscribe.configuration?.updateFrequencyMs)
+	assert.deepEqual(rates, [1000, 250], 'the read, then the feedbacks at once at the faster rate')
+	assert.deepEqual(
+		director.subs.map((s) => s.updateFrequencyMs),
+		[250],
+	)
+	await inst.destroy()
+})
+
 test('an outage turns every state colour off and no readout stays OFFLINE once the Director is back', async () => {
 	const director = new FakeDirector({ valueFor: (_o, p) => (p === 'object.player.playing' ? true : 1) })
 	const { inst, host } = await newInstance(
