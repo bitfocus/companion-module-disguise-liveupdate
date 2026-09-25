@@ -12,11 +12,19 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const catalog = JSON.parse(readFileSync(resolve(root, 'docs/research/phase1-catalog.json'), 'utf8'))
 const outMd = resolve(root, 'docs/PRESET_CATALOG.md')
 
-const esc = (s) =>
+// A '|' would end the table cell. Outside a code span a '<' starts an HTML tag, which GitHub drops
+// (a '<name>' placeholder vanishes), so esc() writes it as an entity, as gen-help's plain() does; the
+// renderer's own <br> and <details> are added after esc(). Inside a code span an entity would show
+// as typed, so inCode() escapes the pipe only.
+const inCode = (s) =>
 	String(s ?? '')
 		.replace(/\r?\n/g, ' ')
 		.replace(/\|/g, '\\|')
 		.trim()
+const esc = (s) =>
+	inCode(s)
+		.replace(/<([^<>]*)>/g, '&lt;$1&gt;')
+		.replace(/</g, '&lt;')
 const code = (s) => {
 	s = String(s ?? '')
 		.replace(/\r?\n/g, '\\n')
@@ -245,7 +253,7 @@ for (const catName of CAT_ORDER) {
 			const typ = [x.valueType, x.range].filter(Boolean).map(esc).join('; ')
 			const nm = (x.tier === 'experimental' ? '[EXP] ' : '') + x.name
 			md.push(
-				`| \`${x.presetId}\`${flag} | ${esc(nm)} | ${esc(x.purpose)} | ${kind} | ${code(x.objectPath)} | ${code(x.propertyPath)} | \`${esc(x.variableName)}\` | ${typ} | ${esc(x.writable)} | ${freq} | ${src} | ${esc(x.status)}${x.designerVersion ? ' (' + esc(x.designerVersion) + ')' : ''} | ${liveCell(x)} | ${writeCell(x)} |`,
+				`| \`${x.presetId}\`${flag} | ${esc(nm)} | ${esc(x.purpose)} | ${kind} | ${code(x.objectPath)} | ${code(x.propertyPath)} | \`${inCode(x.variableName)}\` | ${typ} | ${esc(x.writable)} | ${freq} | ${src} | ${esc(x.status)}${x.designerVersion ? ' (' + esc(x.designerVersion) + ')' : ''} | ${liveCell(x)} | ${writeCell(x)} |`,
 			)
 		}
 		md.push('')
@@ -304,7 +312,7 @@ for (const d of catalog.perDim || []) {
 	if ((d.skipped || []).length) {
 		md.push('<details><summary>Skipped candidates</summary>')
 		md.push('')
-		for (const s of d.skipped) md.push(`- \`${esc(s.candidateId)}\`: ${esc(s.reason)}`)
+		for (const s of d.skipped) md.push(`- \`${inCode(s.candidateId)}\`: ${esc(s.reason)}`)
 		md.push('')
 		md.push('</details>')
 		md.push('')
@@ -329,7 +337,7 @@ if (c.oscParity?.length) {
 	for (const o of c.oscParity) {
 		const rowX = allRows.find((x) => x.presetId === o.presetId)
 		md.push(
-			`| \`${esc(o.oscVariable)}\` | \`${esc(o.presetId)}\` | ${rowX ? rowX.tier : esc(o.tier)} | ${esc(String(o.tier).includes('BEATS') ? 'value in beats, the OSC module reports seconds' : '')} |`,
+			`| \`${inCode(o.oscVariable)}\` | \`${inCode(o.presetId)}\` | ${rowX ? rowX.tier : esc(o.tier)} | ${esc(String(o.tier).includes('BEATS') ? 'value in beats, the OSC module reports seconds' : '')} |`,
 		)
 	}
 	md.push('')

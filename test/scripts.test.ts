@@ -575,6 +575,18 @@ test('HELP renders angle-bracket placeholders literally', () => {
 	assert.ok(!prose.includes('<'), `raw '<' in the preset list: ${prose.match(/.{0,30}<.{0,30}/)?.[0]}`)
 })
 
+test('the rendered catalog shows angle-bracket placeholders literally', () => {
+	const catalog = readFileSync(path.join(ROOT, 'docs/PRESET_CATALOG.md'), 'utf8')
+	// code spans as GitHub reads them; render-catalog's code() uses a double-backtick span for a text
+	// that holds a backtick
+	const spans = /``[^\n]*?``|`[^`\n]*`/g
+	for (const span of catalog.match(spans) ?? [])
+		assert.ok(!span.includes('&lt;'), `an entity inside a code span shows as typed: ${span.slice(0, 80)}`)
+	// outside them a '<' starts an HTML tag, which GitHub drops; the renderer's own tags are the exception
+	const prose = catalog.replace(spans, '').replace(/<\/?(br|details|summary)>/g, '')
+	assert.ok(!prose.includes('<'), `raw '<' in the catalog: ${prose.match(/.{0,30}<.{0,30}/)?.[0]}`)
+})
+
 test('the hand-written docs keep angle-bracket placeholders in code', () => {
 	for (const file of ['companion/HELP.md', 'README.md', 'CHANGELOG.md']) {
 		const prose = readFileSync(path.join(ROOT, file), 'utf8')
