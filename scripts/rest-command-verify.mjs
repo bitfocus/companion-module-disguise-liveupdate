@@ -2,10 +2,12 @@
 //
 // For every command the module can send, this script reads the current state, sends the command,
 // reads the state back and then restores what it changed. The value, time, timecode, return-to-start
-// and play / stop steps fail when the read-back does not show the command's effect; the section, note
-// and track jumps and synclayers record what the Director showed and pass once the command was
-// accepted. The transport state comes from GET /api/session/transport/activetransport; the playhead,
-// which that endpoint does not report, is read over the LiveUpdate WebSocket.
+// and play / stop steps fail when the read-back does not show the command's effect. Return to start
+// follows go to timecode, which puts the playhead back where the run started, so from a start at 0 s
+// it shows no move. The section, note and track jumps and synclayers record what the Director showed
+// and pass once the command was accepted. The transport state comes from
+// GET /api/session/transport/activetransport; the playhead, which that endpoint does not report, is
+// read over the LiveUpdate WebSocket.
 //
 // Usage:
 //   node scripts/rest-command-verify.mjs --host 192.0.2.10 [--port 80]

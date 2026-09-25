@@ -114,16 +114,18 @@ upgrade; saving the connection settings does too.
 `scripts/rest-command-verify.mjs` sent the commands to a Designer r34.0.3 Director on 2026-09-04
 (`docs/research/rest-verification.json`). For these it read the effect back and would have failed
 the step without it: *Set brightness*, *Set volume* and *Set engaged* showed the new value and were
-put back, *Go to time*, *Go to timecode* and *Return to start* moved the playhead where they should,
-and *Play*, *Play to end of section* and *Loop section* started playback, which *Stop* stopped again.
+put back, *Go to time* and *Go to timecode* moved the playhead where they should, and *Play*,
+*Play to end of section* and *Loop section* started playback, which *Stop* stopped again.
+*Return to start* was accepted and read back 0 s, but it was sent with the playhead already at the
+start, where *Go to timecode* had just put it, so the run shows no move.
 *Next section*, *Previous section*, *Go to section* and *Go to note* were only accepted: the script
 recorded the beat the playhead landed on but did not check it against the section it should reach.
 *Next track*, *Previous track* and *Go to track* were accepted but could not change the track,
 because the test project's set list had one track. *Sync layers* was accepted.
-*Set speed* was refused (see below) and *Go to tag* was not sent. The playhead was put back after the
-jumps, and the transport's values after each value step. Starting, stopping and restarting layers and
-the failover commands were not sent, because a second command does not undo them. The script sent its
-jumps with play mode `Stop`.
+*Set speed* was refused (see below) and *Go to tag* was not sent. The playhead was put back after
+the jumps, and the transport's values after each value step. Starting, stopping and restarting
+layers and the failover commands were not sent, because a second command does not undo them. The
+script sent its jumps with play mode `Stop`.
 The next / previous section and track actions now send the body the OpenAPI document records for
 them, with the play mode chosen on the button; that body has not been sent to a Director by the
 module yet.

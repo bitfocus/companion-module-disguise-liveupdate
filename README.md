@@ -257,6 +257,8 @@ entry: the queued restores, the final sweep, its comparison and resume, the resu
 second interrupt leaves at once and prints every field the sweep had not confirmed yet. The results
 record the host as 192.0.2.10 and the Designer version given with `--designer` (default `r34.0.3`).
 `docs/research/rest-verification.json` is the scrubbed result of the 2026-09-04 run on r34.0.3.
+That run started with the playhead at 0 s, where go to timecode put it back, so its return-to-start
+step was accepted and read back 0 s but shows no move.
 
 The script builds its own request bodies: it addresses the transport by uid and name as the Director
 reports it, and was written before the module had Go to tag. The module addresses objects by name

@@ -147,13 +147,14 @@
   Set JSON with a partial object). Every value came back to its original; the results are in
   `docs/research/live-write-*.json` and in the *write* column of `docs/PRESET_CATALOG.md`.
 - Command verification on the same Director (`docs/research/rest-verification.json`): brightness,
-  volume and engaged were set, read back and put back; go to time, go to timecode and return to start
-  moved the playhead where they should; play, play to end of section and loop section started
-  playback and stop stopped it. Next and previous section, go to section and go to note were accepted
-  and the beat they landed on was recorded, not checked. Next track, previous track and go to track
-  were accepted but could not change the track, because the test project's set list had one track.
-  RenderStream sync layers was accepted. Set speed was refused because Designer's
-  *enableTransportSpeedControl* was off, and go to tag was not sent.
+  volume and engaged were set, read back and put back; go to time and go to timecode moved the
+  playhead where they should; return to start was accepted with the playhead already at the start,
+  where go to timecode had left it, so its read-back (0 s) shows no move; play, play to end of
+  section and loop section started playback and stop stopped it. Next and previous section, go to
+  section and go to note were accepted and the beat they landed on was recorded, not checked. Next
+  track, previous track and go to track were accepted but could not change the track, because the
+  test project's set list had one track. RenderStream sync layers was accepted. Set speed was
+  refused because Designer's *enableTransportSpeedControl* was off, and go to tag was not sent.
   The jumps were sent with the script's own body (play mode `Stop`); the next and previous section
   and track steps have not been sent with the body the module sends now.
 
