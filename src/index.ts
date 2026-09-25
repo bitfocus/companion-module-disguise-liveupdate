@@ -893,9 +893,11 @@ export class DisguiseInstance extends InstanceBase<DisguiseConfig> {
 				)
 				return
 			}
-			const key = `${controlId}:${command}:${describe}`
-			const armed = this.armed.get(key)
-			if (!armed) {
+			// The arm is bound to the body the confirming press would send, not to its description: a name
+			// and a uid of the same digits read alike ('name:123456' and '123456') but are different targets.
+			const key = `${controlId}:${command}:${JSON.stringify(body)}`
+			// A command this Designer build does not have is never armed: every press reports it below
+			if (!this.armed.has(key) && !this.rest.isAbsent(command)) {
 				const seconds = Math.max(1, Number(this.config?.restArmSeconds ?? 5))
 				const timer = setTimeout(() => this.disarm(key), seconds * 1000)
 				if (typeof timer.unref === 'function') timer.unref()

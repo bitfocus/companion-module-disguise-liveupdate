@@ -21,6 +21,7 @@ import {
 	REST_ENDPOINTS,
 	RestCommand,
 	RestTarget,
+	targetText,
 	transportsBody,
 	transportsWith,
 } from './rest'
@@ -113,7 +114,7 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 			if (!transport) return null
 			return {
 				body: transportsBody(transport),
-				describe: `${REST_ENDPOINTS[key].summary} on ${transport.name ?? transport.uid}`,
+				describe: `${REST_ENDPOINTS[key].summary} on ${targetText(transport)}`,
 			}
 		})
 
@@ -128,7 +129,7 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 			if (!transport) return null
 			return {
 				body: transportsWith(transport, { playmode: String(action.options.playmode ?? 'NotSet') }),
-				describe: `${REST_ENDPOINTS[key].summary} on ${transport.name ?? transport.uid}`,
+				describe: `${REST_ENDPOINTS[key].summary} on ${targetText(transport)}`,
 			}
 		})
 
@@ -288,7 +289,7 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 				if (!track) return null
 				return {
 					body: transportsWith(transport, { track, playmode: String(action.options.playmode ?? 'NotSet') }),
-					describe: `go to track ${track.name ?? track.uid}`,
+					describe: `go to track ${targetText(track)}`,
 				}
 			},
 		),
@@ -409,7 +410,7 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 			async (action, context) => {
 				const machine = await target(instance, action, context, 'machine')
 				if (!machine) return null
-				return { body: machineBody(machine), describe: `fail over ${machine.name ?? machine.uid}` }
+				return { body: machineBody(machine), describe: `fail over ${targetText(machine)}` }
 			},
 		),
 		restRestoreMachine: command(
@@ -428,7 +429,7 @@ export function getRestActionDefinitions(instance: DisguiseInstance): CompanionA
 			async (action, context) => {
 				const machine = await target(instance, action, context, 'machine')
 				if (!machine) return null
-				return { body: machineBody(machine), describe: `restore ${machine.name ?? machine.uid}` }
+				return { body: machineBody(machine), describe: `restore ${targetText(machine)}` }
 			},
 		),
 		restRescan: {

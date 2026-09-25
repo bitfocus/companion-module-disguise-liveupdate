@@ -236,6 +236,33 @@ test('changing the target re-arms instead of firing at something else', async ()
 	await inst.destroy()
 })
 
+test('a name and a uid of the same digits are different targets for the arm', async () => {
+	const inst = await connected({ restAllowDestructive: true })
+	const actions = dist.getActionDefinitions(inst)
+	const press = (actionId: string, machine: string) =>
+		actions[actionId].callback({ options: { machine }, controlId: 'bank3' }, context)
+	const cases: [string, string, string, string, string, unknown][] = [
+		// action, first press, its arm, second press, its arm, what the third press sends
+		['restFailoverMachine', 'name:123456', 'fail over name:123456', '123456', 'fail over 123456', { uid: '123456' }],
+		['restFailoverMachine', 'uid:12345', 'fail over uid:12345', '12345', 'fail over 12345', { name: '12345' }],
+		['restRestoreMachine', 'name:123456', 'restore name:123456', 'uid:123456', 'restore 123456', { uid: '123456' }],
+	]
+	for (const [actionId, first, firstArm, second, secondArm, sent] of cases) {
+		received.length = 0
+		await press(actionId, first)
+		assert.equal(inst.host.variables.get('rest_armed'), firstArm, 'rest_armed tells a name from a uid')
+		await press(actionId, second)
+		assert.equal(received.length, 0, `${first} then ${second} arms again rather than firing`)
+		assert.equal(inst.host.variables.get('rest_armed'), secondArm)
+		await press(actionId, second)
+		assert.equal(received.length, 1)
+		assert.deepEqual(received[0].body, { machine: sent })
+	}
+	// the arm of the other reference expires on its own; nothing else fires
+	assert.equal(received.length, 1)
+	await inst.destroy()
+})
+
 test('a command the Director does not know is reported once and not retried', async () => {
 	const inst = await connected({ restAllowDestructive: true })
 	const actions = dist.getActionDefinitions(inst)
@@ -251,11 +278,23 @@ test('a command the Director does not know is reported once and not retried', as
 	assert.equal(hits(), 1, 'the first send reaches the Director')
 	assert.equal(inst.host.variables.get('rest_last_status'), 'UNSUPPORTED')
 	assert.ok(inst.host.logs.some((l: { message: string }) => l.message.includes('has no')))
-	await press()
-	await press()
+	// every later press reports it at once, and none of them arms a command that will never be sent
+	for (let i = 0; i < 2; i++) {
+		const from = inst.host.logs.length
+		inst.host.variables.set('rest_last_status', '')
+		await press()
+		const logged = inst.host.logs.slice(from).map((l: { message: string }) => l.message)
+		assert.equal(inst.isRestArmed('bank4'), false, `press ${i + 3} does not arm`)
+		assert.equal(inst.host.variables.get('rest_armed'), '')
+		assert.equal(inst.host.variables.get('rest_last_status'), 'UNSUPPORTED', `press ${i + 3} reports it`)
+		assert.ok(
+			logged.some((m: string) => m.includes("has no '/renderstream/synclayers' command")),
+			logged.join(' | '),
+		)
+		assert.ok(!logged.some((m: string) => m.startsWith('Armed')), logged.join(' | '))
+	}
 	assert.equal(hits(), 1, 'the absent path is not tried again')
 	assert.equal(notFound(), 1, 'the 404 is reported once')
-	assert.equal(inst.host.variables.get('rest_last_status'), 'UNSUPPORTED', 'the cached answer is still reported')
 	await inst.destroy()
 })
 

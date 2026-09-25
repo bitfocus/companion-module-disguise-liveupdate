@@ -51,11 +51,14 @@ Only the **RenderStream:** and **Failover:** actions, which change the shape of 
 gated. They are refused until *Allow destructive commands* is on (it is off by default). Then the first
 press only arms the command, and a second press of the same button within *Confirm within (s)*
 (default 5) sends it. The arm is tied to the button and to the resolved target, so changing the machine
-between the presses arms again instead of firing at the new one. Arms are dropped when *Allow
-destructive commands* or *Enable commands* is turned off, or when the host or port changes.
+between the presses arms again instead of firing at the new one. `name:123456` and `123456` are
+different targets as well. Arms are dropped when *Allow destructive commands* or *Enable commands* is
+turned off, or when the host or port changes.
 
 Put the *Command armed* feedback on the button: it lights only on the button whose press armed the
-command. `rest_armed` names the most recent arm that is still waiting (empty when none is).
+command. `rest_armed` names the most recent arm that is still waiting (empty when none is). There
+and in `rest_last_command`, a name of 6 or more digits is written `name:...` and a uid of fewer
+digits `uid:...`, so the text reads back as the same target.
 
 ### What happened
 
@@ -77,8 +80,9 @@ headers, is a failure too (`timed out`, `timed out reading the reply` or
 
 A Designer that does not know a command answers 404 or 405. The module sends such a command once,
 remembers the answer and does not send it again: later presses report `UNSUPPORTED` and log "This
-Designer build has no '...' command" each time. *Command: rescan the command API* forgets what was
-remembered, for example after a Designer upgrade; saving the connection settings does too.
+Designer build has no '...' command" each time; a RenderStream or Failover command is not armed
+first. *Command: rescan the command API* forgets what was remembered, for example after a Designer
+upgrade; saving the connection settings does too.
 
 ### Command parameters
 

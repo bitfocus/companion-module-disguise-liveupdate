@@ -175,6 +175,17 @@ export function parseTarget(text: string): RestTarget | null {
 	return { name: trimmed }
 }
 
+/**
+ * A reference written the way parseTarget reads it back, for the texts the operator sees (rest_armed,
+ * rest_last_command, the log): a name of 6 or more digits and a uid of fewer carry their prefix, so
+ * 'name:123456' and '123456' never read alike.
+ */
+export function targetText(target: RestTarget): string {
+	if (target.uid !== undefined) return /^\d{6,}$/.test(target.uid) ? target.uid : `uid:${target.uid}`
+	const name = target.name ?? ''
+	return /^\d{6,}$/.test(name) || name.startsWith('name:') || name.startsWith('uid:') ? `name:${name}` : name
+}
+
 export interface RestClientOptions {
 	host: string
 	port: number
