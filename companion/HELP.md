@@ -246,7 +246,7 @@ last two rows are not words the module writes:
 | `ERROR` | the Director refused the object path: wrong name or type prefix, or the object does not exist |
 | `PATH_ERROR` | the object exists but the property path failed |
 | `PATH_ERROR (unsubscribed)` | the property path failed three times in a row; the subscription was dropped and is retried with a back-off |
-| `UNSET` | the path cannot be resolved yet: an empty selection or `$NA`, an unparsed `$(...)`, an empty object or property path, a bare empty name such as `track:""`, or a template placeholder such as `<OBJECT_PATH>` |
+| `UNSET` | the path cannot be resolved yet: an empty selection or `$NA`, an unparsed `$(...)`, an empty object or property path, a bare empty name such as `track:""`, an object name that is a readout word (`track:"PENDING"`, an object path built on another readout that has no value yet), or a template placeholder such as `<OBJECT_PATH>` |
 | (empty) | the Director's value is empty: an empty text, or `None`. A feedback that shares its property with another feedback under a different Variable Name is empty as well: only the first name receives the values, and the log says "Feedbacks share ... with different variable names" |
 | `$NA` | Companion's own text for a variable that is not defined: the name in the button text matches no LiveUpdate Variable feedback of this connection, or the connection has not started |
 
@@ -313,9 +313,11 @@ again at the faster rate, also when the first request is still on its way. The s
 Variable Name that received the values, and that readout keeps its value until the new subscription
 sends one; when the Director does not answer within the *Pending Subscription Timeout*, it says
 `PENDING` until a retry is answered. A slower feedback joins without a new request. Removing the
-faster button does not slow a confirmed subscription down again straight away, but a faster button
-removed before the Director has answered the first request takes its rate with it. The intervals are
-remembered across reconnects.
+faster button does not slow the subscription down again straight away: it keeps the faster rate until
+the next reconnect, which subscribes each property again at the fastest interval of the buttons then
+on it. The one exception is a faster button that joined a request still on its way at a slower rate:
+removed before the Director answers, it takes its rate with it and the request is answered at the
+slower rate.
 
 ### Commands
 
@@ -367,8 +369,9 @@ Experimental presets use five more selections (`selTransport`, `selDmxScreen`, `
 Names are used verbatim (case-sensitive) inside quotes and must not contain quotes, backslashes or
 line breaks; hostnames allow letters, digits, `.`, `_` and `-`; indices are plain decimal integers
 (no leading zero); UIDs and workload ids are decimal or `0x` hex integers. A *Set selection* action
-with an invalid value is refused and the selection keeps its previous value; an invalid value in the
-connection settings is ignored and the selection counts as empty. Both write a log message. An empty
+with an invalid value is refused and the selection keeps its previous value, and so is one whose value
+is exactly a readout word (`PENDING`, `OFFLINE`, ...): it followed a readout that has no value yet. An
+invalid value in the connection settings is ignored and the selection counts as empty. Both write a log message. An empty
 selection is published as `$NA`; the presets that depend on it do not subscribe, and their readouts
 show `UNSET` until it is filled in.
 
@@ -918,6 +921,9 @@ Companion substitutes every `$(...)` in the Value before the module sees it, so 
 starts with an operator (`+`, `-`, `*`, `/`, `%`) is therefore not sent while the property has no
 numeric value yet; once it has one, `-0.5` is an ordinary negative value. For a step, use *Nudge
 Disguise Number*.
+
+A String value that is exactly a readout word (`PENDING`, `OFFLINE`, `UNSET`, ...) is not sent: it
+comes from a readout that has no value yet, and writing it would put the status word into the show.
 
 Writes to the same property in quick succession (a rotary encoder) are collapsed: the first goes out
 at once, then one write per 40 ms carries the latest value.

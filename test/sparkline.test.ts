@@ -66,6 +66,9 @@ test('a flat line stays visible instead of collapsing', () => {
 		['2^53', { samples: [2 ** 53, 2 ** 53] }],
 		['a uint64 none value', { samples: [Number('18446744073709551615'), Number('18446744073709551615')] }],
 		['a fixed scale of one value', { samples: [1e17, 1e17], min: 1e17, max: 1e17 }],
+		// the band around these has no finite width: the line goes to the middle row
+		['the largest double', { samples: [Number.MAX_VALUE, Number.MAX_VALUE] }],
+		['a range wider than a double can hold', { samples: [-1.7e308, 1.7e308] }],
 	]
 	for (const [what, options] of large) {
 		const flat = sparkline.drawSparkline({ width, height, line: [0, 255, 0], ...options })

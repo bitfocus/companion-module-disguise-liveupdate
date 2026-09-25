@@ -552,3 +552,21 @@ test('the Commands settings text gates exactly the destructive commands', () => 
 	assert.match(info, /Transport commands fire on one press/)
 	assert.match(info, /RenderStream and failover commands [^.]*refused unless you allow them/)
 })
+
+test('the command text names a reference the way it was given', async () => {
+	const inst = await connected({ restAllowDestructive: true })
+	const actions = dist.getActionDefinitions(inst)
+	await actions.restPlay.callback({ options: { transport: 'name:123456' }, controlId: 'b' }, context)
+	assert.equal(inst.host.variables.get('rest_last_command'), 'Play on name:123456')
+	await actions.restPlay.callback({ options: { transport: 'uid:12345' }, controlId: 'b' }, context)
+	assert.equal(inst.host.variables.get('rest_last_command'), 'Play on uid:12345')
+	await actions.restGotoTrack.callback(
+		{ options: { transport: 'default', track: 'name:20250914', playmode: 'NotSet' }, controlId: 'b' },
+		context,
+	)
+	assert.equal(inst.host.variables.get('rest_last_command'), 'go to track name:20250914')
+	for (let press = 0; press < 2; press++)
+		await actions.restFailoverMachine.callback({ options: { machine: 'name:123456' }, controlId: 'f' }, context)
+	assert.equal(inst.host.variables.get('rest_last_command'), 'fail over name:123456')
+	await inst.destroy()
+})
