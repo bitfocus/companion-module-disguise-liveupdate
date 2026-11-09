@@ -29,7 +29,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@companion-module/base": "^1.6.3",
+    "@companion-module/base": "~1.15.1",
     "ws": "^8.21.0"
   },
   "devDependencies": {
@@ -40,7 +40,7 @@
     "rimraf": "^5.0.5",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3",
-    "@companion-module/tools": "^2.8.0"
+    "@companion-module/tools": "^2.9.1"
   },
   "publishConfig": {
     "access": "public"
